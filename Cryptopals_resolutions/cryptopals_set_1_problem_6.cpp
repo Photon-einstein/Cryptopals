@@ -112,12 +112,18 @@ error or to false if otherwise */
 double ratioCalc(const std::vector<unsigned char> &xorTest, bool *flag);
 
 /* this function for a given line in binary, it will do a xor test with a single
-english alphabet character, determine the best fit, based on the least deviation
-from the english letter frequency, and if this is the best fit it will also update
+english alphabet character, determine the best fit, based on the max ratio of
+english letters and spaces, and if this is the best fit it will also update
 the structure lineChangedId, in the end it returns true if no error or false
 otherwise */
 bool testCharactersXor(lineChangedId &lineChangedIdData, std::unordered_map<char, float>
   &englishLetterFrequency, std::vector<unsigned char> &lineReadBinary);
+
+/* this function makes the decryption of the cypertext using the key to decrypt,
+the encryption & decryption process was a repeated XOR with a given key, if there
+are no errors it will return true, false otherwise */
+bool decryptText(const std::vector<unsigned char> &encryptedBytesAsciiFullText,
+  const std::vector<unsigned char> &key, std::vector<unsigned char> &decryptedText);
 
 int main () {
   clock_t start, end;
@@ -127,11 +133,12 @@ int main () {
   std::ifstream inputFile;
   inputFile.open("cryptopals_set_1_problem_6_dataset.txt", std::ios::in);
   std::vector<unsigned char> encryptedBytesAsciiFullText, encryptedBytesAscii;
-  std::vector<unsigned char> lineReadBase64Vector, key;
+  std::vector<unsigned char> lineReadBase64Vector, key, decryptedTextV;
   std::string lineReadBase64, lineReadBinary;
   std::vector<struct keyId> keyL;
   std::map<unsigned char, int> base64IndexMap;
   std::map<unsigned char, int>::iterator it;
+  std::string decryptedText;
   int i, size;
   bool b;
   if (!inputFile) {
@@ -199,6 +206,16 @@ int main () {
     perror("There was a problem in the function 'getKey'.");
     exit(1);
   }
+  /* decrypt file with best key found */
+  b = decryptText(encryptedBytesAsciiFullText, key, decryptedTextV);
+  if (b == false) {
+    printf("\nThere was a problem in the function 'decryptText'.");
+    exit(1);
+  }
+  /* print decrypted file with key found */
+  convertVectorBytesToString(decryptedTextV, decryptedText);
+  std::cout<<"\nMessage decrypted:\n\n'"<<decryptedText<<"'"<<std::endl;
+  /* close file */
   inputFile.close();
   /* end of the work */
   end = clock();
@@ -363,15 +380,17 @@ bool getKeyLengthProfileSorted(std::vector<unsigned char> &encryptedBytesAsciiFu
     }
     /* sort the keyL vector by the value of editDistance, in ascending order */
     std::sort(keyL.begin(), keyL.end());
-    /* print sort vector */
-    std::cout<<"\nKeySize and edit distance (Hamming distance) in decreasing order of the second.\n"<<std::endl;
-    for (i = 0; i < keyL.size(); ++i) {
-      std::cout<<"Keysize = "<<keyL[i].keyLength<<"\t | \teditDistance = "<<keyL[i].editDistance<<std::endl;
-    }
-    /* print sort vector */
-    std::cout<<"\nValid KeySize and edit distance (Hamming distance) considered for the search.\n"<<std::endl;
-    for (i = 0; i < validKeyPoolSearch; ++i) {
-      std::cout<<"Keysize = "<<keyL[i].keyLength<<"\t | \teditDistance = "<<keyL[i].editDistance<<std::endl;
+    if (debugFlag == true) {
+      /* print sort vector */
+      std::cout<<"\nKeySize and edit distance (Hamming distance) in decreasing order of the second.\n"<<std::endl;
+      for (i = 0; i < keyL.size(); ++i) {
+        std::cout<<"Keysize = "<<keyL[i].keyLength<<"\t | \teditDistance = "<<keyL[i].editDistance<<std::endl;
+      }
+      /* print sort vector */
+      std::cout<<"\nValid KeySize and edit distance (Hamming distance) considered for the search.\n"<<std::endl;
+      for (i = 0; i < validKeyPoolSearch; ++i) {
+        std::cout<<"Keysize = "<<keyL[i].keyLength<<"\t | \teditDistance = "<<keyL[i].editDistance<<std::endl;
+      }
     }
     return true;
 }
@@ -381,7 +400,6 @@ data provided in the keyL vector, if all goes ok it will return b = true by
 reference, false otherwise */
 std::vector<unsigned char> getKey(std::vector<unsigned char> &encryptedBytesAscii,
     std::vector<struct keyId> &keyL, bool *b) {
-  std::vector<unsigned char> key;
   std::vector<std::vector<unsigned char>> dataParsedInKeySize;
   std::vector<std::vector<lineChangedId>> keySol;
   std::vector<lineChangedId> auxLineChangedIdVector;
@@ -400,7 +418,7 @@ std::vector<unsigned char> getKey(std::vector<unsigned char> &encryptedBytesAsci
     std::cout<<"Size of cypertext = "<<encryptedBytesAscii.size()<<std::endl;
     std::cout<<"Size of maxKeySize = "<<maxKeySize<<std::endl;
     *b = false;
-    return key;
+    return keySolId.key;
   }
   /* get data parsed in keysize from cyphertext */
   for (i = 0; i < validKeyPoolSearch; ++i) {
@@ -408,7 +426,7 @@ std::vector<unsigned char> getKey(std::vector<unsigned char> &encryptedBytesAsci
     dataParsedInKeySize = getDataParseInKeySize(encryptedBytesAscii, keyL[i].keyLength, &b2);
     if (b2 == false) {
       *b = false;
-      return key;
+      return keySolId.key;
     }
     /* keySol memory allocation and test */
     keySol.emplace_back(auxLineChangedIdVector);
@@ -419,7 +437,7 @@ std::vector<unsigned char> getKey(std::vector<unsigned char> &encryptedBytesAsci
       if (b2 == false) {
         perror("There was an error in the function 'testCharactersXor'.");
         *b = false;
-        return key;
+        return keySolId.key;
       }
       valMaxRatioLettersSpaceMean+=keySol[i][j].charId.valMaxRatioLettersSpace;
     }
@@ -443,7 +461,7 @@ std::vector<unsigned char> getKey(std::vector<unsigned char> &encryptedBytesAsci
   printf("'\n");
   /* if all went well in this function */
   *b = true;
-  return key;
+  return keySolId.key;
 }
 /******************************************************************************/
 /* this function makes the parsing of the cypertext according to the key length,
@@ -550,8 +568,8 @@ double ratioCalc(const std::vector<unsigned char> &xorTest, bool *flag) {
 }
 /******************************************************************************/
 /* this function for a given line in binary, it will do a xor test with a single
-english alphabet character, determine the best fit, based on the least deviation
-from the english letter frequency, and if this is the best fit it will also update
+english alphabet character, determine the best fit, based on the max ratio of
+english letters and spaces, and if this is the best fit it will also update
 the structure lineChangedId, in the end it returns true if no error or false
 otherwise */
 bool testCharactersXor(lineChangedId &lineChangedIdData, std::unordered_map<char,
@@ -612,6 +630,21 @@ bool testCharactersXor(lineChangedId &lineChangedIdData, std::unordered_map<char
     free(freqXorChar);
     freqXorChar = nullptr;
     /* return no error status */
+    return true;
+}
+/******************************************************************************/
+/* this function makes the decryption of the cypertext using the key to decrypt,
+the encryption & decryption process was a repeated XOR with a given key, if there
+are no errors it will return true, false otherwise */
+bool decryptText(const std::vector<unsigned char> &encryptedBytesAsciiFullText,
+  const std::vector<unsigned char> &key, std::vector<unsigned char> &decryptedText) {
+    if (encryptedBytesAsciiFullText.size() == 0 || key.size() == 0) {
+      return false;
+    }
+    int i, size = encryptedBytesAsciiFullText.size(), sizeKey = key.size();
+    for (i = 0; i < size; i++) {
+      decryptedText.emplace_back(encryptedBytesAsciiFullText[i]^key[i%sizeKey]);
+    }
     return true;
 }
 /******************************************************************************/
