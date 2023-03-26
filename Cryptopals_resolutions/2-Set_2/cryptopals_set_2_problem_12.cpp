@@ -240,7 +240,7 @@ bool keyFilling(const int blockSize) {
   }
   std::random_device rd;   // non-deterministic generator
   std::mt19937 gen(rd());  // to seed mersenne twister.
-  std::uniform_int_distribution<> dist1(0,255); // distribute results between 0 and 25r inclusive
+  std::uniform_int_distribution<> dist1(0,255); // distribute results between 0 and 255 inclusive
   int i;
   if(debugFlag == true) {
     printf("\nKey generated: ");
