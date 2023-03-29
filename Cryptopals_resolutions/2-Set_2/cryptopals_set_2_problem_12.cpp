@@ -730,7 +730,7 @@ int aesEcbEncryptWorker(unsigned char *plaintext, int plaintextLen, unsigned cha
 the padding result by reference in the v vector and by value true if all ok or
 false otherwise */
 bool padPKCS_7(std::vector<unsigned char> &v, const unsigned int blockSize) {
-  if (blockSize <= 0 && blockSize > 255) {
+  if (blockSize <= 0 || blockSize > 255) {
     return false;
   }
   int i, padSize = blockSize - (v.size()%blockSize);
