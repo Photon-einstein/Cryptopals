@@ -2,7 +2,7 @@
 This repository contains my resolutions of the set of problems of the Cryptopals challenges.
 
 # To compile and run the program:
-To test each program just compile using the following command in the command line:  
+To test each program just compile and run using the following bash script in the command line:  
 -  $ sh cryptopals_set_x_problem_y.sh
 
 # Example:
