@@ -6,4 +6,4 @@ To test each program just compile and run using the following bash script in the
 -  $ bash cryptopals_set_x_problem_y.sh
 
 # Example:
-![Screenshot from 2023-04-04 23-43-21](https://user-images.githubusercontent.com/31144077/229938358-444f1645-fc82-4563-a558-810b2756cbde.png)
+![Screenshot from 2023-04-09 15-02-38](https://user-images.githubusercontent.com/31144077/230777282-316a77c7-5542-4822-998c-2f33a16cfb87.png)
