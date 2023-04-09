@@ -203,7 +203,7 @@ returns a string of that size filled with random data */
 std::vector<unsigned char> RandomPrefixWorker::generateRandomPrefix() {
   std::random_device rd;   // non-deterministic generator
   std::mt19937 gen(rd());  // to seed mersenne twister.
-  std::uniform_int_distribution<> dist1(0, 255); // distribute results between 1 and 255 inclusive
+  std::uniform_int_distribution<> dist1(0, 255); // distribute results between 0 and 255 inclusive
   std::vector<unsigned char> randomPrefix;
   int i;
   if(_debugFlagExtreme == true) {
