@@ -1,0 +1,45 @@
+#include <openssl/conf.h>
+#include <openssl/evp.h>
+#include <openssl/err.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string.h>
+#include <string>
+#include <math.h>
+#include <ctype.h>
+#include <assert.h>
+#include <vector>
+#include <iostream>
+#include <cstddef>
+#include <unordered_map>
+#include <bits/stdc++.h>
+#include <cctype>
+#include <fstream>
+#include <random>
+#include <map>
+#include <algorithm> // for copy() and assign()
+#include <iterator> // for back_inserter
+#include <memory>
+
+#include "./../include/Server.h"
+#include "./../include/MT19937.h"
+
+const int numberTests = 200;
+const int numberSimulationsPerTest = 1000000;
+
+int main (void) {
+  clock_t start, end;
+  double time;
+  start = clock();
+  /* work to verify */
+  std::shared_ptr<Server> server = std::make_shared<Server>(numberTests, numberSimulationsPerTest);
+  server->runTests();
+  /* end of the work */
+  end = clock();
+  time = (double)(end - start) / CLOCKS_PER_SEC;
+  printf("\nProgram took %f s.", time);
+  printf("\n");
+  return 0;
+}
+/******************************************************************************/
