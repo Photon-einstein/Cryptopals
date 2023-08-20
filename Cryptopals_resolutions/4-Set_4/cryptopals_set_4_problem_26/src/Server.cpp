@@ -8,8 +8,6 @@
 /* constructor / destructor */
 Server::Server() {
   bool b;
-  std::string ciphertext;
-  std::string plaintext;
   Server::setBlockSize(blockSize);
   _aesCtrMachine = std::make_shared<AesCtrMachine>(_blockSize);
 }
