@@ -11,6 +11,7 @@ Server::Server() {
 Server::~Server() {
 }
 /******************************************************************************/
+
 /**
  * @brief Calculates the SHA1 hash using the Openssl library
  *
@@ -20,7 +21,6 @@ Server::~Server() {
  * @param originalMessage The characters to be hashed in a string format
  * @return The hash SHA1 of the inputV characters
  */
-
 std::vector<unsigned char> Server::hashSHA1WithLibrary(const std::vector<unsigned char> &inputV,
     const std::string &originalMessage) {
     std::vector<unsigned char> output;
@@ -65,6 +65,7 @@ std::vector<unsigned char> Server::hashSHA1WithLibrary(const std::vector<unsigne
   return output;
 }
 /******************************************************************************/
+
 /**
  * @brief This method print the hash value and the original message to be hashed.
  *
