@@ -34,6 +34,8 @@
 #include <random>
 #include <cstdlib>
 
+#include "./../include/PrintFormat.hpp"
+
 // Define SHA_DIGEST_LENGTH if it is not defined elsewhere.
 // SHA-1 produces a 160-bit (20-byte) digest.
 #ifndef SHA_DIGEST_LENGTH
@@ -54,11 +56,23 @@ public:
    * This function takes two integers as input and returns their sum.
    *
    * @param inputV The characters to be hashed in a vector format
-   * @param description The characters to be hashed in a string format
+   * @param originalMessage The characters to be hashed in a string format
    * @return The hash SHA1 of the inputV characters
    */
   std::vector<unsigned char> hashSHA1WithLibrary(const std::vector<unsigned char> &inputV,
-    const std::string &description);
+    const std::string &originalMessage);
+  
+
+  /**
+   * @brief This method print the hash value and the original message to be hashed.
+   *
+   * This method print the hash value and the original message in the specified format.
+   *
+   * @param originalMessage The characters to be hashed in a string format
+   * @param hash The originalMessage hashed in a vector format
+   * @param format The format to be used in the print of the hash value.
+   */
+  void printMessage(const std::string& originalMessage, const std::vector<unsigned char> &hash, PrintFormat::Format format);
 
 private:
   bool debugFlag = true;

@@ -14,13 +14,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Include directories
 include_directories(include)
 
-# Source files
-set(SOURCES
-    src/cryptopals_set_4_problem_28.cpp
-    src/Server.cpp
-    src/SHA.cpp 
-    src/SHA1.cpp
-)
+# Automatically collect all source files from the src directory
+file(GLOB SOURCES "src/*.cpp")
 
 # Create the executable
 add_executable(cryptopals_set_4_problem_28 ${SOURCES})

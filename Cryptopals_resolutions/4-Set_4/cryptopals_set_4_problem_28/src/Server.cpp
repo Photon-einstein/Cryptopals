@@ -17,12 +17,12 @@ Server::~Server() {
  * This function takes two integers as input and returns their sum.
  *
  * @param inputV The characters to be hashed in a vector format
- * @param description The characters to be hashed in a string format
+ * @param originalMessage The characters to be hashed in a string format
  * @return The hash SHA1 of the inputV characters
  */
 
 std::vector<unsigned char> Server::hashSHA1WithLibrary(const std::vector<unsigned char> &inputV,
-    const std::string &description) {
+    const std::string &originalMessage) {
     std::vector<unsigned char> output;
 
     // Create a new digest context
@@ -59,9 +59,42 @@ std::vector<unsigned char> Server::hashSHA1WithLibrary(const std::vector<unsigne
 
     // Optionally, print for debug purposes
     if (debugFlag == true) {
-        //printMessage("SHA1 with library | " + description + " (hex):", output, PrintFormat::HEX);
+        printMessage("SHA1 with library | " + originalMessage + " (hex): ", output, PrintFormat::HEX);
     }
 
   return output;
+}
+/******************************************************************************/
+/**
+ * @brief This method print the hash value and the original message to be hashed.
+ *
+ * This method print the hash value and the original message in the specified format.
+ *
+ * @param originalMessage The characters to be hashed in a string format
+ * @param hash The originalMessage hashed in a vector format
+ * @param format The format to be used in the print of the hash value.
+ */
+void Server::printMessage(const std::string& originalMessage, const std::vector<unsigned char> &hash, PrintFormat::Format format) {
+    std::cout<<originalMessage;
+    switch (format) {
+        case PrintFormat::HEX:
+            // Print in hexadecimal format
+            for(unsigned char c : hash) {
+                printf("%02x", c);
+            }
+            break;
+        case PrintFormat::DECIMAL:
+            // Print in decimal format
+            for(unsigned char c : hash) {
+                printf("%d ", c);
+            }
+            break;
+        case PrintFormat::ASCII:
+            // Print in ascii format
+            for(unsigned char c : hash) {
+                printf("%d ", c);
+            }
+            break;
+    }
 }
 /******************************************************************************/
