@@ -1,14 +1,13 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 #include "./../include/PrintFormat.hpp"
 #include "./../include/SHA.hpp"
 #include "./../include/SHA1.hpp"
-
 
 // Define SHA_DIGEST_LENGTH if it is not defined elsewhere.
 // SHA-1 produces a 160-bit (20-byte) digest.

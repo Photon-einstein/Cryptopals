@@ -1,7 +1,7 @@
-#include <time.h>
-#include <string>
-#include <vector>
 #include <memory>
+#include <string>
+#include <time.h>
+#include <vector>
 
 #include "./../include/Server.hpp"
 #include "./../include/SHA1.hpp"
