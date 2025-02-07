@@ -43,7 +43,7 @@ make
 Run the executable:
 
 ```bash
-./cryptopals_set_<set_number>_problem_<problem_number>
+./build/cryptopals_set_<set_number>_problem_<problem_number>
 ```
 
 
