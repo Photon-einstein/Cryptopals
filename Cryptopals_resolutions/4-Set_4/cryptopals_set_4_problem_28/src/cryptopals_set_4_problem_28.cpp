@@ -31,10 +31,14 @@ int main (void) {
   start = clock();
   /* work to verify */
   std::shared_ptr<Server> server = std::make_shared<Server>();
-  const int sizePlaintext = 20;
-  bool randomPlaintext {true};
-  std::string plaintext = "AAAAAAAAAAAAAAAAA";
+  const int sizePlaintext = 100;
+  bool randomPlaintext {false};
+  std::string plaintext = "Aasffefefdecfdsfcawwwd33432";
+  std::vector<unsigned char> hashOpenSSL;
+  std::vector<unsigned char> hash;
   server->setPlaintext(sizePlaintext, randomPlaintext, plaintext);
+  hashOpenSSL = server->hashSHA1WithLibrary(server->getPlaintextV(), server->getPlaintext());
+  hash = server->hashSHA1(server->getPlaintextV(), server->getPlaintext());
   /* end of the work */
   end = clock();
   time = (double)(end - start) / CLOCKS_PER_SEC;

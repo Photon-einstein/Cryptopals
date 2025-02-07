@@ -26,6 +26,16 @@ std::vector<unsigned char> MyCryptoLibrary::SHA1::hash(const std::vector<unsigne
   preProcessing(inputV);
   processing();
   std::vector<unsigned char> hashV;
+  hashV.reserve(SHA_DIGEST_LENGTH);
+  
+  uint32_t hashParts[] = {_h0, _h1, _h2, _h3, _h4};
+  
+  for (uint32_t part : hashParts) {
+    hashV.push_back((part >> 24) & 0xFF);
+    hashV.push_back((part >> 16) & 0xFF);
+    hashV.push_back((part >> 8) & 0xFF);
+    hashV.push_back(part & 0xFF);
+  }
   return hashV;
 }
 /******************************************************************************/

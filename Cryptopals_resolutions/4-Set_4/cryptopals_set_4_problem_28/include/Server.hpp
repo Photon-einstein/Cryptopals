@@ -65,6 +65,18 @@ public:
   std::vector<unsigned char> hashSHA1WithLibrary(const std::vector<unsigned char> &inputV,
     const std::string &originalMessage);
   
+  /**
+   * @brief Calculates the SHA1 without Openssl library
+   *
+   * This function takes two integers as input and returns their sum.
+   *
+   * @param inputV The characters to be hashed in a vector format
+   * @param originalMessage The characters to be hashed in a string format
+   * @return The hash SHA1 of the inputV characters
+   */
+  std::vector<unsigned char> hashSHA1(const std::vector<unsigned char> &inputV,
+    const std::string &originalMessage);
+
 
   /**
    * @brief This method print the hash value and the original message to be hashed.
@@ -79,12 +91,17 @@ public:
 
   void setPlaintext(const int sizePlaintext, bool randomPlaintext, const std::string &plaintext);
 
+  const std::vector<unsigned char> getPlaintextV();
+  
+  const std::string getPlaintext();
 
 private:
   bool _debugFlag = true;
   std::shared_ptr<MyCryptoLibrary::SHA> _sha;
   std::vector<unsigned char> _plaintextV;
   std::string _plaintext;
+  std::vector<unsigned char> _hashOpenSSL;
+  std::vector<unsigned char> _hash;
 };
 
 #endif // SERVER_HPP

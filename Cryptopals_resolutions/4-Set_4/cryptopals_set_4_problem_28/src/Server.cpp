@@ -60,13 +60,30 @@ std::vector<unsigned char> Server::hashSHA1WithLibrary(const std::vector<unsigne
 
     // Optionally, print for debug purposes
     if (_debugFlag == true) {
-        printMessage("SHA1 with library | " + originalMessage + " (hex): ", output, PrintFormat::HEX);
+        printMessage("SHA1 with library    | " + originalMessage + " (hex): ", output, PrintFormat::HEX);
     }
 
   return output;
 }
 /******************************************************************************/
-
+/**
+ * @brief Calculates the SHA1 without Openssl library
+ *
+ * This function takes two integers as input and returns their sum.
+ *
+ * @param inputV The characters to be hashed in a vector format
+ * @param originalMessage The characters to be hashed in a string format
+ * @return The hash SHA1 of the inputV characters
+ */
+std::vector<unsigned char> Server::hashSHA1(const std::vector<unsigned char> &inputV, const std::string &originalMessage) {
+  std::vector<unsigned char> output = _sha->hash(inputV); 
+  // Optionally, print for debug purposes
+  if (_debugFlag == true) {
+      printMessage("SHA1 without library | " + originalMessage + " (hex): ", output, PrintFormat::HEX);
+  }
+  return output;
+}
+/******************************************************************************/
 /**
  * @brief This method print the hash value and the original message to be hashed.
  *
@@ -98,6 +115,7 @@ void Server::printMessage(const std::string& originalMessage, const std::vector<
             }
             break;
     }
+    printf("\n");
 }
 /******************************************************************************/
 void Server::setPlaintext(const int sizePlaintext, bool randomPlaintext, const std::string &plaintext) {
@@ -130,5 +148,16 @@ void Server::setPlaintext(const int sizePlaintext, bool randomPlaintext, const s
       }
     }
   }
+  if (_debugFlag) {
+    printf("\n");
+  }
+}
+/******************************************************************************/
+const std::vector<unsigned char> Server::getPlaintextV() {
+  return _plaintextV;
+}
+/******************************************************************************/
+const std::string Server::getPlaintext() {
+  return _plaintext;
 }
 /******************************************************************************/
