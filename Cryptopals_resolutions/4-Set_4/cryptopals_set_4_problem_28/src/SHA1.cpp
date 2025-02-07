@@ -1,6 +1,6 @@
 #include <openssl/conf.h>
-#include <openssl/evp.h>
 #include <openssl/err.h>
+#include <openssl/evp.h>
 
 #include "./../include/SHA1.hpp"
 
