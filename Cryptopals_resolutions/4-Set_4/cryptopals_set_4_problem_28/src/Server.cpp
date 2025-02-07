@@ -1,8 +1,9 @@
 #include <iostream>
 #include <openssl/conf.h>
 #include <openssl/err.h>
-#include <openssl/sha.h>
 #include <openssl/evp.h>
+#include <openssl/sha.h>
+
 #include <random>
 #include <stdexcept>
 
