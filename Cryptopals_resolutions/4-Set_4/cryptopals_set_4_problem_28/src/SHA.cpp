@@ -1,7 +1,3 @@
-#include <stdexcept>
-#include <chrono>
-#include <thread>
-
 #include "./../include/SHA.hpp"
 
 /* constructor / destructor */

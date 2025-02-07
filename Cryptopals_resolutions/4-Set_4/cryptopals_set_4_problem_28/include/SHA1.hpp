@@ -1,10 +1,6 @@
 #ifndef SHA1_HPP
 #define SHA1_HPP
 
-#include <vector>
-#include <cstdint>
-#include <climits>
-
 #include "./../include/SHA.hpp"
 
 // Define SHA_DIGEST_LENGTH if it is not defined elsewhere.

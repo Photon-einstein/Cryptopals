@@ -1,6 +1,6 @@
-#include <stdexcept>
-#include <chrono>
-#include <thread>
+#include <openssl/conf.h>
+#include <openssl/evp.h>
+#include <openssl/err.h>
 
 #include "./../include/SHA1.hpp"
 

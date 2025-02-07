@@ -1,38 +1,9 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#include <openssl/conf.h>
-#include <openssl/evp.h>
-#include <openssl/err.h>
-#include <openssl/sha.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <ctime>
-#include <string.h>
-#include <cstring>
 #include <string>
-#include <math.h>
-#include <ctype.h>
-#include <assert.h>
 #include <vector>
-#include <iostream>
-#include <cstddef>
-#include <unordered_map>
-#include <bits/stdc++.h>
-#include <cctype>
-#include <fstream>
-#include <random>
-#include <map>
-#include <algorithm> // for copy() and assign()
-#include <iterator> // for back_inserter
-#include <string.h>
-#include <string>
 #include <memory>
-#include <climits>
-#include <random>
-#include <cstdlib>
 
 #include "./../include/PrintFormat.hpp"
 #include "./../include/SHA.hpp"
