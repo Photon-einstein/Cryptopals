@@ -6,6 +6,7 @@
 
 /* constructor / destructor */
 Server::Server() {
+    _sha = std::make_shared<MyCryptoLibrary::SHA1>();
 }
 /******************************************************************************/
 Server::~Server() {
@@ -58,7 +59,7 @@ std::vector<unsigned char> Server::hashSHA1WithLibrary(const std::vector<unsigne
     output.assign(hash, hash + hashLength);
 
     // Optionally, print for debug purposes
-    if (debugFlag == true) {
+    if (_debugFlag == true) {
         printMessage("SHA1 with library | " + originalMessage + " (hex): ", output, PrintFormat::HEX);
     }
 
@@ -97,5 +98,37 @@ void Server::printMessage(const std::string& originalMessage, const std::vector<
             }
             break;
     }
+}
+/******************************************************************************/
+void Server::setPlaintext(const int sizePlaintext, bool randomPlaintext, const std::string &plaintext) {
+  if (sizePlaintext < 1) {
+    throw std::invalid_argument("Server log | Bad limit boundaries for the plaintext generation");
+  }
+  std::random_device rd;   // non-deterministic generator
+  std::mt19937 gen(rd());  // to seed mersenne twister.
+  std::uniform_int_distribution<> dist1(0,255); // distribute results between 0 and 255 inclusive
+  int i;
+  unsigned char c;
+  if(_debugFlag == true) {
+    printf("\nServer log | Plaintext generated (hex):   ");
+  }
+  if (randomPlaintext) {
+    for (i = 0; i < sizePlaintext; ++i) {
+      c = dist1(gen);
+      _plaintextV.push_back(c);
+      _plaintext.push_back(c);
+      if (_debugFlag == true) {
+        printf("%.2x ", (unsigned char)c);
+      }
+    }
+  } else {
+    _plaintext = plaintext;
+    for (i = 0; i < plaintext.size(); ++i) {
+      _plaintextV.push_back(plaintext[i]);
+      if (_debugFlag == true) {
+        printf("%.2x ", (unsigned char)_plaintextV[i]);
+      }
+    }
+  }
 }
 /******************************************************************************/

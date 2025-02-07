@@ -134,14 +134,14 @@ std::string AesCbcMachine::aesCbcEncryption(const std::vector<unsigned char> &pl
   }
   /* Add a NULL terminator. We are expecting printable text */
   encryptedTextPointer[encryptedTextLen] = '\0';
-  /* fill cyphertext vector */
+  /* fill ciphertext vector */
   flag = Function::fillVectorFromPointerArray(cypherTextVector, encryptedTextPointer, encryptedTextLen);
   if (flag == false) {
     perror("\nAesEcbMachine log | There was an error in the function 'fillVectorFromPointerArray'.");
     *b = false;
     return encryptedText;
   }
-  /* add cyphertext encrypted to the result */
+  /* add ciphertext encrypted to the result */
   Function::convertVectorBytesToString(cypherTextVector, encryptedText);
   /* free memory */
   memset(plainTextPointer, 0, size+1);
@@ -193,7 +193,7 @@ std::string AesCbcMachine::aesCbcDecryption(const std::vector<unsigned char> &en
   }
   /* Add a NULL terminator. We are expecting printable text */
   cypherTextDecryptedPointer[decryptedTextLen] = '\0';
-  /* fill cyphertext vector */
+  /* fill ciphertext vector */
   flag = Function::fillVectorFromPointerArray(decryptedTextVector, cypherTextDecryptedPointer, decryptedTextLen);
   if (flag == false) {
     perror("\nAesEcbMachine log | There was an error in the function 'fillVectorFromPointerArray'.");

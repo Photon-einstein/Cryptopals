@@ -30,7 +30,11 @@ int main (void) {
   double time;
   start = clock();
   /* work to verify */
-
+  std::shared_ptr<Server> server = std::make_shared<Server>();
+  const int sizePlaintext = 20;
+  bool randomPlaintext {true};
+  std::string plaintext = "AAAAAAAAAAAAAAAAA";
+  server->setPlaintext(sizePlaintext, randomPlaintext, plaintext);
   /* end of the work */
   end = clock();
   time = (double)(end - start) / CLOCKS_PER_SEC;

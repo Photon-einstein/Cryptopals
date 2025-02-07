@@ -15,7 +15,7 @@
 
 namespace MyCryptoLibrary {
 
-class SHA1 {
+class SHA1 : public SHA {
 public:
     /// Constructor.
     SHA1();
@@ -32,7 +32,7 @@ public:
      * @param inputV The input data as a vector of unsigned char.
      * @return A vector of unsigned char containing the computed hash.
      */
-    std::vector<unsigned char> hash(const std::vector<unsigned char>& inputV);
+    virtual std::vector<unsigned char> hash(const std::vector<unsigned char>& inputV);
 
 private:
     /// Sets the expected hash output size.

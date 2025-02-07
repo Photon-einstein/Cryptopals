@@ -35,6 +35,9 @@
 #include <cstdlib>
 
 #include "./../include/PrintFormat.hpp"
+#include "./../include/SHA.hpp"
+#include "./../include/SHA1.hpp"
+
 
 // Define SHA_DIGEST_LENGTH if it is not defined elsewhere.
 // SHA-1 produces a 160-bit (20-byte) digest.
@@ -74,8 +77,14 @@ public:
    */
   void printMessage(const std::string& originalMessage, const std::vector<unsigned char> &hash, PrintFormat::Format format);
 
+  void setPlaintext(const int sizePlaintext, bool randomPlaintext, const std::string &plaintext);
+
+
 private:
-  bool debugFlag = true;
+  bool _debugFlag = true;
+  std::shared_ptr<MyCryptoLibrary::SHA> _sha;
+  std::vector<unsigned char> _plaintextV;
+  std::string _plaintext;
 };
 
 #endif // SERVER_HPP
