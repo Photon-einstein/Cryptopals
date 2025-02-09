@@ -19,9 +19,9 @@ Server::~Server() {
 /******************************************************************************/
 
 /**
- * @brief Calculates the SHA1 hash using the Openssl library
+ * @brief Calculates the SHA-1 hash using the OpenSSL library
  *
- * This function takes two integers as input and returns their sum.
+ * This method perform the hash SHA-1 of the message using the OpenSSL library
  *
  * @param inputV The characters to be hashed in a vector format
  * @param originalMessage The characters to be hashed in a string format
@@ -72,9 +72,9 @@ std::vector<unsigned char> Server::hashSHA1WithLibrary(const std::vector<unsigne
 }
 /******************************************************************************/
 /**
- * @brief Calculates the SHA1 without Openssl library
+ * @brief Calculates the SHA-1 using a custom made library
  *
- * This function takes two integers as input and returns their sum.
+ * This method perform the hash SHA-1 of the message with a custom made library
  *
  * @param inputV The characters to be hashed in a vector format
  * @param originalMessage The characters to be hashed in a string format
@@ -96,7 +96,7 @@ std::vector<unsigned char> Server::hashSHA1(const std::vector<unsigned char> &in
  *
  * @param originalMessage The characters to be hashed in a string format
  * @param hash The originalMessage hashed in a vector format
- * @param format The format to be used in the print of the hash value.
+ * @param format The format to be used in the print of the hash value (HEX, DECIMAL, ASCII)
  */
 void Server::printMessage(const std::string& originalMessage, const std::vector<unsigned char> &hash, PrintFormat::Format format) {
     std::cout<<originalMessage;
@@ -123,6 +123,15 @@ void Server::printMessage(const std::string& originalMessage, const std::vector<
     printf("\n");
 }
 /******************************************************************************/
+ /**
+ * @brief This method sets the plaintext to be hashed in a server's variable.
+ *
+ * This method sets the plaintext to be hashed, randomly or from the input string
+ *
+ * @param sizePlaintext The size of the random plaintext to be generated
+ * @param randomPlaintext A bool flag that signal if the plaintext is to be generated randomly or not
+ * @param plaintext The input plaintext string if the plaintext is to be set deterministically
+ */
 void Server::setPlaintext(const int sizePlaintext, bool randomPlaintext, const std::string &plaintext) {
   if (sizePlaintext < 1) {
     throw std::invalid_argument("Server log | Bad limit boundaries for the plaintext generation");
@@ -158,10 +167,24 @@ void Server::setPlaintext(const int sizePlaintext, bool randomPlaintext, const s
   }
 }
 /******************************************************************************/
+ /**
+ * @brief Returns the plaintext stored in the server
+ *
+ * This method returns the plaintext stored in the server, in a vector format
+ *
+ * @return The plaintext stored in the server, as a vector
+ */
 const std::vector<unsigned char> Server::getPlaintextV() {
   return _plaintextV;
 }
 /******************************************************************************/
+/**
+ * @brief Returns the plaintext stored in the server
+ *
+ * This method returns the plaintext stored in the server, in a string format
+ *
+ * @return The plaintext stored in the server, as a string
+ */
 const std::string Server::getPlaintext() {
   return _plaintext;
 }

@@ -16,10 +16,14 @@ void MyCryptoLibrary::SHA1::setHashOutputSize() {
   _sizeOutputHash = SHA_DIGEST_LENGTH;
 }
 /******************************************************************************/
-std::size_t MyCryptoLibrary::SHA1::getHashOutputSize() {
-  return _sizeOutputHash;
-}
-/******************************************************************************/
+/**
+ * @brief Computes the SHA-1 hash value
+ * 
+ * Computes the SHA-1 hash of the given input vector
+ *
+ * @param inputV The input data as a vector of unsigned characters
+ * @return A vector of unsigned characters containing the computed hash
+ */
 std::vector<unsigned char> MyCryptoLibrary::SHA1::hash(const std::vector<unsigned char> &inputV) {
   _inputVpadded.clear();
   initialization(inputV.size());
@@ -39,6 +43,16 @@ std::vector<unsigned char> MyCryptoLibrary::SHA1::hash(const std::vector<unsigne
   return hashV;
 }
 /******************************************************************************/
+/// Sets the expected hash output size
+std::size_t MyCryptoLibrary::SHA1::getHashOutputSize() {
+  return _sizeOutputHash;
+}
+/******************************************************************************/
+/**
+ * Initializes internal state based on the input length
+ *
+ * @param sizeInputV The size of the original message in bytes
+ */
 void MyCryptoLibrary::SHA1::initialization(const std::size_t sizeInputV) {
   _h0 = 0x67452301;
   _h1 = 0xEFCDAB89;
@@ -48,6 +62,11 @@ void MyCryptoLibrary::SHA1::initialization(const std::size_t sizeInputV) {
   _ml = sizeInputV * CHAR_BIT; // message length in bits (always a multiple of the number of bits in a character)
 }
 /******************************************************************************/
+/**
+ * Preprocesses the input data (padding, appending length) as required by the SHA-1 algorithm.
+ *
+ * @param inputV The input data as a vector of unsigned char.
+ */
 void MyCryptoLibrary::SHA1::preProcessing(const std::vector<unsigned char> &inputV) {
   // Initialize padded input vector with original message
   _inputVpadded = inputV;
@@ -67,6 +86,7 @@ void MyCryptoLibrary::SHA1::preProcessing(const std::vector<unsigned char> &inpu
   }
 }
 /******************************************************************************/
+/// Processes the padded message in 512-bit blocks.
 void MyCryptoLibrary::SHA1::processing() {
   // Process the padded input in 512-bit blocks
   for (std::size_t i = 0; i < _inputVpadded.size(); i += 64) {
@@ -126,6 +146,13 @@ void MyCryptoLibrary::SHA1::processing() {
   }
 }
 /******************************************************************************/
+/**
+ * Performs a left-rotation (circular shift) on a 32-bit integer.
+ *
+ * @param value The value to rotate.
+ * @param bits The number of bits to rotate by.
+ * @return The rotated value.
+ */
 uint32_t MyCryptoLibrary::SHA1::leftRotate(uint32_t value, int bits) {
   return (value << bits) | (value >> (32 - bits));
 }

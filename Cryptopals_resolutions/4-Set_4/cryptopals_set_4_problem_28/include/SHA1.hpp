@@ -23,15 +23,17 @@ public:
     std::size_t getHashOutputSize();
 
     /**
-     * Computes the SHA-1 hash of the given input vector.
+     * @brief Computes the SHA-1 hash value
+     * 
+     * Computes the SHA-1 hash of the given input vector
      *
-     * @param inputV The input data as a vector of unsigned char.
-     * @return A vector of unsigned char containing the computed hash.
+     * @param inputV The input data as a vector of unsigned characters
+     * @return A vector of unsigned characters containing the computed hash
      */
     virtual std::vector<unsigned char> hash(const std::vector<unsigned char>& inputV);
 
 private:
-    /// Sets the expected hash output size.
+    /// Sets the expected hash output size
     void setHashOutputSize();
 
     /**
