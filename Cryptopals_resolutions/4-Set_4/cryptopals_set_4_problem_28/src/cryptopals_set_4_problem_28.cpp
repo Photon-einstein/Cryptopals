@@ -14,7 +14,7 @@ int main (void) {
   std::shared_ptr<Server> server = std::make_shared<Server>();
   const int sizePlaintext = 100;
   bool randomPlaintext {false};
-  std::string plaintext = "Aasffefefdecfdsfcawwwd33432";
+  std::string plaintext = "This is a test";
   std::vector<unsigned char> hashOpenSSL;
   std::vector<unsigned char> hash;
   server->setPlaintext(sizePlaintext, randomPlaintext, plaintext);

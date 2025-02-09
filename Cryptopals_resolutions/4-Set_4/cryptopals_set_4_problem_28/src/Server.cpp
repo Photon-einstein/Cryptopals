@@ -65,7 +65,7 @@ std::vector<unsigned char> Server::hashSHA1WithLibrary(const std::vector<unsigne
 
     // Optionally, print for debug purposes
     if (_debugFlag == true) {
-        printMessage("SHA1 with library    | " + originalMessage + " (hex): ", output, PrintFormat::HEX);
+        printMessage("SHA1 with library    | '" + originalMessage + "' (hex): ", output, PrintFormat::HEX);
     }
 
   return output;
@@ -84,7 +84,7 @@ std::vector<unsigned char> Server::hashSHA1(const std::vector<unsigned char> &in
   std::vector<unsigned char> output = _sha->hash(inputV); 
   // Optionally, print for debug purposes
   if (_debugFlag == true) {
-      printMessage("SHA1 without library | " + originalMessage + " (hex): ", output, PrintFormat::HEX);
+      printMessage("SHA1 without library | '" + originalMessage + "' (hex): ", output, PrintFormat::HEX);
   }
   return output;
 }
