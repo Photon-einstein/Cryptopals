@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
     return RUN_ALL_TESTS();
 }
     
-TEST_F(SHA1Test, HashCorrectness) {
+TEST_F(SHA1Test, HashCorrectnessEnglishSentenceAsAnInput) {
     test_input = "This is a test!";
     input.insert(input.end(), test_input.begin(), test_input.end());
     auto hash = sha1->hash(input);
