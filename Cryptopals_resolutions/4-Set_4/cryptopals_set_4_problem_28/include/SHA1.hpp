@@ -37,9 +37,9 @@ private:
     void setHashOutputSize();
 
     /**
-     * Initializes internal state based on the input length.
+     * Initializes internal state based on the input length
      *
-     * @param sizeInputV The size of the original message in bytes.
+     * @param sizeInputV The size of the original message in bytes
      */
     void initialization(const std::size_t sizeInputV);
 

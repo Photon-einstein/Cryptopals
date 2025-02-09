@@ -1,6 +1,63 @@
 @startuml
-class Car {
-    +startEngine()
-    +stopEngine()
+
+namespace PrintFormat {
+    enum Format {
+        +HEX 
+        +DECIMAL 
+        +ASCII
+    }
 }
+
+class Server {
+    - bool _debugFlag
+    - std::shared_ptr<MyCryptoLibrary::SHA> _sha
+    - std::vector<unsigned char> _plaintextV
+    - std::string _plaintext
+    - std::vector<unsigned char> _hashOpenSSL
+    - std::vector<unsigned char> _hash
+
+    + Server()
+    + ~Server()
+    + hashSHA1WithLibrary(inputV : std::vector<unsigned char>, originalMessage : std::string) : std::vector<unsigned char>
+    + hashSHA1(inputV : std::vector<unsigned char>, originalMessage : std::string) : std::vector<unsigned char>
+    + printMessage(originalMessage : std::string, hash : std::vector<unsigned char>, format : PrintFormat::Format) : void
+    + setPlaintext(sizePlaintext : int, randomPlaintext: bool, plaintext : std::string) : void
+    + getPlaintextV() : std::vector<unsigned char>
+    + getPlaintext() : std::string 
+}
+
+namespace MyCryptoLibrary {
+    class SHA <<abstract>> {
+        + SHA()
+        + ~SHA()
+        + hash(inputV : std::vector<unsigned char>) : std::vector<unsigned char>
+
+    }
+
+    class SHA1 {
+        - _sizeOutputHash : std::size_t
+        - _inputVpadded : std::vector<unsigned char>
+        - _h0 : uint32_t
+        - _h1 : uint32_t
+        - _h2 : uint32_t
+        - _h3 : uint32_t
+        - _h4 : uint32_t
+        - _ml : uint64_t
+
+        + SHA1()
+        + ~SHA1()
+        + getHashOutputSize() : std::size_t
+        + hash(inputV : vector<unsigned char>) : std::vector<unsigned char>
+        - setHashOutputSize() : void
+        - initialization(sizeInputV : std::size_t) : void
+        - preProcessing(inputV : vector<unsigned char>) : void
+        - processing() : void
+        - leftRotate(value : uint32_t, bits : int) : uint32_t
+    }
+
+    SHA <|-- SHA1 : "inherits"
+}
+
+Server --> MyCryptoLibrary.SHA : "has a"
+
 @enduml
