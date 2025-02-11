@@ -10,8 +10,10 @@
 #include "./../include/Server.hpp"
 
 /* constructor / destructor */
-Server::Server() {
-    _sha = std::make_shared<MyCryptoLibrary::SHA1>();
+Server::Server() : _keyLength(SHA_DIGEST_LENGTH * 2) 
+{
+  Server::setKey(Server::_keyLength);
+  _sha = std::make_shared<MyCryptoLibrary::SHA1>();
 }
 /******************************************************************************/
 Server::~Server() {
@@ -29,8 +31,8 @@ Server::~Server() {
  */
 std::vector<unsigned char> Server::hashSHA1WithLibrary(const std::vector<unsigned char> &inputV,
     const std::string &originalMessage) {
-    std::vector<unsigned char> output;
-
+    std::vector<unsigned char> output, inputKeyPrepended;
+    inputKeyPrepended = Server::prependKey(inputV);
     // Create a new digest context
     EVP_MD_CTX* ctx = EVP_MD_CTX_new();
     if (ctx == nullptr) {
@@ -44,7 +46,7 @@ std::vector<unsigned char> Server::hashSHA1WithLibrary(const std::vector<unsigne
     }
 
     // Provide the message to be hashed
-    if (EVP_DigestUpdate(ctx, inputV.data(), inputV.size()) != 1) {
+    if (EVP_DigestUpdate(ctx, inputKeyPrepended.data(), inputKeyPrepended.size()) != 1) {
         EVP_MD_CTX_free(ctx);
         throw std::runtime_error("EVP_DigestUpdate failed");
     }
@@ -65,7 +67,7 @@ std::vector<unsigned char> Server::hashSHA1WithLibrary(const std::vector<unsigne
 
     // Optionally, print for debug purposes
     if (_debugFlag == true) {
-        printMessage("SHA1 with library    | '" + originalMessage + "' (hex): ", output, PrintFormat::HEX);
+        printMessage("\nSHA1 with library    | '" + originalMessage + "' (hex): ", output, PrintFormat::HEX);
     }
 
   return output;
@@ -81,10 +83,37 @@ std::vector<unsigned char> Server::hashSHA1WithLibrary(const std::vector<unsigne
  * @return The hash SHA1 of the inputV characters
  */
 std::vector<unsigned char> Server::hashSHA1(const std::vector<unsigned char> &inputV, const std::string &originalMessage) {
-  std::vector<unsigned char> output = _sha->hash(inputV); 
+    ;
+  std::vector<unsigned char> inputKeyPrepended, output;
+  inputKeyPrepended = Server::prependKey(inputV),  
+  output = _sha->hash(inputKeyPrepended); 
   // Optionally, print for debug purposes
   if (_debugFlag == true) {
-      printMessage("SHA1 without library | '" + originalMessage + "' (hex): ", output, PrintFormat::HEX);
+      printMessage("\nSHA1 without library | '" + originalMessage + "' (hex): ", output, PrintFormat::HEX);
+  }
+  return output;
+}
+/******************************************************************************/
+/**
+ * @brief This method does the verification of a given mac and the corresponding message
+ *
+ * This method does the verification of a given mac and the corresponding message, checking
+ * if the message was tampered
+ *
+ * @param message The message that was hashed
+ * @param mac The corresponding mac value of the given message
+ * @return The true if the hash(key || message) == mac, false otherwise
+ */
+bool Server::checkMac(const std::string &message, const std::vector<unsigned char> &mac) {
+  const std::vector<unsigned char> messageV(message.begin(), message.end());
+  const std::vector<unsigned char> serverMac = Server::hashSHA1(messageV, message);
+  bool output = (serverMac == mac);
+  if(_debugFlag == true) {
+    if (output) {
+      printf("\nServer log | 'checkMac' test for message: '%s' and mac verdict match.", message.c_str());
+    } else {
+      printf("\nServer log | 'checkMac' test for message: '%s' and mac verdict does not match.", message.c_str());
+    }
   }
   return output;
 }
@@ -141,10 +170,10 @@ void Server::setPlaintext(const int sizePlaintext, bool randomPlaintext, const s
   std::uniform_int_distribution<> dist1(0,255); // distribute results between 0 and 255 inclusive
   int i;
   unsigned char c;
-  if(_debugFlag == true) {
-    printf("\nServer log | Plaintext generated (hex):   ");
-  }
   if (randomPlaintext) {
+    if(_debugFlag == true) {
+      printf("\nServer log | Plaintext generated (hex):   '");
+    }
     for (i = 0; i < sizePlaintext; ++i) {
       c = dist1(gen);
       _plaintextV.push_back(c);
@@ -154,16 +183,19 @@ void Server::setPlaintext(const int sizePlaintext, bool randomPlaintext, const s
       }
     }
   } else {
+    if(_debugFlag == true) {
+      printf("\nServer log | Plaintext received (ascii):   '");
+    }
     _plaintext = plaintext;
     for (i = 0; i < plaintext.size(); ++i) {
       _plaintextV.push_back(plaintext[i]);
       if (_debugFlag == true) {
-        printf("%.2x ", (unsigned char)_plaintextV[i]);
+        printf("%c", (unsigned char)_plaintextV[i]);
       }
     }
   }
   if (_debugFlag) {
-    printf("\n");
+    printf("'\n");
   }
 }
 /******************************************************************************/
@@ -187,5 +219,53 @@ const std::vector<unsigned char> Server::getPlaintextV() {
  */
 const std::string Server::getPlaintext() {
   return _plaintext;
+}
+/******************************************************************************/
+/**
+ * @brief This method sets the key to be used as a prefix in a hash calculation.
+ *
+ * This method sets the key to be used as a prefix in a hash calculation, with
+ * a given size
+ *
+ * @param sizeKey The size of the random key to be generated
+ */
+void Server::setKey(const std::size_t sizeKey) {
+  if (sizeKey < SHA_DIGEST_LENGTH) {
+    throw std::invalid_argument("Server log | Bad size for the key generation");
+  }
+  std::random_device rd;   // non-deterministic generator
+  std::mt19937 gen(rd());  // to seed mersenne twister.
+  std::uniform_int_distribution<> dist1(0,255); // distribute results between 0 and 255 inclusive
+  int i;
+  unsigned char k_n;
+  if(_debugFlag == true) {
+    printf("\nServer log | Key generated (hex):   ");
+  }
+  for (i = 0; i < sizeKey; ++i) {
+    k_n = dist1(gen);
+    _key.push_back(k_n);
+    if (_debugFlag == true) {
+      printf("%.2x", (unsigned char)k_n);
+    }
+  }
+  if (_debugFlag) {
+    printf("\n");
+  }
+
+}
+/******************************************************************************/
+/**
+ * @brief This method prepend the key to input that is going to be hashed
+ *
+ * This method prepend the key to the input that is going to be hashed
+ *
+ * @param inputV The input that is going to be hashed
+ */
+std::vector<unsigned char> Server::prependKey(const std::vector<unsigned char> &inputV) {
+  std::vector<unsigned char> inputWithKey = Server::_key;
+  for(unsigned char c: inputV) {
+    inputWithKey.emplace_back(c);
+  }
+  return inputWithKey;
 }
 /******************************************************************************/

@@ -46,7 +46,18 @@ public:
    */
   std::vector<unsigned char> hashSHA1(const std::vector<unsigned char> &inputV,
     const std::string &originalMessage);
-
+  
+  /**
+   * @brief This method does the verification of a given mac and the corresponding message
+   *
+   * This method does the verification of a given mac and the corresponding message, checking
+   * if the message was tampered
+   *
+   * @param message The message that was hashed
+   * @param mac The corresponding mac value of the given message
+   * @return The true if the hash(key || message) == mac, false otherwise
+   */
+  bool checkMac(const std::string &message, const std::vector<unsigned char> &mac);
 
   /**
    * @brief This method print the hash value and the original message to be hashed.
@@ -58,7 +69,6 @@ public:
    * @param format The format to be used in the print of the hash value (HEX, DECIMAL, ASCII)
    */
   void printMessage(const std::string& originalMessage, const std::vector<unsigned char> &hash, PrintFormat::Format format);
-
 
 
   /**
@@ -91,12 +101,36 @@ public:
   const std::string getPlaintext();
 
 private:
+
+  /**
+   * @brief This method prepend the key to input that is going to be hashed
+   *
+   * This method prepend the key to the input that is going to be hashed
+   *
+   * @param inputV The input that is going to be hashed
+   */
+  std::vector<unsigned char> prependKey(const std::vector<unsigned char> &inputV);
+  
+
+  /**
+   * @brief This method sets the key to be used as a prefix in a hash calculation.
+   *
+   * This method sets the key to be used as a prefix in a hash calculation, with
+   * a given size
+   *
+   * @param sizeKey The size of the random key to be generated
+   */
+  void setKey(const std::size_t sizeKey);
+
+
   bool _debugFlag = true;
   std::shared_ptr<MyCryptoLibrary::SHA> _sha;
   std::vector<unsigned char> _plaintextV;
   std::string _plaintext;
   std::vector<unsigned char> _hashOpenSSL;
   std::vector<unsigned char> _hash;
+  std::vector<unsigned char> _key;
+  const std::size_t _keyLength;
 };
 
 #endif // SERVER_HPP

@@ -1,3 +1,4 @@
+#include <iostream>
 #include <memory>
 #include <string>
 #include <time.h>
@@ -14,12 +15,18 @@ int main (void) {
   std::shared_ptr<Server> server = std::make_shared<Server>();
   const int sizePlaintext = 100;
   bool randomPlaintext {false};
+  bool checkMac;
   std::string plaintext = "This is a test";
   std::vector<unsigned char> hashOpenSSL;
   std::vector<unsigned char> hash;
   server->setPlaintext(sizePlaintext, randomPlaintext, plaintext);
   hashOpenSSL = server->hashSHA1WithLibrary(server->getPlaintextV(), server->getPlaintext());
   hash = server->hashSHA1(server->getPlaintextV(), server->getPlaintext());
+  // check tampered message
+  std::cout<<std::endl;
+  checkMac = server->checkMac(plaintext, hash);
+  hash[0] ^= 0xFF;
+  checkMac = server->checkMac(plaintext, hash);
   /* end of the work */
   end = clock();
   time = (double)(end - start) / CLOCKS_PER_SEC;
