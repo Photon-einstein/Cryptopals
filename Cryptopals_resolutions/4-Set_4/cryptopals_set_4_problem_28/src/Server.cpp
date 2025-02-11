@@ -19,7 +19,6 @@ Server::Server() : _keyLength(SHA_DIGEST_LENGTH * 2)
 Server::~Server() {
 }
 /******************************************************************************/
-
 /**
  * @brief Calculates the SHA-1 hash using the OpenSSL library
  *
