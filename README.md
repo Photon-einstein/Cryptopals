@@ -5,7 +5,7 @@ Before begin, ensure that you have the following installed:
 
 * CMake (version 3.10 or later)
 * A C++ compiler that supports C++17 (e.g., GCC, g++)
-* OpenSSL (if the problem uses it)
+* OpenSSL
 * Google Test
 
 ### Intro
