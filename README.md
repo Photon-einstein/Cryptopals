@@ -29,7 +29,7 @@ mkdir build
 cd build
 ```
 
-Configure the project with CMake
+Configure the poject with CMake
 
 ```bash
 cmake ..
@@ -56,7 +56,7 @@ mkdir tests/build
 cd tests/build
 ```
 
-Configure the project with CMake
+Configure the project tests with CMake
 
 ```bash
 cmake ..
