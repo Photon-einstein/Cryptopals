@@ -18,7 +18,7 @@
 class Server {
 public:
   /* constructor / destructor */
-  Server();
+  Server(const bool debugFlag);
   ~Server();
 
   /* public methods */
@@ -123,7 +123,7 @@ private:
   void setKey(const std::size_t sizeKey);
 
 
-  bool _debugFlag = true;
+  const bool _debugFlag;
   std::shared_ptr<MyCryptoLibrary::SHA> _sha;
   std::vector<unsigned char> _plaintextV;
   std::string _plaintext;

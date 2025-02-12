@@ -10,7 +10,7 @@
 #include "./../include/Server.hpp"
 
 /* constructor / destructor */
-Server::Server() : _keyLength(SHA_DIGEST_LENGTH * 2) 
+Server::Server(const bool debugFlag) : _keyLength(SHA_DIGEST_LENGTH * 2), _debugFlag(debugFlag) 
 {
   Server::setKey(Server::_keyLength);
   _sha = std::make_shared<MyCryptoLibrary::SHA1>();

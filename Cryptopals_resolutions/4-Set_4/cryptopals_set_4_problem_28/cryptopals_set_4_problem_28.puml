@@ -9,21 +9,27 @@ namespace PrintFormat {
 }
 
 class Server {
-    - bool _debugFlag
-    - std::shared_ptr<MyCryptoLibrary::SHA> _sha
-    - std::vector<unsigned char> _plaintextV
-    - std::string _plaintext
-    - std::vector<unsigned char> _hashOpenSSL
-    - std::vector<unsigned char> _hash
+    - _debugFlag : bool
+    - _sha : std::shared_ptr<MyCryptoLibrary::SHA>
+    - _plaintextV : std::vector<unsigned char> 
+    - _plaintext : std::string
+    - _hashOpenSSL : std::vector<unsigned char>
+    - _hash : std::vector<unsigned char>
+    - _key : std::vector<unsigned char>
+    - _keyLength : std::size_t
 
-    + Server()
+    + Server(debugFlag : bool)
     + ~Server()
     + hashSHA1WithLibrary(inputV : std::vector<unsigned char>, originalMessage : std::string) : std::vector<unsigned char>
     + hashSHA1(inputV : std::vector<unsigned char>, originalMessage : std::string) : std::vector<unsigned char>
+    + checkMac(message : std::string, mac : std::vector<unsigned char>) : bool
     + printMessage(originalMessage : std::string, hash : std::vector<unsigned char>, format : PrintFormat::Format) : void
     + setPlaintext(sizePlaintext : int, randomPlaintext: bool, plaintext : std::string) : void
     + getPlaintextV() : std::vector<unsigned char>
-    + getPlaintext() : std::string 
+    + getPlaintext() : std::string
+    - prependKey(inputV : std::vector<unsigned char>) : std::vector<unsigned char>
+    - setKey(std::size_t sizeKey) : void
+
 }
 
 namespace MyCryptoLibrary {
@@ -31,7 +37,6 @@ namespace MyCryptoLibrary {
         + SHA()
         + ~SHA()
         + hash(inputV : std::vector<unsigned char>) : std::vector<unsigned char>
-
     }
 
     class SHA1 {
@@ -47,10 +52,10 @@ namespace MyCryptoLibrary {
         + SHA1()
         + ~SHA1()
         + getHashOutputSize() : std::size_t
-        + hash(inputV : vector<unsigned char>) : std::vector<unsigned char>
+        + hash(inputV : std::vector<unsigned char>) : std::vector<unsigned char>
         - setHashOutputSize() : void
         - initialization(sizeInputV : std::size_t) : void
-        - preProcessing(inputV : vector<unsigned char>) : void
+        - preProcessing(inputV : std::vector<unsigned char>) : void
         - processing() : void
         - leftRotate(value : uint32_t, bits : int) : uint32_t
     }
