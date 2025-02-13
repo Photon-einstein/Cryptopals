@@ -7,6 +7,7 @@ Before begin, ensure that you have the following installed:
 * A C++ compiler that supports C++17 (e.g., GCC, g++)
 * OpenSSL
 * Google Test
+* nlohmann-json3-dev C++ json library 
 
 ### Intro
 This repository contains my resolutions of the set of problems of the Cryptopals challenges.  
