@@ -21,7 +21,7 @@ jobs:
 
       - name: Build and run tests
         run: |
-          for dir in $(find . -name 'CMakeLists.txt' -exec dirname {} \;); do
+          for dir in $(find . -name 'tests/CMakeLists.txt' -exec dirname {} \;); do
             echo "Building in $dir"
             mkdir -p "$dir/build"
             cd "$dir/build"
