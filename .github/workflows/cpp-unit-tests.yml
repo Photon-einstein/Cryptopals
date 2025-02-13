@@ -11,29 +11,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y cmake g++ ninja-build
+          sudo apt install -y cmake g++ libgtest-dev libssl-dev
 
-      - name: Find and Build CMake Projects
+      - name: Build and run tests
         run: |
           for dir in $(find . -name 'CMakeLists.txt' -exec dirname {} \;); do
             echo "Building in $dir"
-            mkdir -p $dir/build
-            cmake -S $dir -B $dir/build -G Ninja -DCMAKE_BUILD_TYPE=Debug
-            cmake --build $dir/build
+            mkdir -p "$dir/build"
+            cd "$dir/build"
+            cmake ..
+            make
+            ctest
+            cd -
           done
-
-      - name: Run Tests
-        run: |
-          for test_bin in $(find . -path '*/build/*' -executable -type f); do
-            if $test_bin --gtest_list_tests > /dev/null 2>&1; then
-              echo "Running tests in $test_bin"
-              $test_bin
-            fi
-          done
-
