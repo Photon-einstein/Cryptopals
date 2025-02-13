@@ -4,6 +4,7 @@
 #include <time.h>
 #include <vector>
 
+#include "./../include/Attacker.hpp"
 #include "./../include/Server.hpp"
 #include "./../include/SHA1.hpp"
 
@@ -14,6 +15,7 @@ int main (void) {
   /* work to verify */
   const bool debugFlag{true};
   std::shared_ptr<Server> server = std::make_shared<Server>(debugFlag);
+  std::shared_ptr<Attacker> attacker = std::make_shared<Attacker>(server);
   const int sizePlaintext = 100;
   bool randomPlaintext {false};
   bool checkMac;
