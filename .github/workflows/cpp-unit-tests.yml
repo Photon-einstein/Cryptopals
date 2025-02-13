@@ -30,7 +30,7 @@ jobs:
                 cd "$test_dir/build"
                 cmake ..
                 make
-                ctest
+                ctest -V  # Enable verbose output for tests
                 cd -
               fi
             done
