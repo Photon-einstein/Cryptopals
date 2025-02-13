@@ -1,0 +1,7 @@
+{
+    "sender": "Alice",
+    "recipient": "Bob",
+    "amount": 1000,
+    "currency": "USD",
+    "hash": "261ac8ed6f304d56f4291aab2c878d3fff6bcbe4"
+}
