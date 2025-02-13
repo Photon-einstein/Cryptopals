@@ -21,7 +21,7 @@ jobs:
 
       - name: Build and run tests
         run: |
-          for set_dir in $(find . -type d -name '*-Set-*'); do
+          for set_dir in $(find . -type d -name '*-Set_*'); do
             for problem_dir in $(find "$set_dir" -type d -name 'cryptopals_set_*_problem_*'); do
               test_dir="$problem_dir/tests"
               if [ -f "$test_dir/CMakeLists.txt" ]; then
