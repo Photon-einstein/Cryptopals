@@ -21,12 +21,15 @@ jobs:
 
       - name: Build and run tests
         run: |
-          for dir in $(find . -name 'tests/CMakeLists.txt' -exec dirname {} \;); do
-            echo "Building in $dir"
-            mkdir -p "$dir/build"
-            cd "$dir/build"
-            cmake ..
-            make
-            ctest
-            cd -
+          for problem_dir in $(find . -type d -name 'cryptopals_set_*_problem_*'); do
+            test_dir="$problem_dir/tests"
+            if [ -f "$test_dir/CMakeLists.txt" ]; then
+              echo "Building in $test_dir"
+              mkdir -p "$test_dir/build"
+              cd "$test_dir/build"
+              cmake ..
+              make
+              ctest
+              cd -
+            fi
           done
