@@ -1,0 +1,37 @@
+name: C++ Unit Tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y cmake g++ libgtest-dev libssl-dev
+
+      - name: Build and run tests
+        run: |
+          for set_dir in $(find . -type d -name '*-Set_*'); do
+            for problem_dir in $(find "$set_dir" -type d -name 'cryptopals_set_*_problem_*'); do
+              test_dir="$problem_dir/tests"
+              if [ -f "$test_dir/CMakeLists.txt" ]; then
+                echo "Building in $test_dir"
+                mkdir -p "$test_dir/build"
+                cd "$test_dir/build"
+                cmake ..
+                make
+                ctest -V  # Enable verbose output for tests
+                cd -
+              fi
+            done
+          done
