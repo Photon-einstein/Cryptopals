@@ -1,33 +1,30 @@
-#include <stdexcept>
 #include <chrono>
 #include <cmath>
+#include <stdexcept>
 
-#include "./../include/Server.h"
 #include "./../include/Attacker.h"
 #include "./../include/Function.h"
+#include "./../include/Server.h"
 
 /* constructor / destructor */
-Attacker::Attacker(std::shared_ptr<Server>& server) {
+Attacker::Attacker(std::shared_ptr<Server> &server) {
   Attacker::setServer(server);
 }
 /******************************************************************************/
-Attacker::~Attacker() {
-}
+Attacker::~Attacker() {}
 /******************************************************************************/
-void Attacker::setServer(std::shared_ptr<Server>& server) {
-  _server = server;
-}
+void Attacker::setServer(std::shared_ptr<Server> &server) { _server = server; }
 /******************************************************************************/
 /* this function will extract the next 32 bit number from the mt1997 PRNG and
 it will convert that number into a keystream of 8 bit, return those 8 bits */
 unsigned char Attacker::getNextKeyStream(std::shared_ptr<MT19937> &mt19937) {
   unsigned int n = mt19937->extractNumber();
-  unsigned char *pNumber = (unsigned char*)&n;
-  unsigned char res=0;
+  unsigned char *pNumber = (unsigned char *)&n;
+  unsigned char res = 0;
   int i;
   const int numberBytesInInteger = 4;
   for (i = 0; i < numberBytesInInteger; ++i, ++pNumber) {
-    res^=*pNumber;
+    res ^= *pNumber;
   }
   return res;
 }
@@ -36,12 +33,12 @@ unsigned char Attacker::getNextKeyStream(std::shared_ptr<MT19937> &mt19937) {
 it will convert that number into a keystream of 8 bit, return those 8 bits */
 unsigned char Attacker::getNextKeyStream(MT19937 &mt19937) {
   unsigned int n = mt19937.extractNumber();
-  unsigned char *pNumber = (unsigned char*)&n;
-  unsigned char res=0;
+  unsigned char *pNumber = (unsigned char *)&n;
+  unsigned char res = 0;
   int i;
   const int numberBytesInInteger = 4;
   for (i = 0; i < numberBytesInInteger; ++i, ++pNumber) {
-    res^=*pNumber;
+    res ^= *pNumber;
   }
   return res;
 }
@@ -50,29 +47,30 @@ unsigned char Attacker::getNextKeyStream(MT19937 &mt19937) {
 mt19937 stream cipher, having as input the vector ciphertext, returning true if
 all went ok or false otherwise */
 bool Attacker::recoverTheKey(const std::vector<unsigned char> &ciphertext,
-    unsigned int &seed) {
+                             unsigned int &seed) {
   if (ciphertext.size() < _lengthStringsA) {
     return false;
   }
-  seed=0;
+  seed = 0;
   bool found = false;
   int i, j, size = ciphertext.size();
   unsigned char c;
-  while(found == false && seed < _maxSeed) {
+  while (found == false && seed < _maxSeed) {
     MT19937 mt19937Attacker(seed);
     /* test maxLengthTry times */
     j = 0;
-    while(j+size <= _maxLengthTry) {
-      for(i = 0, found = true; i < size; ++i) {
-        c = (unsigned char)Attacker::getNextKeyStream(mt19937Attacker) ^ ciphertext[i];
-        if (i >= size- _lengthStringsA && i <= size-1 && c != 'A') {
+    while (j + size <= _maxLengthTry) {
+      for (i = 0, found = true; i < size; ++i) {
+        c = (unsigned char)Attacker::getNextKeyStream(mt19937Attacker) ^
+            ciphertext[i];
+        if (i >= size - _lengthStringsA && i <= size - 1 && c != 'A') {
           found = false;
         }
       } // for
       if (found == true) {
         break;
       }
-      j+=size;
+      j += size;
     } // while
     if (found == true) {
       break;
@@ -90,14 +88,17 @@ that the attacker knows before hand that it will end in 14 A's,
 this function has as input the vector ciphertext, returning true if all went ok
 or false otherwise */
 bool Attacker::recoverTheKeyFromTheServer(unsigned int &seed) {
-  std::vector<unsigned char> ciphertext = _server->encryptWithStreamCypherBasedOnMt19937
-      (_server->getKnownPlaintext());
+  std::vector<unsigned char> ciphertext =
+      _server->encryptWithStreamCypherBasedOnMt19937(
+          _server->getKnownPlaintext());
   bool b = Attacker::recoverTheKey(ciphertext, seed);
   if (b == false) {
     perror("There was a problem in the function 'Attacker::recoverTheKey'.");
     return b;
   }
-  std::cout<<"\nAttacker log | seed cracked mt19937 from server: "<<seed<<".\n"<<std::endl;
+  std::cout << "\nAttacker log | seed cracked mt19937 from server: " << seed
+            << ".\n"
+            << std::endl;
   return b;
 }
 /******************************************************************************/
@@ -111,19 +112,23 @@ bool Attacker::performTestsAgainstServer() {
   for (i = 0; i < _nTests; ++i) {
     possiblePasswordResetToken.clear();
     possiblePasswordResetToken = _server->generatePossiblePasswordToken();
-    idAnswer = Attacker::calculatePossiblePasswordResetTokenVeredict(possiblePasswordResetToken);
+    idAnswer = Attacker::calculatePossiblePasswordResetTokenVeredict(
+        possiblePasswordResetToken);
     b = _server->checkAttackerAnswer(possiblePasswordResetToken, idAnswer);
     if (b == true) {
-      std::cout<<"Attacker log | Password reset token attack test number "<<i+1<<
-        " passed.\n"<<std::endl;
+      std::cout << "Attacker log | Password reset token attack test number "
+                << i + 1 << " passed.\n"
+                << std::endl;
     } else {
-      std::cout<<"Attacker log | Password reset token attack test number "<<i+1<<
-        " failed.\n"<<std::endl;
+      std::cout << "Attacker log | Password reset token attack test number "
+                << i + 1 << " failed.\n"
+                << std::endl;
       return false;
     }
   }
   // if it reaches here then it has passed all the tests
-  std::cout<<"Attacker log | All tests passed regarding Password reset token."<<std::endl;
+  std::cout << "Attacker log | All tests passed regarding Password reset token."
+            << std::endl;
   return true;
 }
 /******************************************************************************/
@@ -131,11 +136,12 @@ bool Attacker::performTestsAgainstServer() {
 trying to decide if the string possiblePasswordResetToken was the product of a
 PRNG MT19937 or not, and if yes, what was the seed that was used, returning that
 information at the structure idPossiblePasswordToken */
-idPossiblePasswordToken Attacker::calculatePossiblePasswordResetTokenVeredict
-    (const std::string &possiblePasswordResetToken) {
+idPossiblePasswordToken Attacker::calculatePossiblePasswordResetTokenVeredict(
+    const std::string &possiblePasswordResetToken) {
   idPossiblePasswordToken idAnswer;
   int size = possiblePasswordResetToken.size();
-  const unsigned int maxSeed = USHRT_MAX & 0x0000ffff; // maxSeed truncated to 16 bits
+  const unsigned int maxSeed =
+      USHRT_MAX & 0x0000ffff; // maxSeed truncated to 16 bits
   unsigned int seed, i;
   std::string sTest;
   idPossiblePasswordToken idAttacker;
@@ -147,7 +153,7 @@ idPossiblePasswordToken Attacker::calculatePossiblePasswordResetTokenVeredict
     _mt19937Attacker = std::make_shared<MT19937>(seed);
     sTest.clear();
     // load characters into the string
-    for(i = 0; i < _maxLengthTry; ++i) {
+    for (i = 0; i < _maxLengthTry; ++i) {
       sTest.push_back(Attacker::getNextKeyStream(_mt19937Attacker));
     }
     // test substrings

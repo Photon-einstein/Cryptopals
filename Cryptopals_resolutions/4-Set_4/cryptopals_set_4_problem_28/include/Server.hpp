@@ -32,55 +32,67 @@ public:
    * @param originalMessage The characters to be hashed in a string format
    * @return The hash SHA1 of the inputV characters
    */
-  std::vector<unsigned char> hashSHA1WithLibrary(const std::vector<unsigned char> &inputV,
-    const std::string &originalMessage);
-  
+  std::vector<unsigned char>
+  hashSHA1WithLibrary(const std::vector<unsigned char> &inputV,
+                      const std::string &originalMessage);
+
   /**
    * @brief Calculates the hash SHA-1 using a custom made library
    *
-   * This method perform the hash SHA-1 of the message with a custom made library
+   * This method perform the hash SHA-1 of the message with a custom made
+   * library
    *
    * @param inputV The characters to be hashed in a vector format
    * @param originalMessage The characters to be hashed in a string format
    * @return The hash SHA1 of the inputV characters
    */
   std::vector<unsigned char> hashSHA1(const std::vector<unsigned char> &inputV,
-    const std::string &originalMessage);
-  
+                                      const std::string &originalMessage);
+
   /**
-   * @brief This method does the verification of a given mac and the corresponding message
+   * @brief This method does the verification of a given mac and the
+   * corresponding message
    *
-   * This method does the verification of a given mac and the corresponding message, checking
-   * if the message was tampered
+   * This method does the verification of a given mac and the corresponding
+   * message, checking if the message was tampered
    *
    * @param message The message that was hashed
    * @param mac The corresponding mac value of the given message
    * @return The true if the hash(key || message) == mac, false otherwise
    */
-  bool checkMac(const std::string &message, const std::vector<unsigned char> &mac);
+  bool checkMac(const std::string &message,
+                const std::vector<unsigned char> &mac);
 
   /**
-   * @brief This method print the hash value and the original message to be hashed.
+   * @brief This method print the hash value and the original message to be
+   * hashed.
    *
-   * This method print the hash value and the original message in the specified format.
+   * This method print the hash value and the original message in the specified
+   * format.
    *
    * @param originalMessage The characters to be hashed in a string format
    * @param hash The originalMessage hashed in a vector format
-   * @param format The format to be used in the print of the hash value (HEX, DECIMAL, ASCII)
+   * @param format The format to be used in the print of the hash value (HEX,
+   * DECIMAL, ASCII)
    */
-  void printMessage(const std::string& originalMessage, const std::vector<unsigned char> &hash, PrintFormat::Format format);
-
+  void printMessage(const std::string &originalMessage,
+                    const std::vector<unsigned char> &hash,
+                    PrintFormat::Format format);
 
   /**
    * @brief This method sets the plaintext to be hashed in a server's variable.
    *
-   * This method sets the plaintext to be hashed, randomly or from the input string
+   * This method sets the plaintext to be hashed, randomly or from the input
+   * string
    *
    * @param sizePlaintext The size of the random plaintext to be generated
-   * @param randomPlaintext A bool flag that signal if the plaintext is to be generated randomly or not
-   * @param plaintext The input plaintext string if the plaintext is to be set deterministically
+   * @param randomPlaintext A bool flag that signal if the plaintext is to be
+   * generated randomly or not
+   * @param plaintext The input plaintext string if the plaintext is to be set
+   * deterministically
    */
-  void setPlaintext(const int sizePlaintext, bool randomPlaintext, const std::string &plaintext);
+  void setPlaintext(const int sizePlaintext, bool randomPlaintext,
+                    const std::string &plaintext);
 
   /**
    * @brief Returns the plaintext stored in the server
@@ -90,7 +102,7 @@ public:
    * @return The plaintext stored in the server, as a vector
    */
   const std::vector<unsigned char> getPlaintextV();
-  
+
   /**
    * @brief Returns the plaintext stored in the server
    *
@@ -101,7 +113,6 @@ public:
   const std::string getPlaintext();
 
 private:
-
   /**
    * @brief This method prepend the key to input that is going to be hashed
    *
@@ -109,11 +120,12 @@ private:
    *
    * @param inputV The input that is going to be hashed
    */
-  std::vector<unsigned char> prependKey(const std::vector<unsigned char> &inputV);
-  
+  std::vector<unsigned char>
+  prependKey(const std::vector<unsigned char> &inputV);
 
   /**
-   * @brief This method sets the key to be used as a prefix in a hash calculation.
+   * @brief This method sets the key to be used as a prefix in a hash
+   * calculation.
    *
    * This method sets the key to be used as a prefix in a hash calculation, with
    * a given size
@@ -121,7 +133,6 @@ private:
    * @param sizeKey The size of the random key to be generated
    */
   void setKey(const std::size_t sizeKey);
-
 
   const bool _debugFlag;
   std::shared_ptr<MyCryptoLibrary::SHA> _sha;

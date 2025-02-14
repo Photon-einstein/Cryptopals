@@ -8,11 +8,10 @@ Server::Server(int numberTests, int numberSimulationsPerTest) {
   _numberSimulationsPerTest = numberSimulationsPerTest;
 }
 /******************************************************************************/
-Server::~Server() {
-}
+Server::~Server() {}
 /******************************************************************************/
 void Server::setSeed() {
-  _currentSeed = std::time(nullptr)+_entropy;
+  _currentSeed = std::time(nullptr) + _entropy;
   ++_entropy;
 }
 /******************************************************************************/
@@ -33,8 +32,9 @@ bool Server::runSimulation(std::time_t *seedUsed) {
     n1 = _mt19937_homeMade->extractNumber();
     n2 = _mt19937_offTheShelf();
     if (debugFlag == true) {
-      std::cout<<"Seed "<<_currentSeed<<" | simulation "<<i+1<<" | "<<
-        " mt19937 homeMade "<<n1<<" | mt19937 offTheShelf "<<n2<<std::endl;
+      std::cout << "Seed " << _currentSeed << " | simulation " << i + 1 << " | "
+                << " mt19937 homeMade " << n1 << " | mt19937 offTheShelf " << n2
+                << std::endl;
     }
     if (n1 != n2) {
       return false;
@@ -52,10 +52,12 @@ bool Server::runTests() {
   for (i = 0; i < _numberTests; ++i) {
     b = Server::runSimulation(&seedUsed);
     if (b == false) {
-      std::cout<<"There was a failed simulation at the test with the seed "<<seedUsed<<"."<<std::endl;
+      std::cout << "There was a failed simulation at the test with the seed "
+                << seedUsed << "." << std::endl;
       return false;
     }
-    std::cout<<"Test "<<i+1<<" passed"<<" | seed "<<seedUsed<<std::endl;
+    std::cout << "Test " << i + 1 << " passed" << " | seed " << seedUsed
+              << std::endl;
   }
   return true;
 }

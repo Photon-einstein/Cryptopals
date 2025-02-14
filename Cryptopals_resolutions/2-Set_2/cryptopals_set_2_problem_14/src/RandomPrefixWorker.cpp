@@ -1,17 +1,20 @@
 #include <stdexcept>
 
-#include "./../include/RandomPrefixWorker.h"
 #include "./../include/Function.h"
-
+#include "./../include/RandomPrefixWorker.h"
 
 /* constructor / destructor */
-RandomPrefixWorker::RandomPrefixWorker(int blockSize, bool debugFlag, bool debugFlagExtreme, std::string key, std::string iv) {
+RandomPrefixWorker::RandomPrefixWorker(int blockSize, bool debugFlag,
+                                       bool debugFlagExtreme, std::string key,
+                                       std::string iv) {
   if (blockSize < 1) {
     throw std::invalid_argument("block size must be positive.");
   } else if (key.size() != blockSize) {
-    throw std::invalid_argument("key must be of the same size as the blockSize.");
+    throw std::invalid_argument(
+        "key must be of the same size as the blockSize.");
   } else if (iv.size() != blockSize) {
-    throw std::invalid_argument("iv must be of the same size as the blockSize.");
+    throw std::invalid_argument(
+        "iv must be of the same size as the blockSize.");
   }
   _blockSize = blockSize;
   RandomPrefixWorker::setDebugFlag(debugFlag);
@@ -20,9 +23,9 @@ RandomPrefixWorker::RandomPrefixWorker(int blockSize, bool debugFlag, bool debug
   RandomPrefixWorker::setIV(iv);
 }
 /******************************************************************************/
-RandomPrefixWorker::~RandomPrefixWorker(){
-  memset(_key, 0, 2*_blockSize+1);
-  memset(_iv, 0, 2*_blockSize+1);
+RandomPrefixWorker::~RandomPrefixWorker() {
+  memset(_key, 0, 2 * _blockSize + 1);
+  memset(_iv, 0, 2 * _blockSize + 1);
   free(_key);
   free(_iv);
   _key = nullptr;
@@ -41,10 +44,11 @@ bool RandomPrefixWorker::testRandomPrefixSize(int randomPrefixSizeGuess) {
 /******************************************************************************/
 /* setters */
 void RandomPrefixWorker::setRandomPrefixSize() {
-  std::random_device rd;   // non-deterministic generator
-  std::mt19937 gen(rd());  // to seed mersenne twister.
-  std::uniform_int_distribution<> dist1(1,_blockSize); // distribute results between 1 and _blockSize inclusive
-  if(_debugFlag == true) {
+  std::random_device rd;  // non-deterministic generator
+  std::mt19937 gen(rd()); // to seed mersenne twister.
+  std::uniform_int_distribution<> dist1(
+      1, _blockSize); // distribute results between 1 and _blockSize inclusive
+  if (_debugFlag == true) {
     printf("\nRandom prefix size: ");
   }
   _randomPrefixSize = dist1(gen);
@@ -59,12 +63,12 @@ void RandomPrefixWorker::setKey(std::string key) {
   if (size > _blockSize) {
     size = _blockSize;
   }
-  _key = (unsigned char *) calloc(2*_blockSize+1, sizeof(unsigned char));
+  _key = (unsigned char *)calloc(2 * _blockSize + 1, sizeof(unsigned char));
   if (_key == nullptr) {
     perror("There was a problem in the memory allocation of _key.");
     return;
   }
-  for(i = 0; i < size; ++i) {
+  for (i = 0; i < size; ++i) {
     _key[i] = key[i];
   }
   return;
@@ -75,12 +79,12 @@ void RandomPrefixWorker::setIV(std::string iv) {
   if (size > _blockSize) {
     size = _blockSize;
   }
-  _iv = (unsigned char *) calloc(2*_blockSize+1, sizeof(unsigned char));
+  _iv = (unsigned char *)calloc(2 * _blockSize + 1, sizeof(unsigned char));
   if (_iv == nullptr) {
     perror("There was a problem in the memory allocation of _iv.");
     return;
   }
-  for(i = 0; i < size; ++i) {
+  for (i = 0; i < size; ++i) {
     _iv[i] = iv[i];
   }
   return;
@@ -97,22 +101,17 @@ void RandomPrefixWorker::setDebugFlagExtreme(bool debugFlagExtreme) {
 }
 /******************************************************************************/
 /* getters */
-int RandomPrefixWorker::getBlockSize() {
-  return _blockSize;
-};
+int RandomPrefixWorker::getBlockSize() { return _blockSize; };
 /******************************************************************************/
-bool RandomPrefixWorker::getDebugFlag() {
-  return _debugFlag;
-}
+bool RandomPrefixWorker::getDebugFlag() { return _debugFlag; }
 /******************************************************************************/
-bool RandomPrefixWorker::getDebugFlagExtreme() {
-  return _debugFlagExtreme;
-}
+bool RandomPrefixWorker::getDebugFlagExtreme() { return _debugFlagExtreme; }
 /******************************************************************************/
-/* this function does the encryption of aes-cbc mode using the iv and key values,
-in the end it returns the decrypted text and sets flag b by reference to true if
-no errors or to false otherwise */
-std::string RandomPrefixWorker::aesEcbEncryption(const std::vector<unsigned char> &plainTextBytesAsciiFullText, bool *b) {
+/* this function does the encryption of aes-cbc mode using the iv and key
+values, in the end it returns the decrypted text and sets flag b by reference to
+true if no errors or to false otherwise */
+std::string RandomPrefixWorker::aesEcbEncryption(
+    const std::vector<unsigned char> &plainTextBytesAsciiFullText, bool *b) {
   std::string encryptedText;
   if (b == nullptr) {
     return encryptedText;
@@ -129,15 +128,19 @@ std::string RandomPrefixWorker::aesEcbEncryption(const std::vector<unsigned char
     plainTextBytesAsciiFullTextCopy.push_back(plainTextBytesAsciiFullText[i]);
   }
   /* work to be done */
-  plainTextPointer = (unsigned char*) calloc(2*_blockSize+1, sizeof (unsigned char));
+  plainTextPointer =
+      (unsigned char *)calloc(2 * _blockSize + 1, sizeof(unsigned char));
   if (plainTextPointer == nullptr) {
-    perror("There was a problem in the memory allocation of the 'plainTextPointer'.");
+    perror("There was a problem in the memory allocation of the "
+           "'plainTextPointer'.");
     *b = false;
     return encryptedText;
   }
-  encryptedTextPointer = (unsigned char*) calloc(2*_blockSize+1, sizeof (unsigned char));
+  encryptedTextPointer =
+      (unsigned char *)calloc(2 * _blockSize + 1, sizeof(unsigned char));
   if (encryptedTextPointer == nullptr) {
-    perror("There was a problem in the memory allocation of the 'encryptedTextPointer'.");
+    perror("There was a problem in the memory allocation of the "
+           "'encryptedTextPointer'.");
     *b = false;
     return encryptedText;
   }
@@ -158,31 +161,35 @@ std::string RandomPrefixWorker::aesEcbEncryption(const std::vector<unsigned char
     return encryptedText;
   }
   size = plainTextBytesAsciiFullTextCopy.size();
-  nCycles = size/_blockSize;
+  nCycles = size / _blockSize;
   for (i = 0; i < nCycles; ++i) {
     /* fill plainTextPointer */
     plainTextVector.clear();
     for (j = 0; j < (int)_blockSize; ++j) {
-      plainTextVector.push_back(plainTextBytesAsciiFullTextCopy[_blockSize*i+j]);
+      plainTextVector.push_back(
+          plainTextBytesAsciiFullTextCopy[_blockSize * i + j]);
     }
     /* copy content of plainTextVector into plainTextPointer */
     for (j = 0; j < (int)_blockSize; ++j) {
       plainTextPointer[j] = plainTextVector[j];
     }
-    memset(encryptedTextPointer, 0, 2*_blockSize+1);
+    memset(encryptedTextPointer, 0, 2 * _blockSize + 1);
     /* Decrypt the ciphertext */
-    encryptedTextLen = Function::aesEcbEncryptWorker(plainTextPointer, _blockSize,
-    _key, _iv, encryptedTextPointer);
+    encryptedTextLen = Function::aesEcbEncryptWorker(
+        plainTextPointer, _blockSize, _key, _iv, encryptedTextPointer);
     if (debugFlagExtreme == true) {
-      std::cout<<"Full Decrypted ECB text size = "<<encryptedTextLen<<std::endl;
-      BIO_dump_fp (stdout, (const char *)encryptedTextPointer, encryptedTextLen);
+      std::cout << "Full Decrypted ECB text size = " << encryptedTextLen
+                << std::endl;
+      BIO_dump_fp(stdout, (const char *)encryptedTextPointer, encryptedTextLen);
     }
     /* Add a NULL terminator. We are expecting printable text */
     encryptedTextPointer[encryptedTextLen] = '\0';
     /* fill cyphertext vector */
-    flag = Function::fillVectorFromPointerArray(cypherTextVector, encryptedTextPointer, encryptedTextLen);
+    flag = Function::fillVectorFromPointerArray(
+        cypherTextVector, encryptedTextPointer, encryptedTextLen);
     if (flag == false) {
-      perror("\nThere was an error in the function 'fillVectorFromPointerArray'.");
+      perror(
+          "\nThere was an error in the function 'fillVectorFromPointerArray'.");
       *b = false;
       return encryptedText;
     }
@@ -195,7 +202,8 @@ std::string RandomPrefixWorker::aesEcbEncryption(const std::vector<unsigned char
   free(plainTextPointer);
   free(encryptedTextPointer);
   if (debugFlagExtreme == true) {
-    std::cout<<"Full Encrypted text size = "<<encryptedText.size()<<std::endl;
+    std::cout << "Full Encrypted text size = " << encryptedText.size()
+              << std::endl;
   }
   return encryptedText;
 }
@@ -203,12 +211,13 @@ std::string RandomPrefixWorker::aesEcbEncryption(const std::vector<unsigned char
 /* this function generates a random prefix of size _randomPrefixSize and it
 returns a string of that size filled with random data */
 std::vector<unsigned char> RandomPrefixWorker::generateRandomPrefix() {
-  std::random_device rd;   // non-deterministic generator
-  std::mt19937 gen(rd());  // to seed mersenne twister.
-  std::uniform_int_distribution<> dist1(0, 255); // distribute results between 0 and 255 inclusive
+  std::random_device rd;  // non-deterministic generator
+  std::mt19937 gen(rd()); // to seed mersenne twister.
+  std::uniform_int_distribution<> dist1(
+      0, 255); // distribute results between 0 and 255 inclusive
   std::vector<unsigned char> randomPrefix;
   int i;
-  if(_debugFlagExtreme == true) {
+  if (_debugFlagExtreme == true) {
     printf("\nRandom prefix: ");
   }
   for (i = 0; i < _randomPrefixSize; ++i) {
