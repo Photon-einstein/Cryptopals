@@ -33,6 +33,15 @@ public:
   bool tamperMessageTry();
 
 private:
+  /**
+   * @brief This method extract the message intercepted
+   *
+   * This method will extract the message intercepted in a
+   * bank transaction
+   *
+   * @return A bool value, true if the attack was successful,
+   * false otherwise
+   */
   std::string extractMessage(const std::string &messageLocation);
 
   std::shared_ptr<Server> _server;

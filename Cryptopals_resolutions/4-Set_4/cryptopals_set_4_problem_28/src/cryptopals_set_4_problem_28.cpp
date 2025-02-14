@@ -31,6 +31,8 @@ int main(void) {
   checkMac = server->checkMac(plaintext, hash);
   hash[0] ^= 0xFF;
   checkMac = server->checkMac(plaintext, hash);
+  // check attacker
+  attacker->tamperMessageTry();
   /* end of the work */
   end = clock();
   time = (double)(end - start) / CLOCKS_PER_SEC;
