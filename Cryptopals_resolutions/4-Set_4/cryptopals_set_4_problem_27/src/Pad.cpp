@@ -5,11 +5,11 @@
 /* constructor / destructor */
 Pad::Pad(int blockSize) {
   if (blockSize < 1) {
-    throw std::invalid_argument("Pad log | blockSize argument must be positive");
+    throw std::invalid_argument(
+        "Pad log | blockSize argument must be positive");
   }
   _blockSize = blockSize;
 }
 /******************************************************************************/
-Pad::~Pad() {
-}
+Pad::~Pad() {}
 /******************************************************************************/

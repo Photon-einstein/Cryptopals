@@ -5,10 +5,10 @@
 #include <vector>
 
 #include "./../include/Attacker.hpp"
-#include "./../include/Server.hpp"
 #include "./../include/SHA1.hpp"
+#include "./../include/Server.hpp"
 
-int main (void) {
+int main(void) {
   clock_t start, end;
   double time;
   start = clock();
@@ -17,16 +17,17 @@ int main (void) {
   std::shared_ptr<Server> server = std::make_shared<Server>(debugFlag);
   std::shared_ptr<Attacker> attacker = std::make_shared<Attacker>(server);
   const int sizePlaintext = 100;
-  bool randomPlaintext {false};
+  bool randomPlaintext{false};
   bool checkMac;
   std::string plaintext = "This is a test";
   std::vector<unsigned char> hashOpenSSL;
   std::vector<unsigned char> hash;
   server->setPlaintext(sizePlaintext, randomPlaintext, plaintext);
-  hashOpenSSL = server->hashSHA1WithLibrary(server->getPlaintextV(), server->getPlaintext());
+  hashOpenSSL = server->hashSHA1WithLibrary(server->getPlaintextV(),
+                                            server->getPlaintext());
   hash = server->hashSHA1(server->getPlaintextV(), server->getPlaintext());
   // check tampered message
-  std::cout<<std::endl;
+  std::cout << std::endl;
   checkMac = server->checkMac(plaintext, hash);
   hash[0] ^= 0xFF;
   checkMac = server->checkMac(plaintext, hash);

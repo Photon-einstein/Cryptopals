@@ -1,40 +1,41 @@
-#include <openssl/conf.h>
-#include <openssl/evp.h>
-#include <openssl/err.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <string.h>
-#include <string>
-#include <math.h>
-#include <ctype.h>
+#include <algorithm> // for copy() and assign()
 #include <assert.h>
-#include <vector>
-#include <iostream>
-#include <cstddef>
-#include <unordered_map>
 #include <bits/stdc++.h>
 #include <cctype>
-#include <fstream>
-#include <random>
-#include <map>
-#include <algorithm> // for copy() and assign()
-#include <iterator> // for back_inserter
-#include <memory>
-#include <sstream>
-#include <cmath>
-#include <stdexcept>
 #include <climits>
+#include <cmath>
+#include <cstddef>
+#include <ctype.h>
+#include <fstream>
+#include <iostream>
+#include <iterator> // for back_inserter
+#include <map>
+#include <math.h>
+#include <memory>
+#include <openssl/conf.h>
+#include <openssl/err.h>
+#include <openssl/evp.h>
+#include <random>
+#include <sstream>
+#include <stdexcept>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <string>
+#include <time.h>
+#include <unordered_map>
+#include <vector>
 
 #include "./../include/Function.h"
 
 /* this function makes the fulling of the string s based on the content of the
 vector v */
-void Function::convertVectorBytesToString(const std::vector<unsigned char> &v, std::string &s) {
+void Function::convertVectorBytesToString(const std::vector<unsigned char> &v,
+                                          std::string &s) {
   int i, size = v.size();
   s.clear();
   for (i = 0; i < size; ++i) {
-    s+=v[i];
+    s += v[i];
   }
   return;
 }

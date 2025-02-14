@@ -1,9 +1,9 @@
-#include <stdexcept>
 #include <chrono>
+#include <stdexcept>
 #include <thread>
 
-#include "./../include/Server.h"
 #include "./../include/Function.h"
+#include "./../include/Server.h"
 
 /* constructor / destructor */
 Server::Server(const std::string inputFilePath, const std::string aesEcbKey) {
@@ -20,8 +20,10 @@ Server::Server(const std::string inputFilePath, const std::string aesEcbKey) {
     perror("Error at the function 'AesEcbMachine::aesEcbDecryption'");
   }
   if (debugFlagExtreme == true) {
-    std::cout<<"\n\nServer log | Ascii data read from file, after decryption of AES-ECB mode:\n\n'"
-      <<_plaintext<<"'.\n"<<std::endl;
+    std::cout << "\n\nServer log | Ascii data read from file, after decryption "
+                 "of AES-ECB mode:\n\n'"
+              << _plaintext << "'.\n"
+              << std::endl;
   }
   _aesCtrMachine->saveIVCtrMode();
   ciphertext = _aesCtrMachine->encryption(_plaintextV, &b);
@@ -31,16 +33,14 @@ Server::Server(const std::string inputFilePath, const std::string aesEcbKey) {
   }
 }
 /******************************************************************************/
-Server::~Server() {
-}
+Server::~Server() {}
 /******************************************************************************/
-std::vector<unsigned char> Server::getCiphertext() {
-  return _ciphertextV;
-}
+std::vector<unsigned char> Server::getCiphertext() { return _ciphertextV; }
 /******************************************************************************/
 /* this function will test if plaintext matches the _plaintextV from the
 server, and it will return if matches, false otherwise */
-bool Server::testRecoveredPlaintext(const std::vector<unsigned char> &plaintextV) {
+bool Server::testRecoveredPlaintext(
+    const std::vector<unsigned char> &plaintextV) {
   if (plaintextV.size() != _plaintextV.size()) {
     return false;
   }
@@ -57,8 +57,9 @@ bool Server::testRecoveredPlaintext(const std::vector<unsigned char> &plaintextV
 newText starting at the offset position, and then encrypt again, returning
 the new ciphertext by reference in the same vector ciphertext, if all went
 ok it will return true, false otherwise */
-bool Server::editCiphertextAPI(std::vector<unsigned char> &ciphertextV, unsigned int
-  offset, const std::vector<unsigned char> &newTextV) {
+bool Server::editCiphertextAPI(std::vector<unsigned char> &ciphertextV,
+                               unsigned int offset,
+                               const std::vector<unsigned char> &newTextV) {
   std::string plaintext, ciphertext;
   bool b;
   std::vector<unsigned char> plaintextV;
@@ -102,7 +103,8 @@ it does the base64 to ascii convertion, afterwards it return the converted data
 in a vector by reference and returns true if all went ok or false otherwise */
 void Server::getDecodeDataFromFile(const std::string inputFileName) {
   if (inputFileName.size() == 0) {
-    throw std::invalid_argument("Bad 'inputFilePath' | file path cannot be empty");
+    throw std::invalid_argument(
+        "Bad 'inputFilePath' | file path cannot be empty");
   }
   std::ifstream inputFile;
   inputFile.open(inputFileName, std::ios::in);
@@ -117,31 +119,36 @@ void Server::getDecodeDataFromFile(const std::string inputFileName) {
   if (!inputFile) {
     throw std::invalid_argument("File failed to be opened.");
   } else if (debugFlagExtreme == true) {
-    std::cout<<"Server log | The file 'cryptopals_set_4_problem_25_dataset.txt' was sucessfully opened.\n"<<std::endl;
+    std::cout
+        << "Server log | The file 'cryptopals_set_4_problem_25_dataset.txt' "
+           "was sucessfully opened.\n"
+        << std::endl;
   }
   /* base64IndexMap */
-  for(i = 0; i < (int)base64CharsDecoder.size(); ++i) {
+  for (i = 0; i < (int)base64CharsDecoder.size(); ++i) {
     base64IndexMap[base64CharsDecoder[i]] = i;
   }
   /* data read and conversion to ascii */
-  while(inputFile.good() == true) {
+  while (inputFile.good() == true) {
     lineReadBase64.clear();
     lineReadBase64Vector.clear();
     inputBytesAscii.clear();
     std::getline(inputFile, lineReadBase64);
     Function::convertStringToVectorBytes(lineReadBase64, lineReadBase64Vector);
-    b = Server::decodeBase64ToByte(lineReadBase64Vector, base64IndexMap, inputBytesAscii);
+    b = Server::decodeBase64ToByte(lineReadBase64Vector, base64IndexMap,
+                                   inputBytesAscii);
     if (b == false) {
-      throw std::invalid_argument("There was an error in the function 'decodeBase64ToByte'.");
+      throw std::invalid_argument(
+          "There was an error in the function 'decodeBase64ToByte'.");
     }
     /* pass data read line by line into the full vector data */
     size = inputBytesAscii.size();
-    for(i = 0; i < size; ++i) {
+    for (i = 0; i < size; ++i) {
       _inputBytesAsciiFullTextV.emplace_back(inputBytesAscii[i]);
     }
     /* pass data input data read line by line into the full vector data */
     size = lineReadBase64Vector.size();
-    for(i = 0; i < size; ++i) {
+    for (i = 0; i < size; ++i) {
       lineReadBase64VectorFullText.emplace_back(lineReadBase64Vector[i]);
     }
   }
@@ -152,39 +159,45 @@ void Server::getDecodeDataFromFile(const std::string inputFileName) {
 /* this function does the decode from base64 into bytes, returning the
 result in a vector of unsigned char by reference, if all is ok it will be also
 returned true, false otherwise */
-bool Server::decodeBase64ToByte(const std::vector<unsigned char> &sV, std::map<unsigned char, int>
-  &base64IndexMap, std::vector<unsigned char> &encryptedBytesAscii) {
+bool Server::decodeBase64ToByte(
+    const std::vector<unsigned char> &sV,
+    std::map<unsigned char, int> &base64IndexMap,
+    std::vector<unsigned char> &encryptedBytesAscii) {
   if (sV.size() % 4 != 0) {
     return false;
   }
-  int sizeString = sV.size(), i, j, k, validInputLetters=0;
-  int validOutputLetters=0;
-  unsigned char c, mapBase64Index[4]={0};
+  int sizeString = sV.size(), i, j, k, validInputLetters = 0;
+  int validOutputLetters = 0;
+  unsigned char c, mapBase64Index[4] = {0};
   encryptedBytesAscii.clear();
-  /* convert from base64 into bytes taking as input 4 base64 chars at each step */
-  for (i = 0; i < sizeString; i+=4) {
+  /* convert from base64 into bytes taking as input 4 base64 chars at each step
+   */
+  for (i = 0; i < sizeString; i += 4) {
     /* valid letters count, meaning different from '=' base64char */
-    for (j = i, validInputLetters = 0; j < i+4; ++j) {
+    for (j = i, validInputLetters = 0; j < i + 4; ++j) {
       if (sV[j] != '=') {
         ++validInputLetters;
       }
     }
     /* convertion from base64 char into index of the base64 alphabet */
-    for(j = i, k = 0; j < i+validInputLetters; ++j, ++k) {
+    for (j = i, k = 0; j < i + validInputLetters; ++j, ++k) {
       mapBase64Index[k] = base64IndexMap[(unsigned char)sV[j]];
     }
     /* valid input letters converted to valid output letters */
-    validOutputLetters = validInputLetters-1;
+    validOutputLetters = validInputLetters - 1;
     for (j = 0; j < validOutputLetters; ++j) {
       if (j == 0) {
         /* 765432 | 10 */
-        c = ( (mapBase64Index[0] & 0x3F) << 2 ) | ( (mapBase64Index[1] & 0x3F) >> 4 );
+        c = ((mapBase64Index[0] & 0x3F) << 2) |
+            ((mapBase64Index[1] & 0x3F) >> 4);
       } else if (j == 1) {
         /* 7654 | 3210 */
-        c = ( (mapBase64Index[1] & 0x3F) << 4 ) | ( (mapBase64Index[2] & 0x3F) >> 2 );
+        c = ((mapBase64Index[1] & 0x3F) << 4) |
+            ((mapBase64Index[2] & 0x3F) >> 2);
       } else if (j == 2) {
         /* 76 | 543210 */
-        c = ( (mapBase64Index[2] & 0x3F) << 6 ) | ( (mapBase64Index[3] & 0x3F) >> 0 );
+        c = ((mapBase64Index[2] & 0x3F) << 6) |
+            ((mapBase64Index[3] & 0x3F) >> 0);
       }
       encryptedBytesAscii.emplace_back(c);
     }
@@ -195,13 +208,12 @@ bool Server::decodeBase64ToByte(const std::vector<unsigned char> &sV, std::map<u
 /* setters */
 void Server::setBlockSize(int blockSize) {
   if (blockSize < 1) {
-    throw std::invalid_argument("Bad blockSize | blockSize cannot be less than 1");
+    throw std::invalid_argument(
+        "Bad blockSize | blockSize cannot be less than 1");
   }
   _blockSize = blockSize;
 }
 /******************************************************************************/
 /* getters */
-int Server::getBlockSize() {
-  return _blockSize;
-}
+int Server::getBlockSize() { return _blockSize; }
 /******************************************************************************/

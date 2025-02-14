@@ -1,22 +1,21 @@
-#include <stdexcept>
 #include <chrono>
 #include <cmath>
+#include <stdexcept>
 
-#include "./../include/Server.h"
 #include "./../include/Attacker.h"
 #include "./../include/Function.h"
+#include "./../include/Server.h"
 
 /* constructor / destructor */
-Attacker::Attacker(std::shared_ptr<Server>& server) {
+Attacker::Attacker(std::shared_ptr<Server> &server) {
   Attacker::setServer(server);
 }
 /******************************************************************************/
-Attacker::~Attacker() {
-}
+Attacker::~Attacker() {}
 /******************************************************************************/
 /* this function tries to attack the CTR encryption mode, the goal is to inject
-the substring ";admin=true;", it will return by reference true if it was able to,
-false otherwise, it will also return true if all ok or false if there was a
+the substring ";admin=true;", it will return by reference true if it was able
+to, false otherwise, it will also return true if all ok or false if there was a
 problem in the function */
 bool Attacker::attackCtrMode(bool *res) {
   if (res == nullptr) {
@@ -24,12 +23,13 @@ bool Attacker::attackCtrMode(bool *res) {
     return false;
   }
   std::string input, processedInput;
-  unsigned int i, j, prefixLength = strlen("comment1=cooking%20MCs;userdata="), sizeInjectedText;
+  unsigned int i, j, prefixLength = strlen("comment1=cooking%20MCs;userdata="),
+                     sizeInjectedText;
   std::string injectedText = ";admin=true;";
   bool flag, veredict;
   /* input prepare */
   for (i = 0; i < injectedText.size(); ++i) {
-    input+="a";
+    input += "a";
   }
   flag = _server->processInput(input, processedInput);
   if (flag == false) {
@@ -37,8 +37,8 @@ bool Attacker::attackCtrMode(bool *res) {
     return false;
   }
   /* overwrite content of Encryption(input) to result in injectedText */
-  for(i = prefixLength, j=0; i < prefixLength+input.size(); ++i, ++j) {
-    processedInput[i]^=input[j]^injectedText[j];
+  for (i = prefixLength, j = 0; i < prefixLength + input.size(); ++i, ++j) {
+    processedInput[i] ^= input[j] ^ injectedText[j];
   }
   flag = _server->testEncryption(processedInput, res);
   if (flag == false) {
@@ -48,7 +48,5 @@ bool Attacker::attackCtrMode(bool *res) {
   return true;
 }
 /******************************************************************************/
-void Attacker::setServer(std::shared_ptr<Server>& server) {
-  _server = server;
-}
+void Attacker::setServer(std::shared_ptr<Server> &server) { _server = server; }
 /******************************************************************************/

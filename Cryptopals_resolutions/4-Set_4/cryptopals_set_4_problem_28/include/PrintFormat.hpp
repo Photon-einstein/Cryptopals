@@ -2,11 +2,7 @@
 #define PRINT_FORMAT_HPP
 
 namespace PrintFormat {
-    enum Format {
-        HEX,
-        DECIMAL,
-        ASCII
-    };
+enum Format { HEX, DECIMAL, ASCII };
 
 };
 

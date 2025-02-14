@@ -5,12 +5,9 @@
 #include "./../include/SHA1.hpp"
 
 /* constructor / destructor */
-MyCryptoLibrary::SHA1::SHA1() {
-  setHashOutputSize();
-}
+MyCryptoLibrary::SHA1::SHA1() { setHashOutputSize(); }
 /******************************************************************************/
-MyCryptoLibrary::SHA1::~SHA1() {
-}
+MyCryptoLibrary::SHA1::~SHA1() {}
 /******************************************************************************/
 void MyCryptoLibrary::SHA1::setHashOutputSize() {
   _sizeOutputHash = SHA_DIGEST_LENGTH;
@@ -18,22 +15,23 @@ void MyCryptoLibrary::SHA1::setHashOutputSize() {
 /******************************************************************************/
 /**
  * @brief Computes the SHA-1 hash value
- * 
+ *
  * Computes the SHA-1 hash of the given input vector
  *
  * @param inputV The input data as a vector of unsigned characters
  * @return A vector of unsigned characters containing the computed hash
  */
-std::vector<unsigned char> MyCryptoLibrary::SHA1::hash(const std::vector<unsigned char> &inputV) {
+std::vector<unsigned char>
+MyCryptoLibrary::SHA1::hash(const std::vector<unsigned char> &inputV) {
   _inputVpadded.clear();
   initialization(inputV.size());
   preProcessing(inputV);
   processing();
   std::vector<unsigned char> hashV;
   hashV.reserve(SHA_DIGEST_LENGTH);
-  
+
   uint32_t hashParts[] = {_h0, _h1, _h2, _h3, _h4};
-  
+
   for (uint32_t part : hashParts) {
     hashV.push_back((part >> 24) & 0xFF);
     hashV.push_back((part >> 16) & 0xFF);
@@ -59,30 +57,35 @@ void MyCryptoLibrary::SHA1::initialization(const std::size_t sizeInputV) {
   _h2 = 0x98BADCFE;
   _h3 = 0x10325476;
   _h4 = 0xC3D2E1F0;
-  _ml = sizeInputV * CHAR_BIT; // message length in bits (always a multiple of the number of bits in a character)
+  _ml = sizeInputV * CHAR_BIT; // message length in bits (always a multiple of
+                               // the number of bits in a character)
 }
 /******************************************************************************/
 /**
- * Preprocesses the input data (padding, appending length) as required by the SHA-1 algorithm.
+ * Preprocesses the input data (padding, appending length) as required by the
+ * SHA-1 algorithm.
  *
  * @param inputV The input data as a vector of unsigned char.
  */
-void MyCryptoLibrary::SHA1::preProcessing(const std::vector<unsigned char> &inputV) {
+void MyCryptoLibrary::SHA1::preProcessing(
+    const std::vector<unsigned char> &inputV) {
   // Initialize padded input vector with original message
   _inputVpadded = inputV;
 
   // Step 1: Append the bit '1' (equivalent to adding 0x80)
   _inputVpadded.push_back(0x80);
 
-  // Step 2: Append '0' bits until the length of the message (in bits) is congruent to 448 mod 512
+  // Step 2: Append '0' bits until the length of the message (in bits) is
+  // congruent to 448 mod 512
   while ((_inputVpadded.size() * 8) % 512 != 448) {
-      _inputVpadded.push_back(0x00);
+    _inputVpadded.push_back(0x00);
   }
 
-  // Step 3: Append the original message length (ml) as a 64-bit big-endian integer
-  // _ml is already in bits
+  // Step 3: Append the original message length (ml) as a 64-bit big-endian
+  // integer _ml is already in bits
   for (int i = 7; i >= 0; --i) {
-      _inputVpadded.push_back(static_cast<unsigned char>((_ml >> (i * 8)) & 0xFF));
+    _inputVpadded.push_back(
+        static_cast<unsigned char>((_ml >> (i * 8)) & 0xFF));
   }
 }
 /******************************************************************************/
@@ -90,10 +93,11 @@ void MyCryptoLibrary::SHA1::preProcessing(const std::vector<unsigned char> &inpu
 void MyCryptoLibrary::SHA1::processing() {
   // Process the padded input in 512-bit blocks
   for (std::size_t i = 0; i < _inputVpadded.size(); i += 64) {
-    std::vector<unsigned char> block(_inputVpadded.begin() + i, _inputVpadded.begin() + i + 64);
+    std::vector<unsigned char> block(_inputVpadded.begin() + i,
+                                     _inputVpadded.begin() + i + 64);
     // Prepare the message schedule (W)
     uint32_t W[80];
-    
+
     for (int t = 0; t < 16; ++t) {
       W[t] = (static_cast<uint32_t>(block[t * 4]) << 24) |
              (static_cast<uint32_t>(block[t * 4 + 1]) << 16) |

@@ -1,0 +1,32 @@
+name: Clang Format Check
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  clang-format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format
+
+      - name: Run clang-format and check for formatting issues
+        run: |
+          # Find all .cpp and .hpp files in the repository.
+          FILES=$(find . -type f \( -name "*.cpp" -o -name "*.hpp" \))
+          # Run clang-format in-place using your .clang-format file for style.
+          for file in $FILES; do
+              clang-format -i -style=file "$file"
+          done
+          # Check if any file was modified by clang-format.
+          git diff --exit-code
+
