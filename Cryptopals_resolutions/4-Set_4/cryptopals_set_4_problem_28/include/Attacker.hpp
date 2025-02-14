@@ -1,6 +1,8 @@
 #ifndef ATTACKER_H
 #define ATTACKER_H
 
+#include "./../include/SHA.hpp"
+#include "./../include/SHA1.hpp"
 #include "./../include/Server.hpp"
 
 class Attacker {
@@ -44,7 +46,19 @@ private:
    */
   std::string extractMessage(const std::string &messageLocation);
 
+  /**
+   * @brief This method converts a vector into a string in hex format
+   *
+   * This method will convert a vector into a string of hexadecimal
+   * characters, padded with zero
+   *
+   * @param data The vector with chars to be converted
+   * @return A string containing the chars with hexadecimal format, zero padded
+   */
+  std::string toHexString(const std::vector<unsigned char> &data);
+
   std::shared_ptr<Server> _server;
+  std::shared_ptr<MyCryptoLibrary::SHA> _sha;
 };
 
 #endif // ATTACKER_HPP

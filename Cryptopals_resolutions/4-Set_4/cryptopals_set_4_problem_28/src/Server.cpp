@@ -117,11 +117,11 @@ bool Server::checkMac(const std::string &message,
   bool output = (serverMac == mac);
   if (_debugFlag == true) {
     if (output) {
-      printf("\nServer log | 'checkMac' test for message: '%s' and mac verdict "
+      printf("\nServer log | 'checkMac' test for message: '%s' mac verdict "
              "match.",
              message.c_str());
     } else {
-      printf("\nServer log | 'checkMac' test for message: '%s' and mac verdict "
+      printf("\nServer log | 'checkMac' test for message: '%s' mac verdict "
              "does not match.",
              message.c_str());
     }
