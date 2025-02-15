@@ -21,6 +21,9 @@ public:
    */
   virtual std::vector<unsigned char>
   hash(const std::vector<unsigned char> &inputV) = 0;
+
+  /// Returns the hash output size in bytes.
+  virtual std::size_t getHashOutputSize() = 0;
 };
 
 } // namespace MyCryptoLibrary

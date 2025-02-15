@@ -37,6 +37,7 @@ namespace MyCryptoLibrary {
         + SHA()
         + ~SHA()
         + hash(inputV : std::vector<unsigned char>) : std::vector<unsigned char>
+        + getHashOutputSize() : std::size_t
     }
 
     class SHA1 {
