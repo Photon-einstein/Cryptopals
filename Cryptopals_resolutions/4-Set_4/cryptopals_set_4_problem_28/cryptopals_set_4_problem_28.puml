@@ -63,6 +63,20 @@ namespace MyCryptoLibrary {
     SHA <|-- SHA1 : "inherits"
 }
 
+class Attacker {
+    - _server : std::shared_ptr<Server>
+    - _sha : std::shared_ptr<MyCryptoLibrary::SHA>
+
+    + Attacker(server : std::shared_ptr<Server>)
+    + ~Attacker()
+    + setServer(server : std::shared_ptr<Server>) : void
+    + tamperMessageTry() : void
+    - extractMessage(messageLocation : std::string) : std::string
+    - toHexString(data : std::vector<unsigned char>) : std::string
+}
+
 Server --> MyCryptoLibrary.SHA : "has a"
+Attacker --> MyCryptoLibrary.SHA : "has a"
+Attacker --> Server : "has a"
 
 @enduml
