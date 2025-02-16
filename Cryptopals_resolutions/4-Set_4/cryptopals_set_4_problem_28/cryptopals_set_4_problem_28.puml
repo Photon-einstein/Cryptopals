@@ -67,11 +67,12 @@ namespace MyCryptoLibrary {
 class Attacker {
     - _server : std::shared_ptr<Server>
     - _sha : std::shared_ptr<MyCryptoLibrary::SHA>
+    - _writeToFile : bool
 
-    + Attacker(server : std::shared_ptr<Server>)
+    + Attacker(server : std::shared_ptr<Server>, writeToFile : bool)
     + ~Attacker()
     + setServer(server : std::shared_ptr<Server>) : void
-    + tamperMessageTry() : void
+    + tamperMessageTry(messageLocation : std::string) : void
     - extractMessage(messageLocation : std::string) : std::string
     - toHexString(data : std::vector<unsigned char>) : std::string
 }

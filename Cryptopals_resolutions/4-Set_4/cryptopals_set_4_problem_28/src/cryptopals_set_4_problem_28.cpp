@@ -15,7 +15,9 @@ int main(void) {
   /* work to verify */
   const bool debugFlag{true};
   std::shared_ptr<Server> server = std::make_shared<Server>(debugFlag);
-  std::shared_ptr<Attacker> attacker = std::make_shared<Attacker>(server);
+  const bool writeToFile{true};
+  std::shared_ptr<Attacker> attacker =
+      std::make_shared<Attacker>(server, writeToFile);
   const int sizePlaintext = 100;
   bool randomPlaintext{false};
   bool checkMac;
@@ -32,7 +34,8 @@ int main(void) {
   hash[0] ^= 0xFF;
   checkMac = server->checkMac(plaintext, hash);
   // check attacker
-  attacker->tamperMessageTry();
+  const std::string messageLocation{"./../input/transaction_Alice_to_Bob.json"};
+  attacker->tamperMessageTry(messageLocation);
   /* end of the work */
   end = clock();
   time = (double)(end - start) / CLOCKS_PER_SEC;

@@ -11,6 +11,7 @@ include_directories(${OPENSSL_INCLUDE_DIR})
 
 # Add source files (your implementation files)
 set(SOURCE_FILES
+    ../src/Attacker.cpp
     ../src/SHA.cpp
     ../src/SHA1.cpp
     ../src/Server.cpp
@@ -18,6 +19,7 @@ set(SOURCE_FILES
 
 # Add test source files
 set(TEST_SOURCES
+    test_attacker.cpp
     test_server.cpp
     test_sha1.cpp
 )
