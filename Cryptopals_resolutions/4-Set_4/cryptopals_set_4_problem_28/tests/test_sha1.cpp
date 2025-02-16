@@ -25,6 +25,7 @@ int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
+
 /**
  * @test Test the correctness of the hash function.
  * @brief Ensures that hash sha1 output is the expected one
