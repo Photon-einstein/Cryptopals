@@ -257,6 +257,7 @@ void Server::setKey(const std::size_t sizeKey) {
       0, 255); // distribute results between 0 and 255 inclusive
   int i;
   unsigned char k_n;
+  _key.clear();
   if (_debugFlag == true) {
     printf("\nServer log | Key generated (hex):   ");
   }
