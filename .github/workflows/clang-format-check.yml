@@ -19,14 +19,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y clang-format
 
-      - name: Run clang-format and check for formatting issues
+      - name: Run clang-format check
         run: |
-          # Find all .cpp and .hpp files in the repository.
           FILES=$(find . -type f \( -name "*.cpp" -o -name "*.hpp" \))
-          # Run clang-format in-place using your .clang-format file for style.
-          for file in $FILES; do
-              clang-format -i -style=file "$file"
-          done
-          # Check if any file was modified by clang-format.
-          git diff --exit-code
+          clang-format --dry-run --Werror $FILES
 
