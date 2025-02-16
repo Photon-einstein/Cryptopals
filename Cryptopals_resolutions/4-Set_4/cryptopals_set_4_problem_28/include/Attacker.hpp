@@ -8,7 +8,7 @@
 class Attacker {
 public:
   /* constructor / destructor*/
-  Attacker(std::shared_ptr<Server> &server);
+  Attacker(std::shared_ptr<Server> &server, bool writeToFile);
   ~Attacker();
 
   /* public methods */
@@ -29,10 +29,12 @@ public:
    * deceive the server with another message authentication
    * code (MAC)
    *
+   * @param messageLocation The location of the message to be
+   * tampered
    * @return A bool value, true if the attack was successful,
    * false otherwise
    */
-  bool tamperMessageTry();
+  bool tamperMessageTry(const std::string &messageLocation);
 
 private:
   /**
@@ -59,6 +61,7 @@ private:
 
   std::shared_ptr<Server> _server;
   std::shared_ptr<MyCryptoLibrary::SHA> _sha;
+  bool _writeToFile;
 };
 
 #endif // ATTACKER_HPP

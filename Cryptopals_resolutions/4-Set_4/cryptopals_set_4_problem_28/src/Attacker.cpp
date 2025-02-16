@@ -6,7 +6,8 @@
 #include "./../include/Attacker.hpp"
 
 /* constructor / destructor */
-Attacker::Attacker(std::shared_ptr<Server> &server) {
+Attacker::Attacker(std::shared_ptr<Server> &server, bool writeToFile)
+    : _writeToFile{writeToFile} {
   Attacker::setServer(server);
   _sha = std::make_shared<MyCryptoLibrary::SHA1>();
 }
@@ -29,25 +30,17 @@ void Attacker::setServer(std::shared_ptr<Server> &server) { _server = server; }
  * deceive the server with another message authentication
  * code (MAC)
  *
- * @param messageLocation The location were the message is located
- * @return The content of the message intercepted by the attacker
+ * @param messageLocation The location of the message to be
+ * tampered
+ * @return A bool value, true if the attack was successful,
+ * false otherwise
  */
-bool Attacker::tamperMessageTry() {
-  const std::string messageLocation{"./../input/transaction_Alice_to_Bob.json"};
+bool Attacker::tamperMessageTry(const std::string &messageLocation) {
   std::string transactionMessage = Attacker::extractMessage(messageLocation);
   const int newAmount{9000};
   const std::string newRecipient{"Mallory"};
   nlohmann::ordered_json transaction =
       nlohmann::json::parse(transactionMessage);
-  const std::string forgedTransactionLocation{
-      "./../output/forged_transaction_Alice_to_Mallory.json"};
-  std::ofstream outFile(forgedTransactionLocation);
-  if (!outFile) {
-    const std::string errorMessage = "Attacker log | " +
-                                     forgedTransactionLocation +
-                                     " file not able to be written";
-    throw std::invalid_argument(errorMessage);
-  }
   // forge the transaction with new data
   transaction["recipient"] = newRecipient;
   transaction["amount"] = newAmount;
@@ -62,9 +55,20 @@ bool Attacker::tamperMessageTry() {
   std::vector<unsigned char> jsonV(jsonStr.begin(), jsonStr.end());
   std::vector<unsigned char> newHashV = Attacker::_sha->hash(jsonV);
   transactionForgedOrdered["hash"] = Attacker::toHexString(newHashV);
-  // write to the output file the forged transaction content
-  outFile << transactionForgedOrdered.dump(4);
-  outFile.close();
+  if (_writeToFile) {
+    // write to the output file the forged transaction content
+    const std::string forgedTransactionLocation{
+        "./../output/forged_transaction_Alice_to_Mallory.json"};
+    std::ofstream outFile(forgedTransactionLocation);
+    if (!outFile) {
+      const std::string errorMessage = "Attacker log | " +
+                                       forgedTransactionLocation +
+                                       " file not able to be written";
+      throw std::invalid_argument(errorMessage);
+    }
+    outFile << transactionForgedOrdered.dump(4);
+    outFile.close();
+  }
   return Attacker::_server->checkMac(jsonStr, newHashV);
 }
 /******************************************************************************/
