@@ -13,8 +13,7 @@
 #include "./../include/Server.hpp"
 
 /* constructor / destructor */
-Server::Server(const bool debugFlag)
-    : _debugFlag(debugFlag) {
+Server::Server(const bool debugFlag) : _debugFlag(debugFlag) {
   _sha = std::make_shared<MyCryptoLibrary::SHA1>();
 }
 /******************************************************************************/
@@ -91,7 +90,8 @@ Server::hashSHA1(const std::vector<unsigned char> &inputV,
   ;
   std::vector<unsigned char> inputKeyPrepended, output;
   inputKeyPrepended = Server::prependKey(inputV);
-  std::string inputKeyPrependedS(inputKeyPrepended.begin(), inputKeyPrepended.end());
+  std::string inputKeyPrependedS(inputKeyPrepended.begin(),
+                                 inputKeyPrepended.end());
   output = _sha->hash(inputKeyPrepended);
   // Optionally, print for debug purposes
   if (_debugFlag == true) {
@@ -251,39 +251,42 @@ const std::string Server::getPlaintext() { return _plaintext; }
  */
 void Server::setKey(const std::string &message) {
   if (message.size() == 0) {
-    const std::string errorMessage{"Server log | message empty to be look up in the database"};
+    const std::string errorMessage{
+        "Server log | message empty to be look up in the database"};
     throw std::invalid_argument(errorMessage);
   }
   std::string sender{}, symmetricKey{};
-  const std::string fileLocation{"./../input/Server_database/symmetric_keys.json"};
+  const std::string fileLocation{
+      "./../input/Server_database/symmetric_keys.json"};
   std::string fileContent = Server::extractFile(fileLocation);
   nlohmann::ordered_json symmetricKeys = nlohmann::json::parse(fileContent);
   nlohmann::ordered_json transaction = nlohmann::json::parse(message);
-  
+
   sender = transaction["sender"];
-  
+
   const std::string keySender;
   bool foundKey{false};
-  for (const auto& user : symmetricKeys["users"]) {
-      if (user["name"] == sender) {
-          symmetricKey = user["symmetric_key"];
-          foundKey = true;
-          if (_debugFlag == true) {
-            std::cout<<"\n\nServer log | Key from " + sender + " (hex):   " + symmetricKey<<std::endl;
-          }
+  for (const auto &user : symmetricKeys["users"]) {
+    if (user["name"] == sender) {
+      symmetricKey = user["symmetric_key"];
+      foundKey = true;
+      if (_debugFlag == true) {
+        std::cout << "\n\nServer log | Key from " + sender +
+                         " (hex):   " + symmetricKey
+                  << std::endl;
       }
+    }
   }
   if (foundKey == false) {
-    const std::string errorMessage = "Server log | " +
-                                       sender +
-                                       " symmetric key not found in the database";
+    const std::string errorMessage =
+        "Server log | " + sender + " symmetric key not found in the database";
     throw std::invalid_argument(errorMessage);
   }
   // check minimum size of the key
   if (symmetricKey.size() < SHA_DIGEST_LENGTH) {
-    const std::string errorMessage = "Server log | " +
-                                       sender +
-                                       " symmetric key found in the database does not meet minimum size requirements";
+    const std::string errorMessage = "Server log | " + sender +
+                                     " symmetric key found in the database "
+                                     "does not meet minimum size requirements";
     throw std::invalid_argument(errorMessage);
   }
   // set key in servers data structure
