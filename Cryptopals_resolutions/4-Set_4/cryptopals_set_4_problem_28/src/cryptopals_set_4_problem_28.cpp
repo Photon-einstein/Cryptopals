@@ -21,7 +21,12 @@ int main(void) {
   const int sizePlaintext = 100;
   bool randomPlaintext{false};
   bool checkMac;
-  std::string plaintext = "This is a test";
+  std::string plaintext = R"({
+      "sender": "Alice",
+      "recipient": "Bob",
+      "amount": 1000,
+      "currency": "USD"
+  })";
   std::vector<unsigned char> hashOpenSSL;
   std::vector<unsigned char> hash;
   server->setPlaintext(sizePlaintext, randomPlaintext, plaintext);

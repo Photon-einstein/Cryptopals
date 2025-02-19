@@ -17,7 +17,12 @@ protected:
 
   std::unique_ptr<Server> _server;
   const bool _debugFlag{false};
-  std::string _testInput;
+  const std::string _testInput = R"({
+    "sender": "Alice",
+    "recipient": "Bob",
+    "amount": 1000,
+    "currency": "USD"
+})";
   std::vector<unsigned char> _input, _hash;
 };
 
@@ -28,42 +33,27 @@ protected:
  */
 TEST_F(ServerTest,
        HashSHA1WithLibray_EnglishSentenceInput_ShouldMatchReferenceSize) {
-  _testInput = "This is a test!";
   _input.insert(_input.end(), _testInput.begin(), _testInput.end());
   _hash = _server->hashSHA1WithLibrary(_input, _testInput);
   ASSERT_EQ(_hash.size(), 20);
 }
 
 /**
- * @test Test the correctness of the size of the hash function
- * made
- * @brief Ensures that hash sha1 output has the correct size
- */
-TEST_F(ServerTest, HashSHA_EnglishSentenceInput_ShouldMatchReferenceSize) {
-  _testInput = "This is a test!";
-  _input.insert(_input.end(), _testInput.begin(), _testInput.end());
-  _hash = _server->hashSHA1WithLibrary(_input, _testInput);
-  ASSERT_EQ(_hash.size(), 20);
-}
-
-/**
- * @test Test the checkMac behavior
- * @brief Ensures that the effect of the hash(key || message) is
- * not equal to hash(message)
+ * @test Test the prepend of the key by the server
+ * @brief Ensures that what gets to be hashed by the server is hash(key || message)
+ * and not hash(message) 
  */
 TEST_F(
     ServerTest,
     HashSHA_EnglishSentenceInput_HashGenerateWithKeyShouldDifferFromTheHashWithoutKeyPrepended) {
-  _testInput = R"({
-        "sender": "Alice",
-        "recipient": "Bob",
-        "amount": 1000,
-        "currency": "USD"
-    })";
   std::vector<unsigned char> hashWithoutKey = {
-      0x26, 0x1A, 0xC8, 0xED, 0x6F, 0x30, 0x4D, 0x56, 0xF4, 0x29,
-      0x1A, 0xAB, 0x2C, 0x87, 0x8D, 0x3F, 0xFF, 0x6B, 0xCB, 0xE4};
+    0xF5, 0x0A, 0x7E, 0x42, 0x5B, 0xDC, 0x37, 0x77, 0xDA, 0xDE,
+    0x70, 0xE7, 0x64, 0x78, 0x1C, 0x51, 0x8C, 0x58, 0x6A, 0xC1};
+  std::vector<unsigned char> hashWithKey = {
+      0x9C, 0x69, 0xAF, 0x9C, 0x10, 0x51, 0xC9, 0x8C, 0xB0, 0x67,
+      0xBD, 0x6D, 0x7D, 0xDC, 0x59, 0x87, 0x63, 0xD5, 0x95, 0xD4};
   _input.insert(_input.end(), _testInput.begin(), _testInput.end());
   _hash = _server->hashSHA1(_input, _testInput);
   ASSERT_NE(_hash, hashWithoutKey);
+  ASSERT_EQ(_hash, hashWithKey);
 }

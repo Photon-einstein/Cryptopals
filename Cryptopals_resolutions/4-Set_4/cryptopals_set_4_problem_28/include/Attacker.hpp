@@ -43,8 +43,7 @@ private:
    * This method will extract the message intercepted in a
    * bank transaction
    *
-   * @return A bool value, true if the attack was successful,
-   * false otherwise
+   * @return The message intercepted in a string format
    */
   std::string extractMessage(const std::string &messageLocation);
 

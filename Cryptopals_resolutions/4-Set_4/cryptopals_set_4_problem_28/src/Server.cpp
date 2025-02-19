@@ -1,18 +1,20 @@
-#include <iostream>
 #include <openssl/conf.h>
 #include <openssl/err.h>
 #include <openssl/evp.h>
 #include <openssl/sha.h>
 
+#include <fstream>
+#include <iostream>
+#include <nlohmann/json.hpp>
 #include <random>
+#include <sstream>
 #include <stdexcept>
 
 #include "./../include/Server.hpp"
 
 /* constructor / destructor */
 Server::Server(const bool debugFlag)
-    : _keyLength(SHA_DIGEST_LENGTH * 2), _debugFlag(debugFlag) {
-  Server::setKey(Server::_keyLength);
+    : _debugFlag(debugFlag) {
   _sha = std::make_shared<MyCryptoLibrary::SHA1>();
 }
 /******************************************************************************/
@@ -88,7 +90,8 @@ Server::hashSHA1(const std::vector<unsigned char> &inputV,
                  const std::string &originalMessage) {
   ;
   std::vector<unsigned char> inputKeyPrepended, output;
-  inputKeyPrepended = Server::prependKey(inputV),
+  inputKeyPrepended = Server::prependKey(inputV);
+  std::string inputKeyPrependedS(inputKeyPrepended.begin(), inputKeyPrepended.end());
   output = _sha->hash(inputKeyPrepended);
   // Optionally, print for debug purposes
   if (_debugFlag == true) {
@@ -112,6 +115,7 @@ Server::hashSHA1(const std::vector<unsigned char> &inputV,
 bool Server::checkMac(const std::string &message,
                       const std::vector<unsigned char> &mac) {
   const std::vector<unsigned char> messageV(message.begin(), message.end());
+  Server::setKey(message);
   const std::vector<unsigned char> serverMac =
       Server::hashSHA1(messageV, message);
   bool output = (serverMac == mac);
@@ -144,7 +148,6 @@ bool Server::checkMac(const std::string &message,
 void Server::printMessage(const std::string &originalMessage,
                           const std::vector<unsigned char> &hash,
                           PrintFormat::Format format) {
-  std::cout << originalMessage;
   switch (format) {
   case PrintFormat::HEX:
     // Print in hexadecimal format
@@ -240,37 +243,52 @@ const std::vector<unsigned char> Server::getPlaintextV() { return _plaintextV; }
 const std::string Server::getPlaintext() { return _plaintext; }
 /******************************************************************************/
 /**
- * @brief This method sets the key to be used as a prefix in a hash calculation.
+ * @brief This method sets the key to be used as a prefix in a hash
+ * calculation.
  *
- * This method sets the key to be used as a prefix in a hash calculation, with
- * a given size
- *
- * @param sizeKey The size of the random key to be generated
+ * This method sets the key to be used as a prefix in a hash calculation,
+ * for a given sender of a message
  */
-void Server::setKey(const std::size_t sizeKey) {
-  if (sizeKey < SHA_DIGEST_LENGTH) {
-    throw std::invalid_argument("Server log | Bad size for the key generation");
+void Server::setKey(const std::string &message) {
+  if (message.size() == 0) {
+    const std::string errorMessage{"Server log | message empty to be look up in the database"};
+    throw std::invalid_argument(errorMessage);
   }
-  std::random_device rd;  // non-deterministic generator
-  std::mt19937 gen(rd()); // to seed mersenne twister.
-  std::uniform_int_distribution<> dist1(
-      0, 255); // distribute results between 0 and 255 inclusive
-  int i;
-  unsigned char k_n;
-  _key.clear();
-  if (_debugFlag == true) {
-    printf("\nServer log | Key generated (hex):   ");
+  std::string sender{}, symmetricKey{};
+  const std::string fileLocation{"./../input/Server_database/symmetric_keys.json"};
+  std::string fileContent = Server::extractFile(fileLocation);
+  nlohmann::ordered_json symmetricKeys = nlohmann::json::parse(fileContent);
+  nlohmann::ordered_json transaction = nlohmann::json::parse(message);
+  
+  sender = transaction["sender"];
+  
+  const std::string keySender;
+  bool foundKey{false};
+  for (const auto& user : symmetricKeys["users"]) {
+      if (user["name"] == sender) {
+          symmetricKey = user["symmetric_key"];
+          foundKey = true;
+          if (_debugFlag == true) {
+            std::cout<<"\n\nServer log | Key from " + sender + " (hex):   " + symmetricKey<<std::endl;
+          }
+      }
   }
-  for (i = 0; i < sizeKey; ++i) {
-    k_n = dist1(gen);
-    _key.push_back(k_n);
-    if (_debugFlag == true) {
-      printf("%.2x", (unsigned char)k_n);
-    }
+  if (foundKey == false) {
+    const std::string errorMessage = "Server log | " +
+                                       sender +
+                                       " symmetric key not found in the database";
+    throw std::invalid_argument(errorMessage);
   }
-  if (_debugFlag) {
-    printf("\n");
+  // check minimum size of the key
+  if (symmetricKey.size() < SHA_DIGEST_LENGTH) {
+    const std::string errorMessage = "Server log | " +
+                                       sender +
+                                       " symmetric key found in the database does not meet minimum size requirements";
+    throw std::invalid_argument(errorMessage);
   }
+  // set key in servers data structure
+  Server::_key.clear();
+  Server::_key.assign(symmetricKey.begin(), symmetricKey.end());
 }
 /******************************************************************************/
 /**
@@ -282,10 +300,32 @@ void Server::setKey(const std::size_t sizeKey) {
  */
 std::vector<unsigned char>
 Server::prependKey(const std::vector<unsigned char> &inputV) {
+  const std::string message(inputV.begin(), inputV.end());
+  Server::setKey(message);
   std::vector<unsigned char> inputWithKey = Server::_key;
   for (unsigned char c : inputV) {
     inputWithKey.emplace_back(c);
   }
   return inputWithKey;
+}
+/******************************************************************************/
+/**
+ * @brief This method extract the content of a given file
+ * This method will extract the content of a given file location
+ *
+ * @return The content of a file in a string format
+ */
+std::string Server::extractFile(const std::string &fileLocation) {
+  std::ifstream file(fileLocation);
+  if (!file) {
+    const std::string errorMessage =
+        "Server log | " + fileLocation + " file not found";
+    throw std::invalid_argument(errorMessage);
+  }
+  std::stringstream buffer;
+  buffer << file.rdbuf();
+  std::string content = buffer.str();
+  file.close();
+  return content;
 }
 /******************************************************************************/

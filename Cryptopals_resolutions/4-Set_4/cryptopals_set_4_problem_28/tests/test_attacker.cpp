@@ -33,7 +33,7 @@ TEST_F(
     AttackerTest,
     TamperMessageTry_TamperedMessageAndNewHashAsInput_ShouldReturnFalseFromCheckMacInTheServer) {
   const std::string messageLocation{
-      "./../../input/transaction_Alice_to_Bob.json"};
+      "./../input/transaction_Alice_to_Bob.json"};
   const bool checkMacResponse = _attacker->tamperMessageTry(messageLocation);
   ASSERT_FALSE(checkMacResponse);
 }
