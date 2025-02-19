@@ -127,12 +127,18 @@ private:
    * @brief This method sets the key to be used as a prefix in a hash
    * calculation.
    *
-   * This method sets the key to be used as a prefix in a hash calculation, with
-   * a given size
-   *
-   * @param sizeKey The size of the random key to be generated
+   * This method sets the key to be used as a prefix in a hash calculation,
+   * for a given sender of a message
    */
-  void setKey(const std::size_t sizeKey);
+  void setKey(const std::string &message);
+
+  /**
+   * @brief This method extract the content of a given file
+   * This method will extract the content of a given file location
+   *
+   * @return The content of a file in a string format
+   */
+  std::string extractFile(const std::string &fileLocation);
 
   const bool _debugFlag;
   std::shared_ptr<MyCryptoLibrary::SHA> _sha;
@@ -141,7 +147,6 @@ private:
   std::vector<unsigned char> _hashOpenSSL;
   std::vector<unsigned char> _hash;
   std::vector<unsigned char> _key;
-  const std::size_t _keyLength;
 };
 
 #endif // SERVER_HPP

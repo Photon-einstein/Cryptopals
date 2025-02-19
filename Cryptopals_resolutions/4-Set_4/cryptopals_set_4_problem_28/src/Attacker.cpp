@@ -97,8 +97,7 @@ std::string Attacker::toHexString(const std::vector<unsigned char> &data) {
  * This method will extract the message intercepted in a
  * bank transaction
  *
- * @return A bool value, true if the attack was successful,
- * false otherwise
+ * @return The message intercepted in a string format
  */
 std::string Attacker::extractMessage(const std::string &messageLocation) {
   std::ifstream file(messageLocation);
