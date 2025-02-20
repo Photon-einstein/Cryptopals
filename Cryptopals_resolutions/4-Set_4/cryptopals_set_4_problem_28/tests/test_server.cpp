@@ -56,4 +56,5 @@ TEST_F(
   _hash = _server->hashSHA1(_input, _testInput);
   ASSERT_NE(_hash, hashWithoutKey);
   ASSERT_EQ(_hash, hashWithKey);
+  ASSERT_EQ(_hash.size(), SHA_DIGEST_LENGTH);
 }
