@@ -1,17 +1,17 @@
 @startuml
 participant Attacker
 participant Server
-participant FileSystem
+participant FileSystemLibrary
 participant JSONLibrary
 participant SHA1
 
 Attacker -> Attacker: tamperMessageTry(messageLocation)
 activate Attacker
 
-Attacker -> FileSystem: extractMessage(messageLocation)
-activate FileSystem
-FileSystem --> Attacker: message content
-deactivate FileSystem
+Attacker -> FileSystemLibrary: extractMessage(messageLocation)
+activate FileSystemLibrary
+FileSystemLibrary --> Attacker: message content
+deactivate FileSystemLibrary
 
 Attacker -> JSONLibrary: Parse JSON message
 activate JSONLibrary
@@ -25,10 +25,10 @@ activate SHA1
 SHA1 --> Attacker: newHash
 deactivate SHA1
 
-Attacker -> FileSystem: Write forged transaction
-activate FileSystem
-FileSystem --> Attacker:
-deactivate FileSystem
+Attacker -> FileSystemLibrary: Write forged transaction
+activate FileSystemLibrary
+FileSystemLibrary --> Attacker:
+deactivate FileSystemLibrary
 
 Attacker -> Server: checkMac(jsonMessageTampered, newHash)
 activate Server
