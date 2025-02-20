@@ -141,7 +141,7 @@ private:
   std::vector<unsigned char> _hashOpenSSL;
   std::vector<unsigned char> _hash;
   std::vector<unsigned char> _key;
-  const std::string keysFileLocation{
+  const std::string _keysFileLocation{
       "./../input/Server_database/symmetric_keys.json"};
 };
 
