@@ -28,4 +28,4 @@ public:
 
 } // namespace MyCryptoLibrary
 
-#endif
+#endif // SHA_HPP

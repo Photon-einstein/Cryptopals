@@ -9,6 +9,7 @@ MyCryptoLibrary::SHA1::SHA1() { setHashOutputSize(); }
 /******************************************************************************/
 MyCryptoLibrary::SHA1::~SHA1() {}
 /******************************************************************************/
+/// Sets the expected hash output size
 void MyCryptoLibrary::SHA1::setHashOutputSize() {
   _sizeOutputHash = SHA_DIGEST_LENGTH;
 }

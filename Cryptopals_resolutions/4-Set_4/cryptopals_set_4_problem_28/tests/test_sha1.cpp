@@ -39,7 +39,8 @@ TEST_F(SHA1Test, Hash_EnglishSentenceInput_ShouldMatchReference) {
   std::vector<unsigned char> expected = {
       0x8B, 0x6C, 0xCB, 0x43, 0xDC, 0xA2, 0x04, 0x0C, 0x3C, 0xFB,
       0xCD, 0x7B, 0xFF, 0xF0, 0xB3, 0x87, 0xD4, 0x53, 0x8C, 0x33};
-  ASSERT_EQ(_hash.size(), 20);
+  ASSERT_EQ(_hash.size(), SHA_DIGEST_LENGTH);
+  ASSERT_EQ(_sha1->getHashOutputSize(), SHA_DIGEST_LENGTH);
   ASSERT_EQ(_hash, expected);
 }
 
@@ -57,7 +58,7 @@ TEST_F(SHA1Test, Hash_EmptyInput_ShouldMatchReference) {
   std::vector<unsigned char> expected = {
       0xDA, 0x39, 0xA3, 0xEE, 0x5E, 0x6B, 0x4B, 0x0D, 0x32, 0x55,
       0xBF, 0xEF, 0x95, 0x60, 0x18, 0x90, 0xAF, 0xD8, 0x07, 0x09};
-  ASSERT_EQ(_hash.size(), 20);
+  ASSERT_EQ(_hash.size(), SHA_DIGEST_LENGTH);
   ASSERT_EQ(_hash, expected);
 }
 
@@ -67,5 +68,5 @@ TEST_F(SHA1Test, Hash_EmptyInput_ShouldMatchReference) {
  */
 TEST_F(SHA1Test,
        GetHashOutputSize__NormalClassInitialization_ShouldMatchTheCorrectSize) {
-  ASSERT_EQ(_sha1->getHashOutputSize(), 20);
+  ASSERT_EQ(_sha1->getHashOutputSize(), SHA_DIGEST_LENGTH);
 }
