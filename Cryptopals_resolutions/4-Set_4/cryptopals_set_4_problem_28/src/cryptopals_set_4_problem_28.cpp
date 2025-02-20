@@ -18,26 +18,6 @@ int main(void) {
   const bool writeToFile{true};
   std::shared_ptr<Attacker> attacker =
       std::make_shared<Attacker>(server, writeToFile);
-  const int sizePlaintext = 100;
-  bool randomPlaintext{false};
-  bool checkMac;
-  std::string plaintext = R"({
-      "sender": "Alice",
-      "recipient": "Bob",
-      "amount": 1000,
-      "currency": "USD"
-  })";
-  std::vector<unsigned char> hashOpenSSL;
-  std::vector<unsigned char> hash;
-  server->setPlaintext(sizePlaintext, randomPlaintext, plaintext);
-  hashOpenSSL = server->hashSHA1WithLibrary(server->getPlaintextV(),
-                                            server->getPlaintext());
-  hash = server->hashSHA1(server->getPlaintextV(), server->getPlaintext());
-  // check tampered message
-  std::cout << std::endl;
-  checkMac = server->checkMac(plaintext, hash);
-  hash[0] ^= 0xFF;
-  checkMac = server->checkMac(plaintext, hash);
   // check attacker
   const std::string messageLocation{"./../input/transaction_Alice_to_Bob.json"};
   attacker->tamperMessageTry(messageLocation);
