@@ -103,7 +103,7 @@ Server::hashSHA1(const std::vector<unsigned char> &inputV,
  *
  * @param message The message that was hashed
  * @param mac The corresponding mac value of the given message
- * @return The true if the hash(key || message) == mac, false otherwise
+ * @return The true if the hash(key sender || message) == mac, false otherwise
  */
 bool Server::checkMac(const std::string &message,
                       const std::vector<unsigned char> &mac) {
@@ -258,7 +258,7 @@ void Server::setKey(const std::string &message) {
 }
 /******************************************************************************/
 /**
- * @brief This method prepend the key to input that is going to be hashed
+ * @brief This method prepend the key to the input that is going to be hashed
  *
  * This method prepend the key to the input that is going to be hashed
  *
@@ -277,6 +277,7 @@ Server::prependKey(const std::vector<unsigned char> &inputV) {
 /******************************************************************************/
 /**
  * @brief This method extract the content of a given file
+ * 
  * This method will extract the content of a given file location
  *
  * @return The content of a file in a string format

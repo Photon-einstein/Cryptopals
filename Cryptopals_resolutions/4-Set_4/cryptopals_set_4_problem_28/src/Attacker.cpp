@@ -101,10 +101,9 @@ std::string Attacker::toHexString(const std::vector<unsigned char> &data) {
 }
 /******************************************************************************/
 /**
- * @brief This method extract the message intercepted
+ * @brief This method extracts the message intercepted
  *
- * This method will extract the message intercepted in a
- * bank transaction
+ * This method will extract the message intercepted
  *
  * @return The message intercepted in a string format
  */

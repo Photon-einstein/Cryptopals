@@ -16,7 +16,7 @@ class Server {
     - _hashOpenSSL : std::vector<unsigned char>
     - _hash : std::vector<unsigned char>
     - _key : std::vector<unsigned char>
-    - _keyLength : std::size_t
+    - _keysFileLocation : std::string
 
     + Server(debugFlag : bool)
     + ~Server()
@@ -24,12 +24,12 @@ class Server {
     + hashSHA1(inputV : std::vector<unsigned char>, originalMessage : std::string) : std::vector<unsigned char>
     + checkMac(message : std::string, mac : std::vector<unsigned char>) : bool
     + printMessage(originalMessage : std::string, hash : std::vector<unsigned char>, format : PrintFormat::Format) : void
-    + setPlaintext(sizePlaintext : int, randomPlaintext: bool, plaintext : std::string) : void
+    + setPlaintext(plaintext : std::string) : void
     + getPlaintextV() : std::vector<unsigned char>
     + getPlaintext() : std::string
     - prependKey(inputV : std::vector<unsigned char>) : std::vector<unsigned char>
-    - setKey(std::size_t sizeKey) : void
-
+    - setKey(message : std::string) : void
+    - extractFile(fileLocation : std::string) : std::string
 }
 
 namespace MyCryptoLibrary {

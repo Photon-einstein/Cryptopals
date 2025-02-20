@@ -1,5 +1,5 @@
-#ifndef ATTACKER_H
-#define ATTACKER_H
+#ifndef ATTACKER_HPP
+#define ATTACKER_HPP
 
 #include "./../include/SHA.hpp"
 #include "./../include/SHA1.hpp"
@@ -38,10 +38,9 @@ public:
 
 private:
   /**
-   * @brief This method extract the message intercepted
+   * @brief This method extracts the message intercepted
    *
-   * This method will extract the message intercepted in a
-   * bank transaction
+   * This method will extract the message intercepted
    *
    * @return The message intercepted in a string format
    */
