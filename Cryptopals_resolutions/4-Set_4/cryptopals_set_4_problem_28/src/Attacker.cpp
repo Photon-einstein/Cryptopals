@@ -41,20 +41,29 @@ bool Attacker::tamperMessageTry(const std::string &messageLocation) {
   const std::string newRecipient{"Mallory"};
   nlohmann::ordered_json transaction =
       nlohmann::json::parse(transactionMessage);
+  nlohmann::ordered_json transactionForgedOrdered;
+  std::string jsonStr;
+  std::vector<unsigned char> newHashV;
   // forge the transaction with new data
-  transaction["recipient"] = newRecipient;
-  transaction["amount"] = newAmount;
-  transaction.erase("hash");
-  nlohmann::ordered_json transactionForgedOrdered = {
-      {"sender", transaction["sender"]},
-      {"recipient", transaction["recipient"]},
-      {"amount", transaction["amount"]},
-      {"currency", transaction["currency"]}};
-  std::string jsonStr = transactionForgedOrdered.dump(4);
-  // calculation of a new hash with the forget new data
-  std::vector<unsigned char> jsonV(jsonStr.begin(), jsonStr.end());
-  std::vector<unsigned char> newHashV = Attacker::_sha->hash(jsonV);
-  transactionForgedOrdered["hash"] = Attacker::toHexString(newHashV);
+  try {
+    transaction.at("recipient") = newRecipient;
+    transaction.at("amount") = newAmount;
+    transaction.erase("hash");
+    transactionForgedOrdered = {{"sender", transaction.at("sender")},
+                                {"recipient", transaction.at("recipient")},
+                                {"amount", transaction.at("amount")},
+                                {"currency", transaction.at("currency")}};
+    jsonStr = transactionForgedOrdered.dump(4);
+    // calculation of a new hash with the forget new data
+    std::vector<unsigned char> jsonV(jsonStr.begin(), jsonStr.end());
+    newHashV = Attacker::_sha->hash(jsonV);
+    transactionForgedOrdered["hash"] = Attacker::toHexString(newHashV);
+  } catch (const std::exception &e) {
+    std::cout << "Caught in Attacker::tamperMessageTry: " << e.what()
+              << std::endl;
+    throw std::invalid_argument(
+        "Attacker log | Bad input for the json library");
+  }
   if (_writeToFile) {
     // write to the output file the forged transaction content
     const std::string forgedTransactionLocation{

@@ -82,17 +82,11 @@ public:
   /**
    * @brief This method sets the plaintext to be hashed in a server's variable.
    *
-   * This method sets the plaintext to be hashed, randomly or from the input
-   * string
+   * This method sets the plaintext to be hashed
    *
-   * @param sizePlaintext The size of the random plaintext to be generated
-   * @param randomPlaintext A bool flag that signal if the plaintext is to be
-   * generated randomly or not
-   * @param plaintext The input plaintext string if the plaintext is to be set
-   * deterministically
+   * @param plaintext The input plaintext string
    */
-  void setPlaintext(const int sizePlaintext, bool randomPlaintext,
-                    const std::string &plaintext);
+  void setPlaintext(const std::string &plaintext);
 
   /**
    * @brief Returns the plaintext stored in the server
@@ -147,6 +141,8 @@ private:
   std::vector<unsigned char> _hashOpenSSL;
   std::vector<unsigned char> _hash;
   std::vector<unsigned char> _key;
+  const std::string keysFileLocation{
+      "./../input/Server_database/symmetric_keys.json"};
 };
 
 #endif // SERVER_HPP

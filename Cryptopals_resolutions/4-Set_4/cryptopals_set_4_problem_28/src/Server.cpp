@@ -38,20 +38,17 @@ Server::hashSHA1WithLibrary(const std::vector<unsigned char> &inputV,
   if (ctx == nullptr) {
     throw std::runtime_error("EVP_MD_CTX_new failed");
   }
-
   // Initialize the context to use the SHA-1 digest algorithm
   if (EVP_DigestInit_ex(ctx, EVP_sha1(), nullptr) != 1) {
     EVP_MD_CTX_free(ctx);
     throw std::runtime_error("EVP_DigestInit_ex failed");
   }
-
   // Provide the message to be hashed
   if (EVP_DigestUpdate(ctx, inputKeyPrepended.data(),
                        inputKeyPrepended.size()) != 1) {
     EVP_MD_CTX_free(ctx);
     throw std::runtime_error("EVP_DigestUpdate failed");
   }
-
   // Finalize the digest
   unsigned char hash[EVP_MAX_MD_SIZE];
   unsigned int hashLength = 0;
@@ -59,19 +56,15 @@ Server::hashSHA1WithLibrary(const std::vector<unsigned char> &inputV,
     EVP_MD_CTX_free(ctx);
     throw std::runtime_error("EVP_DigestFinal_ex failed");
   }
-
   // Clean up
   EVP_MD_CTX_free(ctx);
-
   // Resize output vector to the digest length and copy hash data
   output.assign(hash, hash + hashLength);
-
   // Optionally, print for debug purposes
   if (_debugFlag == true) {
     printMessage("\nSHA1 with library    | '" + originalMessage + "' (hex): ",
                  output, PrintFormat::HEX);
   }
-
   return output;
 }
 /******************************************************************************/
@@ -174,49 +167,19 @@ void Server::printMessage(const std::string &originalMessage,
 /**
  * @brief This method sets the plaintext to be hashed in a server's variable.
  *
- * This method sets the plaintext to be hashed, randomly or from the input
- * string
+ * This method sets the plaintext to be hashed
  *
- * @param sizePlaintext The size of the random plaintext to be generated
- * @param randomPlaintext A bool flag that signal if the plaintext is to be
- * generated randomly or not
- * @param plaintext The input plaintext string if the plaintext is to be set
- * deterministically
+ * @param plaintext The input plaintext string
  */
-void Server::setPlaintext(const int sizePlaintext, bool randomPlaintext,
-                          const std::string &plaintext) {
-  if (sizePlaintext < 1) {
-    throw std::invalid_argument(
-        "Server log | Bad limit boundaries for the plaintext generation");
+void Server::setPlaintext(const std::string &plaintext) {
+  if (_debugFlag == true) {
+    printf("\nServer log | Plaintext received (ascii):   '");
   }
-  std::random_device rd;  // non-deterministic generator
-  std::mt19937 gen(rd()); // to seed mersenne twister.
-  std::uniform_int_distribution<> dist1(
-      0, 255); // distribute results between 0 and 255 inclusive
-  int i;
-  unsigned char c;
-  if (randomPlaintext) {
+  _plaintext = plaintext;
+  for (std::size_t i = 0; i < plaintext.size(); ++i) {
+    _plaintextV.push_back(plaintext[i]);
     if (_debugFlag == true) {
-      printf("\nServer log | Plaintext generated (hex):   '");
-    }
-    for (i = 0; i < sizePlaintext; ++i) {
-      c = dist1(gen);
-      _plaintextV.push_back(c);
-      _plaintext.push_back(c);
-      if (_debugFlag == true) {
-        printf("%.2x ", (unsigned char)c);
-      }
-    }
-  } else {
-    if (_debugFlag == true) {
-      printf("\nServer log | Plaintext received (ascii):   '");
-    }
-    _plaintext = plaintext;
-    for (i = 0; i < plaintext.size(); ++i) {
-      _plaintextV.push_back(plaintext[i]);
-      if (_debugFlag == true) {
-        printf("%c", (unsigned char)_plaintextV[i]);
-      }
+      printf("%c", (unsigned char)_plaintextV[i]);
     }
   }
   if (_debugFlag) {
@@ -256,26 +219,26 @@ void Server::setKey(const std::string &message) {
     throw std::invalid_argument(errorMessage);
   }
   std::string sender{}, symmetricKey{};
-  const std::string fileLocation{
-      "./../input/Server_database/symmetric_keys.json"};
-  std::string fileContent = Server::extractFile(fileLocation);
+  std::string fileContent = Server::extractFile(keysFileLocation);
   nlohmann::ordered_json symmetricKeys = nlohmann::json::parse(fileContent);
   nlohmann::ordered_json transaction = nlohmann::json::parse(message);
-
-  sender = transaction["sender"];
-
-  const std::string keySender;
   bool foundKey{false};
-  for (const auto &user : symmetricKeys["users"]) {
-    if (user["name"] == sender) {
-      symmetricKey = user["symmetric_key"];
-      foundKey = true;
-      if (_debugFlag == true) {
-        std::cout << "\n\nServer log | Key from " + sender +
-                         " (hex):   " + symmetricKey
-                  << std::endl;
+  try {
+    sender = transaction.at("sender");
+    for (const auto &user : symmetricKeys.at("users")) {
+      if (user.at("name") == sender) {
+        symmetricKey = user.at("symmetric_key");
+        foundKey = true;
+        if (_debugFlag == true) {
+          std::cout << "\n\nServer log | Key from " + sender +
+                           " (hex):   " + symmetricKey
+                    << std::endl;
+        }
       }
     }
+  } catch (const std::exception &e) {
+    std::cout << "Caught in Server::setKey: " << e.what() << std::endl;
+    throw std::invalid_argument("Server log | Bad input for the json library");
   }
   if (foundKey == false) {
     const std::string errorMessage =
