@@ -219,7 +219,7 @@ void Server::setKey(const std::string &message) {
     throw std::invalid_argument(errorMessage);
   }
   std::string sender{}, symmetricKey{};
-  std::string fileContent = Server::extractFile(keysFileLocation);
+  std::string fileContent = Server::extractFile(_keysFileLocation);
   nlohmann::ordered_json symmetricKeys = nlohmann::json::parse(fileContent);
   nlohmann::ordered_json transaction = nlohmann::json::parse(message);
   bool foundKey{false};
