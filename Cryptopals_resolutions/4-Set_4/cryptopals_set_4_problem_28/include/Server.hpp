@@ -128,7 +128,7 @@ private:
 
   /**
    * @brief This method extract the content of a given file
-   * 
+   *
    * This method will extract the content of a given file location
    *
    * @return The content of a file in a string format
