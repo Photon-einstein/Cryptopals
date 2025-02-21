@@ -144,7 +144,7 @@ int main() {
   std::cout << std::endl;
   std::string key(keyV.begin(),
                   keyV.end()); //= "0123456789abcdef0123456789abcdef"; //
-                               //Example key (32 bytes)
+                               // Example key (32 bytes)
 
   // Generate a random IV
   unsigned char iv[AES_BLOCK_SIZE];
