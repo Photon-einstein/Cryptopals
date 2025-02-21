@@ -1,150 +1,160 @@
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <openssl/aes.h>
+#include <openssl/err.h>
+#include <openssl/evp.h>
+#include <openssl/rand.h>
+#include <random>
 #include <sstream>
 #include <vector>
-#include <openssl/aes.h>
-#include <openssl/rand.h>
-#include <openssl/evp.h>
-#include <openssl/err.h>
-#include <random>
 
 void handleErrors() {
-    ERR_print_errors_fp(stderr);
-    abort();
+  ERR_print_errors_fp(stderr);
+  abort();
 }
 
-void encrypt(const std::string &plaintext, const std::string &key, std::vector<unsigned char> &ciphertext, unsigned char* iv) {
-    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
-    if (!ctx) handleErrors();
+void encrypt(const std::string &plaintext, const std::string &key,
+             std::vector<unsigned char> &ciphertext, unsigned char *iv) {
+  EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+  if (!ctx)
+    handleErrors();
 
-    int len;
-    int ciphertext_len;
+  int len;
+  int ciphertext_len;
 
-    // Initialize encryption operation
-    if (EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, (unsigned char*)key.c_str(), iv) != 1)
-        handleErrors();
+  // Initialize encryption operation
+  if (EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL,
+                         (unsigned char *)key.c_str(), iv) != 1)
+    handleErrors();
 
-    // Provide the message to be encrypted
-    if (EVP_EncryptUpdate(ctx, ciphertext.data(), &len, (unsigned char*)plaintext.c_str(), plaintext.length()) != 1)
-        handleErrors();
-    ciphertext_len = len;
+  // Provide the message to be encrypted
+  if (EVP_EncryptUpdate(ctx, ciphertext.data(), &len,
+                        (unsigned char *)plaintext.c_str(),
+                        plaintext.length()) != 1)
+    handleErrors();
+  ciphertext_len = len;
 
-    // Finalize the encryption (this handles padding)
-    if (EVP_EncryptFinal_ex(ctx, ciphertext.data() + len, &len) != 1)
-        handleErrors();
-    ciphertext_len += len;
+  // Finalize the encryption (this handles padding)
+  if (EVP_EncryptFinal_ex(ctx, ciphertext.data() + len, &len) != 1)
+    handleErrors();
+  ciphertext_len += len;
 
-    EVP_CIPHER_CTX_free(ctx);
+  EVP_CIPHER_CTX_free(ctx);
 }
 
+void decrypt(const std::vector<unsigned char> &ciphertext,
+             const std::string &key, std::string &plaintext,
+             unsigned char *iv) {
+  EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+  if (!ctx)
+    handleErrors();
 
-void decrypt(const std::vector<unsigned char> &ciphertext, const std::string &key, std::string &plaintext, unsigned char* iv) {
-    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
-    if (!ctx) handleErrors();
+  int len;
+  int plaintext_len;
 
-    int len;
-    int plaintext_len;
+  // Initialize decryption operation
+  if (EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL,
+                         (unsigned char *)key.c_str(), iv) != 1)
+    handleErrors();
 
-    // Initialize decryption operation
-    if (EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, (unsigned char*)key.c_str(), iv) != 1)
-        handleErrors();
+  // Provide the message to be decrypted
+  if (EVP_DecryptUpdate(ctx, (unsigned char *)plaintext.data(), &len,
+                        ciphertext.data(), ciphertext.size()) != 1)
+    handleErrors();
+  plaintext_len = len;
 
-    // Provide the message to be decrypted
-    if (EVP_DecryptUpdate(ctx, (unsigned char*)plaintext.data(), &len, ciphertext.data(), ciphertext.size()) != 1)
-        handleErrors();
-    plaintext_len = len;
-
-    EVP_CIPHER_CTX_free(ctx);
-    plaintext.resize(plaintext_len); // Resize plaintext to the actual length
+  EVP_CIPHER_CTX_free(ctx);
+  plaintext.resize(plaintext_len); // Resize plaintext to the actual length
 }
-
 
 // Function to convert hexadecimal string to byte vector
-std::vector<unsigned char> hexToBytes(const std::string& hexStr) {
-    std::vector<unsigned char> bytes;
-    for (size_t i = 0; i < hexStr.length(); i += 2) {
-        std::string byteString = hexStr.substr(i, 2);
-        unsigned char byte = static_cast<unsigned char>(std::stoi(byteString, nullptr, 16));
-        bytes.push_back(byte);
-    }
-    return bytes;
+std::vector<unsigned char> hexToBytes(const std::string &hexStr) {
+  std::vector<unsigned char> bytes;
+  for (size_t i = 0; i < hexStr.length(); i += 2) {
+    std::string byteString = hexStr.substr(i, 2);
+    unsigned char byte =
+        static_cast<unsigned char>(std::stoi(byteString, nullptr, 16));
+    bytes.push_back(byte);
+  }
+  return bytes;
 }
 
-std::vector<unsigned char> readFile(std::string filePath) {    
-    std::vector<unsigned char> content;
-    std::ifstream inFile(filePath);
-    
-    if (!inFile) {
-        std::cerr << "Error opening file." << std::endl;
-    }
+std::vector<unsigned char> readFile(std::string filePath) {
+  std::vector<unsigned char> content;
+  std::ifstream inFile(filePath);
 
-    // Read the content of the file into a string
-    std::stringstream buffer;
-    buffer << inFile.rdbuf();
-    std::string hexCiphertext = buffer.str();
-    content.assign(hexCiphertext.begin(), hexCiphertext.end());
-    std::vector<unsigned char> ciphertext(content.size() + AES_BLOCK_SIZE);
-    ciphertext.assign(content.begin(), content.end());
-    return ciphertext;
+  if (!inFile) {
+    std::cerr << "Error opening file." << std::endl;
+  }
+
+  // Read the content of the file into a string
+  std::stringstream buffer;
+  buffer << inFile.rdbuf();
+  std::string hexCiphertext = buffer.str();
+  content.assign(hexCiphertext.begin(), hexCiphertext.end());
+  std::vector<unsigned char> ciphertext(content.size() + AES_BLOCK_SIZE);
+  ciphertext.assign(content.begin(), content.end());
+  return ciphertext;
 }
 
-void writeEncryptedDataToFile(const std::vector<unsigned char>& ciphertext, const std::string& filename) {
-    // Open the file in binary mode
-    std::ofstream outFile(filename, std::ios::binary);
-    
-    if (!outFile) {
-        std::cerr << "Error opening file for writing!" << std::endl;
-        return;
-    }
+void writeEncryptedDataToFile(const std::vector<unsigned char> &ciphertext,
+                              const std::string &filename) {
+  // Open the file in binary mode
+  std::ofstream outFile(filename, std::ios::binary);
 
-    // Write the ciphertext to the file
-    outFile.write(reinterpret_cast<const char*>(ciphertext.data()), ciphertext.size());
+  if (!outFile) {
+    std::cerr << "Error opening file for writing!" << std::endl;
+    return;
+  }
 
-    // Close the file
-    outFile.close();
+  // Write the ciphertext to the file
+  outFile.write(reinterpret_cast<const char *>(ciphertext.data()),
+                ciphertext.size());
+
+  // Close the file
+  outFile.close();
 }
-
 
 int main() {
-    // Key should be 32 bytes for AES-256
-    // Define the key size (16 bytes)
-    const size_t key_size = 16;
+  // Key should be 32 bytes for AES-256
+  // Define the key size (16 bytes)
+  const size_t key_size = 16;
 
-    // Create a vector of chars to store the key
-    std::vector<unsigned char> keyV(key_size);
+  // Create a vector of chars to store the key
+  std::vector<unsigned char> keyV(key_size);
 
-    // Random number generator (using a secure random device)
-    std::random_device rd;
-    std::uniform_int_distribution<int> dist(0, 255); // Values between 0 and 255 for each byte
+  // Random number generator (using a secure random device)
+  std::random_device rd;
+  std::uniform_int_distribution<int> dist(
+      0, 255); // Values between 0 and 255 for each byte
 
-    // Fill the vector with random bytes
-    
-    std::string hexStr = "9b8543afa6d2c041c353d38c310d5f6e";
-    keyV = hexToBytes(hexStr);
-    // for (size_t i = 0; i < key_size; ++i) {
-    //     keyV[i] = static_cast<char>(dist(rd));
-    // }
+  // Fill the vector with random bytes
 
-    // Print the key as hexadecimal (for verification)
-    std::cout << "Generated key: ";
-    for (const auto& byte : keyV) {
-        printf("%02x", static_cast<unsigned char>(byte));
-    }
-    std::cout<<std::endl;
-    std::string key(keyV.begin(), keyV.end()); //= "0123456789abcdef0123456789abcdef"; // Example key (32 bytes)
+  std::string hexStr = "9b8543afa6d2c041c353d38c310d5f6e";
+  keyV = hexToBytes(hexStr);
+  // for (size_t i = 0; i < key_size; ++i) {
+  //     keyV[i] = static_cast<char>(dist(rd));
+  // }
 
-    // Generate a random IV
-    unsigned char iv[AES_BLOCK_SIZE];
-    // if (!RAND_bytes(iv, sizeof(iv))) {
-    //     std::cerr << "Error generating random IV." << std::endl;
-    //     return 1;
-    // }
+  // Print the key as hexadecimal (for verification)
+  std::cout << "Generated key: ";
+  for (const auto &byte : keyV) {
+    printf("%02x", static_cast<unsigned char>(byte));
+  }
+  std::cout << std::endl;
+  std::string key(keyV.begin(),
+                  keyV.end()); //= "0123456789abcdef0123456789abcdef"; //
+                               //Example key (32 bytes)
 
-    
+  // Generate a random IV
+  unsigned char iv[AES_BLOCK_SIZE];
+  // if (!RAND_bytes(iv, sizeof(iv))) {
+  //     std::cerr << "Error generating random IV." << std::endl;
+  //     return 1;
+  // }
 
-
-    // Plaintext to be encrypted
-    std::string plaintext = R"(
+  // Plaintext to be encrypted
+  std::string plaintext = R"(
     {
         "users": [
             {"id": 1, "name": "Alice", "symmetric_key": "f3a1c6e8b0d48f2e7a9d5c3b6e4f8a2d9c7b5e1a6d3f4c8b0e2d7a9f5c1b6e3d"},
@@ -170,46 +180,48 @@ int main() {
         ]
     }
     )";
-    std::vector<unsigned char> ciphertext(plaintext.length() + AES_BLOCK_SIZE); // Allocate space for ciphertext
+  std::vector<unsigned char> ciphertext(
+      plaintext.length() + AES_BLOCK_SIZE); // Allocate space for ciphertext
 
-    //Encrypt the plaintext
-    // encrypt(plaintext, key, ciphertext, iv);
+  // Encrypt the plaintext
+  //  encrypt(plaintext, key, ciphertext, iv);
 
-    // //Display the ciphertext in hexadecimal format
-    // std::cout << "Ciphertext: '";
-    // for (size_t i = 0; i < ciphertext.size(); ++i) {
-    //     std::cout << std::hex << (int)ciphertext[i];
-    // }
-    // std::cout<<"'\n"<< std::endl;
+  // //Display the ciphertext in hexadecimal format
+  // std::cout << "Ciphertext: '";
+  // for (size_t i = 0; i < ciphertext.size(); ++i) {
+  //     std::cout << std::hex << (int)ciphertext[i];
+  // }
+  // std::cout<<"'\n"<< std::endl;
 
-    //ciphertext.clear();
-    std::string filePath = "./input/Server_database/symmetric_keys_encrypted_aes.json.enc";
-    //writeEncryptedDataToFile(ciphertext, filePath);
-    ciphertext = readFile(filePath);
-    //ciphertext = hexToBytes(hexString);
-    // Display the ciphertext in hexadecimal format
-    // std::cout << "Ciphertext: '";
-    // for (size_t i = 0; i < ciphertext.size(); ++i) {
-    //     std::cout << std::hex << (int)ciphertext[i];
-    // }
-    // std::cout<<"'\n"<< std::endl;
+  // ciphertext.clear();
+  std::string filePath =
+      "./input/Server_database/symmetric_keys_encrypted_aes.json.enc";
+  // writeEncryptedDataToFile(ciphertext, filePath);
+  ciphertext = readFile(filePath);
+  // ciphertext = hexToBytes(hexString);
+  //  Display the ciphertext in hexadecimal format
+  //  std::cout << "Ciphertext: '";
+  //  for (size_t i = 0; i < ciphertext.size(); ++i) {
+  //      std::cout << std::hex << (int)ciphertext[i];
+  //  }
+  //  std::cout<<"'\n"<< std::endl;
 
-    // Display the ciphertext in hexadecimal format
-    // std::cout << "Ciphertext: '";
-    // for (size_t i = 0; i < ciphertext.size(); ++i) {
-    //     std::cout << std::hex << (int)ciphertext[i];
-    // }
-    // std::cout <<"'"<< std::endl;
+  // Display the ciphertext in hexadecimal format
+  // std::cout << "Ciphertext: '";
+  // for (size_t i = 0; i < ciphertext.size(); ++i) {
+  //     std::cout << std::hex << (int)ciphertext[i];
+  // }
+  // std::cout <<"'"<< std::endl;
 
-    // Decrypt the ciphertext
-    std::string decryptedtext(ciphertext.size(), '\0'); // Allocate space for decrypted text
-    decrypt(ciphertext, key, decryptedtext, iv);
+  // Decrypt the ciphertext
+  std::string decryptedtext(ciphertext.size(),
+                            '\0'); // Allocate space for decrypted text
+  decrypt(ciphertext, key, decryptedtext, iv);
 
-    // Display the decrypted text
-    std::cout << "Decrypted Text:  '"<< decryptedtext <<"'"<< std::endl;
+  // Display the decrypted text
+  std::cout << "Decrypted Text:  '" << decryptedtext << "'" << std::endl;
 
-    return 0;
+  return 0;
 }
-
 
 // sudo apt-get install libcrypto++-dev libcrypto++-doc libcrypto++-utils
