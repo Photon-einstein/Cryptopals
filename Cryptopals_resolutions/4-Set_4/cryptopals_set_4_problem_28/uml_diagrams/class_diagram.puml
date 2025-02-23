@@ -16,8 +16,10 @@ class Server {
     - _hashOpenSSL : std::vector<unsigned char>
     - _hash : std::vector<unsigned char>
     - _key : std::vector<unsigned char>
+    - _keyServer : std::vector<unsigned char>
+    - _iv : unsigned char[]
     - _keysFileLocation : std::string
-
+    
     + Server(debugFlag : bool)
     + ~Server()
     + hashSHA1WithLibrary(inputV : std::vector<unsigned char>, originalMessage : std::string) : std::vector<unsigned char>
@@ -27,9 +29,15 @@ class Server {
     + setPlaintext(plaintext : std::string) : void
     + getPlaintextV() : std::vector<unsigned char>
     + getPlaintext() : std::string
-    - prependKey(inputV : std::vector<unsigned char>) : std::vector<unsigned char>
     - setKey(message : std::string) : void
+    - prependKey(inputV : std::vector<unsigned char>) : std::vector<unsigned char>
     - extractFile(fileLocation : std::string) : std::string
+    - handleErrors() : void
+    - encrypt(plaintext : std::string, key : std::string, ciphertext: std::vector<unsigned char>, iv : unsigned char*) : void
+    - decrypt(ciphertext : std::vector<unsigned char>, key : std::string, plaintext : std::string, iv : unsigned char *) : void
+    - removePKCS7Padding(data : std::vector<unsigned char>) : void
+    - hexToBytes(hexStr : std::string) : std::vector<unsigned char>
+    - bytesToHex(data : std::vector<unsigned char>) : std::vector<unsigned char>
 }
 
 namespace MyCryptoLibrary {
