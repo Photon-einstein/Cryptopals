@@ -8,6 +8,7 @@
 #include "./../include/PrintFormat.hpp"
 #include "./../include/SHA.hpp"
 #include "./../include/SHA1.hpp"
+#include <openssl/aes.h>
 
 // Define SHA_DIGEST_LENGTH if it is not defined elsewhere.
 // SHA-1 produces a 160-bit (20-byte) digest.
@@ -108,6 +109,15 @@ public:
 
 private:
   /**
+   * @brief This method sets the key to be used as a prefix in a hash
+   * calculation.
+   *
+   * This method sets the key to be used as a prefix in a hash calculation,
+   * for a given sender of a message
+   */
+  void setKey(const std::string &message);
+
+  /**
    * @brief This method prepend the key to the input that is going to be hashed
    *
    * This method prepend the key to the input that is going to be hashed
@@ -118,22 +128,82 @@ private:
   prependKey(const std::vector<unsigned char> &inputV);
 
   /**
-   * @brief This method sets the key to be used as a prefix in a hash
-   * calculation.
-   *
-   * This method sets the key to be used as a prefix in a hash calculation,
-   * for a given sender of a message
-   */
-  void setKey(const std::string &message);
-
-  /**
    * @brief This method extract the content of a given file
    *
    * This method will extract the content of a given file location
    *
-   * @return The content of a file in a string format
+   * @return The content of a file in a vector format
    */
-  std::string extractFile(const std::string &fileLocation);
+  std::vector<unsigned char> extractFile(const std::string &fileLocation);
+
+  /******************************************************************************/
+  /**
+   * @brief This method will deal with errors during encryption/decryption
+   *
+   * This method will deal with errors during encryption/decryption, including
+   * printing error messages
+   */
+  void handleErrors();
+
+  /**
+   * @brief This method will encrypt the plaintext using aes256 cbc mode
+   *
+   * This method will encrypt the plaintext using aes256 cbc mode, using key
+   * and iv in the process, returning by reference in the ciphertext the result
+   *
+   * @param plaintext The input to be encrypted
+   * @param key The key to be used in the encryption
+   * @param ciphertext The ciphertext resulting of the encryption
+   * @param iv The initialization vector used in the encryption
+   */
+  void encrypt(const std::string &plaintext, const std::string &key,
+               std::vector<unsigned char> &ciphertext, unsigned char *iv);
+
+  /**
+   * @brief This method will decrypt the ciphertext using aes256 cbc mode
+   *
+   * This method will decrypt the ciphertext using aes256 cbc mode, using key
+   * and iv in the process, returning by reference in the plaintext the result
+   *
+   * @param ciphertext The input to be decrypted
+   * @param key The key to be used in the decryption
+   * @param plaintext The plaintext resulting of the decryption
+   * @param iv The initialization vector used in the decryption
+   */
+  void decrypt(const std::vector<unsigned char> &ciphertext,
+               const std::string &key, std::string &plaintext,
+               unsigned char *iv);
+  /**
+   * @brief This method will remove the padding PKCDS7
+   *
+   * This method will remove the padding PKCDS7 from the data, in place
+   *
+   * @param data The input to be removed the padding, by reference
+   */
+  void removePKCS7Padding(std::vector<unsigned char> &data);
+
+  /**
+   * @brief This method will convert hexadecimal string to byte vector
+   *
+   * This method will convert hexadecimal string to byte vector, using zero
+   * alignment
+   *
+   * @param hexStr The input to be converted
+   *
+   * @return The byte vector resulting of the conversion
+   */
+  std::vector<unsigned char> hexToBytes(const std::string &hexStr);
+
+  /**
+   * @brief This method will convert byte data into to hexadecimal
+   *
+   * This method will convert byte data into to hexadecimal using zero alignment
+   *
+   * @param data The input data in bytes to be converted
+   *
+   * @return The hexadecimal vector resulting of the conversion
+   */
+  std::vector<unsigned char> bytesToHex(const std::vector<unsigned char> &data);
 
   const bool _debugFlag;
   std::shared_ptr<MyCryptoLibrary::SHA> _sha;
@@ -142,8 +212,10 @@ private:
   std::vector<unsigned char> _hashOpenSSL;
   std::vector<unsigned char> _hash;
   std::vector<unsigned char> _key;
+  std::vector<unsigned char> _keyServer;
+  unsigned char _iv[AES_BLOCK_SIZE] = {0};
   const std::string _keysFileLocation{
-      "./../input/Server_database/symmetric_keys.json"};
+      "./../input/Server_database/symmetric_keys_encrypted_aes.json.enc"};
 };
 
 #endif // SERVER_HPP
