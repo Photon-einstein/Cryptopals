@@ -31,7 +31,23 @@ FileSystemLibrary --> Attacker:
 deactivate FileSystemLibrary
 
 Attacker -> Server: checkMac(jsonMessageTampered, newHash)
+
 activate Server
+Server -> FileSystemLibrary: Extract encrypted user keys
+
+activate FileSystemLibrary
+FileSystemLibrary --> Server: encrypted user keys
+deactivate FileSystemLibrary
+
+Server -> Server: decrypt(ciphertext, key, plaintext, iv)
+Server -> Server: Prepend key from sender to the message
+Server -> SHA1: hash(key || message)
+
+activate SHA1
+SHA1 --> Server: hashServer 
+deactivate SHA1
+
+Server -> Server: check if newHash == hashServer
 Server --> Attacker: true/false
 deactivate Server
 
