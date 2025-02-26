@@ -65,7 +65,6 @@ public:
                 const std::vector<unsigned char> &mac);
 
 private:
-
   /**
    * @brief This method print the hash value and the original message to be
    * hashed.
@@ -79,36 +78,35 @@ private:
    * DECIMAL, ASCII)
    */
   void printMessage(const std::string &originalMessage,
-    const std::vector<unsigned char> &hash,
-    PrintFormat::Format format);
+                    const std::vector<unsigned char> &hash,
+                    PrintFormat::Format format);
 
   /**
-  * @brief This method sets the plaintext to be hashed in a server's variable.
-  *
-  * This method sets the plaintext to be hashed
-  *
-  * @param plaintext The input plaintext string
-  */
+   * @brief This method sets the plaintext to be hashed in a server's variable.
+   *
+   * This method sets the plaintext to be hashed
+   *
+   * @param plaintext The input plaintext string
+   */
   void setPlaintext(const std::string &plaintext);
 
   /**
-  * @brief Returns the plaintext stored in the server
-  *
-  * This method returns the plaintext stored in the server, in a vector format
-  *
-  * @return The plaintext stored in the server, as a vector
-  */
+   * @brief Returns the plaintext stored in the server
+   *
+   * This method returns the plaintext stored in the server, in a vector format
+   *
+   * @return The plaintext stored in the server, as a vector
+   */
   const std::vector<unsigned char> getPlaintextV();
 
   /**
-  * @brief Returns the plaintext stored in the server
-  *
-  * This method returns the plaintext stored in the server, in a string format
-  *
-  * @return The plaintext stored in the server, as a string
-  */
+   * @brief Returns the plaintext stored in the server
+   *
+   * This method returns the plaintext stored in the server, in a string format
+   *
+   * @return The plaintext stored in the server, as a string
+   */
   const std::string getPlaintext();
-
 
   /**
    * @brief This method sets the key to be used as a prefix in a hash
