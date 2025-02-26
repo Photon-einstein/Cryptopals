@@ -7,6 +7,7 @@
 #include <random>
 #include <sstream>
 #include <vector>
+#include <iomanip>
 
 void handleErrors() {
   ERR_print_errors_fp(stderr);
@@ -79,6 +80,18 @@ std::vector<unsigned char> hexToBytes(const std::string &hexStr) {
   return bytes;
 }
 
+std::vector<unsigned char> bytesToHex(const std::vector<unsigned char>& data) {
+    std::vector<unsigned char> hexResult;
+    std::ostringstream oss;
+    for (unsigned char byte : data) {
+        oss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte);
+    }
+    std::string hexStr = oss.str();   
+    // Convert hex string to vector<unsigned char>
+    hexResult.assign(hexStr.begin(), hexStr.end());
+    return hexResult;
+}
+
 std::vector<unsigned char> readFile(std::string filePath) {
   std::vector<unsigned char> content;
   std::ifstream inFile(filePath);
@@ -117,8 +130,7 @@ void writeEncryptedDataToFile(const std::vector<unsigned char> &ciphertext,
 
 int main() {
   // Key should be 32 bytes for AES-256
-  // Define the key size (16 bytes)
-  const size_t key_size = 16;
+  const size_t key_size = 32;
 
   // Create a vector of chars to store the key
   std::vector<unsigned char> keyV(key_size);
@@ -130,7 +142,7 @@ int main() {
 
   // Fill the vector with random bytes
 
-  std::string hexStr = "9b8543afa6d2c041c353d38c310d5f6e";
+  std::string hexStr = "361ffae6445cc35c2dbcf296e452e26aebca9e54a1b090108fe572f84521b5f2";
   keyV = hexToBytes(hexStr);
   // for (size_t i = 0; i < key_size; ++i) {
   //     keyV[i] = static_cast<char>(dist(rd));
@@ -147,7 +159,7 @@ int main() {
                                // Example key (32 bytes)
 
   // Generate a random IV
-  unsigned char iv[AES_BLOCK_SIZE];
+  unsigned char iv[AES_BLOCK_SIZE*2] = {0};
   // if (!RAND_bytes(iv, sizeof(iv))) {
   //     std::cerr << "Error generating random IV." << std::endl;
   //     return 1;
@@ -180,11 +192,11 @@ int main() {
         ]
     }
     )";
-  std::vector<unsigned char> ciphertext(
-      plaintext.length() + AES_BLOCK_SIZE); // Allocate space for ciphertext
+  std::vector<unsigned char> ciphertext; //(
+      //plaintext.length() + AES_BLOCK_SIZE); // Allocate space for ciphertext
 
   // Encrypt the plaintext
-  //  encrypt(plaintext, key, ciphertext, iv);
+  //encrypt(plaintext, key, ciphertext, iv);
 
   // //Display the ciphertext in hexadecimal format
   // std::cout << "Ciphertext: '";
@@ -194,11 +206,11 @@ int main() {
   // std::cout<<"'\n"<< std::endl;
 
   // ciphertext.clear();
-  std::string filePath =
-      "./input/Server_database/symmetric_keys_encrypted_aes.json.enc";
-  // writeEncryptedDataToFile(ciphertext, filePath);
+  std::string filePath = "./input/Server_database/symmetric_keys_encrypted_aes.json.enc";
+  //writeEncryptedDataToFile(bytesToHex(ciphertext), filePath);
   ciphertext = readFile(filePath);
-  // ciphertext = hexToBytes(hexString);
+  hexStr.assign(ciphertext.begin(), ciphertext.end());
+  ciphertext = hexToBytes(hexStr);
   //  Display the ciphertext in hexadecimal format
   //  std::cout << "Ciphertext: '";
   //  for (size_t i = 0; i < ciphertext.size(); ++i) {
@@ -219,8 +231,8 @@ int main() {
   decrypt(ciphertext, key, decryptedtext, iv);
 
   // Display the decrypted text
-  std::cout << "Decrypted Text:  '" << decryptedtext << "'" << std::endl;
-
+  std::cout << "Decrypted Text:  \n'" << decryptedtext << "'" << std::endl;
+  
   return 0;
 }
 
