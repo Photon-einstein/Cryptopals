@@ -25,10 +25,10 @@ class Server {
     + hashSHA1WithLibrary(inputV : std::vector<unsigned char>, originalMessage : std::string) : std::vector<unsigned char>
     + hashSHA1(inputV : std::vector<unsigned char>, originalMessage : std::string) : std::vector<unsigned char>
     + checkMac(message : std::string, mac : std::vector<unsigned char>) : bool
-    + printMessage(originalMessage : std::string, hash : std::vector<unsigned char>, format : PrintFormat::Format) : void
-    + setPlaintext(plaintext : std::string) : void
-    + getPlaintextV() : std::vector<unsigned char>
-    + getPlaintext() : std::string
+    - printMessage(originalMessage : std::string, hash : std::vector<unsigned char>, format : PrintFormat::Format) : void
+    - setPlaintext(plaintext : std::string) : void
+    - getPlaintextV() : std::vector<unsigned char>
+    - getPlaintext() : std::string
     - setKey(message : std::string) : void
     - prependKey(inputV : std::vector<unsigned char>) : std::vector<unsigned char>
     - extractFile(fileLocation : std::string) : std::string

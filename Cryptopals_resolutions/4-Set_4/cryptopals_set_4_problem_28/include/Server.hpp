@@ -64,6 +64,7 @@ public:
   bool checkMac(const std::string &message,
                 const std::vector<unsigned char> &mac);
 
+private:
   /**
    * @brief This method print the hash value and the original message to be
    * hashed.
@@ -107,7 +108,6 @@ public:
    */
   const std::string getPlaintext();
 
-private:
   /**
    * @brief This method sets the key to be used as a prefix in a hash
    * calculation.
