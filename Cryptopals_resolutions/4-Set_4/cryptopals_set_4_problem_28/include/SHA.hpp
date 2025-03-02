@@ -9,7 +9,7 @@ class SHA {
 public:
   /* constructor / destructor*/
   SHA();
-  ~SHA();
+  virtual ~SHA();
 
   /* public methods */
   /**

@@ -19,7 +19,7 @@
 class Server {
 public:
   /* constructor / destructor */
-  Server(const bool debugFlag);
+  explicit Server(const bool debugFlag);
   ~Server();
 
   /* public methods */

@@ -5,14 +5,9 @@
 #include "./../include/SHA1.hpp"
 
 /* constructor / destructor */
-MyCryptoLibrary::SHA1::SHA1() { setHashOutputSize(); }
+MyCryptoLibrary::SHA1::SHA1() : _sizeOutputHash{SHA_DIGEST_LENGTH} {}
 /******************************************************************************/
 MyCryptoLibrary::SHA1::~SHA1() {}
-/******************************************************************************/
-/// Sets the expected hash output size
-void MyCryptoLibrary::SHA1::setHashOutputSize() {
-  _sizeOutputHash = SHA_DIGEST_LENGTH;
-}
 /******************************************************************************/
 /**
  * @brief Computes the SHA-1 hash value

@@ -20,7 +20,7 @@ public:
   ~SHA1();
 
   /// Returns the hash output size in bytes.
-  std::size_t getHashOutputSize();
+  virtual std::size_t getHashOutputSize() override;
 
   /**
    * @brief Computes the SHA-1 hash value
@@ -31,12 +31,9 @@ public:
    * @return A vector of unsigned characters containing the computed hash
    */
   virtual std::vector<unsigned char>
-  hash(const std::vector<unsigned char> &inputV);
+  hash(const std::vector<unsigned char> &inputV) override;
 
 private:
-  /// Sets the expected hash output size
-  void setHashOutputSize();
-
   /**
    * Initializes internal state based on the input length
    *
