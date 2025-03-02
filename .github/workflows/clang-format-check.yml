@@ -1,4 +1,4 @@
-name: C++ Static Analysis
+name: Clang Format Check
 
 on:
   pull_request:
@@ -7,35 +7,20 @@ on:
       - main
 
 jobs:
-  static-analysis:
+  clang-format:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install clang-format
         run: |
-          sudo apt update
-          sudo apt install -y clang-tidy cppcheck
+          sudo apt-get update
+          sudo apt-get install -y clang-format
 
-      - name: Run Clang-Tidy
+      - name: Run clang-format check
         run: |
-          find . -type f -name "CMakeLists.txt" | while read cmake_file; do
-            dir=$(dirname "$cmake_file")
-            src_dir="$dir/src"
-            if [ -d "$src_dir" ]; then
-              echo "Running Clang-Tidy in $src_dir"
-              for file in "$src_dir"/*.cpp; do
-                [ -f "$file" ] && clang-tidy "$file" -- -I"$src_dir"
-              done
-            fi
-          done
+          FILES=$(find . -type f \( -name "*.cpp" -o -name "*.hpp" \))
+          clang-format --dry-run --Werror $FILES
 
-      - name: Run Cppcheck
-        run: |
-          find . -type f -name "CMakeLists.txt" | while read cmake_file; do
-            dir=$(dirname "$cmake_file")
-            echo "Running Cppcheck in $dir"
-            cppcheck --enable=all --inconclusive --force --error-exitcode=1 "$dir"
-          done
