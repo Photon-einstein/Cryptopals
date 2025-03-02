@@ -5,7 +5,7 @@
 #include "./../include/SHA1.hpp"
 
 /* constructor / destructor */
-MyCryptoLibrary::SHA1::SHA1() :_sizeOutputHash{SHA_DIGEST_LENGTH} {}
+MyCryptoLibrary::SHA1::SHA1() : _sizeOutputHash{SHA_DIGEST_LENGTH} {}
 /******************************************************************************/
 MyCryptoLibrary::SHA1::~SHA1() {}
 /******************************************************************************/

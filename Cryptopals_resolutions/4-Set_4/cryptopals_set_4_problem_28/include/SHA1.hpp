@@ -34,7 +34,6 @@ public:
   hash(const std::vector<unsigned char> &inputV) override;
 
 private:
-
   /**
    * Initializes internal state based on the input length
    *

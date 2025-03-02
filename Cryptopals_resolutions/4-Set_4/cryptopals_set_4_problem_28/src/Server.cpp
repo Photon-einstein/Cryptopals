@@ -21,7 +21,8 @@ Server::Server(const bool debugFlag) : _debugFlag(debugFlag) {
     hexServerKey = std::getenv("AES_256_KEY_SERVER_SET_4_PROBLEM_28");
   } else {
     const std::string errorMessage{
-      "Server log | server key 'AES_256_KEY_SERVER_SET_4_PROBLEM_28' must be setup prior to this call"};
+        "Server log | server key 'AES_256_KEY_SERVER_SET_4_PROBLEM_28' must be "
+        "setup prior to this call"};
     throw std::invalid_argument(errorMessage);
   }
   Server::_keyServer = Server::hexToBytes(hexServerKey);
