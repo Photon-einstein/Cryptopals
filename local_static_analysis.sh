@@ -21,11 +21,11 @@ fi
 
 echo "🔍 Searching for CMakeLists.txt files..."
 
-# Find all directories containing a CMakeLists.txt file
-find . -type f -name "CMakeLists.txt" | while read cmake_file; do
+# Find all directories containing a CMakeLists.txt file, excluding 'build' directories and everything inside them
+find . -type f -name "CMakeLists.txt" ! -path "*/build/*" | while read cmake_file; do
     dir=$(dirname "$cmake_file")
     src_dir="$dir/src"
-
+    
     # Run Clang-Tidy only if a src/ folder exists
     if [ -d "$src_dir" ]; then
         echo "🚀 Running Clang-Tidy in $src_dir"
@@ -34,9 +34,27 @@ find . -type f -name "CMakeLists.txt" | while read cmake_file; do
         done
     fi
 
-    # Run Cppcheck in the directory with CMakeLists.txt
-    echo "🚀 Running Cppcheck in $dir"
-    cppcheck --enable=all --inconclusive --force --error-exitcode=1 "$dir"
+    # Run Clang-Tidy on cpp files in the 'tests' folder as well
+    if [ -d "$dir/tests" ]; then
+        echo "🚀 Running Clang-Tidy in $dir/tests"
+        for file in "$dir/tests"/*.cpp; do
+            [ -f "$file" ] && clang-tidy "$file" -- -I"$dir/tests"
+        done
+    fi
+
+    # Run Cppcheck only if a src/ folder exists
+    if [ -d "$src_dir" ]; then
+        echo "🚀 Running Cppcheck in $src_dir"
+        cppcheck --enable=all --inconclusive --force --error-exitcode=1 "$src_dir" --suppress=missingIncludeSystem
+    fi
+
+    # Run Cppcheck file by file in the 'tests' folder
+    if [ -d "$dir/tests" ]; then
+        echo "🚀 Running Cppcheck file by file in $dir/tests"
+        for file in "$dir/tests"/*.cpp; do
+            [ -f "$file" ] && cppcheck --enable=all --inconclusive  --force --error-exitcode=1 "$file" --suppress=missingIncludeSystem
+        done
+    fi
 done
 
 echo "✅ Static analysis completed."
