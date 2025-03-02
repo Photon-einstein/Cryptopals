@@ -62,7 +62,6 @@ namespace MyCryptoLibrary {
         + ~SHA1()
         + getHashOutputSize() : std::size_t
         + hash(inputV : std::vector<unsigned char>) : std::vector<unsigned char>
-        - setHashOutputSize() : void
         - initialization(sizeInputV : std::size_t) : void
         - preProcessing(inputV : std::vector<unsigned char>) : void
         - processing() : void

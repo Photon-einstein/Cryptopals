@@ -16,7 +16,14 @@
 /* constructor / destructor */
 Server::Server(const bool debugFlag) : _debugFlag(debugFlag) {
   _sha = std::make_shared<MyCryptoLibrary::SHA1>();
-  std::string hexServerKey = std::getenv("AES_256_KEY_SERVER_SET_4_PROBLEM_28");
+  std::string hexServerKey{};
+  if (std::getenv("AES_256_KEY_SERVER_SET_4_PROBLEM_28") != nullptr) {
+    hexServerKey = std::getenv("AES_256_KEY_SERVER_SET_4_PROBLEM_28");
+  } else {
+    const std::string errorMessage{
+      "Server log | server key 'AES_256_KEY_SERVER_SET_4_PROBLEM_28' must be setup prior to this call"};
+    throw std::invalid_argument(errorMessage);
+  }
   Server::_keyServer = Server::hexToBytes(hexServerKey);
 }
 /******************************************************************************/
@@ -342,7 +349,6 @@ void Server::encrypt(const std::string &plaintext, const std::string &key,
     handleErrors();
 
   int len;
-  int ciphertext_len;
 
   // Initialize encryption operation
   if (EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL,
@@ -354,12 +360,10 @@ void Server::encrypt(const std::string &plaintext, const std::string &key,
                         (unsigned char *)plaintext.c_str(),
                         plaintext.length()) != 1)
     handleErrors();
-  ciphertext_len = len;
 
   // Finalize the encryption (this handles padding)
   if (EVP_EncryptFinal_ex(ctx, ciphertext.data() + len, &len) != 1)
     handleErrors();
-  ciphertext_len += len;
 
   EVP_CIPHER_CTX_free(ctx);
 }

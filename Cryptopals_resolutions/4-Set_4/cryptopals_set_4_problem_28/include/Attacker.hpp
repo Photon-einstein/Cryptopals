@@ -44,7 +44,7 @@ private:
    *
    * @return The message intercepted in a string format
    */
-  std::string extractMessage(const std::string &messageLocation);
+  static std::string extractMessage(const std::string &messageLocation);
 
   /**
    * @brief This method converts a vector into a string in hex format
@@ -55,7 +55,7 @@ private:
    * @param data The vector with chars to be converted
    * @return A string containing the chars with hexadecimal format, zero padded
    */
-  std::string toHexString(const std::vector<unsigned char> &data);
+  static std::string toHexString(const std::vector<unsigned char> &data);
 
   std::shared_ptr<Server> _server;
   std::shared_ptr<MyCryptoLibrary::SHA> _sha;
