@@ -8,14 +8,19 @@
 
 class SHA1Test : public ::testing::Test {
 protected:
+  // cppcheck-suppress unusedFunction
   void SetUp() override {
+    // NOLINTNEXTLINE(clang-analyzer-optin.cplusplus.VirtualCall)
     _sha1 = std::make_unique<MyCryptoLibrary::SHA1>(); // Shared setup
   }
 
+  // cppcheck-suppress unusedFunction
   void TearDown() override {
+    // NOLINTNEXTLINE(clang-analyzer-optin.cplusplus.VirtualCall)
     // Cleanup (if needed)
   }
 
+  // cppcheck-suppress unusedStructMember
   std::unique_ptr<MyCryptoLibrary::SHA1> _sha1;
   std::string _testInput;
   std::vector<unsigned char> _input, _hash;

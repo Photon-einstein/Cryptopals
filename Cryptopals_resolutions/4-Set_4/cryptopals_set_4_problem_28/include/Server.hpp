@@ -25,19 +25,6 @@ public:
   /* public methods */
 
   /**
-   * @brief Calculates the SHA1 hash using the OpenSSL library
-   *
-   * This method perform the hash SHA1 of the message using the OpenSSL library
-   *
-   * @param inputV The characters to be hashed in a vector format
-   * @param originalMessage The characters to be hashed in a string format
-   * @return The hash SHA1 of the inputV characters
-   */
-  std::vector<unsigned char>
-  hashSHA1WithLibrary(const std::vector<unsigned char> &inputV,
-                      const std::string &originalMessage);
-
-  /**
    * @brief Calculates the hash SHA-1 using a custom made library
    *
    * This method perform the hash SHA-1 of the message with a custom made
@@ -63,6 +50,9 @@ public:
    */
   bool checkMac(const std::string &message,
                 const std::vector<unsigned char> &mac);
+
+  // Returns the hash output size in bytes.
+  std::size_t getHashOutputSize();
 
 private:
   /**
