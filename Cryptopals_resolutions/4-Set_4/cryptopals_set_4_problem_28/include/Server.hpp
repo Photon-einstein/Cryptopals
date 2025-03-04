@@ -146,10 +146,6 @@ private:
 
   const bool _debugFlag;
   std::shared_ptr<MyCryptoLibrary::SHA> _sha;
-  std::vector<unsigned char> _plaintextV;
-  std::string _plaintext;
-  std::vector<unsigned char> _hashOpenSSL;
-  std::vector<unsigned char> _hash;
   std::vector<unsigned char> _key;
   std::vector<unsigned char> _keyServer;
   unsigned char _iv[AES_BLOCK_SIZE] = {0};

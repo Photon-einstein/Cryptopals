@@ -22,17 +22,17 @@ class Server {
     
     + Server(debugFlag : bool)
     + ~Server()
-    + hashSHA1WithLibrary(inputV : std::vector<unsigned char>, originalMessage : std::string) : std::vector<unsigned char>
     + hashSHA1(inputV : std::vector<unsigned char>, originalMessage : std::string) : std::vector<unsigned char>
     + checkMac(message : std::string, mac : std::vector<unsigned char>) : bool
+    + getHashOutputSize() : void
     - printMessage(originalMessage : std::string, hash : std::vector<unsigned char>, format : PrintFormat::Format) : void
     - setKey(message : std::string) : void
     - prependKey(inputV : std::vector<unsigned char>) : std::vector<unsigned char>
     - extractFile(fileLocation : std::string) : std::string
-    - handleErrors() : void
-    - decrypt(ciphertext : std::vector<unsigned char>, key : std::string, plaintext : std::string, iv : unsigned char *) : void
-    - removePKCS7Padding(data : std::vector<unsigned char>) : void
-    - hexToBytes(hexStr : std::string) : std::vector<unsigned char>
+    - handleErrors() : void {static}
+    - decrypt(ciphertext : std::vector<unsigned char>, key : std::string, plaintext : std::string, iv : unsigned char *) : void {static}
+    - removePKCS7Padding(data : std::vector<unsigned char>) : void {static}
+    - hexToBytes(hexStr : std::string) : std::vector<unsigned char> {static}
 }
 
 namespace MyCryptoLibrary {
@@ -75,8 +75,8 @@ class Attacker {
     + ~Attacker()
     + setServer(server : std::shared_ptr<Server>) : void
     + tamperMessageTry(messageLocation : std::string) : void
-    - extractMessage(messageLocation : std::string) : std::string
-    - toHexString(data : std::vector<unsigned char>) : std::string
+    - extractMessage(messageLocation : std::string) : std::string {static}
+    - toHexString(data : std::vector<unsigned char>) : std::string {static}
 }
 
 Server --> MyCryptoLibrary.SHA : "has a"

@@ -45,7 +45,7 @@ find . -type f -name "CMakeLists.txt" ! -path "*/build/*" | while read cmake_fil
     # Run Cppcheck only if a src/ folder exists
     if [ -d "$src_dir" ]; then
         echo "🚀 Running Cppcheck in $src_dir"
-        [ -f "$file" ] && cppcheck --enable=all --inconclusive --force --error-exitcode=1 "$src_dir" --suppress=missingIncludeSystem
+        [ -f "$file" ] && cppcheck --enable=style,warning,performance,portability --std=c++17 --inconclusive --force --error-exitcode=1 "$src_dir" 
     fi
 
     # Run Cppcheck only if a tests/ folder exists
@@ -54,7 +54,7 @@ find . -type f -name "CMakeLists.txt" ! -path "*/build/*" | while read cmake_fil
         echo "🚀 Running Cppcheck in $tst_dir"
         
         find "$tst_dir" -type f -name "*.cpp" ! -path "*/build/*" | while read file; do
-            cppcheck --enable=all --inconclusive --force --error-exitcode=1 --suppress=missingIncludeSystem --suppress=unusedStructMember --suppress=unusedFunction --suppress=unmatchedSuppression "$file"
+            cppcheck --enable=all --std=c++17 --inconclusive --force --error-exitcode=1 --suppress=missingIncludeSystem --suppress=unusedStructMember --suppress=unusedFunction --suppress=unmatchedSuppression "$file"
         done
     fi
 
