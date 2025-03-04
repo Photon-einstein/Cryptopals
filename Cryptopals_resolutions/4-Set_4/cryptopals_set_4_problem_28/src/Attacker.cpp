@@ -6,7 +6,7 @@
 #include "./../include/Attacker.hpp"
 
 /* constructor / destructor */
-Attacker::Attacker(std::shared_ptr<Server> &server, bool writeToFile)
+Attacker::Attacker(const std::shared_ptr<Server> &server, bool writeToFile)
     : _writeToFile{writeToFile} {
   Attacker::setServer(server);
   _sha = std::make_shared<MyCryptoLibrary::SHA1>();
@@ -21,7 +21,9 @@ Attacker::~Attacker() {}
  *
  * @param server The server shared pointer
  */
-void Attacker::setServer(std::shared_ptr<Server> &server) { _server = server; }
+void Attacker::setServer(const std::shared_ptr<Server> &server) {
+  _server = server;
+}
 /******************************************************************************/
 /**
  * @brief This method will try to tamper a message
