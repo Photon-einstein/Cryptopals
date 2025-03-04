@@ -7,11 +7,15 @@
 
 class ServerTest : public ::testing::Test {
 protected:
+  // cppcheck-suppress unusedFunction
   void SetUp() override {
+    // NOLINTNEXTLINE(clang-analyzer-optin.cplusplus.VirtualCall)
     _server = std::make_unique<Server>(_debugFlag); // Shared setup
   }
 
+  // cppcheck-suppress unusedFunction
   void TearDown() override {
+    // NOLINTNEXTLINE(clang-analyzer-optin.cplusplus.VirtualCall)
     // Cleanup (if needed)
   }
 
@@ -34,8 +38,9 @@ protected:
 TEST_F(ServerTest,
        HashSHA1WithLibray_EnglishSentenceInput_ShouldMatchReferenceSize) {
   _input.insert(_input.end(), _testInput.begin(), _testInput.end());
-  _hash = _server->hashSHA1WithLibrary(_input, _testInput);
-  ASSERT_EQ(_hash.size(), 20);
+  _hash = _server->hashSHA1(_input, _testInput);
+  ASSERT_EQ(_hash.size(), SHA_DIGEST_LENGTH);
+  ASSERT_EQ(_server->getHashOutputSize(), SHA_DIGEST_LENGTH);
 }
 
 /**

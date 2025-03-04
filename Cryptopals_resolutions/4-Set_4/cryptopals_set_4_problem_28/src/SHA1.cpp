@@ -37,7 +37,7 @@ MyCryptoLibrary::SHA1::hash(const std::vector<unsigned char> &inputV) {
   return hashV;
 }
 /******************************************************************************/
-/// Sets the expected hash output size
+// gets the expected hash output size
 std::size_t MyCryptoLibrary::SHA1::getHashOutputSize() {
   return _sizeOutputHash;
 }

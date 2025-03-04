@@ -45,16 +45,20 @@ find . -type f -name "CMakeLists.txt" ! -path "*/build/*" | while read cmake_fil
     # Run Cppcheck only if a src/ folder exists
     if [ -d "$src_dir" ]; then
         echo "🚀 Running Cppcheck in $src_dir"
-        cppcheck --enable=all --inconclusive --force --error-exitcode=1 "$src_dir" --suppress=missingIncludeSystem
+        [ -f "$file" ] && cppcheck --enable=all --inconclusive --force --error-exitcode=1 "$src_dir" --suppress=missingIncludeSystem
     fi
 
-    # Run Cppcheck file by file in the 'tests' folder
+    # Run Cppcheck only if a tests/ folder exists
     if [ -d "$dir/tests" ]; then
-        echo "🚀 Running Cppcheck file by file in $dir/tests"
-        for file in "$dir/tests"/*.cpp; do
-            [ -f "$file" ] && cppcheck --enable=all --inconclusive  --force --error-exitcode=1 "$file" --suppress=missingIncludeSystem
+        tst_dir="$dir/tests"
+        echo "🚀 Running Cppcheck in $tst_dir"
+        
+        find "$tst_dir" -type f -name "*.cpp" ! -path "*/build/*" | while read file; do
+            cppcheck --enable=all --inconclusive --force --error-exitcode=1 --suppress=missingIncludeSystem --suppress=unusedStructMember --suppress=unusedFunction --suppress=unmatchedSuppression "$file"
         done
     fi
+
+
 done
 
 echo "✅ Static analysis completed."

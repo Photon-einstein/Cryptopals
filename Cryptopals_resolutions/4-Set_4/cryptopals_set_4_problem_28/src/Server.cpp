@@ -31,55 +31,6 @@ Server::Server(const bool debugFlag)
 Server::~Server() {}
 /******************************************************************************/
 /**
- * @brief Calculates the SHA-1 hash using the OpenSSL library
- *
- * This method perform the hash SHA-1 of the message using the OpenSSL library
- *
- * @param inputV The characters to be hashed in a vector format
- * @param originalMessage The characters to be hashed in a string format
- * @return The hash SHA1 of the inputV characters
- */
-std::vector<unsigned char>
-Server::hashSHA1WithLibrary(const std::vector<unsigned char> &inputV,
-                            const std::string &originalMessage) {
-  std::vector<unsigned char> output, inputKeyPrepended;
-  inputKeyPrepended = Server::prependKey(inputV);
-  // Create a new digest context
-  EVP_MD_CTX *ctx = EVP_MD_CTX_new();
-  if (ctx == nullptr) {
-    throw std::runtime_error("EVP_MD_CTX_new failed");
-  }
-  // Initialize the context to use the SHA-1 digest algorithm
-  if (EVP_DigestInit_ex(ctx, EVP_sha1(), nullptr) != 1) {
-    EVP_MD_CTX_free(ctx);
-    throw std::runtime_error("EVP_DigestInit_ex failed");
-  }
-  // Provide the message to be hashed
-  if (EVP_DigestUpdate(ctx, inputKeyPrepended.data(),
-                       inputKeyPrepended.size()) != 1) {
-    EVP_MD_CTX_free(ctx);
-    throw std::runtime_error("EVP_DigestUpdate failed");
-  }
-  // Finalize the digest
-  unsigned char hash[EVP_MAX_MD_SIZE];
-  unsigned int hashLength = 0;
-  if (EVP_DigestFinal_ex(ctx, hash, &hashLength) != 1) {
-    EVP_MD_CTX_free(ctx);
-    throw std::runtime_error("EVP_DigestFinal_ex failed");
-  }
-  // Clean up
-  EVP_MD_CTX_free(ctx);
-  // Resize output vector to the digest length and copy hash data
-  output.assign(hash, hash + hashLength);
-  // Optionally, print for debug purposes
-  if (_debugFlag == true) {
-    printMessage("\nSHA1 with library    | '" + originalMessage + "' (hex): ",
-                 output, PrintFormat::HEX);
-  }
-  return output;
-}
-/******************************************************************************/
-/**
  * @brief Calculates the SHA-1 using a custom made library
  *
  * This method perform the hash SHA-1 of the message with a custom made library
@@ -94,8 +45,6 @@ Server::hashSHA1(const std::vector<unsigned char> &inputV,
   ;
   std::vector<unsigned char> inputKeyPrepended, output;
   inputKeyPrepended = Server::prependKey(inputV);
-  std::string inputKeyPrependedS(inputKeyPrepended.begin(),
-                                 inputKeyPrepended.end());
   output = _sha->hash(inputKeyPrepended);
   // Optionally, print for debug purposes
   if (_debugFlag == true) {
@@ -136,6 +85,9 @@ bool Server::checkMac(const std::string &message,
   }
   return output;
 }
+/******************************************************************************/
+// gets the expected hash output size
+std::size_t Server::getHashOutputSize() { return _sha->getHashOutputSize(); }
 /******************************************************************************/
 /**
  * @brief This method print the hash value and the original message to be
@@ -249,9 +201,7 @@ Server::prependKey(const std::vector<unsigned char> &inputV) {
   const std::string message(inputV.begin(), inputV.end());
   Server::setKey(message);
   std::vector<unsigned char> inputWithKey = Server::_key;
-  for (unsigned char c : inputV) {
-    inputWithKey.emplace_back(c);
-  }
+  inputWithKey.insert(inputWithKey.end(), inputV.begin(), inputV.end());
   return inputWithKey;
 }
 /******************************************************************************/
@@ -318,8 +268,9 @@ void Server::decrypt(const std::vector<unsigned char> &ciphertext,
     Server::handleErrors();
 
   // Provide the message to be decrypted
-  if (EVP_DecryptUpdate(ctx, (unsigned char *)plaintext.data(), &len,
-                        ciphertext.data(), ciphertext.size()) != 1)
+  if (EVP_DecryptUpdate(ctx,
+                        reinterpret_cast<unsigned char *>(plaintext.data()),
+                        &len, ciphertext.data(), ciphertext.size()) != 1)
     Server::handleErrors();
   plaintext_len = len;
 

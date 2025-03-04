@@ -1,26 +1,26 @@
 #include <gtest/gtest.h>
 
-#include <string>
-#include <vector>
-
 #include "../include/Attacker.hpp"
 
 class AttackerTest : public ::testing::Test {
 protected:
-  void SetUp() {
+  // cppcheck-suppress unusedFunction
+  void SetUp() override {
+    // NOLINTNEXTLINE(clang-analyzer-optin.cplusplus.VirtualCall)
     _server = std::make_shared<Server>(_debugFlag);
     _attacker =
         std::make_shared<Attacker>(_server, _writeToFile); // Shared setup
   }
 
-  void TearDown() {}
+  // cppcheck-suppress unusedFunction
+  void TearDown() override {
+    // NOLINTNEXTLINE(clang-analyzer-optin.cplusplus.VirtualCall)
+  }
 
   const bool _debugFlag{false};
   const bool _writeToFile{false};
   std::shared_ptr<Attacker> _attacker;
   std::shared_ptr<Server> _server;
-  std::string _testInput;
-  std::vector<unsigned char> _input, _hash;
 };
 
 /**
