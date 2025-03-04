@@ -59,21 +59,21 @@ private:
    * @param bits The number of bits to rotate by.
    * @return The rotated value.
    */
-  uint32_t leftRotate(uint32_t value, int bits);
+  static uint32_t leftRotate(uint32_t value, int bits);
 
   // Internal state variables
 
   /// Expected output hash size in bytes.
-  std::size_t _sizeOutputHash;
+  std::size_t _sizeOutputHash{};
 
   /// Padded input vector.
-  std::vector<unsigned char> _inputVpadded;
+  std::vector<unsigned char> _inputVpadded{};
 
   // The five working variables (initialized in `initialization`)
-  uint32_t _h0, _h1, _h2, _h3, _h4;
+  uint32_t _h0{}, _h1{}, _h2{}, _h3{}, _h4{};
 
   /// Message length in bits.
-  uint64_t _ml;
+  uint64_t _ml{};
 };
 
 } // namespace MyCryptoLibrary

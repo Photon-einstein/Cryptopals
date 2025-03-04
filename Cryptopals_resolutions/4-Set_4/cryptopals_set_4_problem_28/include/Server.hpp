@@ -77,36 +77,9 @@ private:
    * @param format The format to be used in the print of the hash value (HEX,
    * DECIMAL, ASCII)
    */
-  void printMessage(const std::string &originalMessage,
-                    const std::vector<unsigned char> &hash,
-                    PrintFormat::Format format);
-
-  /**
-   * @brief This method sets the plaintext to be hashed in a server's variable.
-   *
-   * This method sets the plaintext to be hashed
-   *
-   * @param plaintext The input plaintext string
-   */
-  void setPlaintext(const std::string &plaintext);
-
-  /**
-   * @brief Returns the plaintext stored in the server
-   *
-   * This method returns the plaintext stored in the server, in a vector format
-   *
-   * @return The plaintext stored in the server, as a vector
-   */
-  const std::vector<unsigned char> getPlaintextV();
-
-  /**
-   * @brief Returns the plaintext stored in the server
-   *
-   * This method returns the plaintext stored in the server, in a string format
-   *
-   * @return The plaintext stored in the server, as a string
-   */
-  const std::string getPlaintext();
+  static void printMessage(const std::string &originalMessage,
+                           const std::vector<unsigned char> &hash,
+                           PrintFormat::Format format);
 
   /**
    * @brief This method sets the key to be used as a prefix in a hash
@@ -134,7 +107,8 @@ private:
    *
    * @return The content of a file in a vector format
    */
-  std::vector<unsigned char> extractFile(const std::string &fileLocation);
+  static std::vector<unsigned char>
+  extractFile(const std::string &fileLocation);
 
   /******************************************************************************/
   /**
@@ -143,21 +117,7 @@ private:
    * This method will deal with errors during encryption/decryption, including
    * printing error messages
    */
-  void handleErrors();
-
-  /**
-   * @brief This method will encrypt the plaintext using aes256 cbc mode
-   *
-   * This method will encrypt the plaintext using aes256 cbc mode, using key
-   * and iv in the process, returning by reference in the ciphertext the result
-   *
-   * @param plaintext The input to be encrypted
-   * @param key The key to be used in the encryption
-   * @param ciphertext The ciphertext resulting of the encryption
-   * @param iv The initialization vector used in the encryption
-   */
-  void encrypt(const std::string &plaintext, const std::string &key,
-               std::vector<unsigned char> &ciphertext, unsigned char *iv);
+  static void handleErrors();
 
   /**
    * @brief This method will decrypt the ciphertext using aes256 cbc mode
@@ -170,9 +130,9 @@ private:
    * @param plaintext The plaintext resulting of the decryption
    * @param iv The initialization vector used in the decryption
    */
-  void decrypt(const std::vector<unsigned char> &ciphertext,
-               const std::string &key, std::string &plaintext,
-               unsigned char *iv);
+  static void decrypt(const std::vector<unsigned char> &ciphertext,
+                      const std::string &key, std::string &plaintext,
+                      unsigned char *iv);
   /**
    * @brief This method will remove the padding PKCDS7
    *
@@ -180,7 +140,7 @@ private:
    *
    * @param data The input to be removed the padding, by reference
    */
-  void removePKCS7Padding(std::vector<unsigned char> &data);
+  static void removePKCS7Padding(std::vector<unsigned char> &data);
 
   /**
    * @brief This method will convert hexadecimal string to byte vector
@@ -192,18 +152,7 @@ private:
    *
    * @return The byte vector resulting of the conversion
    */
-  std::vector<unsigned char> hexToBytes(const std::string &hexStr);
-
-  /**
-   * @brief This method will convert byte data into to hexadecimal
-   *
-   * This method will convert byte data into to hexadecimal using zero alignment
-   *
-   * @param data The input data in bytes to be converted
-   *
-   * @return The hexadecimal vector resulting of the conversion
-   */
-  std::vector<unsigned char> bytesToHex(const std::vector<unsigned char> &data);
+  static std::vector<unsigned char> hexToBytes(const std::string &hexStr);
 
   const bool _debugFlag;
   std::shared_ptr<MyCryptoLibrary::SHA> _sha;

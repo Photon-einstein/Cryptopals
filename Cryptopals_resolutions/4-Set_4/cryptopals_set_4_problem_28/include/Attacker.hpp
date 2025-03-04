@@ -8,7 +8,7 @@
 class Attacker {
 public:
   /* constructor / destructor*/
-  Attacker(std::shared_ptr<Server> &server, bool writeToFile);
+  Attacker(const std::shared_ptr<Server> &server, bool writeToFile);
   ~Attacker();
 
   /* public methods */
@@ -20,7 +20,7 @@ public:
    *
    * @param server The server shared pointer
    */
-  void setServer(std::shared_ptr<Server> &server);
+  void setServer(const std::shared_ptr<Server> &server);
 
   /**
    * @brief This method will try to tamper a message

@@ -14,8 +14,8 @@
 #include "./../include/Server.hpp"
 
 /* constructor / destructor */
-Server::Server(const bool debugFlag) : _debugFlag(debugFlag) {
-  _sha = std::make_shared<MyCryptoLibrary::SHA1>();
+Server::Server(const bool debugFlag)
+    : _debugFlag(debugFlag), _sha(std::make_shared<MyCryptoLibrary::SHA1>()) {
   std::string hexServerKey{};
   if (std::getenv("AES_256_KEY_SERVER_SET_4_PROBLEM_28") != nullptr) {
     hexServerKey = std::getenv("AES_256_KEY_SERVER_SET_4_PROBLEM_28");
@@ -176,47 +176,6 @@ void Server::printMessage(const std::string &originalMessage,
 }
 /******************************************************************************/
 /**
- * @brief This method sets the plaintext to be hashed in a server's variable.
- *
- * This method sets the plaintext to be hashed
- *
- * @param plaintext The input plaintext string
- */
-void Server::setPlaintext(const std::string &plaintext) {
-  if (_debugFlag == true) {
-    printf("\nServer log | Plaintext received (ascii):   '");
-  }
-  _plaintext = plaintext;
-  for (std::size_t i = 0; i < plaintext.size(); ++i) {
-    _plaintextV.push_back(plaintext[i]);
-    if (_debugFlag == true) {
-      printf("%c", (unsigned char)_plaintextV[i]);
-    }
-  }
-  if (_debugFlag) {
-    printf("'\n");
-  }
-}
-/******************************************************************************/
-/**
- * @brief Returns the plaintext stored in the server
- *
- * This method returns the plaintext stored in the server, in a vector format
- *
- * @return The plaintext stored in the server, as a vector
- */
-const std::vector<unsigned char> Server::getPlaintextV() { return _plaintextV; }
-/******************************************************************************/
-/**
- * @brief Returns the plaintext stored in the server
- *
- * This method returns the plaintext stored in the server, in a string format
- *
- * @return The plaintext stored in the server, as a string
- */
-const std::string Server::getPlaintext() { return _plaintext; }
-/******************************************************************************/
-/**
  * @brief This method sets the key to be used as a prefix in a hash
  * calculation.
  *
@@ -332,44 +291,6 @@ void Server::handleErrors() {
 }
 /******************************************************************************/
 /**
- * @brief This method will encrypt the plaintext using aes256 cbc mode
- *
- * This method will encrypt the plaintext using aes256 cbc mode, using key
- * and iv in the process, returning by reference in the ciphertext the result
- *
- * @param plaintext The input to be encrypted
- * @param key The key to be used in the encryption
- * @param ciphertext The ciphertext resulting of the encryption
- * @param iv The initialization vector used in the encryption
- */
-void Server::encrypt(const std::string &plaintext, const std::string &key,
-                     std::vector<unsigned char> &ciphertext,
-                     unsigned char *iv) {
-  EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
-  if (!ctx)
-    handleErrors();
-
-  int len;
-
-  // Initialize encryption operation
-  if (EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL,
-                         (unsigned char *)key.c_str(), iv) != 1)
-    handleErrors();
-
-  // Provide the message to be encrypted
-  if (EVP_EncryptUpdate(ctx, ciphertext.data(), &len,
-                        (unsigned char *)plaintext.c_str(),
-                        plaintext.length()) != 1)
-    handleErrors();
-
-  // Finalize the encryption (this handles padding)
-  if (EVP_EncryptFinal_ex(ctx, ciphertext.data() + len, &len) != 1)
-    handleErrors();
-
-  EVP_CIPHER_CTX_free(ctx);
-}
-/******************************************************************************/
-/**
  * @brief This method will decrypt the ciphertext using aes256 cbc mode
  *
  * This method will decrypt the ciphertext using aes256 cbc mode, using key
@@ -392,7 +313,8 @@ void Server::decrypt(const std::vector<unsigned char> &ciphertext,
   std::vector<unsigned char> plaintextV;
   // Initialize decryption operation
   if (EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL,
-                         (unsigned char *)key.c_str(), iv) != 1)
+                         reinterpret_cast<const unsigned char *>(key.c_str()),
+                         iv) != 1)
     Server::handleErrors();
 
   // Provide the message to be decrypted
@@ -453,28 +375,5 @@ std::vector<unsigned char> Server::hexToBytes(const std::string &hexStr) {
     bytes.push_back(byte);
   }
   return bytes;
-}
-/******************************************************************************/
-/**
- * @brief This method will convert byte data into to hexadecimal
- *
- * This method will convert byte data into to hexadecimal using zero alignment
- *
- * @param data The input data in bytes to be converted
- *
- * @return The hexadecimal vector resulting of the conversion
- */
-std::vector<unsigned char>
-Server::bytesToHex(const std::vector<unsigned char> &data) {
-  std::vector<unsigned char> hexResult;
-  std::ostringstream oss;
-  for (unsigned char byte : data) {
-    oss << std::hex << std::setw(2) << std::setfill('0')
-        << static_cast<int>(byte);
-  }
-  std::string hexStr = oss.str();
-  // Convert hex string to vector<unsigned char>
-  hexResult.assign(hexStr.begin(), hexStr.end());
-  return hexResult;
 }
 /******************************************************************************/

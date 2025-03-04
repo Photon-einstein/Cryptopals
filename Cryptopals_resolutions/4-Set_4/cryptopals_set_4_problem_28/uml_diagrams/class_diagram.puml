@@ -26,18 +26,13 @@ class Server {
     + hashSHA1(inputV : std::vector<unsigned char>, originalMessage : std::string) : std::vector<unsigned char>
     + checkMac(message : std::string, mac : std::vector<unsigned char>) : bool
     - printMessage(originalMessage : std::string, hash : std::vector<unsigned char>, format : PrintFormat::Format) : void
-    - setPlaintext(plaintext : std::string) : void
-    - getPlaintextV() : std::vector<unsigned char>
-    - getPlaintext() : std::string
     - setKey(message : std::string) : void
     - prependKey(inputV : std::vector<unsigned char>) : std::vector<unsigned char>
     - extractFile(fileLocation : std::string) : std::string
     - handleErrors() : void
-    - encrypt(plaintext : std::string, key : std::string, ciphertext: std::vector<unsigned char>, iv : unsigned char*) : void
     - decrypt(ciphertext : std::vector<unsigned char>, key : std::string, plaintext : std::string, iv : unsigned char *) : void
     - removePKCS7Padding(data : std::vector<unsigned char>) : void
     - hexToBytes(hexStr : std::string) : std::vector<unsigned char>
-    - bytesToHex(data : std::vector<unsigned char>) : std::vector<unsigned char>
 }
 
 namespace MyCryptoLibrary {
