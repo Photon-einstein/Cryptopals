@@ -43,6 +43,9 @@ Result: A valid SHA-1 hash for "hello<glue-padding>world!".
 
 **Steps to Implement**
 
+0. **Extraction of the data from the attacker**
+    * Extraction of the URL, message and mac from the message intercepted (TBD)
+
 1. **Implement SHA-1 Padding**
 
     * Write a function to compute SHA-1 padding for an arbitrary message. (TBD)
