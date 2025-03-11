@@ -43,6 +43,9 @@ Result: A valid SHA-1 hash for "hello<glue-padding>world!".
 
 **Steps to Implement**
 
+0. **Extraction of the data from the attacker**
+    * Extraction of the URL, message and mac from the message intercepted (TBD)
+
 1. **Implement SHA-1 Padding**
 
     * Write a function to compute SHA-1 padding for an arbitrary message. (TBD)
@@ -56,9 +59,24 @@ Result: A valid SHA-1 hash for "hello<glue-padding>world!".
 3. **Perform the Length Extension Attack**
 
     * Try different key lengths. (TBD)
+    * Attacker tests the server that he has guessed the right key length (TBD)
     * Compute the glue padding for key || message. (TBD)
     * Use your modified SHA-1 to hash the additional ";admin=true" data. (TBD)
-    * The result is a valid SHA-1 MAC for the forged message. (TBD)
+    * The result is a valid SHA-1 MAC for the forged message, the attacker can then test the response from the server. (TBD)
 
+
+This is why HMAC (H(key || message)) prevents this attack—because the key is mixed inside the compression function, 
+making it impossible to extend!
+
+
+**Example of a URL**
+
+```bash
+https://api.example.com/data?user=bob&amount=1000&timestamp=1700000000&mac=9c69af9c1051c98cb067bd6d7ddc598763d595d4
+```
+
+```bash
+mac = SHA1(key || "user=bob&amount=1000&timestamp=1700000000")
+```
 
 
