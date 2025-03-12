@@ -14,6 +14,7 @@ public:
 private:
   std::shared_ptr<Server> _server;
   std::shared_ptr<MyCryptoLibrary::SHA> _sha;
+  const std::string messageLocation{"./../input/intercepted_url.txt"};
 };
 
 #endif // ATTACKER_HPP
