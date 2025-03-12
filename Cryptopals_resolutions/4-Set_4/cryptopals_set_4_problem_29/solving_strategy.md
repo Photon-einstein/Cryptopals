@@ -44,6 +44,8 @@ Result: A valid SHA-1 hash for "hello<glue-padding>world!".
 **Steps to Implement**
 
 0. **Extraction of the data from the attacker**
+    * Setup of the key for the server locally    (Done)
+    * Setup of the key for the server remotely  (Done)
     * Extraction of the URL, message and mac from the message intercepted (TBD)
 
 1. **Implement SHA-1 Padding**
@@ -72,7 +74,7 @@ making it impossible to extend!
 **Example of a URL**
 
 ```bash
-https://api.example.com/data?user=bob&amount=1000&timestamp=1700000000&mac=9c69af9c1051c98cb067bd6d7ddc598763d595d4
+https://api.example.com/data?user=bob&amount=1000&timestamp=1700000000&mac=b240077242795755b85fa52c89c9806e0d68c277
 ```
 
 ```bash
