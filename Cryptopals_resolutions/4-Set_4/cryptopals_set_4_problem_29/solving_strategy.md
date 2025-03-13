@@ -46,7 +46,7 @@ Result: A valid SHA-1 hash for "hello<glue-padding>world!".
 0. **Extraction of the data from the attacker**
     * Setup of the key for the server locally    (Done)
     * Setup of the key for the server remotely  (Done)
-    * Extraction of the URL, message and mac from the message intercepted (TBD)
+    * Extraction of the URL, message and mac from the message intercepted (Done)
 
 1. **Implement SHA-1 Padding**
 
