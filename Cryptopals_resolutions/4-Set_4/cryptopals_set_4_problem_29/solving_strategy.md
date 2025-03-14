@@ -50,13 +50,13 @@ Result: A valid SHA-1 hash for "hello<glue-padding>world!".
 
 1. **Implement SHA-1 Padding**
 
-    * Write a function to compute SHA-1 padding for an arbitrary message. (TBD)
-    * Verify it against a real SHA-1 implementation. (TBD)
+    * Write a function to compute SHA-1 padding for an arbitrary message. (Done)
+    * Verify it against a real SHA-1 implementation. (Done)
 
 2. **Modify SHA-1 to Accept a Custom State**
 
     * Normally, SHA-1 starts with magic constants in its registers.
-    * Modify your SHA-1 implementation to accept arbitrary register values so you can continue hashing. (TBD)
+    * Modify your SHA-1 implementation to accept arbitrary register values so you can continue hashing. (Done)
 
 3. **Perform the Length Extension Attack**
 
@@ -65,8 +65,7 @@ Result: A valid SHA-1 hash for "hello<glue-padding>world!".
     * Compute the glue padding for key || message. (TBD)
     * Use your modified SHA-1 to hash the additional ";admin=true" data. (TBD)
     * The result is a valid SHA-1 MAC for the forged message, the attacker can then test the response from the server. (TBD)
-
-
+ 
 This is why HMAC (H(key || message)) prevents this attack—because the key is mixed inside the compression function, 
 making it impossible to extend!
 

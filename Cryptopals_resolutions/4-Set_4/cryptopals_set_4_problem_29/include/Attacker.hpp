@@ -31,6 +31,16 @@ public:
    */
   MessageFormat::MessageParsed parseMessage(const std::string &message);
 
+  /**
+   * @brief This method will append the padding to the message
+   *
+   * This method will append the padding according to the requirements
+   * of the SHA1 hash
+   *
+   * @return The message padded
+   */
+  std::vector<unsigned char> computeSHA1padding(const std::string &message);
+
   const std::string messageLocation{"./../input/intercepted_url.txt"};
 
 private:

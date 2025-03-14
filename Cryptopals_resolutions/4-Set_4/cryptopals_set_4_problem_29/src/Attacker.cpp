@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <limits.h>
 #include <nlohmann/json.hpp>
 #include <sstream>
 
@@ -79,5 +80,46 @@ Attacker::parseMessage(const std::string &message) {
               << "'\nmac: '" << msgParsed.mac << "'" << std::endl;
   }
   return msgParsed;
+}
+/******************************************************************************/
+/**
+ * @brief This method will append the padding to the message
+ *
+ * This method will append the padding according to the requirements
+ * of the SHA1 hash
+ *
+ * @return The message padded
+ */
+std::vector<unsigned char>
+Attacker::computeSHA1padding(const std::string &message) {
+  // Initialize padded input vector with original message
+  uint64_t messageLenght{message.size() * CHAR_BIT};
+  std::vector<unsigned char> inputVpadded(message.begin(), message.end());
+  // Step 1: Append the bit '1' (equivalent to adding 0x80)
+  inputVpadded.push_back(0x80);
+
+  // Step 2: Append '0' bits until the length of the message (in bits) is
+  // congruent to 448 mod 512
+  while ((inputVpadded.size() * 8) % 512 != 448) {
+    inputVpadded.push_back(0x00);
+  }
+
+  // Step 3: Append the original message length (ml) as a 64-bit big-endian
+  // integer _ml is already in bits
+  for (int i = 7; i >= 0; --i) {
+    inputVpadded.push_back(
+        static_cast<unsigned char>((messageLenght >> (i * 8)) & 0xFF));
+  }
+  if (Attacker::debugFlag) {
+    std::cout << "\nAttacker log | Message padded: ";
+    for (std::size_t i = 0; i < inputVpadded.size(); ++i) {
+      if (i < message.size()) {
+        printf("%c", inputVpadded[i]);
+      } else {
+        printf(" %02x", inputVpadded[i]);
+      }
+    }
+  }
+  return inputVpadded;
 }
 /******************************************************************************/

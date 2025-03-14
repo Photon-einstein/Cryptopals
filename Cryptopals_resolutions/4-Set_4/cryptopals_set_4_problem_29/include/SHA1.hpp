@@ -33,6 +33,24 @@ public:
   virtual std::vector<unsigned char>
   hash(const std::vector<unsigned char> &inputV) override;
 
+  /**
+   * @brief Computes the SHA-1 hash value
+   *
+   * Computes the SHA-1 hash of the given input vector from a predefined
+   * internal state
+   *
+   * @param inputV The input data as a vector of unsigned characters
+   * @param h0 Internal state of the SHA1
+   * @param h1 Internal state of the SHA1
+   * @param h2 Internal state of the SHA1
+   * @param h3 Internal state of the SHA1
+   * @param h4 Internal state of the SHA1
+   * @return A vector of unsigned characters containing the computed hash
+   */
+  std::vector<unsigned char> hash(const std::vector<unsigned char> &inputV,
+                                  uint32_t h0, uint32_t h1, uint32_t h2,
+                                  uint32_t h3, uint32_t h4);
+
 private:
   /**
    * Initializes internal state based on the input length
@@ -40,6 +58,20 @@ private:
    * @param sizeInputV The size of the original message in bytes
    */
   void initialization(const std::size_t sizeInputV);
+
+  /**
+   * Initializes internal state based on the input length and predefined input
+   * state
+   *
+   * @param sizeInputV The size of the original message in bytes
+   * @param h0 Internal state of the SHA1
+   * @param h1 Internal state of the SHA1
+   * @param h2 Internal state of the SHA1
+   * @param h3 Internal state of the SHA1
+   * @param h4 Internal state of the SHA1
+   */
+  void initialization(const std::size_t sizeInputV, uint32_t h0, uint32_t h1,
+                      uint32_t h2, uint32_t h3, uint32_t h4);
 
   /**
    * Preprocesses the input data (padding, appending length) as required by the
