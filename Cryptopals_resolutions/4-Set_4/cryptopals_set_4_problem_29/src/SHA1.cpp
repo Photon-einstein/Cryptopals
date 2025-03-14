@@ -37,6 +37,42 @@ MyCryptoLibrary::SHA1::hash(const std::vector<unsigned char> &inputV) {
   return hashV;
 }
 /******************************************************************************/
+/**
+ * @brief Computes the SHA-1 hash value
+ *
+ * Computes the SHA-1 hash of the given input vector from a predefined internal
+ * state
+ *
+ * @param inputV The input data as a vector of unsigned characters
+ * @param h0 Internal state of the SHA1
+ * @param h1 Internal state of the SHA1
+ * @param h2 Internal state of the SHA1
+ * @param h3 Internal state of the SHA1
+ * @param h4 Internal state of the SHA1
+ * @return A vector of unsigned characters containing the computed hash
+ */
+std::vector<unsigned char>
+MyCryptoLibrary::SHA1::hash(const std::vector<unsigned char> &inputV,
+                            uint32_t h0, uint32_t h1, uint32_t h2, uint32_t h3,
+                            uint32_t h4) {
+  _inputVpadded.clear();
+  initialization(inputV.size(), h0, h1, h2, h3, h4);
+  preProcessing(inputV);
+  processing();
+  std::vector<unsigned char> hashV;
+  hashV.reserve(SHA_DIGEST_LENGTH);
+
+  const uint32_t hashParts[] = {_h0, _h1, _h2, _h3, _h4};
+
+  for (uint32_t part : hashParts) {
+    hashV.push_back((part >> 24) & 0xFF);
+    hashV.push_back((part >> 16) & 0xFF);
+    hashV.push_back((part >> 8) & 0xFF);
+    hashV.push_back(part & 0xFF);
+  }
+  return hashV;
+}
+/******************************************************************************/
 // gets the expected hash output size
 std::size_t MyCryptoLibrary::SHA1::getHashOutputSize() {
   return _sizeOutputHash;
@@ -53,6 +89,30 @@ void MyCryptoLibrary::SHA1::initialization(const std::size_t sizeInputV) {
   _h2 = 0x98BADCFE;
   _h3 = 0x10325476;
   _h4 = 0xC3D2E1F0;
+  _ml = sizeInputV * CHAR_BIT; // message length in bits (always a multiple of
+                               // the number of bits in a character)
+}
+/******************************************************************************/
+/**
+ * Initializes internal state based on the input length and predefined input
+ * state
+ *
+ * @param sizeInputV The size of the original message in bytes
+ * @param h0 Internal state of the SHA1
+ * @param h1 Internal state of the SHA1
+ * @param h2 Internal state of the SHA1
+ * @param h3 Internal state of the SHA1
+ * @param h4 Internal state of the SHA1
+ */
+void MyCryptoLibrary::SHA1::initialization(const std::size_t sizeInputV,
+                                           uint32_t h0, uint32_t h1,
+                                           uint32_t h2, uint32_t h3,
+                                           uint32_t h4) {
+  _h0 = h0;
+  _h1 = h1;
+  _h2 = h2;
+  _h3 = h3;
+  _h4 = h4;
   _ml = sizeInputV * CHAR_BIT; // message length in bits (always a multiple of
                                // the number of bits in a character)
 }

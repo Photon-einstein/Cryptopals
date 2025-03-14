@@ -22,6 +22,7 @@ int main(void) {
   // check attacker
   std::string message = attacker->extractMessage(attacker->messageLocation);
   MessageFormat::MessageParsed msgParsed = attacker->parseMessage(message);
+  attacker->computeSHA1padding(msgParsed.msg);
   /* end of the work */
   end = clock();
   time = (double)(end - start) / CLOCKS_PER_SEC;
