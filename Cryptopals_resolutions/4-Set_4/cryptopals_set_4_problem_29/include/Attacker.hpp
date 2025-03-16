@@ -41,6 +41,19 @@ public:
    */
   std::vector<unsigned char> computeSHA1padding(const std::string &message);
 
+  /**
+   * @brief This method will try to tamper a message
+   *
+   * This method will try to tamper a message intercepted and
+   * deceive the server with another message authentication
+   * code (MAC)
+   *
+   * @param messageParsed The content of the message intercepted, parsed already
+   * @return A bool value, true if the attack was successful,
+   * false otherwise
+   */
+  bool tamperMessageTry(MessageFormat::MessageParsed &messageParsed);
+
   const std::string messageLocation{"./../input/intercepted_url.txt"};
 
 private:

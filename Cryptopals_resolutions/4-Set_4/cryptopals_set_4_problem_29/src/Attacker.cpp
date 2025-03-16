@@ -111,7 +111,7 @@ Attacker::computeSHA1padding(const std::string &message) {
         static_cast<unsigned char>((messageLenght >> (i * 8)) & 0xFF));
   }
   if (Attacker::debugFlag) {
-    std::cout << "\nAttacker log | Message padded: ";
+    std::cout << "\nAttacker log | Message padded:\n'";
     for (std::size_t i = 0; i < inputVpadded.size(); ++i) {
       if (i < message.size()) {
         printf("%c", inputVpadded[i]);
@@ -119,7 +119,46 @@ Attacker::computeSHA1padding(const std::string &message) {
         printf(" %02x", inputVpadded[i]);
       }
     }
+    std::cout << "'.\n" << std::endl;
   }
   return inputVpadded;
+}
+/******************************************************************************/
+/**
+ * @brief This method will try to tamper a message
+ *
+ * This method will try to tamper a message intercepted and
+ * deceive the server with another message authentication
+ * code (MAC)
+ *
+ * @param messageParsed The content of the message intercepted, parsed already
+ * @return A bool value, true if the attack was successful,
+ * false otherwise
+ */
+bool Attacker::tamperMessageTry(MessageFormat::MessageParsed &messageParsed) {
+  if (messageParsed.url.size() == 0 || messageParsed.msg.size() == 0 ||
+      messageParsed.mac.size() == 0) {
+    const std::string errorMessage =
+        "Attacker log | messageParsed empty as an input field at the method "
+        "Attacker::tamperMessageTry";
+    throw std::invalid_argument(errorMessage);
+  }
+  const unsigned int maxKeySize{64};
+  unsigned int keyLength;
+  const std::string appendMessageGoal{"&admin=true"};
+  std::vector<unsigned char> padding, newMessage;
+  std::string keyAndMessage{};
+  const char dummyChar = '#';
+  for (keyLength = 1; keyLength <= maxKeySize; ++keyLength) {
+    std::string keyAndMessage(keyLength, dummyChar);
+    keyAndMessage += messageParsed.msg;
+    padding = Attacker::computeSHA1padding(keyAndMessage);
+    // construction of new forged message:   msg || padding || forged msg
+    newMessage.clear();
+    newMessage.assign(messageParsed.msg.begin(), messageParsed.msg.end());
+    newMessage.insert(newMessage.end(), padding.begin(), padding.end());
+    // calculation of the new MAC TBD
+  }
+  return true;
 }
 /******************************************************************************/

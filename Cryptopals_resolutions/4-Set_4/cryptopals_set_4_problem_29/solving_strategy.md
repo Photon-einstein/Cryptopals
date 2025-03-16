@@ -27,12 +27,12 @@ By setting these as the new initial state, they can continue hashing extra data 
 
 **Example: Normal vs. Length Extension**
 
-Let's assume SHA-1 is hashing "hello":
+Let's assume SHA-1 is hashing "hello":  
 
-Normal SHA-1 Process
+Normal SHA-1 Process  
 
-Start with the fixed constants (a, b, c, d, e).
-Process "hello".
+Start with the fixed constants (a, b, c, d, e).  
+Process "hello".  
 Output: SHA1("hello") = 2cf24dba....
 Length Extension Attack
 
@@ -61,6 +61,23 @@ Result: A valid SHA-1 hash for "hello<glue-padding>world!".
 3. **Perform the Length Extension Attack**
 
     * Try different key lengths. (TBD)
+    Idea: The idea is that the attacker will append a dummy data to the message,   
+    simulating the addition of the key at the server side, after that he will add   
+    the padding to the message, and send the message to be tested in at the server.  
+
+    Attacker's Process  
+        1. Guess key_length = 16  
+        2. Compute SHA-1 padding for "user=bob&amount=1000&timestamp=1700000000" as if it were preceded by 16 bytes
+        of a secret key.
+        3. Append &isAdmin=true to escalate privileges.  
+        4. Compute the new MAC using SHA-1’s state from the intercepted message.  
+        Send:
+
+        ```bash
+        https://api.example.com/data?user=bob&amount=1000&timestamp=1700000000<PADDING>&isAdmin=true&mac=new_mac_here  
+        If the server accepts it, the attack succeeds. If not, try another key_length.  
+        ```
+
     * Attacker tests the server that he has guessed the right key length (TBD)
     * Compute the glue padding for key || message. (TBD)
     * Use your modified SHA-1 to hash the additional ";admin=true" data. (TBD)
