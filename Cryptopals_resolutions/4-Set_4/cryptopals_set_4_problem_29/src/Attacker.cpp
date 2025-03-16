@@ -31,7 +31,7 @@ std::string Attacker::extractMessage(const std::string &messageLocation) {
   buffer << file.rdbuf();
   std::string content = buffer.str();
   file.close();
-  if (Attacker::debugFlag) {
+  if (Attacker::_debugFlag) {
     std::cout << "Attacker log | File content read at the file "
               << messageLocation << "':\n'" << content << "'." << std::endl;
   }
@@ -74,7 +74,7 @@ Attacker::parseMessage(const std::string &message) {
   msgParsed.url = baseUrl;
   msgParsed.msg = query;
   msgParsed.mac = mac;
-  if (Attacker::debugFlag) {
+  if (Attacker::_debugFlag) {
     std::cout << "\nAttacker log | Message Parsed content:\nbase url: '"
               << msgParsed.url << "'\nmessage: '" << msgParsed.msg
               << "'\nmac: '" << msgParsed.mac << "'" << std::endl;
@@ -110,7 +110,7 @@ Attacker::computeSHA1padding(const std::string &message) {
     inputVpadded.push_back(
         static_cast<unsigned char>((messageLenght >> (i * 8)) & 0xFF));
   }
-  if (Attacker::debugFlag) {
+  if (Attacker::_debugFlagExtreme) {
     std::cout << "\nAttacker log | Message padded:\n'";
     for (std::size_t i = 0; i < inputVpadded.size(); ++i) {
       if (i < message.size()) {
@@ -146,9 +146,17 @@ bool Attacker::tamperMessageTry(MessageFormat::MessageParsed &messageParsed) {
   const unsigned int maxKeySize{64};
   unsigned int keyLength;
   const std::string appendMessageGoal{"&admin=true"};
-  std::vector<unsigned char> padding, newMessage;
+  std::vector<unsigned char> padding, newMessage, macByteFormat;
   std::string keyAndMessage{};
   const char dummyChar = '#';
+  // calculation of the new MAC TBD
+  // conversion hex to bytes of the mac
+  macByteFormat = Attacker::hexToBytes(messageParsed.mac);
+  if (Attacker::_debugFlag) {
+    std::cout << "\nAttacker log | Size of the mac = " << macByteFormat.size()
+              << " bytes" << std::endl;
+  }
+  // extraction of the internal state of the SHA1 of the current mac
   for (keyLength = 1; keyLength <= maxKeySize; ++keyLength) {
     std::string keyAndMessage(keyLength, dummyChar);
     keyAndMessage += messageParsed.msg;
@@ -157,8 +165,57 @@ bool Attacker::tamperMessageTry(MessageFormat::MessageParsed &messageParsed) {
     newMessage.clear();
     newMessage.assign(messageParsed.msg.begin(), messageParsed.msg.end());
     newMessage.insert(newMessage.end(), padding.begin(), padding.end());
-    // calculation of the new MAC TBD
+    // to be continued
   }
   return true;
+}
+/******************************************************************************/
+/**
+ * @brief This method will convert hexadecimal string to byte vector
+ *
+ * This method will convert hexadecimal string to byte vector, using zero
+ * alignment
+ *
+ * @param hexStr The input to be converted
+ *
+ * @return The byte vector resulting of the conversion
+ */
+std::vector<unsigned char> Attacker::hexToBytes(const std::string &hexStr) {
+  std::vector<unsigned char> bytes;
+  for (size_t i = 0; i < hexStr.length(); i += 2) {
+    std::string byteString = hexStr.substr(i, 2);
+    unsigned char byte =
+        static_cast<unsigned char>(std::stoi(byteString, nullptr, 16));
+    bytes.push_back(byte);
+  }
+  return bytes;
+}
+/******************************************************************************/
+/**
+ * @brief This method will extract the internal state of the SHA1
+ *
+ * This method will extract the internal state of the SHA1 from a mac in a byte
+ * format input
+ *
+ * @param macByteFormat The SHA1 mac in a byte format
+ *
+ * @return The internal state of the SHA1
+ */
+SHA1InternalState::SHA1InternalState Attacker::extractionSHA1InternalState(
+    const std::vector<unsigned char> &macByteFormat) {
+  SHA1InternalState::SHA1InternalState sha1InternalState;
+  const int internalStateRegisterSize{5}; // 32 bit / 4 byte each register
+  if (macByteFormat.size() != Attacker::_sha1DigestLength) {
+    const std::string errorMessage =
+        "Attacker log | invalid size of the input macByteFormat at the method "
+        "Attacker::extractionSHA1InternalState,"
+        " expected " +
+        std::to_string(Attacker::_sha1DigestLength) +
+        std::string(" bytes and got ") + std::to_string(macByteFormat.size()) +
+        " bytes instead.";
+    throw std::invalid_argument(errorMessage);
+  }
+  // To be continued
+  return sha1InternalState;
 }
 /******************************************************************************/
