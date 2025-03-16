@@ -4,6 +4,7 @@
 #include "./../include/MessageFormat.hpp"
 #include "./../include/SHA.hpp"
 #include "./../include/SHA1.hpp"
+#include "./../include/SHA1InternalState.hpp"
 #include "./../include/Server.hpp"
 
 class Attacker {
@@ -57,7 +58,33 @@ public:
   const std::string messageLocation{"./../input/intercepted_url.txt"};
 
 private:
-  static const bool debugFlag{true};
+  /**
+   * @brief This method will convert hexadecimal string to byte vector
+   *
+   * This method will convert hexadecimal string to byte vector, using zero
+   * alignment
+   *
+   * @param hexStr The input to be converted
+   *
+   * @return The byte vector resulting of the conversion
+   */
+  static std::vector<unsigned char> hexToBytes(const std::string &hexStr);
+
+  /**
+   * @brief This method will extract the internal state of the SHA1
+   *
+   * This method will extract the internal state of the SHA1 from a mac in a
+   * byte format input
+   *
+   * @param macByteFormat The SHA1 mac in a byte format
+   *
+   * @return The internal state of the SHA1
+   */
+  static SHA1InternalState::SHA1InternalState
+  extractionSHA1InternalState(const std::vector<unsigned char> &macByteFormat);
+
+  static const bool _debugFlag{true}, _debugFlagExtreme{false};
+  static const int _sha1DigestLength{20};
   std::shared_ptr<Server> _server;
   std::shared_ptr<MyCryptoLibrary::SHA> _sha;
   MessageFormat::MessageParsed _msgParsed;
