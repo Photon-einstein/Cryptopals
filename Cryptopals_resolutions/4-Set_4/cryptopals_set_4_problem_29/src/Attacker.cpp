@@ -205,6 +205,7 @@ SHA1InternalState::SHA1InternalState Attacker::extractionSHA1InternalState(
     const std::vector<unsigned char> &macByteFormat) {
   SHA1InternalState::SHA1InternalState sha1InternalState;
   const int internalStateRegisterSize{5}; // 32 bit / 4 byte each register
+  uint32_t registerSha1Value;
   if (macByteFormat.size() != Attacker::_sha1DigestLength) {
     const std::string errorMessage =
         "Attacker log | invalid size of the input macByteFormat at the method "
@@ -215,7 +216,18 @@ SHA1InternalState::SHA1InternalState Attacker::extractionSHA1InternalState(
         " bytes instead.";
     throw std::invalid_argument(errorMessage);
   }
-  // To be continued
+  for (int registerSha1Counter = 0;
+       registerSha1Counter < internalStateRegisterSize; ++registerSha1Counter) {
+    registerSha1Value =
+        static_cast<uint32_t>(macByteFormat[registerSha1Counter * 4]) << 24 |
+        (static_cast<uint32_t>(macByteFormat[registerSha1Counter * 4 + 1])
+         << 16) |
+        (static_cast<uint32_t>(macByteFormat[registerSha1Counter * 4 + 2])
+         << 8) |
+        (static_cast<uint32_t>(macByteFormat[registerSha1Counter * 4 + 3]));
+    sha1InternalState.internalState.push_back(registerSha1Value);
+  }
+  // TBD: Perform a good testing to ensure proper functioning
   return sha1InternalState;
 }
 /******************************************************************************/
