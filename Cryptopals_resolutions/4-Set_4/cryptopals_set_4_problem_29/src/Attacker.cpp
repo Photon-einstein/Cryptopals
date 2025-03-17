@@ -146,9 +146,12 @@ bool Attacker::tamperMessageTry(MessageFormat::MessageParsed &messageParsed) {
   const unsigned int maxKeySize{64};
   unsigned int keyLength;
   const std::string appendMessageGoal{"&admin=true"};
-  std::vector<unsigned char> padding, newMessage, macByteFormat;
+  const std::vector<unsigned char> appendMessageGoalV(appendMessageGoal.begin(),
+                                                      appendMessageGoal.end());
+  std::vector<unsigned char> padding, newMessage, macByteFormat, newMac;
   std::string keyAndMessage{};
   const char dummyChar = '#';
+  SHA1InternalState::SHA1InternalState sha1InternalState;
   // calculation of the new MAC TBD
   // conversion hex to bytes of the mac
   macByteFormat = Attacker::hexToBytes(messageParsed.mac);
@@ -157,6 +160,12 @@ bool Attacker::tamperMessageTry(MessageFormat::MessageParsed &messageParsed) {
               << " bytes" << std::endl;
   }
   // extraction of the internal state of the SHA1 of the current mac
+  sha1InternalState = Attacker::extractionSHA1InternalState(macByteFormat);
+  // Computation of the new MAC using SHA-1’s state from the intercepted message
+  newMac = _sha->hash(
+      appendMessageGoalV, sha1InternalState.internalState[0],
+      sha1InternalState.internalState[1], sha1InternalState.internalState[2],
+      sha1InternalState.internalState[3], sha1InternalState.internalState[4]);
   for (keyLength = 1; keyLength <= maxKeySize; ++keyLength) {
     std::string keyAndMessage(keyLength, dummyChar);
     keyAndMessage += messageParsed.msg;
@@ -165,7 +174,6 @@ bool Attacker::tamperMessageTry(MessageFormat::MessageParsed &messageParsed) {
     newMessage.clear();
     newMessage.assign(messageParsed.msg.begin(), messageParsed.msg.end());
     newMessage.insert(newMessage.end(), padding.begin(), padding.end());
-    // to be continued
   }
   return true;
 }
@@ -227,7 +235,6 @@ SHA1InternalState::SHA1InternalState Attacker::extractionSHA1InternalState(
         (static_cast<uint32_t>(macByteFormat[registerSha1Counter * 4 + 3]));
     sha1InternalState.internalState.push_back(registerSha1Value);
   }
-  // TBD: Perform a good testing to ensure proper functioning
   return sha1InternalState;
 }
 /******************************************************************************/

@@ -86,7 +86,7 @@ private:
   static const bool _debugFlag{true}, _debugFlagExtreme{false};
   static const int _sha1DigestLength{20};
   std::shared_ptr<Server> _server;
-  std::shared_ptr<MyCryptoLibrary::SHA> _sha;
+  std::shared_ptr<MyCryptoLibrary::SHA1> _sha;
   MessageFormat::MessageParsed _msgParsed;
 };
 
