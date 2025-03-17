@@ -166,6 +166,7 @@ bool Attacker::tamperMessageTry(MessageFormat::MessageParsed &messageParsed) {
       appendMessageGoalV, sha1InternalState.internalState[0],
       sha1InternalState.internalState[1], sha1InternalState.internalState[2],
       sha1InternalState.internalState[3], sha1InternalState.internalState[4]);
+  // Trial and error to find the length of private key of the server
   for (keyLength = 1; keyLength <= maxKeySize; ++keyLength) {
     std::string keyAndMessage(keyLength, dummyChar);
     keyAndMessage += messageParsed.msg;
@@ -175,6 +176,7 @@ bool Attacker::tamperMessageTry(MessageFormat::MessageParsed &messageParsed) {
     newMessage.assign(messageParsed.msg.begin(), messageParsed.msg.end());
     newMessage.insert(newMessage.end(), padding.begin(), padding.end());
   }
+  // TODO
   return true;
 }
 /******************************************************************************/
