@@ -1,4 +1,5 @@
 #include <iostream>
+#include <map>
 #include <memory>
 #include <string>
 #include <time.h>
@@ -20,10 +21,12 @@ int main(void) {
   std::shared_ptr<Attacker> attacker =
       std::make_shared<Attacker>(server, writeToFile);
   // check attacker
-  std::string message = attacker->extractMessage(attacker->messageLocation);
-  MessageFormat::MessageParsed msgParsed = attacker->parseMessage(message);
-  attacker->computeSHA1padding(msgParsed.msg);
-  attacker->tamperMessageTry(msgParsed);
+  bool attackResult = attacker->lengthExtensionAttackAtSHA1();
+  std::map<int, std::string> m;
+  m.insert({0, "False"});
+  m.insert({1, "True"});
+  std::cout << "\nAttacker result of LengthExtensionAttackSHA1: "
+            << m[attackResult] << std::endl;
   /* end of the work */
   end = clock();
   time = (double)(end - start) / CLOCKS_PER_SEC;
