@@ -5,6 +5,7 @@
 #include <sstream>
 
 #include "./../include/Attacker.hpp"
+#include "./../include/MessageExtractionFacility.hpp"
 
 /* constructor / destructor */
 Attacker::Attacker(const std::shared_ptr<Server> &server, bool writeToFile) {
@@ -14,10 +15,28 @@ Attacker::Attacker(const std::shared_ptr<Server> &server, bool writeToFile) {
 Attacker::~Attacker() {}
 /******************************************************************************/
 /**
+ * @brief This method will try perform the Length Extension Attack at
+ * the SHA1
+ *
+ * This method will try to perform the Length Extension Attack at the SHA1
+ *
+ * @return A bool value, true if the attack was successful,
+ * false otherwise
+ */
+bool Attacker::lengthExtensionAttackAtSHA1() {
+  std::string message = Attacker::extractMessage(Attacker::messageLocation);
+  MessageFormat::MessageParsed msgParsed =
+      MessageExtractionFacility::parseMessage(message, Attacker::_debugFlag);
+  Attacker::computeSHA1padding(msgParsed.msg);
+  return Attacker::tamperMessageTry(msgParsed);
+}
+/******************************************************************************/
+/**
  * @brief This method extracts the message intercepted
  *
  * This method will extract the message intercepted
  *
+ * @param messageLocation The location of the message to be extracted
  * @return The message intercepted in a string format
  */
 std::string Attacker::extractMessage(const std::string &messageLocation) {
@@ -39,55 +58,12 @@ std::string Attacker::extractMessage(const std::string &messageLocation) {
 }
 /******************************************************************************/
 /**
- * @brief This method parses the message intercepted
- *
- * This method will parses the message intercepted,
- * extracting url, message and mac fields
- *
- * @return The message parsed
- */
-MessageFormat::MessageParsed
-Attacker::parseMessage(const std::string &message) {
-  if (message.empty()) {
-    const std::string errorMessage =
-        "Attacker log | message empty at the method Attacker::parseMessage";
-    throw std::invalid_argument(errorMessage);
-  }
-  std::size_t queryPos, macPos;
-  std::string baseUrl, query, mac;
-  queryPos = message.find("?");
-  MessageFormat::MessageParsed msgParsed;
-  if (queryPos == std::string::npos) {
-    const std::string errorMessage = "Attacker log | query message empty at "
-                                     "the method Attacker::parseMessage";
-    throw std::invalid_argument(errorMessage);
-  }
-  macPos = message.find("&mac=");
-  if (macPos == std::string::npos) {
-    const std::string errorMessage =
-        "Attacker log | mac not found at the method Attacker::parseMessage";
-    throw std::invalid_argument(errorMessage);
-  }
-  baseUrl = message.substr(0, queryPos);
-  query = message.substr(queryPos + 1, macPos - queryPos - 1);
-  mac = message.substr(macPos + 5);
-  msgParsed.url = baseUrl;
-  msgParsed.msg = query;
-  msgParsed.mac = mac;
-  if (Attacker::_debugFlag) {
-    std::cout << "\nAttacker log | Message Parsed content:\nbase url: '"
-              << msgParsed.url << "'\nmessage: '" << msgParsed.msg
-              << "'\nmac: '" << msgParsed.mac << "'" << std::endl;
-  }
-  return msgParsed;
-}
-/******************************************************************************/
-/**
  * @brief This method will append the padding to the message
  *
  * This method will append the padding according to the requirements
  * of the SHA1 hash
  *
+ * @param message The message to be padded
  * @return The message padded
  */
 std::vector<unsigned char>
@@ -175,8 +151,8 @@ bool Attacker::tamperMessageTry(MessageFormat::MessageParsed &messageParsed) {
     newMessage.clear();
     newMessage.assign(messageParsed.msg.begin(), messageParsed.msg.end());
     newMessage.insert(newMessage.end(), padding.begin(), padding.end());
+    // Test the keyLength in the server
   }
-  // TODO
   return true;
 }
 /******************************************************************************/

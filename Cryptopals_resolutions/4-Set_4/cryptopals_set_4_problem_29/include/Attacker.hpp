@@ -14,23 +14,25 @@ public:
   ~Attacker();
 
   /**
+   * @brief This method will try perform the Length Extension Attack at
+   * the SHA1
+   *
+   * This method will try to perform the Length Extension Attack at the SHA1
+   *
+   * @return A bool value, true if the attack was successful,
+   * false otherwise
+   */
+  bool lengthExtensionAttackAtSHA1();
+
+  /**
    * @brief This method extracts the message intercepted
    *
    * This method will extract the message intercepted
    *
+   * @param messageLocation The location of the message to be extracted
    * @return The message intercepted in a string format
    */
   static std::string extractMessage(const std::string &messageLocation);
-
-  /**
-   * @brief This method parses the message intercepted
-   *
-   * This method will parses the message intercepted,
-   * extracting url, message and mac fields
-   *
-   * @return The message parsed
-   */
-  MessageFormat::MessageParsed parseMessage(const std::string &message);
 
   /**
    * @brief This method will append the padding to the message
@@ -38,6 +40,7 @@ public:
    * This method will append the padding according to the requirements
    * of the SHA1 hash
    *
+   * @param message The message to be padded
    * @return The message padded
    */
   std::vector<unsigned char> computeSHA1padding(const std::string &message);
