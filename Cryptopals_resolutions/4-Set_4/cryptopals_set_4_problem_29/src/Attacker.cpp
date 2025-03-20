@@ -160,12 +160,9 @@ bool Attacker::tamperMessageTry(MessageFormat::MessageParsed &messageParsed) {
                       appendMessageGoalV.end());
     // Test the keyLength in the server
     std::string macServerHex, macReceivedHex;
-    serverReply = Attacker::_server->validateMac(newMessage, newMac,
-                                                 macServerHex, macReceivedHex);
+    serverReply = Attacker::_server->validateMac(newMessage, newMac);
     std::cout << "For key length: " << keyLength
-              << " server reply: " << serverReply
-              << "| MacServerHex = " << macServerHex
-              << " | MacAttackerHex = " << macReceivedHex << std::endl;
+              << " server reply: " << serverReply << std::endl;
     if (serverReply) {
       std::cout << "\nAttacker log | Size of the server key = " << keyLength
                 << " bytes" << std::endl;

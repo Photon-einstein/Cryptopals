@@ -51,9 +51,7 @@ Server::~Server() {}
  * mac produced by the server
  */
 bool Server::validateMac(const std::vector<unsigned char> &msg,
-                         const std::vector<unsigned char> &mac,
-                         std::string &macServerHex,
-                         std::string &macReceivedHex) {
+                         const std::vector<unsigned char> &mac) {
   if (mac.size() != SHA_DIGEST_LENGTH) {
     const std::string errorMessage = "Server log | mac received in the method "
                                      "Server::validateMac does not match the " +
@@ -68,22 +66,7 @@ bool Server::validateMac(const std::vector<unsigned char> &msg,
   std::vector<unsigned char> macServer;
   msgToValidateV.insert(msgToValidateV.end(), msg.begin(), msg.end());
   macServer = Server::_sha->hash(msgToValidateV);
-  macServerHex = MessageExtractionFacility::toHexString(macServer);
-  macReceivedHex = MessageExtractionFacility::toHexString(mac);
   return macServer == mac;
-}
-/******************************************************************************/
-std::string Server::generateSecureMac() {
-  std::string msg{"user=bob&amount=1000&timestamp=1700000000"};
-  std::vector<unsigned char> payload(Server::_keyServer.begin(),
-                                     Server::_keyServer.end());
-  payload.insert(payload.end(), msg.begin(), msg.end());
-  std::vector<unsigned char> sha1Hash = Server::_sha->hash(payload);
-  std::string sha1HashS = MessageExtractionFacility::toHexString(sha1Hash);
-  std::cout << "Server log | sha1(key server || message) = " << sha1HashS
-            << " \n"
-            << std::endl;
-  return sha1HashS;
 }
 /******************************************************************************/
 /**
@@ -127,23 +110,5 @@ Server::computeSHA1padding(const std::string &message) {
     std::cout << "'.\n" << std::endl;
   }
   return inputVpadded;
-}
-/******************************************************************************/
-std::string Server::generateMacGoal() {
-  std::string msg{"user=bob&amount=1000&timestamp=1700000000"};
-  std::vector<unsigned char> payload(Server::_keyServer.begin(),
-                                     Server::_keyServer.end()),
-      payloadPadded;
-  payload.insert(payload.end(), msg.begin(), msg.end());
-  std::string payloadS(payload.begin(), payload.end()), appendS{"&admin=true"};
-  payloadPadded = Server::computeSHA1padding(payloadS);
-  payloadPadded.insert(payloadPadded.end(), appendS.begin(), appendS.end());
-  std::vector<unsigned char> sha1Hash = Server::_sha->hash(payloadPadded);
-  std::string sha1HashS = MessageExtractionFacility::toHexString(sha1Hash);
-  std::cout << "Server log | sha1(key server || message || <PADDING> || "
-               "'&admin=true' ) = "
-            << sha1HashS << " \n"
-            << std::endl;
-  return sha1HashS;
 }
 /******************************************************************************/

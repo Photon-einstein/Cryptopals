@@ -49,14 +49,17 @@ MyCryptoLibrary::SHA1::hash(const std::vector<unsigned char> &inputV) {
  * @param h2 Internal state of the SHA1
  * @param h3 Internal state of the SHA1
  * @param h4 Internal state of the SHA1
+ * @param messageSize Size of the entire message that was intended to hash from
+ * the start
+ *
  * @return A vector of unsigned characters containing the computed hash
  */
 std::vector<unsigned char>
 MyCryptoLibrary::SHA1::hash(const std::vector<unsigned char> &inputV,
                             uint32_t h0, uint32_t h1, uint32_t h2, uint32_t h3,
-                            uint32_t h4, std::size_t originalMessageSize) {
+                            uint32_t h4, std::size_t messageSize) {
   _inputVpadded.clear();
-  initialization(originalMessageSize, h0, h1, h2, h3, h4);
+  initialization(messageSize, h0, h1, h2, h3, h4);
   preProcessing(inputV);
   processing();
   std::vector<unsigned char> hashV;
