@@ -52,3 +52,28 @@ MessageExtractionFacility::parseMessage(const std::string &message,
   return msgParsed;
 }
 /******************************************************************************/
+/**
+ * @brief This method will convert hexadecimal string to byte vector
+ *
+ * This method will convert hexadecimal string to byte vector, using zero
+ * alignment
+ *
+ * @param hexStr The input to be converted
+ *
+ * @return The byte vector resulting of the conversion
+ */
+std::vector<unsigned char>
+MessageExtractionFacility::hexToBytes(const std::string &hexStr) {
+  if (hexStr.length() % 2 != 0) {
+    throw std::invalid_argument("Invalid hex string: length must be even.");
+  }
+  std::vector<unsigned char> bytes;
+  for (size_t i = 0; i < hexStr.length(); i += 2) {
+    std::string byteString = hexStr.substr(i, 2);
+    unsigned char byte =
+        static_cast<unsigned char>(std::stoi(byteString, nullptr, 16));
+    bytes.push_back(byte);
+  }
+  return bytes;
+}
+/******************************************************************************/

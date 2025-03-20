@@ -32,7 +32,7 @@ public:
    * @param messageLocation The location of the message to be extracted
    * @return The message intercepted in a string format
    */
-  static std::string extractMessage(const std::string &messageLocation);
+  std::string extractMessage(const std::string &messageLocation);
 
   /**
    * @brief This method will append the padding to the message
@@ -58,21 +58,7 @@ public:
    */
   bool tamperMessageTry(MessageFormat::MessageParsed &messageParsed);
 
-  const std::string messageLocation{"./../input/intercepted_url.txt"};
-
 private:
-  /**
-   * @brief This method will convert hexadecimal string to byte vector
-   *
-   * This method will convert hexadecimal string to byte vector, using zero
-   * alignment
-   *
-   * @param hexStr The input to be converted
-   *
-   * @return The byte vector resulting of the conversion
-   */
-  static std::vector<unsigned char> hexToBytes(const std::string &hexStr);
-
   /**
    * @brief This method will extract the internal state of the SHA1
    *
@@ -88,6 +74,7 @@ private:
 
   static const bool _debugFlag{true}, _debugFlagExtreme{false};
   static const int _sha1DigestLength{20};
+  const std::string messageLocation{"./../input/intercepted_url.txt"};
   std::shared_ptr<Server> _server;
   std::shared_ptr<MyCryptoLibrary::SHA1> _sha;
   MessageFormat::MessageParsed _msgParsed;
