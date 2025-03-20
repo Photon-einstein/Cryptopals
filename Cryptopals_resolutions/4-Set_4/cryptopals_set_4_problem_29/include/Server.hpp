@@ -38,10 +38,7 @@ public:
    * mac produced by the server
    */
   bool validateMac(const std::vector<unsigned char> &msg,
-                   const std::vector<unsigned char> &mac,
-                   std::string &macServerHex, std::string &macReceivedHex);
-
-  std::string generateSecureMac();
+                   const std::vector<unsigned char> &mac);
 
   /**
    * @brief This method will append the padding to the message
@@ -53,8 +50,6 @@ public:
    * @return The message padded
    */
   std::vector<unsigned char> computeSHA1padding(const std::string &message);
-
-  std::string generateMacGoal();
 
 private:
   const bool _debugFlag;
