@@ -19,12 +19,12 @@ int main(void) {
   std::shared_ptr<Server> server = std::make_shared<Server>(debugFlag);
   const bool writeToFile{true};
   std::shared_ptr<Attacker> attacker =
-      std::make_shared<Attacker>(server, writeToFile);
+      std::make_shared<Attacker>(server, debugFlag);
   // check attacker
   bool attackResult = attacker->lengthExtensionAttackAtSHA1();
   std::map<int, std::string> m;
-  m.insert({0, "False"});
-  m.insert({1, "True"});
+  m.insert({0, "Failed"});
+  m.insert({1, "Succeed"});
   std::cout << "\nAttacker result of LengthExtensionAttackSHA1: "
             << m[attackResult] << std::endl;
   /* end of the work */

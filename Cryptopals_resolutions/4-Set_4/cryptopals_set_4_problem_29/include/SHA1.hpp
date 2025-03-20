@@ -45,7 +45,10 @@ public:
    * @param h2 Internal state of the SHA1
    * @param h3 Internal state of the SHA1
    * @param h4 Internal state of the SHA1
-   * @return A vector of unsigned characters containing the computed hash
+   * @param messageSize Size of the entire message that was intended to hash
+   * from the start
+   *
+   * @return A vector of bytes containing the computed hash
    */
   std::vector<unsigned char> hash(const std::vector<unsigned char> &inputV,
                                   uint32_t h0, uint32_t h1, uint32_t h2,

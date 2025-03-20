@@ -52,7 +52,7 @@ MyCryptoLibrary::SHA1::hash(const std::vector<unsigned char> &inputV) {
  * @param messageSize Size of the entire message that was intended to hash from
  * the start
  *
- * @return A vector of unsigned characters containing the computed hash
+ * @return A vector of bytes containing the computed hash
  */
 std::vector<unsigned char>
 MyCryptoLibrary::SHA1::hash(const std::vector<unsigned char> &inputV,
