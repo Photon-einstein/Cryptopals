@@ -15,8 +15,9 @@ jobs:
         uses: actions/checkout@v4
       
       - name: Set up environment variable
-        run: echo "AES_256_KEY_SERVER_SET_4_PROBLEM_28=${{ secrets.AES_256_KEY_SERVER_SET_4_PROBLEM_28 }}" >> $GITHUB_ENV
-        run: echo "KEY_SERVER_SET_4_PROBLEM_29=${{ secrets.KEY_SERVER_SET_4_PROBLEM_29 }}" >> $GITHUB_ENV
+        run: |
+        echo "AES_256_KEY_SERVER_SET_4_PROBLEM_28=${{ secrets.AES_256_KEY_SERVER_SET_4_PROBLEM_28 }}" >> $GITHUB_ENV
+        echo "KEY_SERVER_SET_4_PROBLEM_29=${{ secrets.KEY_SERVER_SET_4_PROBLEM_29 }}" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: |
