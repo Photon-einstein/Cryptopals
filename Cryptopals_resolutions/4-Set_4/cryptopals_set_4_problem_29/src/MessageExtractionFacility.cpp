@@ -1,6 +1,8 @@
 #include "./../include/MessageExtractionFacility.hpp"
 
+#include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 
 /**
@@ -75,5 +77,25 @@ MessageExtractionFacility::hexToBytes(const std::string &hexStr) {
     bytes.push_back(byte);
   }
   return bytes;
+}
+/******************************************************************************/
+/**
+ * @brief This method converts a vector into a string in hex format
+ *
+ * This method will convert a vector into a string of hexadecimal
+ * characters, padded with zero
+ *
+ * @param data The vector with chars to be converted
+ * @return A string containing the chars with hexadecimal format, zero padded
+ */
+std::string
+MessageExtractionFacility::toHexString(const std::vector<unsigned char> &data) {
+  std::stringstream ss;
+  ss << std::hex << std::setfill('0'); // Use hex format and pad with zeros
+  for (unsigned char byte : data) {
+    ss << std::setw(2)
+       << static_cast<int>(byte); // Convert to int to print properly
+  }
+  return ss.str();
 }
 /******************************************************************************/

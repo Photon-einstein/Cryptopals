@@ -49,7 +49,8 @@ public:
    */
   std::vector<unsigned char> hash(const std::vector<unsigned char> &inputV,
                                   uint32_t h0, uint32_t h1, uint32_t h2,
-                                  uint32_t h3, uint32_t h4);
+                                  uint32_t h3, uint32_t h4,
+                                  std::size_t originalMessageSize);
 
 private:
   /**
