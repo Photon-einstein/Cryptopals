@@ -22,8 +22,27 @@ public:
   explicit Server(const bool debugFlag);
   ~Server();
 
+  /**
+   * @brief This method will validate if a given message has produces the
+   * given message authentication code (MAC)
+   *
+   * This method will validate if a given message has produces the
+   * given message authentication code (MAC), it will perform the following
+   * test: SHA1(private server key || msg) == mac
+   *
+   * @param msg The message to be authenticated
+   * @param mac The message authentication code (mac) to be validated in
+   * hexadecimal format
+   *
+   * @return A bool value, true if the mac received matches the
+   * mac produced by the server
+   */
+  bool validateMac(const std::vector<unsigned char> &msg,
+                   const std::vector<unsigned char> &mac);
+
 private:
   const bool _debugFlag;
+  std::vector<unsigned char> _keyServer{};
   std::shared_ptr<MyCryptoLibrary::SHA> _sha;
 };
 

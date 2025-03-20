@@ -10,6 +10,7 @@
 /* constructor / destructor */
 Attacker::Attacker(const std::shared_ptr<Server> &server, bool writeToFile) {
   _sha = std::make_shared<MyCryptoLibrary::SHA1>();
+  _server = server;
 }
 /******************************************************************************/
 Attacker::~Attacker() {}
@@ -120,17 +121,18 @@ bool Attacker::tamperMessageTry(MessageFormat::MessageParsed &messageParsed) {
     throw std::invalid_argument(errorMessage);
   }
   const unsigned int maxKeySize{64};
-  unsigned int keyLength;
+  unsigned int keyLength, keyLengthFixed{0};
   const std::string appendMessageGoal{"&admin=true"};
   const std::vector<unsigned char> appendMessageGoalV(appendMessageGoal.begin(),
                                                       appendMessageGoal.end());
-  std::vector<unsigned char> padding, newMessage, macByteFormat, newMac;
+  std::vector<unsigned char> MessagePadded, newMessage, macByteFormat, newMac;
   std::string keyAndMessage{};
   const char dummyChar = '#';
+  bool serverReply;
   SHA1InternalState::SHA1InternalState sha1InternalState;
-  // calculation of the new MAC TBD
+  // calculation of the new MAC
   // conversion hex to bytes of the mac
-  macByteFormat = Attacker::hexToBytes(messageParsed.mac);
+  macByteFormat = MessageExtractionFacility::hexToBytes(messageParsed.mac);
   if (Attacker::_debugFlag) {
     std::cout << "\nAttacker log | Size of the mac = " << macByteFormat.size()
               << " bytes" << std::endl;
@@ -146,35 +148,24 @@ bool Attacker::tamperMessageTry(MessageFormat::MessageParsed &messageParsed) {
   for (keyLength = 1; keyLength <= maxKeySize; ++keyLength) {
     std::string keyAndMessage(keyLength, dummyChar);
     keyAndMessage += messageParsed.msg;
-    padding = Attacker::computeSHA1padding(keyAndMessage);
+    MessagePadded = Attacker::computeSHA1padding(keyAndMessage);
     // construction of new forged message:   msg || padding || forged msg
     newMessage.clear();
-    newMessage.assign(messageParsed.msg.begin(), messageParsed.msg.end());
-    newMessage.insert(newMessage.end(), padding.begin(), padding.end());
+    newMessage.assign(MessagePadded.begin() + keyLength, MessagePadded.end());
+    newMessage.insert(newMessage.end(), appendMessageGoalV.begin(),
+                      appendMessageGoalV.end());
     // Test the keyLength in the server
+    serverReply = Attacker::_server->validateMac(newMessage, newMac);
+    std::cout << "For key length: " << keyLength
+              << " the server reply was: " << serverReply << std::endl;
+    if (serverReply) {
+      std::cout << "\nAttacker log | Size of the server key = " << keyLength
+                << " bytes" << std::endl;
+      keyLengthFixed = keyLength;
+      break;
+    }
   }
   return true;
-}
-/******************************************************************************/
-/**
- * @brief This method will convert hexadecimal string to byte vector
- *
- * This method will convert hexadecimal string to byte vector, using zero
- * alignment
- *
- * @param hexStr The input to be converted
- *
- * @return The byte vector resulting of the conversion
- */
-std::vector<unsigned char> Attacker::hexToBytes(const std::string &hexStr) {
-  std::vector<unsigned char> bytes;
-  for (size_t i = 0; i < hexStr.length(); i += 2) {
-    std::string byteString = hexStr.substr(i, 2);
-    unsigned char byte =
-        static_cast<unsigned char>(std::stoi(byteString, nullptr, 16));
-    bytes.push_back(byte);
-  }
-  return bytes;
 }
 /******************************************************************************/
 /**
