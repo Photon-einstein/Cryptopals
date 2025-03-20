@@ -54,9 +54,9 @@ MyCryptoLibrary::SHA1::hash(const std::vector<unsigned char> &inputV) {
 std::vector<unsigned char>
 MyCryptoLibrary::SHA1::hash(const std::vector<unsigned char> &inputV,
                             uint32_t h0, uint32_t h1, uint32_t h2, uint32_t h3,
-                            uint32_t h4) {
+                            uint32_t h4, std::size_t originalMessageSize) {
   _inputVpadded.clear();
-  initialization(inputV.size(), h0, h1, h2, h3, h4);
+  initialization(originalMessageSize, h0, h1, h2, h3, h4);
   preProcessing(inputV);
   processing();
   std::vector<unsigned char> hashV;

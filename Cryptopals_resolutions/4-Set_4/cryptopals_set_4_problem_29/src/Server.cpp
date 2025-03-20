@@ -51,7 +51,9 @@ Server::~Server() {}
  * mac produced by the server
  */
 bool Server::validateMac(const std::vector<unsigned char> &msg,
-                         const std::vector<unsigned char> &mac) {
+                         const std::vector<unsigned char> &mac,
+                         std::string &macServerHex,
+                         std::string &macReceivedHex) {
   if (mac.size() != SHA_DIGEST_LENGTH) {
     const std::string errorMessage = "Server log | mac received in the method "
                                      "Server::validateMac does not match the " +
@@ -66,6 +68,82 @@ bool Server::validateMac(const std::vector<unsigned char> &msg,
   std::vector<unsigned char> macServer;
   msgToValidateV.insert(msgToValidateV.end(), msg.begin(), msg.end());
   macServer = Server::_sha->hash(msgToValidateV);
+  macServerHex = MessageExtractionFacility::toHexString(macServer);
+  macReceivedHex = MessageExtractionFacility::toHexString(mac);
   return macServer == mac;
+}
+/******************************************************************************/
+std::string Server::generateSecureMac() {
+  std::string msg{"user=bob&amount=1000&timestamp=1700000000"};
+  std::vector<unsigned char> payload(Server::_keyServer.begin(),
+                                     Server::_keyServer.end());
+  payload.insert(payload.end(), msg.begin(), msg.end());
+  std::vector<unsigned char> sha1Hash = Server::_sha->hash(payload);
+  std::string sha1HashS = MessageExtractionFacility::toHexString(sha1Hash);
+  std::cout << "Server log | sha1(key server || message) = " << sha1HashS
+            << " \n"
+            << std::endl;
+  return sha1HashS;
+}
+/******************************************************************************/
+/**
+ * @brief This method will append the padding to the message
+ *
+ * This method will append the padding according to the requirements
+ * of the SHA1 hash
+ *
+ * @param message The message to be padded
+ * @return The message padded
+ */
+std::vector<unsigned char>
+Server::computeSHA1padding(const std::string &message) {
+  // Initialize padded input vector with original message
+  uint64_t messageLenght{message.size() * CHAR_BIT};
+  std::vector<unsigned char> inputVpadded(message.begin(), message.end());
+  // Step 1: Append the bit '1' (equivalent to adding 0x80)
+  inputVpadded.push_back(0x80);
+
+  // Step 2: Append '0' bits until the length of the message (in bits) is
+  // congruent to 448 mod 512
+  while ((inputVpadded.size() * 8) % 512 != 448) {
+    inputVpadded.push_back(0x00);
+  }
+
+  // Step 3: Append the original message length (ml) as a 64-bit big-endian
+  // integer _ml is already in bits
+  for (int i = 7; i >= 0; --i) {
+    inputVpadded.push_back(
+        static_cast<unsigned char>((messageLenght >> (i * 8)) & 0xFF));
+  }
+  if (Server::_debugFlagExtreme) {
+    std::cout << "\nServer log | Message padded:\n'";
+    for (std::size_t i = 0; i < inputVpadded.size(); ++i) {
+      if (i < message.size()) {
+        printf("%c", inputVpadded[i]);
+      } else {
+        printf(" %02x", inputVpadded[i]);
+      }
+    }
+    std::cout << "'.\n" << std::endl;
+  }
+  return inputVpadded;
+}
+/******************************************************************************/
+std::string Server::generateMacGoal() {
+  std::string msg{"user=bob&amount=1000&timestamp=1700000000"};
+  std::vector<unsigned char> payload(Server::_keyServer.begin(),
+                                     Server::_keyServer.end()),
+      payloadPadded;
+  payload.insert(payload.end(), msg.begin(), msg.end());
+  std::string payloadS(payload.begin(), payload.end()), appendS{"&admin=true"};
+  payloadPadded = Server::computeSHA1padding(payloadS);
+  payloadPadded.insert(payloadPadded.end(), appendS.begin(), appendS.end());
+  std::vector<unsigned char> sha1Hash = Server::_sha->hash(payloadPadded);
+  std::string sha1HashS = MessageExtractionFacility::toHexString(sha1Hash);
+  std::cout << "Server log | sha1(key server || message || <PADDING> || "
+               "'&admin=true' ) = "
+            << sha1HashS << " \n"
+            << std::endl;
+  return sha1HashS;
 }
 /******************************************************************************/

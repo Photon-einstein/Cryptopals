@@ -31,6 +31,17 @@ MessageFormat::MessageParsed parseMessage(const std::string &message,
  */
 std::vector<unsigned char> hexToBytes(const std::string &hexStr);
 
+/**
+ * @brief This method converts a vector into a string in hex format
+ *
+ * This method will convert a vector into a string of hexadecimal
+ * characters, padded with zero
+ *
+ * @param data The vector with chars to be converted
+ * @return A string containing the chars with hexadecimal format, zero padded
+ */
+std::string toHexString(const std::vector<unsigned char> &data);
+
 }; // namespace MessageExtractionFacility
 
 #endif // MESSAGE_EXTRACTION_FACILITY_HPP

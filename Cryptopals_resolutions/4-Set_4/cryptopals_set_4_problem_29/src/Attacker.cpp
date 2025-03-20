@@ -125,10 +125,11 @@ bool Attacker::tamperMessageTry(MessageFormat::MessageParsed &messageParsed) {
   const std::string appendMessageGoal{"&admin=true"};
   const std::vector<unsigned char> appendMessageGoalV(appendMessageGoal.begin(),
                                                       appendMessageGoal.end());
-  std::vector<unsigned char> MessagePadded, newMessage, macByteFormat, newMac;
+  std::vector<unsigned char> messagePadded, newMessage, macByteFormat, newMac;
   std::string keyAndMessage{};
   const char dummyChar = '#';
   bool serverReply;
+  std::size_t messagePaddedSize;
   SHA1InternalState::SHA1InternalState sha1InternalState;
   // calculation of the new MAC
   // conversion hex to bytes of the mac
@@ -139,25 +140,32 @@ bool Attacker::tamperMessageTry(MessageFormat::MessageParsed &messageParsed) {
   }
   // extraction of the internal state of the SHA1 of the current mac
   sha1InternalState = Attacker::extractionSHA1InternalState(macByteFormat);
-  // Computation of the new MAC using SHA-1’s state from the intercepted message
-  newMac = _sha->hash(
-      appendMessageGoalV, sha1InternalState.internalState[0],
-      sha1InternalState.internalState[1], sha1InternalState.internalState[2],
-      sha1InternalState.internalState[3], sha1InternalState.internalState[4]);
   // Trial and error to find the length of private key of the server
   for (keyLength = 1; keyLength <= maxKeySize; ++keyLength) {
     std::string keyAndMessage(keyLength, dummyChar);
     keyAndMessage += messageParsed.msg;
-    MessagePadded = Attacker::computeSHA1padding(keyAndMessage);
+    messagePadded = Attacker::computeSHA1padding(keyAndMessage);
+    // Computation of the new MAC using SHA-1’s state from the intercepted
+    // message
+    messagePaddedSize = messagePadded.size();
+    newMac = _sha->hash(
+        appendMessageGoalV, sha1InternalState.internalState[0],
+        sha1InternalState.internalState[1], sha1InternalState.internalState[2],
+        sha1InternalState.internalState[3], sha1InternalState.internalState[4],
+        messagePaddedSize + appendMessageGoalV.size());
     // construction of new forged message:   msg || padding || forged msg
     newMessage.clear();
-    newMessage.assign(MessagePadded.begin() + keyLength, MessagePadded.end());
+    newMessage.assign(messagePadded.begin() + keyLength, messagePadded.end());
     newMessage.insert(newMessage.end(), appendMessageGoalV.begin(),
                       appendMessageGoalV.end());
     // Test the keyLength in the server
-    serverReply = Attacker::_server->validateMac(newMessage, newMac);
+    std::string macServerHex, macReceivedHex;
+    serverReply = Attacker::_server->validateMac(newMessage, newMac,
+                                                 macServerHex, macReceivedHex);
     std::cout << "For key length: " << keyLength
-              << " the server reply was: " << serverReply << std::endl;
+              << " server reply: " << serverReply
+              << "| MacServerHex = " << macServerHex
+              << " | MacAttackerHex = " << macReceivedHex << std::endl;
     if (serverReply) {
       std::cout << "\nAttacker log | Size of the server key = " << keyLength
                 << " bytes" << std::endl;
