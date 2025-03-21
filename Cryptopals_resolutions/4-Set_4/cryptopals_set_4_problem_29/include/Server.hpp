@@ -32,7 +32,7 @@ public:
    *
    * @param msg The message to be authenticated
    * @param mac The message authentication code (mac) to be validated in
-   * hexadecimal format
+   * binary format
    *
    * @return A bool value, true if the mac received matches the
    * mac produced by the server, false otherwise

@@ -68,6 +68,53 @@ TEST_F(SHA1Test, Hash_EmptyInput_ShouldMatchReference) {
 }
 
 /**
+ * @test Test the correctness of the tunned hash function.
+ * @brief Ensures that hash sha1 output is the expected one
+ */
+TEST_F(SHA1Test,
+       Hash_EnglishSentenceInputWithInternalRegisters_ShouldMatchReference) {
+  _testInput = "This is a test!";
+  _input.insert(_input.end(), _testInput.begin(), _testInput.end());
+  uint32_t h0 = 0x67452301;
+  uint32_t h1 = 0xEFCDAB89;
+  uint32_t h2 = 0x98BADCFE;
+  uint32_t h3 = 0x10325476;
+  uint32_t h4 = 0xC3D2E1F0;
+  _hash = _sha1->hash(_input, h0, h1, h2, h3, h4, _input.size());
+
+  // Example expected output
+  std::vector<unsigned char> expected = {
+      0x8B, 0x6C, 0xCB, 0x43, 0xDC, 0xA2, 0x04, 0x0C, 0x3C, 0xFB,
+      0xCD, 0x7B, 0xFF, 0xF0, 0xB3, 0x87, 0xD4, 0x53, 0x8C, 0x33};
+  ASSERT_EQ(_hash.size(), SHA_DIGEST_LENGTH);
+  ASSERT_EQ(_sha1->getHashOutputSize(), SHA_DIGEST_LENGTH);
+  ASSERT_EQ(_hash, expected);
+}
+
+/**
+ * @test Test the correctness of the tunned hash function.
+ * @brief Ensures that hash sha1 output is the expected one
+ * for an empty input
+ */
+TEST_F(SHA1Test, Hash_EmptyInputWithInternalRegisters_ShouldMatchReference) {
+  _testInput = "";
+  _input.insert(_input.end(), _testInput.begin(), _testInput.end());
+  uint32_t h0 = 0x67452301;
+  uint32_t h1 = 0xEFCDAB89;
+  uint32_t h2 = 0x98BADCFE;
+  uint32_t h3 = 0x10325476;
+  uint32_t h4 = 0xC3D2E1F0;
+  _hash = _sha1->hash(_input, h0, h1, h2, h3, h4, _input.size());
+
+  // Example expected output
+  std::vector<unsigned char> expected = {
+      0xDA, 0x39, 0xA3, 0xEE, 0x5E, 0x6B, 0x4B, 0x0D, 0x32, 0x55,
+      0xBF, 0xEF, 0x95, 0x60, 0x18, 0x90, 0xAF, 0xD8, 0x07, 0x09};
+  ASSERT_EQ(_hash.size(), SHA_DIGEST_LENGTH);
+  ASSERT_EQ(_hash, expected);
+}
+
+/**
  * @test Test that the hash has the correct size
  * @brief Ensures that hash sha1 output has the correct size output
  */

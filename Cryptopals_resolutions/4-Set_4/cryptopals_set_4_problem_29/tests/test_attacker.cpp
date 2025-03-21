@@ -25,8 +25,8 @@ protected:
  * @test Test that the attacker can succeed in the length extension attack upon
  * SHA1
  * @brief Test that the attacker can succeed in the length extension attack upon
- * SHA1, performing the padding of the original message to append after a new
- * message in the end
+ * SHA1, performing the padding of the original message and appending afterwards
+ * a new message in the end
  */
 TEST_F(AttackerTest,
        lengthExtensionAttackAtSHA1_NoInputNeeded_ShouldSucceedInTheAttack) {
