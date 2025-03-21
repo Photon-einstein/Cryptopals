@@ -24,6 +24,19 @@ public:
    */
   bool lengthExtensionAttackAtSHA1();
 
+private:
+  /**
+   * @brief This method will extract the internal state of the SHA1
+   *
+   * This method will extract the internal state of the SHA1 from a mac in a
+   * byte format input
+   *
+   * @param macByteFormat The SHA1 mac in a byte format
+   * @return The internal state of the SHA1
+   */
+  static SHA1InternalState::SHA1InternalState
+  extractionSHA1InternalState(const std::vector<unsigned char> &macByteFormat);
+
   /**
    * @brief This method extracts the message intercepted
    *
@@ -56,19 +69,6 @@ public:
    * @return A bool value, true if the attack was successful, false otherwise
    */
   bool tamperMessageTry(MessageFormat::MessageParsed &messageParsed);
-
-private:
-  /**
-   * @brief This method will extract the internal state of the SHA1
-   *
-   * This method will extract the internal state of the SHA1 from a mac in a
-   * byte format input
-   *
-   * @param macByteFormat The SHA1 mac in a byte format
-   * @return The internal state of the SHA1
-   */
-  static SHA1InternalState::SHA1InternalState
-  extractionSHA1InternalState(const std::vector<unsigned char> &macByteFormat);
 
   bool _debugFlag{false};
   const bool _debugFlagExtreme{false};
