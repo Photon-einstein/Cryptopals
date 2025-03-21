@@ -8,8 +8,7 @@
 /**
  * @brief This method parses the message
  *
- * This method will parses the message,
- * extracting url, message and mac fields
+ * This method will parses the message, extracting url, message and mac fields
  *
  * @return The message parsed
  */
@@ -55,14 +54,14 @@ MessageExtractionFacility::parseMessage(const std::string &message,
 }
 /******************************************************************************/
 /**
- * @brief This method will convert hexadecimal string to byte vector
+ * @brief This method will convert hexadecimal string to a vector of bytes
  *
- * This method will convert hexadecimal string to byte vector, using zero
+ * This method will convert hexadecimal string to a vector of bytes, using zero
  * alignment
  *
  * @param hexStr The input to be converted
  *
- * @return The byte vector resulting of the conversion
+ * @return The vector of bytes resulting of the conversion
  */
 std::vector<unsigned char>
 MessageExtractionFacility::hexToBytes(const std::string &hexStr) {
@@ -80,12 +79,12 @@ MessageExtractionFacility::hexToBytes(const std::string &hexStr) {
 }
 /******************************************************************************/
 /**
- * @brief This method converts a vector into a string in hex format
+ * @brief This method converts a vector of bytes into a string in hex format
  *
- * This method will convert a vector into a string of hexadecimal
+ * This method will convert a vector of bytes into a string of hexadecimal
  * characters, padded with zero
  *
- * @param data The vector with chars to be converted
+ * @param data The vector with bytes to be converted
  * @return A string containing the chars with hexadecimal format, zero padded
  */
 std::string

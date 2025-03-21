@@ -23,10 +23,10 @@ public:
   ~Server();
 
   /**
-   * @brief This method will validate if a given message has produces the
+   * @brief This method will validate if a given message produces the
    * given message authentication code (MAC)
    *
-   * This method will validate if a given message has produces the
+   * This method will validate if a given message produces the
    * given message authentication code (MAC), it will perform the following
    * test: SHA1(private server key || msg) == mac
    *
@@ -35,21 +35,10 @@ public:
    * hexadecimal format
    *
    * @return A bool value, true if the mac received matches the
-   * mac produced by the server
+   * mac produced by the server, false otherwise
    */
   bool validateMac(const std::vector<unsigned char> &msg,
                    const std::vector<unsigned char> &mac);
-
-  /**
-   * @brief This method will append the padding to the message
-   *
-   * This method will append the padding according to the requirements
-   * of the SHA1 hash
-   *
-   * @param message The message to be padded
-   * @return The message padded
-   */
-  std::vector<unsigned char> computeSHA1padding(const std::string &message);
 
 private:
   const bool _debugFlag;

@@ -8,9 +8,10 @@
 #include "./../include/MessageExtractionFacility.hpp"
 
 /* constructor / destructor */
-Attacker::Attacker(const std::shared_ptr<Server> &server, bool writeToFile) {
+Attacker::Attacker(const std::shared_ptr<Server> &server, bool debugFlag) {
   _sha = std::make_shared<MyCryptoLibrary::SHA1>();
   _server = server;
+  Attacker::_debugFlag = debugFlag;
 }
 /******************************************************************************/
 Attacker::~Attacker() {}
@@ -35,7 +36,7 @@ bool Attacker::lengthExtensionAttackAtSHA1() {
 /**
  * @brief This method extracts the message intercepted
  *
- * This method will extract the message intercepted
+ * This method will extract the message intercepted from a given file location
  *
  * @param messageLocation The location of the message to be extracted
  * @return The message intercepted in a string format
@@ -61,8 +62,8 @@ std::string Attacker::extractMessage(const std::string &messageLocation) {
 /**
  * @brief This method will append the padding to the message
  *
- * This method will append the padding according to the requirements
- * of the SHA1 hash
+ * This method will append the padding to the message according to
+ * the requirements of the SHA1 hash
  *
  * @param message The message to be padded
  * @return The message padded
@@ -109,8 +110,7 @@ Attacker::computeSHA1padding(const std::string &message) {
  * code (MAC)
  *
  * @param messageParsed The content of the message intercepted, parsed already
- * @return A bool value, true if the attack was successful,
- * false otherwise
+ * @return A bool value, true if the attack was successful, false otherwise
  */
 bool Attacker::tamperMessageTry(MessageFormat::MessageParsed &messageParsed) {
   if (messageParsed.url.size() == 0 || messageParsed.msg.size() == 0 ||
@@ -126,7 +126,7 @@ bool Attacker::tamperMessageTry(MessageFormat::MessageParsed &messageParsed) {
   const std::vector<unsigned char> appendMessageGoalV(appendMessageGoal.begin(),
                                                       appendMessageGoal.end());
   std::vector<unsigned char> messagePadded, newMessage, macByteFormat, newMac;
-  std::string keyAndMessage{};
+  std::string keyAndMessage{}, tamperedMessage{};
   const char dummyChar = '#';
   bool serverReply;
   std::size_t messagePaddedSize;
@@ -159,28 +159,50 @@ bool Attacker::tamperMessageTry(MessageFormat::MessageParsed &messageParsed) {
     newMessage.insert(newMessage.end(), appendMessageGoalV.begin(),
                       appendMessageGoalV.end());
     // Test the keyLength in the server
-    std::string macServerHex, macReceivedHex;
-    serverReply = Attacker::_server->validateMac(newMessage, newMac);
-    std::cout << "For key length: " << keyLength
-              << " server reply: " << serverReply << std::endl;
+    if (Attacker::_debugFlag) {
+      serverReply = Attacker::_server->validateMac(newMessage, newMac);
+      std::cout << "For key length: " << keyLength
+                << " server reply: " << serverReply << std::endl;
+    }
     if (serverReply) {
-      std::cout << "\nAttacker log | Size of the server key = " << keyLength
-                << " bytes" << std::endl;
+      if (Attacker::_debugFlag) {
+        std::cout << "\nAttacker log | Size of the server key = " << keyLength
+                  << " bytes" << std::endl;
+      }
       keyLengthFixed = keyLength;
+      tamperedMessage.assign(newMessage.begin(), newMessage.end());
       break;
     }
   }
-  return true;
+  if (keyLengthFixed) {
+    if (Attacker::_debugFlag) {
+      std::cout << "\nAttacker log | Size of the server key = " << keyLength
+                << " bytes" << " |\nTampered message: '";
+      for (std::size_t i = 0; i < tamperedMessage.size(); ++i) {
+        if (i < messageParsed.msg.size() ||
+            i > messagePadded.size() - keyLengthFixed - 1) {
+          printf("%c", static_cast<unsigned char>(tamperedMessage[i]));
+        } else if (i == messagePadded.size() - keyLengthFixed - 1) {
+          printf(" x%02x ", static_cast<unsigned char>(tamperedMessage[i]));
+        } else {
+          printf(" x%02x", static_cast<unsigned char>(tamperedMessage[i]));
+        }
+      }
+      std::cout << "' |\nNew MAC = "
+                << MessageExtractionFacility::toHexString(newMac) << std::endl;
+    }
+    return true;
+  }
+  return false;
 }
 /******************************************************************************/
 /**
  * @brief This method will extract the internal state of the SHA1
  *
- * This method will extract the internal state of the SHA1 from a mac in a byte
- * format input
+ * This method will extract the internal state of the SHA1 from a mac in a
+ * byte format input
  *
  * @param macByteFormat The SHA1 mac in a byte format
- *
  * @return The internal state of the SHA1
  */
 SHA1InternalState::SHA1InternalState Attacker::extractionSHA1InternalState(

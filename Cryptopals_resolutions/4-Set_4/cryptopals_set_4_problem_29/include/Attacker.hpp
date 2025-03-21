@@ -10,7 +10,7 @@
 class Attacker {
 public:
   /* constructor / destructor*/
-  Attacker(const std::shared_ptr<Server> &server, bool writeToFile);
+  Attacker(const std::shared_ptr<Server> &server, bool debugFlag);
   ~Attacker();
 
   /**
@@ -27,7 +27,7 @@ public:
   /**
    * @brief This method extracts the message intercepted
    *
-   * This method will extract the message intercepted
+   * This method will extract the message intercepted from a given file location
    *
    * @param messageLocation The location of the message to be extracted
    * @return The message intercepted in a string format
@@ -37,8 +37,8 @@ public:
   /**
    * @brief This method will append the padding to the message
    *
-   * This method will append the padding according to the requirements
-   * of the SHA1 hash
+   * This method will append the padding to the message according to
+   * the requirements of the SHA1 hash
    *
    * @param message The message to be padded
    * @return The message padded
@@ -53,8 +53,7 @@ public:
    * code (MAC)
    *
    * @param messageParsed The content of the message intercepted, parsed already
-   * @return A bool value, true if the attack was successful,
-   * false otherwise
+   * @return A bool value, true if the attack was successful, false otherwise
    */
   bool tamperMessageTry(MessageFormat::MessageParsed &messageParsed);
 
@@ -66,14 +65,14 @@ private:
    * byte format input
    *
    * @param macByteFormat The SHA1 mac in a byte format
-   *
    * @return The internal state of the SHA1
    */
   static SHA1InternalState::SHA1InternalState
   extractionSHA1InternalState(const std::vector<unsigned char> &macByteFormat);
 
-  static const bool _debugFlag{true}, _debugFlagExtreme{false};
-  static const int _sha1DigestLength{20};
+  bool _debugFlag{false};
+  const bool _debugFlagExtreme{false};
+  static const int _sha1DigestLength{SHA_DIGEST_LENGTH};
   const std::string messageLocation{"./../input/intercepted_url.txt"};
   std::shared_ptr<Server> _server;
   std::shared_ptr<MyCryptoLibrary::SHA1> _sha;
