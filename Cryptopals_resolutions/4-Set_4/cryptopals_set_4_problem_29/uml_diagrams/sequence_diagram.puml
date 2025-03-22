@@ -1,0 +1,60 @@
+@startuml
+
+actor Attacker
+
+participant "Attacker" as A
+participant "MessageExtractionFacility" as MEF
+participant "Server" as S
+participant "SHA1" as SHA
+
+A -> A : lengthExtensionAttackAtSHA1()
+activate A
+
+A -> A : extractMessage()
+activate A
+A --> A : return message
+deactivate A
+
+A -> MEF : parseMessage(message, _debugFlag)
+activate MEF
+MEF --> A : MessageParsed
+deactivate MEF
+
+A -> A : computeSHA1padding(msgParsed._msg)
+activate A
+A --> A : return padded message
+deactivate A
+
+A -> A : tamperMessageTry(msgParsed)
+activate A
+
+A -> MEF : hexToBytes(msgParsed._mac)
+activate MEF
+MEF --> A : macByteFormat
+deactivate MEF
+
+A -> A : extractionSHA1InternalState(macByteFormat)
+activate A
+A --> A : return sha1InternalState
+deactivate A
+
+loop keyLength = 1 to maxKeySize
+    A -> SHA : hash(appendMessageGoalV, sha1InternalState, ...)
+    activate SHA
+    SHA --> A : newMac
+    deactivate SHA
+    
+    A -> S : validateMac(newMessage, newMac)
+    activate S
+    S --> A : serverReply
+    deactivate S
+    
+    alt serverReply is true
+        A -> A : break loop and return true
+    end
+end
+
+A --> A : return false (if no keyLength found)
+deactivate A
+
+@enduml
