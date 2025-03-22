@@ -19,9 +19,6 @@ public:
   /// Destructor.
   ~SHA1();
 
-  /// Returns the hash output size in bytes.
-  virtual std::size_t getHashOutputSize() override;
-
   /**
    * @brief Computes the SHA-1 hash value
    *

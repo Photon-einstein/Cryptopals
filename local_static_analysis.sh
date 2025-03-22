@@ -45,7 +45,7 @@ find . -type f -name "CMakeLists.txt" ! -path "*/build/*" | while read cmake_fil
     # Run Cppcheck only if a src/ folder exists
     if [ -d "$src_dir" ]; then
         echo "🚀 Running Cppcheck in $src_dir"
-        [ -f "$file" ] && cppcheck --enable=style,warning,performance,portability --std=c++17 --inconclusive --force --error-exitcode=1 "$src_dir" 
+        cppcheck --enable=all --inconclusive --force --error-exitcode=1 "$src_dir" --suppress=missingIncludeSystem
     fi
 
     # Run Cppcheck only if a tests/ folder exists

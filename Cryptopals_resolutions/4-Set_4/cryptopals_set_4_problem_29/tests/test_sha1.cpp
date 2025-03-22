@@ -45,7 +45,6 @@ TEST_F(SHA1Test, Hash_EnglishSentenceInput_ShouldMatchReference) {
       0x8B, 0x6C, 0xCB, 0x43, 0xDC, 0xA2, 0x04, 0x0C, 0x3C, 0xFB,
       0xCD, 0x7B, 0xFF, 0xF0, 0xB3, 0x87, 0xD4, 0x53, 0x8C, 0x33};
   ASSERT_EQ(_hash.size(), SHA_DIGEST_LENGTH);
-  ASSERT_EQ(_sha1->getHashOutputSize(), SHA_DIGEST_LENGTH);
   ASSERT_EQ(_hash, expected);
 }
 
@@ -87,7 +86,6 @@ TEST_F(SHA1Test,
       0x8B, 0x6C, 0xCB, 0x43, 0xDC, 0xA2, 0x04, 0x0C, 0x3C, 0xFB,
       0xCD, 0x7B, 0xFF, 0xF0, 0xB3, 0x87, 0xD4, 0x53, 0x8C, 0x33};
   ASSERT_EQ(_hash.size(), SHA_DIGEST_LENGTH);
-  ASSERT_EQ(_sha1->getHashOutputSize(), SHA_DIGEST_LENGTH);
   ASSERT_EQ(_hash, expected);
 }
 
@@ -112,13 +110,4 @@ TEST_F(SHA1Test, Hash_EmptyInputWithInternalRegisters_ShouldMatchReference) {
       0xBF, 0xEF, 0x95, 0x60, 0x18, 0x90, 0xAF, 0xD8, 0x07, 0x09};
   ASSERT_EQ(_hash.size(), SHA_DIGEST_LENGTH);
   ASSERT_EQ(_hash, expected);
-}
-
-/**
- * @test Test that the hash has the correct size
- * @brief Ensures that hash sha1 output has the correct size output
- */
-TEST_F(SHA1Test,
-       GetHashOutputSize__NormalClassInitialization_ShouldMatchTheCorrectSize) {
-  ASSERT_EQ(_sha1->getHashOutputSize(), SHA_DIGEST_LENGTH);
 }
