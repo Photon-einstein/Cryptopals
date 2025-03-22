@@ -17,7 +17,6 @@ int main(void) {
   /* work to verify */
   const bool debugFlag{true};
   std::shared_ptr<Server> server = std::make_shared<Server>(debugFlag);
-  const bool writeToFile{true};
   std::shared_ptr<Attacker> attacker =
       std::make_shared<Attacker>(server, debugFlag);
   // check attacker

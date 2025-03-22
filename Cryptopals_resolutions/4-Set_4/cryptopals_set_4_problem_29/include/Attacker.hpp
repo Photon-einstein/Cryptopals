@@ -45,7 +45,7 @@ private:
    * @param messageLocation The location of the message to be extracted
    * @return The message intercepted in a string format
    */
-  std::string extractMessage(const std::string &messageLocation);
+  std::string extractMessage(const std::string &messageLocation) const;
 
   /**
    * @brief This method will append the padding to the message
@@ -56,7 +56,8 @@ private:
    * @param message The message to be padded
    * @return The message padded
    */
-  std::vector<unsigned char> computeSHA1padding(const std::string &message);
+  std::vector<unsigned char>
+  computeSHA1padding(const std::string &message) const;
 
   /**
    * @brief This method will try to tamper a message
@@ -68,14 +69,14 @@ private:
    * @param messageParsed The content of the message intercepted, parsed already
    * @return A bool value, true if the attack was successful, false otherwise
    */
-  bool tamperMessageTry(MessageFormat::MessageParsed &messageParsed);
+  bool tamperMessageTry(const MessageFormat::MessageParsed &messageParsed);
 
   bool _debugFlag{false};
   const bool _debugFlagExtreme{false};
   static const int _sha1DigestLength{SHA_DIGEST_LENGTH};
   const std::string messageLocation{"./../input/intercepted_url.txt"};
-  std::shared_ptr<Server> _server;
   std::shared_ptr<MyCryptoLibrary::SHA1> _sha;
+  std::shared_ptr<Server> _server;
   MessageFormat::MessageParsed _msgParsed;
 };
 
