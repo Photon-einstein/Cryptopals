@@ -78,13 +78,13 @@ Result: A valid SHA-1 hash for "hello<glue-padding>world!".
         If the server accepts it, the attack succeeds. If not, try another key_length.  
         ```
 
-    * Attacker tests the server that he has guessed the right key length (TBD)
-    * Compute the glue padding for key || message. (TBD)
-    * Use your modified SHA-1 to hash the additional ";admin=true" data. (TBD)
-    * The result is a valid SHA-1 MAC for the forged message, the attacker can then test the response from the server. (TBD)
+    * Attacker tests the server that he has guessed the right key length (Done)
+    * Compute the glue padding for key || message. (Done)
+    * Use your modified SHA-1 to hash the additional ";admin=true" data. (Done)
+    * The result is a valid SHA-1 MAC for the forged message, the attacker can then test the response from the server. (Done)
  
-This is why HMAC (H(key || message)) prevents this attack—because the key is mixed inside the compression function, 
-making it impossible to extend!
+This is why HMAC (H(key || message)) prevents this attack because the key is mixed inside the compression function, 
+making it impossible to extend
 
 
 **Example of a URL**
