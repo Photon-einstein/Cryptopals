@@ -9,7 +9,7 @@
 
 /* constructor / destructor */
 Attacker::Attacker(const std::shared_ptr<Server> &server, bool debugFlag)
-    : _debugFlag{debugFlag}, _sha{std::make_shared<MyCryptoLibrary::SHA1>()},
+    : _debugFlag{debugFlag}, _sha1{std::make_shared<MyCryptoLibrary::SHA1>()},
       _server{server} {}
 /******************************************************************************/
 Attacker::~Attacker() {}
@@ -24,10 +24,10 @@ Attacker::~Attacker() {}
  * false otherwise
  */
 bool Attacker::lengthExtensionAttackAtSHA1() {
-  std::string message = Attacker::extractMessage(Attacker::messageLocation);
+  std::string message = Attacker::extractMessage(Attacker::_messageLocation);
   MessageFormat::MessageParsed msgParsed =
       MessageExtractionFacility::parseMessage(message, Attacker::_debugFlag);
-  Attacker::computeSHA1padding(msgParsed.msg);
+  Attacker::computeSHA1padding(msgParsed._msg);
   return Attacker::tamperMessageTry(msgParsed);
 }
 /******************************************************************************/
@@ -112,8 +112,8 @@ Attacker::computeSHA1padding(const std::string &message) const {
  */
 bool Attacker::tamperMessageTry(
     const MessageFormat::MessageParsed &messageParsed) {
-  if (messageParsed.url.size() == 0 || messageParsed.msg.size() == 0 ||
-      messageParsed.mac.size() == 0) {
+  if (messageParsed._url.size() == 0 || messageParsed._msg.size() == 0 ||
+      messageParsed._mac.size() == 0) {
     const std::string errorMessage =
         "Attacker log | messageParsed empty as an input field at the method "
         "Attacker::tamperMessageTry";
@@ -130,7 +130,7 @@ bool Attacker::tamperMessageTry(
   SHA1InternalState::SHA1InternalState sha1InternalState;
   // calculation of the new MAC
   // conversion hex to bytes of the mac
-  macByteFormat = MessageExtractionFacility::hexToBytes(messageParsed.mac);
+  macByteFormat = MessageExtractionFacility::hexToBytes(messageParsed._mac);
   if (Attacker::_debugFlag) {
     std::cout << "\nAttacker log | Size of the mac = " << macByteFormat.size()
               << " bytes" << std::endl;
@@ -141,15 +141,17 @@ bool Attacker::tamperMessageTry(
   for (keyLength = 1; keyLength <= maxKeySize; ++keyLength) {
     std::string keyAndMessage(keyLength, dummyChar);
     bool serverReply{false};
-    keyAndMessage += messageParsed.msg;
+    keyAndMessage += messageParsed._msg;
     messagePadded = Attacker::computeSHA1padding(keyAndMessage);
     // Computation of the new MAC using SHA-1’s state from the intercepted
     // message
-    newMac = _sha->hash(
-        appendMessageGoalV, sha1InternalState.internalState[0],
-        sha1InternalState.internalState[1], sha1InternalState.internalState[2],
-        sha1InternalState.internalState[3], sha1InternalState.internalState[4],
-        messagePadded.size() + appendMessageGoalV.size());
+    newMac =
+        _sha1->hash(appendMessageGoalV, sha1InternalState._internalState[0],
+                    sha1InternalState._internalState[1],
+                    sha1InternalState._internalState[2],
+                    sha1InternalState._internalState[3],
+                    sha1InternalState._internalState[4],
+                    messagePadded.size() + appendMessageGoalV.size());
     // construction of new forged message:   msg || padding || forged msg
     newMessage.clear();
     newMessage.assign(messagePadded.begin() + keyLength, messagePadded.end());
@@ -176,7 +178,7 @@ bool Attacker::tamperMessageTry(
       std::cout << "\nAttacker log | Size of the server key = " << keyLength
                 << " bytes" << " |\nTampered message: '";
       for (std::size_t i = 0; i < tamperedMessage.size(); ++i) {
-        if (i < messageParsed.msg.size() ||
+        if (i < messageParsed._msg.size() ||
             i > messagePadded.size() - keyLengthFixed - 1) {
           printf("%c", static_cast<unsigned char>(tamperedMessage[i]));
         } else if (i == messagePadded.size() - keyLengthFixed - 1) {
@@ -225,7 +227,7 @@ SHA1InternalState::SHA1InternalState Attacker::extractionSHA1InternalState(
         (static_cast<uint32_t>(macByteFormat[registerSha1Counter * 4 + 2])
          << 8) |
         (static_cast<uint32_t>(macByteFormat[registerSha1Counter * 4 + 3]));
-    sha1InternalState.internalState.push_back(registerSha1Value);
+    sha1InternalState._internalState.push_back(registerSha1Value);
   }
   return sha1InternalState;
 }

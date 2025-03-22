@@ -5,9 +5,9 @@
 
 namespace MessageFormat {
 struct MessageParsed {
-  std::string url;
-  std::string msg;
-  std::string mac;
+  std::string _url;
+  std::string _msg;
+  std::string _mac;
 };
 }; // namespace MessageFormat
 
