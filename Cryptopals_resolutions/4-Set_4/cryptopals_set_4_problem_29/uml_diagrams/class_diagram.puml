@@ -1,0 +1,81 @@
+@startuml
+
+namespace MessageFormat {
+    class MessageFormat <<struct>> {
+        + _url : std::string
+        + _msg : std::string
+        + _mac : std::string
+    }
+}
+
+namespace SHA1InternalState {
+    class SHA1InternalState <<struct>> {
+        + _internalState : std::vector<uint32_t>
+    }
+}
+
+class Server {
+    - _debugFlag : bool
+    - _debugFlagExtreme : bool
+    - _keyServer : std::vector<unsigned char>
+    - _sha : std::shared_ptr<MyCryptoLibrary::SHA>
+    
+    + Server(debugFlag : bool)
+    + ~Server()
+    + validateMac(msg : std::vector<unsigned char>, mac : std::vector<unsigned char>) : bool
+}
+
+namespace MyCryptoLibrary {
+    class SHA <<abstract>> {
+        + SHA()
+        + ~SHA()
+        + hash(inputV : std::vector<unsigned char>) : std::vector<unsigned char>
+    }
+
+    class SHA1 {
+        - _sizeOutputHash : std::size_t
+        - _inputVpadded : std::vector<unsigned char>
+        - _h0 : uint32_t
+        - _h1 : uint32_t
+        - _h2 : uint32_t
+        - _h3 : uint32_t
+        - _h4 : uint32_t
+        - _ml : uint64_t
+
+        + SHA1()
+        + ~SHA1()
+        + hash(inputV : std::vector<unsigned char>) : std::vector<unsigned char>
+        + hash(inputV : std::vector<unsigned char>, h0 : uint32_t, h1 : uint32_t, h2 : uint32_t, h3 : uint32_t, h4 : uint32_t, messageSize: std::size_t) : std::vector<unsigned char>
+        - initialization(sizeInputV : std::size_t) : void
+        - initialization(sizeInputV : std::size_t, h0 : uint32_t, h1 : uint32_t, h2 : uint32_t, h3 : uint32_t, h4 : uint32_t) : void
+        - preProcessing(inputV : std::vector<unsigned char>) : void
+        - processing() : void
+        - leftRotate(value : uint32_t, bits : int) : uint32_t
+    }
+
+    SHA <|-- SHA1 : "inherits"
+}
+
+class Attacker {
+    - _debugFlag : bool
+    - _debugFlagExtreme : bool
+    - _shaDigestLength : int {static}
+    - _messageLocation : std::string
+    - _sha1 : std::shared_ptr<MyCryptoLibrary::SHA1>
+    - _server : std::shared_ptr<Server>
+    - _msgParsed : MessageFormat::MessageParsed
+
+    + Attacker(server : std::shared_ptr<Server>, debugFlag : bool)
+    + ~Attacker()
+    + lengthExtensionAttackAtSHA1 () : void
+    - extractionSHA1InternalState(macByteFormat : std::vector<unsigned char>) : SHA1InternalState::SHA1InternalState {static}
+    - extractMessage(messageLocation : std::string) const : std::string
+    - computeSHA1padding(message : std::string) const : std::vector<unsigned char>
+    - tamperMessageTry(messageParsed : MessageFormat::MessageParsed) : bool
+}
+
+Server --> MyCryptoLibrary.SHA : "has a"
+Attacker --> MyCryptoLibrary.SHA1 : "has a"
+Attacker --> Server : "has a"
+
+@enduml

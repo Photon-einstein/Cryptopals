@@ -74,8 +74,8 @@ private:
   bool _debugFlag{false};
   const bool _debugFlagExtreme{false};
   static const int _sha1DigestLength{SHA_DIGEST_LENGTH};
-  const std::string messageLocation{"./../input/intercepted_url.txt"};
-  std::shared_ptr<MyCryptoLibrary::SHA1> _sha;
+  const std::string _messageLocation{"./../input/intercepted_url.txt"};
+  std::shared_ptr<MyCryptoLibrary::SHA1> _sha1;
   std::shared_ptr<Server> _server;
   MessageFormat::MessageParsed _msgParsed;
 };

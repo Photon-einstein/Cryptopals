@@ -41,14 +41,14 @@ MessageExtractionFacility::parseMessage(const std::string &message,
   baseUrl = message.substr(0, queryPos);
   query = message.substr(queryPos + 1, macPos - queryPos - 1);
   mac = message.substr(macPos + 5);
-  msgParsed.url = baseUrl;
-  msgParsed.msg = query;
-  msgParsed.mac = mac;
+  msgParsed._url = baseUrl;
+  msgParsed._msg = query;
+  msgParsed._mac = mac;
   if (debugFlag) {
     std::cout << "\nMessageExtractionFacility log | Message Parsed "
                  "content:\nbase url: '"
-              << msgParsed.url << "'\nmessage: '" << msgParsed.msg
-              << "'\nmac: '" << msgParsed.mac << "'" << std::endl;
+              << msgParsed._url << "'\nmessage: '" << msgParsed._msg
+              << "'\nmac: '" << msgParsed._mac << "'" << std::endl;
   }
   return msgParsed;
 }

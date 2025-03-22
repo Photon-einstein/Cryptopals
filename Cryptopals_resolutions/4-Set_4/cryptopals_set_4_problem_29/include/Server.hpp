@@ -1,12 +1,5 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
-
-#include <memory>
-#include <openssl/aes.h>
-#include <string>
-#include <vector>
-
-#include "./../include/PrintFormat.hpp"
 #include "./../include/SHA.hpp"
 #include "./../include/SHA1.hpp"
 
