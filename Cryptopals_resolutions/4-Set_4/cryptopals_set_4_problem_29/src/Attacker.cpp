@@ -8,11 +8,9 @@
 #include "./../include/MessageExtractionFacility.hpp"
 
 /* constructor / destructor */
-Attacker::Attacker(const std::shared_ptr<Server> &server, bool debugFlag) {
-  _sha = std::make_shared<MyCryptoLibrary::SHA1>();
-  _server = server;
-  Attacker::_debugFlag = debugFlag;
-}
+Attacker::Attacker(const std::shared_ptr<Server> &server, bool debugFlag)
+    : _debugFlag{debugFlag}, _sha{std::make_shared<MyCryptoLibrary::SHA1>()},
+      _server{server} {}
 /******************************************************************************/
 Attacker::~Attacker() {}
 /******************************************************************************/
@@ -41,7 +39,7 @@ bool Attacker::lengthExtensionAttackAtSHA1() {
  * @param messageLocation The location of the message to be extracted
  * @return The message intercepted in a string format
  */
-std::string Attacker::extractMessage(const std::string &messageLocation) {
+std::string Attacker::extractMessage(const std::string &messageLocation) const {
   std::ifstream file(messageLocation);
   if (!file) {
     const std::string errorMessage =
@@ -69,7 +67,7 @@ std::string Attacker::extractMessage(const std::string &messageLocation) {
  * @return The message padded
  */
 std::vector<unsigned char>
-Attacker::computeSHA1padding(const std::string &message) {
+Attacker::computeSHA1padding(const std::string &message) const {
   // Initialize padded input vector with original message
   uint64_t messageLenght{message.size() * CHAR_BIT};
   std::vector<unsigned char> inputVpadded(message.begin(), message.end());
@@ -112,7 +110,8 @@ Attacker::computeSHA1padding(const std::string &message) {
  * @param messageParsed The content of the message intercepted, parsed already
  * @return A bool value, true if the attack was successful, false otherwise
  */
-bool Attacker::tamperMessageTry(MessageFormat::MessageParsed &messageParsed) {
+bool Attacker::tamperMessageTry(
+    const MessageFormat::MessageParsed &messageParsed) {
   if (messageParsed.url.size() == 0 || messageParsed.msg.size() == 0 ||
       messageParsed.mac.size() == 0) {
     const std::string errorMessage =
@@ -126,10 +125,8 @@ bool Attacker::tamperMessageTry(MessageFormat::MessageParsed &messageParsed) {
   const std::vector<unsigned char> appendMessageGoalV(appendMessageGoal.begin(),
                                                       appendMessageGoal.end());
   std::vector<unsigned char> messagePadded, newMessage, macByteFormat, newMac;
-  std::string keyAndMessage{}, tamperedMessage{};
+  std::string tamperedMessage{};
   const char dummyChar = '#';
-  bool serverReply;
-  std::size_t messagePaddedSize;
   SHA1InternalState::SHA1InternalState sha1InternalState;
   // calculation of the new MAC
   // conversion hex to bytes of the mac
@@ -143,24 +140,24 @@ bool Attacker::tamperMessageTry(MessageFormat::MessageParsed &messageParsed) {
   // Trial and error to find the length of private key of the server
   for (keyLength = 1; keyLength <= maxKeySize; ++keyLength) {
     std::string keyAndMessage(keyLength, dummyChar);
+    bool serverReply{false};
     keyAndMessage += messageParsed.msg;
     messagePadded = Attacker::computeSHA1padding(keyAndMessage);
     // Computation of the new MAC using SHA-1’s state from the intercepted
     // message
-    messagePaddedSize = messagePadded.size();
     newMac = _sha->hash(
         appendMessageGoalV, sha1InternalState.internalState[0],
         sha1InternalState.internalState[1], sha1InternalState.internalState[2],
         sha1InternalState.internalState[3], sha1InternalState.internalState[4],
-        messagePaddedSize + appendMessageGoalV.size());
+        messagePadded.size() + appendMessageGoalV.size());
     // construction of new forged message:   msg || padding || forged msg
     newMessage.clear();
     newMessage.assign(messagePadded.begin() + keyLength, messagePadded.end());
     newMessage.insert(newMessage.end(), appendMessageGoalV.begin(),
                       appendMessageGoalV.end());
     // Test the keyLength in the server
+    serverReply = Attacker::_server->validateMac(newMessage, newMac);
     if (Attacker::_debugFlag) {
-      serverReply = Attacker::_server->validateMac(newMessage, newMac);
       std::cout << "For key length: " << keyLength
                 << " server reply: " << serverReply << std::endl;
     }
@@ -209,7 +206,6 @@ SHA1InternalState::SHA1InternalState Attacker::extractionSHA1InternalState(
     const std::vector<unsigned char> &macByteFormat) {
   SHA1InternalState::SHA1InternalState sha1InternalState;
   const int internalStateRegisterSize{5}; // 32 bit / 4 byte each register
-  uint32_t registerSha1Value;
   if (macByteFormat.size() != Attacker::_sha1DigestLength) {
     const std::string errorMessage =
         "Attacker log | invalid size of the input macByteFormat at the method "
@@ -222,7 +218,7 @@ SHA1InternalState::SHA1InternalState Attacker::extractionSHA1InternalState(
   }
   for (int registerSha1Counter = 0;
        registerSha1Counter < internalStateRegisterSize; ++registerSha1Counter) {
-    registerSha1Value =
+    uint32_t registerSha1Value =
         static_cast<uint32_t>(macByteFormat[registerSha1Counter * 4]) << 24 |
         (static_cast<uint32_t>(macByteFormat[registerSha1Counter * 4 + 1])
          << 16) |
