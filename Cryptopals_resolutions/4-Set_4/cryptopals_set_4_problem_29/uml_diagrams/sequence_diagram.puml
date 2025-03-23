@@ -5,7 +5,7 @@ actor Attacker
 participant "Attacker" as A
 participant "MessageExtractionFacility" as MEF
 participant "Server" as S
-participant "SHA1" as SHA
+participant "SHA1" as SHA1
 
 A -> A : lengthExtensionAttackAtSHA1()
 activate A
@@ -39,13 +39,19 @@ A --> A : return sha1InternalState
 deactivate A
 
 loop keyLength = 1 to maxKeySize
-    A -> SHA : hash(appendMessageGoalV, sha1InternalState, ...)
-    activate SHA
-    SHA --> A : newMac
-    deactivate SHA
+    A -> SHA1 : hash(appendMessageGoalV, h0, h1, h2, h3, h4, messageSize)
+    activate SHA1
+    SHA1 --> A : newMac
+    deactivate SHA1
     
     A -> S : validateMac(newMessage, newMac)
     activate S
+    S -> S: Prepend server key to the message    
+    S -> SHA1: hash(key || newMessage)
+    activate SHA1
+    SHA1 --> S: hashServer
+    deactivate SHA1
+    S -> S: Check if hashServer == newMac 
     S --> A : serverReply
     deactivate S
     
