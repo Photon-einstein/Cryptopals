@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y cmake g++ libgtest-dev libssl-dev nlohmann-json3-dev
+          sudo apt install -y cmake g++ libgtest-dev libssl-dev nlohmann-json3-dev valgrind
 
       - name: Build and run tests
         run: |
@@ -33,9 +33,13 @@ jobs:
                 echo "Building in $test_dir"
                 mkdir -p "$test_dir/build"
                 cd "$test_dir/build"
-                cmake -DENABLE_ASAN=ON .. # Enables AddressSanitizer
+                
+                # Set CMake to Debug mode
+                cmake -DCMAKE_BUILD_TYPE=Debug ..
+                
                 make
-                ASAN_OPTIONS=detect_leaks=1 ctest -V  # Run tests with memory leak detection, enable verbose output for tests
+                # Run tests with Valgrind for memory error checking
+                valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose ctest -V
                 cd -
               fi
             done
