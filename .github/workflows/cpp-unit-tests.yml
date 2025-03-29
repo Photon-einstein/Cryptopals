@@ -38,8 +38,19 @@ jobs:
                 cmake -DCMAKE_BUILD_TYPE=Debug ..
                 
                 make
-                # Run tests with Valgrind for memory error checking
-                valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose ctest -V
+                # Run tests with Valgrind for memory error checking and check for leaks or errors
+                valgrind_output=$(valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose ctest -V)
+                
+                echo "$valgrind_output"
+                
+                # Check Valgrind output for errors and exit with failure code if errors are found
+                if echo "$valgrind_output" | grep -q "ERROR SUMMARY: 0 errors from 0 contexts"; then
+                  echo "No memory leaks or errors detected."
+                else
+                  echo "Valgrind detected errors or memory leaks!"
+                  exit 1  # Fail the job if errors or leaks are detected
+                fi
+                
                 cd -
               fi
             done
