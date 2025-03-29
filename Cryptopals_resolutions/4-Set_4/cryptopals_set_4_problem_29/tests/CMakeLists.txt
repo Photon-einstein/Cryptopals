@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
 project(cryptopals_tests_set_4_problem_29)
 
+# Set the build type to Debug (this ensures debug symbols are included)
+set(CMAKE_BUILD_TYPE Debug)
+
+# Add extra flags for debugging (disable optimizations and include debug symbols)
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
+
 # Find Google Test
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})

@@ -15,3 +15,9 @@ To generate a uml class diagram:
 ```bash
 plantuml <class_diagram_name>.puml
 ```
+
+To run the unit tests with valgrind:
+
+```bash
+valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./run_tests
+```

@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y cmake g++ libgtest-dev libssl-dev nlohmann-json3-dev
+          sudo apt install -y cmake g++ libgtest-dev libssl-dev nlohmann-json3-dev valgrind
 
       - name: Build and run tests
         run: |
@@ -33,9 +33,21 @@ jobs:
                 echo "Building in $test_dir"
                 mkdir -p "$test_dir/build"
                 cd "$test_dir/build"
-                cmake ..
+                
+                # Set CMake to Debug mode
+                cmake -DCMAKE_BUILD_TYPE=Debug ..
+                
                 make
-                ctest -V  # Enable verbose output for tests
+                # Run tests with Valgrind for memory error checking and check for leaks or errors
+                valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./run_tests 2>&1 | tee valgrind_output.log
+                if grep -q "ERROR SUMMARY: 0 errors from 0 contexts" valgrind_output.log; then
+                  echo "No memory leaks or errors detected."
+                else
+                  echo "Valgrind detected errors or memory leaks!"
+                  cat valgrind_output.log
+                  exit 1  # Fail the workflow
+                fi
+                
                 cd -
               fi
             done
