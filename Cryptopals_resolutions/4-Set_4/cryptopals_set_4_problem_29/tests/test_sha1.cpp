@@ -111,22 +111,3 @@ TEST_F(SHA1Test, Hash_EmptyInputWithInternalRegisters_ShouldMatchReference) {
   ASSERT_EQ(_hash.size(), SHA_DIGEST_LENGTH);
   ASSERT_EQ(_hash, expected);
 }
-
-TEST_F(SHA1Test, MemoryLeakCheck) {
-  int *ptr = new int[10]; // Memory allocated
-  delete[] ptr;  // Memory properly freed
-  //  No out-of-bounds access here
-}
-
-TEST_F(SHA1Test, MemoryLeakAndOutOfBoundsCheck) {
-  int *ptr = new int[10]; // Memory allocated
-
-  // Uncommenting this would properly free the memory
-  // delete[] ptr;  // Memory properly freed
-
-  // Out-of-bounds access
-  ptr[9] = 42; // Accessing memory outside of the allocated range
-
-  // No delete[] ptr call, leading to a memory leak
-  delete[] ptr; 
-}
