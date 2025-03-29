@@ -44,12 +44,12 @@ jobs:
                 echo "$valgrind_output"
                 
                 # Check Valgrind output for errors and exit with failure code if errors are found
-                if echo "$valgrind_output" | grep -q "*ERROR SUMMARY: 0 errors from 0 contexts*"; then
+                if echo "$valgrind_output" | grep -q "ERROR SUMMARY: 0 errors from 0 contexts.*"; then
                   echo "No memory leaks or errors detected."
                 else
                   echo "Valgrind detected errors or memory leaks!"
                 fi
-                
+                cle
                 cd -
               fi
             done
