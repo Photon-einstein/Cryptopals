@@ -39,7 +39,7 @@ jobs:
                 
                 make
                 # Run tests with Valgrind for memory error checking and check for leaks or errors
-                valgrind_output=$(valgrind --leak-check=full --track-origins=yes ctest -V)
+                valgrind_output=$(valgrind --leak-check=full --track-origins=yes ./run_tests)
                 
                 echo "$valgrind_output"
                 
