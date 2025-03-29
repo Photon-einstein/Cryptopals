@@ -39,17 +39,15 @@ jobs:
                 
                 make
                 # Run tests with Valgrind for memory error checking and check for leaks or errors
-                valgrind_output=$(valgrind --leak-check=full --track-origins=yes ./run_tests)
-                
-                echo "$valgrind_output"
-                
-                # Check Valgrind output for errors and exit with failure code if errors are found
-                if echo "$valgrind_output" | grep -q "ERROR SUMMARY: 0 errors from 0 contexts.*"; then
+                valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./run_tests 2>&1 | tee valgrind_output.log
+                if grep -q "ERROR SUMMARY: 0 errors from 0 contexts" valgrind_output.log; then
                   echo "No memory leaks or errors detected."
                 else
                   echo "Valgrind detected errors or memory leaks!"
+                  cat valgrind_output.log
+                  exit 1  # Fail the workflow
                 fi
-                cle
+                
                 cd -
               fi
             done
