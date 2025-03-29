@@ -33,9 +33,9 @@ jobs:
                 echo "Building in $test_dir"
                 mkdir -p "$test_dir/build"
                 cd "$test_dir/build"
-                cmake ..
+                cmake -DENABLE_ASAN=ON .. # Enables AddressSanitizer
                 make
-                ctest -V  # Enable verbose output for tests
+                ASAN_OPTIONS=detect_leaks=1 ctest -V  # Run tests with memory leak detection, enable verbose output for tests
                 cd -
               fi
             done
