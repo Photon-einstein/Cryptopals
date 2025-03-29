@@ -111,3 +111,9 @@ TEST_F(SHA1Test, Hash_EmptyInputWithInternalRegisters_ShouldMatchReference) {
   ASSERT_EQ(_hash.size(), SHA_DIGEST_LENGTH);
   ASSERT_EQ(_hash, expected);
 }
+
+TEST_F(SHA1Test, MemoryLeakCheck) {
+  int* ptr = new int[10];  // Memory allocated but not deleted
+  ptr[11] = 42;  // Out-of-bounds access!
+  EXPECT_EQ(ptr[11], 42);  // Should trigger ASan
+}
