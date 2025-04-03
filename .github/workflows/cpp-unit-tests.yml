@@ -77,7 +77,6 @@ jobs:
                 mkdir -p "$test_dir/build"
                 cd "$test_dir/build"
 
-                make clean
                 cmake -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON ..
                 make
                 
