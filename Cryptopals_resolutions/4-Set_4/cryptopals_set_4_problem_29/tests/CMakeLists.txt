@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.10)
 project(cryptopals_tests_set_4_problem_29)
 
+# Add a clean target to remove build artifacts
+add_custom_target(clean_command
+    COMMAND ${CMAKE_BUILD_TOOL} clean
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Cleaning build directory"
+)
+
 # Set the build type to Debug (this ensures debug symbols are included)
 set(CMAKE_BUILD_TYPE Debug)
 
