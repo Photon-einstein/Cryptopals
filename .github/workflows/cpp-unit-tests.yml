@@ -84,10 +84,11 @@ jobs:
                 ./run_tests
 
                 # Generate coverage report
-                geninfo --ignore-errors mismatch ...
                 lcov --capture --directory . --output-file coverage.info
-                lcov --remove coverage.info '/usr/*' '/home/runner/work/*/tests/*' --output-file coverage.info
-                genhtml coverage.info --output-directory coverage_report
+                # Run geninfo to handle mismatches
+                geninfo coverage.info --ignore-errors mismatch --output-file coverage_with_mismatches.info
+                lcov --remove coverage_with_mismatches.info '/usr/*' '/home/runner/work/*/tests/*' --output-file coverage_with_mismatches.info
+                genhtml coverage_with_mismatches.info --output-directory coverage_report
 
                 cd -
               fi
