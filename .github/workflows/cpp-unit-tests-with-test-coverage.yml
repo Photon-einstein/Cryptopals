@@ -42,8 +42,8 @@ jobs:
 
                 # Generate coverage report
                 lcov --capture --directory . --output-file coverage.info
-                # Run geninfo to handle mismatches
-                geninfo coverage.info --ignore-errors mismatch --output-file coverage_with_mismatches.info
+                # Run geninfo to handle mismatches and gcov warnings
+                geninfo coverage.info --ignore-errors mismatch,gcov --output-file coverage_with_mismatches.info
                 lcov --remove coverage_with_mismatches.info '/usr/*' '/home/runner/work/*/tests/*' --output-file coverage_with_mismatches.info
                 genhtml coverage_with_mismatches.info --output-directory coverage_report
 
