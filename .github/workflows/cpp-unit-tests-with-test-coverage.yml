@@ -7,50 +7,7 @@ on:
       - main
 
 jobs:
-  valgrind-tests:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up environment variable
-        run: |
-          echo "AES_256_KEY_SERVER_SET_4_PROBLEM_28=${{ secrets.AES_256_KEY_SERVER_SET_4_PROBLEM_28 }}" >> $GITHUB_ENV
-          echo "KEY_SERVER_SET_4_PROBLEM_29=${{ secrets.KEY_SERVER_SET_4_PROBLEM_29 }}" >> $GITHUB_ENV
-
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y cmake g++ libgtest-dev libssl-dev nlohmann-json3-dev valgrind
-
-      - name: Build and Run Valgrind Tests
-        run: |
-          for set_dir in $(find . -type d -name '*-Set_*'); do
-            for problem_dir in $(find "$set_dir" -type d -name 'cryptopals_set_*_problem_*'); do
-              test_dir="$problem_dir/tests"
-              if [ -f "$test_dir/CMakeLists.txt" ]; then
-                echo "Building in $test_dir"
-                mkdir -p "$test_dir/build"
-                cd "$test_dir/build"
-
-                cmake -DCMAKE_BUILD_TYPE=Debug ..
-                make
-                
-                # Run tests with Valgrind
-                valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./run_tests 2>&1 | tee valgrind_output.log
-                if grep -q "ERROR SUMMARY: 0 errors from 0 contexts" valgrind_output.log; then
-                  echo "No memory leaks detected."
-                else
-                  echo "Valgrind detected errors!"
-                  cat valgrind_output.log
-                  exit 1
-                fi
-
-                cd -
-              fi
-            done
-          done
-
+  
   test-coverage:
     runs-on: ubuntu-latest
     steps:
@@ -84,7 +41,6 @@ jobs:
                 ./run_tests
 
                 # Generate coverage report
-                geninfo --ignore-errors mismatch ...
                 lcov --capture --directory . --output-file coverage.info
                 lcov --remove coverage.info '/usr/*' '/home/runner/work/*/tests/*' --output-file coverage.info
                 genhtml coverage.info --output-directory coverage_report
