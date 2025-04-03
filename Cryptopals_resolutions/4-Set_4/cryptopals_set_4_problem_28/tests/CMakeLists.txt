@@ -1,6 +1,19 @@
 cmake_minimum_required(VERSION 3.10)
 project(cryptopals_tests_set_4_problem_28)
 
+# Add extra flags for debugging (disable optimizations and include debug symbols)
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
+
+# Enable code coverage if requested
+option(CODE_COVERAGE "Enable coverage reporting" OFF)
+
+if(CODE_COVERAGE)
+  message(STATUS "Code Coverage enabled.")
+  # Enable code coverage flags
+  add_compile_options(-fprofile-arcs -ftest-coverage)
+  link_libraries(gcov)
+endif()
+
 # Find Google Test
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
