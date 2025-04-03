@@ -8,7 +8,7 @@ set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
 
 # Enable code coverage if requested
-option(CODE_COVERAGE "Enable coverage reporting" OFF)
+option(CODE_COVERAGE "Enable coverage reporting" ON)  # Default to ON for Debug builds
 
 if(CODE_COVERAGE)
   message(STATUS "Code Coverage enabled.")
@@ -47,7 +47,7 @@ add_executable(run_tests ${TEST_SOURCES} ${SOURCE_FILES})
 # Link with Google Test, OpenSSL, and pthread
 target_link_libraries(run_tests PRIVATE ${GTEST_LIBRARIES} OpenSSL::Crypto pthread)
 
-
 # Enable testing
 enable_testing()
 add_test(NAME cryptopals_tests_set_4_problem_29 COMMAND run_tests)
+
