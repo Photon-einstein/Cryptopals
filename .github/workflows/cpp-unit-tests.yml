@@ -48,6 +48,14 @@ jobs:
                   exit 1  # Fail the workflow
                 fi
                 
+                # Run tests normally for coverage collection
+                ./run_tests
+
+                # Generate coverage report
+                lcov --capture --directory . --output-file coverage.info
+                lcov --remove coverage.info '/usr/*' '/home/runner/work/*/tests/*' --output-file coverage.info
+                genhtml coverage.info --output-directory coverage_report
+
                 cd -
               fi
             done
