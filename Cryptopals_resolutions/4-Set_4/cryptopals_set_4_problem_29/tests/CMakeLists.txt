@@ -41,3 +41,4 @@ target_link_libraries(run_tests PRIVATE ${GTEST_LIBRARIES} OpenSSL::Crypto pthre
 # Enable testing
 enable_testing()
 add_test(NAME cryptopals_tests_set_4_problem_29 COMMAND run_tests)
+
