@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(cryptopals_tests_set_4_problem_29)
+project(cryptopals_tests_set_4_problem_30)
 
 # Set the build type to Debug (this ensures debug symbols are included)
 set(CMAKE_BUILD_TYPE Debug)
@@ -19,8 +19,6 @@ include_directories(${OPENSSL_INCLUDE_DIR})
 set(SOURCE_FILES
     ../src/Attacker.cpp
     ../src/MessageExtractionFacility.cpp
-    ../src/SHA.cpp
-    ../src/SHA1.cpp
     ../src/Server.cpp
 )
 
@@ -28,7 +26,6 @@ set(SOURCE_FILES
 set(TEST_SOURCES
     test_attacker.cpp
     test_server.cpp
-    test_sha1.cpp
 )
 
 # Define the test executable
@@ -37,8 +34,7 @@ add_executable(run_tests ${TEST_SOURCES} ${SOURCE_FILES})
 # Link with Google Test, OpenSSL, and pthread
 target_link_libraries(run_tests PRIVATE ${GTEST_LIBRARIES} OpenSSL::Crypto pthread)
 
-
 # Enable testing
 enable_testing()
-add_test(NAME cryptopals_tests_set_4_problem_29 COMMAND run_tests)
+add_test(NAME cryptopals_tests_set_4_problem_30 COMMAND run_tests)
 
