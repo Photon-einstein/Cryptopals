@@ -1,0 +1,1 @@
+https://api.example.com/data?user=bob&amount=1000&timestamp=1700000000&mac=b240077242795755b85fa52c89c9806e0d68c277
