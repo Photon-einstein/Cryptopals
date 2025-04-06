@@ -2,6 +2,7 @@
 #define SERVER_HPP
 
 #include "./../include/MD4.hpp"
+#include "./../include/MessageDigest.hpp"
 
 #include <memory>
 #include <vector>
