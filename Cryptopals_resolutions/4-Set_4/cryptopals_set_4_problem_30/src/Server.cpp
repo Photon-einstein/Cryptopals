@@ -11,11 +11,13 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "./../include/MD4.hpp"
 #include "./../include/MessageExtractionFacility.hpp"
 #include "./../include/Server.hpp"
 
 /* constructor / destructor */
-Server::Server(const bool debugFlag) : _debugFlag(debugFlag) {
+Server::Server(const bool debugFlag)
+    : _debugFlag(debugFlag), _md(std::make_shared<MyCryptoLibrary::MD4>()) {
   std::string hexServerKey{};
   if (std::getenv("KEY_SERVER_SET_4_PROBLEM_30") != nullptr) {
     hexServerKey = std::getenv("KEY_SERVER_SET_4_PROBLEM_30");

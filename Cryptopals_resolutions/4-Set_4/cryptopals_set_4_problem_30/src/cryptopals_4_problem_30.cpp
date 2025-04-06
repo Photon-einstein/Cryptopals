@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "./../include/Attacker.hpp"
+#include "./../include/MessageDigest.hpp"
 #include "./../include/MessageFormat.hpp"
 #include "./../include/Server.hpp"
 
