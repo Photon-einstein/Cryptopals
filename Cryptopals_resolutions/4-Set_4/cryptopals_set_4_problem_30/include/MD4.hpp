@@ -39,6 +39,50 @@ private:
   void initialization(const std::size_t sizeInputV);
 
   /**
+   * Preprocesses the input data (padding, appending length) as required by the
+   * MD4 algorithm.
+   *
+   * @param inputV The input data as a vector of unsigned char.
+   */
+  void preProcessing(const std::vector<unsigned char> &inputV);
+
+  /**
+   * Auxiliary function in the processing of the message
+   *
+   * @brief Computes: x.y or (not x).z
+   *
+   * @param x The first 32 bit argument
+   * @param y The second 32 bit argument
+   * @param z The third 32 bit argument
+   * @return The auxiliary method result
+   */
+  static uint32_t f(uint32_t x, uint32_t y, uint32_t z);
+
+  /**
+   * Auxiliary function in the processing of the message
+   *
+   * @brief Computes: x.y or x.z or y.z
+   *
+   * @param x The first 32 bit argument
+   * @param y The second 32 bit argument
+   * @param z The third 32 bit argument
+   * @return The auxiliary method result
+   */
+  static uint32_t g(uint32_t x, uint32_t y, uint32_t z);
+
+  /**
+   * Auxiliary function in the processing of the message
+   *
+   * @brief Computes: x xor y xor z
+   *
+   * @param x The first 32 bit argument
+   * @param y The second 32 bit argument
+   * @param z The third 32 bit argument
+   * @return The auxiliary method result
+   */
+  static uint32_t h(uint32_t x, uint32_t y, uint32_t z);
+
+  /**
    * Performs a left-rotation (circular shift) on a 32-bit integer.
    *
    * @param value The value to rotate.
@@ -49,6 +93,8 @@ private:
 
   /// Expected output hash size in bytes.
   std::size_t _sizeOutputHash{};
+  /// Padded input vector.
+  std::vector<unsigned char> _inputVpadded{};
   // The four working variables (initialized in `initialization`)
   uint32_t _a{}, _b{}, _c{}, _d{};
   /// Message length in bits.
