@@ -18,6 +18,8 @@ include_directories(${OPENSSL_INCLUDE_DIR})
 # Add source files (your implementation files)
 set(SOURCE_FILES
     ../src/Attacker.cpp
+    ../src/MessageDigest.cpp
+    ../src/MD4.cpp
     ../src/MessageExtractionFacility.cpp
     ../src/Server.cpp
 )

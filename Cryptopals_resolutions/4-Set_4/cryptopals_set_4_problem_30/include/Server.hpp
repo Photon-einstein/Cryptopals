@@ -1,6 +1,10 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
+#include "./../include/MD4.hpp"
+#include "./../include/MessageDigest.hpp"
+
+#include <memory>
 #include <vector>
 
 class Server {
@@ -13,6 +17,7 @@ private:
   const bool _debugFlag;
   bool _debugFlagExtreme{false};
   std::vector<unsigned char> _keyServer{};
+  std::shared_ptr<MyCryptoLibrary::MessageDigest> _md;
 };
 
 #endif // SERVER_HPP
