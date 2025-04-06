@@ -49,7 +49,7 @@ private:
 
   /// Expected output hash size in bytes.
   std::size_t _sizeOutputHash{};
-  // The five working variables (initialized in `initialization`)
+  // The four working variables (initialized in `initialization`)
   uint32_t _a{}, _b{}, _c{}, _d{};
   /// Message length in bits.
   uint64_t _ml{};
