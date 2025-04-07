@@ -113,20 +113,16 @@ void MyCryptoLibrary::MD4::processing() {
          ++roundOperations) {
       blockIndex = blockRoundInitializer[roundOperations];
       leftShiftAmount = 3;
-      _a = MyCryptoLibrary::MD4::operationRoundThree(
-          _a, _b, _c, _d, x, blockIndex, leftShiftAmount);
+      _a = operationRoundThree(_a, _b, _c, _d, x, blockIndex, leftShiftAmount);
       blockIndex += 8;
       leftShiftAmount = 9;
-      _d = MyCryptoLibrary::MD4::operationRoundThree(
-          _d, _a, _b, _c, x, blockIndex, leftShiftAmount);
+      _d = operationRoundThree(_d, _a, _b, _c, x, blockIndex, leftShiftAmount);
       blockIndex -= 4;
       leftShiftAmount = 11;
-      _c = MyCryptoLibrary::MD4::operationRoundThree(
-          _c, _d, _a, _b, x, blockIndex, leftShiftAmount);
+      _c = operationRoundThree(_c, _d, _a, _b, x, blockIndex, leftShiftAmount);
       blockIndex += 8;
       leftShiftAmount = 15;
-      _b = MyCryptoLibrary::MD4::operationRoundThree(
-          _b, _c, _d, _a, x, blockIndex, leftShiftAmount);
+      _b = operationRoundThree(_b, _c, _d, _a, x, blockIndex, leftShiftAmount);
     }
     // Update the registers at the end of each block
     _a += aa;
