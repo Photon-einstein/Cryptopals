@@ -161,7 +161,7 @@ uint32_t MyCryptoLibrary::MD4::operationRoundOne(
  * Auxiliary function in the processing of the message, at round 2
  *
  * @brief Computes: res = (r1 + g(r2, r3, r4) + x[blockIndex] +
- * roundTwoConstant) <<< leftShiftAmount
+ * _roundTwoConstant) <<< leftShiftAmount
  *
  * @param r1 The first 32 bit argument
  * @param r2 The second 32 bit argument
@@ -183,7 +183,7 @@ uint32_t MyCryptoLibrary::MD4::operationRoundTwo(
  * Auxiliary function in the processing of the message, at round 3
  *
  * @brief Computes: res = (r1 + h(r2, r3, r4) + x[blockIndex] +
- * roundThreeConstant) <<< leftShiftAmount
+ * _roundThreeConstant) <<< leftShiftAmount
  *
  * @param r1 The first 32 bit argument
  * @param r2 The second 32 bit argument
