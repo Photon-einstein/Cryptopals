@@ -65,6 +65,138 @@ void MyCryptoLibrary::MD4::preProcessing(
   }
 }
 /******************************************************************************/
+/// Processes the padded message in 512-bit blocks.
+void MyCryptoLibrary::MD4::processing() {
+  // Process the padded input in 512-bit blocks / 16 word blocks / 64 bytes
+  uint32_t aa, bb, cc, dd;
+  std::size_t blockIndex, leftShiftAmount;
+  for (std::size_t i = 0; i < _inputVpadded.size(); i += 64) {
+    std::vector<unsigned char> x(_inputVpadded.begin() + i,
+                                 _inputVpadded.begin() + i + 64);
+    // Save register values
+    aa = _a;
+    bb = _b;
+    cc = _c;
+    dd = _d;
+    // Round 1
+    blockIndex = -1;
+    for (std::size_t roundOperations = 0; roundOperations < 4;
+         ++roundOperations) {
+      leftShiftAmount = 3;
+      _a = operationRoundOne(_a, _b, _c, _d, x, ++blockIndex, leftShiftAmount);
+      leftShiftAmount = 7;
+      _d = operationRoundOne(_d, _a, _b, _c, x, ++blockIndex, leftShiftAmount);
+      leftShiftAmount = 11;
+      _c = operationRoundOne(_c, _d, _a, _b, x, ++blockIndex, leftShiftAmount);
+      leftShiftAmount = 19;
+      _b = operationRoundOne(_b, _c, _d, _a, x, ++blockIndex, leftShiftAmount);
+    }
+    // Round 2
+    for (std::size_t roundOperations = 0; roundOperations < 4;
+         ++roundOperations) {
+      blockIndex = roundOperations;
+      leftShiftAmount = 3;
+      _a = operationRoundTwo(_a, _b, _c, _d, x, blockIndex, leftShiftAmount);
+      blockIndex += 4;
+      leftShiftAmount = 5;
+      _d = operationRoundTwo(_d, _a, _b, _c, x, blockIndex, leftShiftAmount);
+      blockIndex += 4;
+      leftShiftAmount = 9;
+      _c = operationRoundTwo(_c, _d, _a, _b, x, blockIndex, leftShiftAmount);
+      blockIndex += 4;
+      leftShiftAmount = 13;
+      _b = operationRoundTwo(_b, _c, _d, _a, x, blockIndex, leftShiftAmount);
+    }
+    // Round 3
+    std::vector<std::size_t> blockRoundInitializer{0, 2, 1, 3};
+    for (std::size_t roundOperations = 0; roundOperations < 4;
+         ++roundOperations) {
+      blockIndex = blockRoundInitializer[roundOperations];
+      leftShiftAmount = 3;
+      _a = operationRoundThree(_a, _b, _c, _d, x, blockIndex, leftShiftAmount);
+      blockIndex += 8;
+      leftShiftAmount = 9;
+      _d = operationRoundThree(_d, _a, _b, _c, x, blockIndex, leftShiftAmount);
+      blockIndex -= 4;
+      leftShiftAmount = 11;
+      _c = operationRoundThree(_c, _d, _a, _b, x, blockIndex, leftShiftAmount);
+      blockIndex += 8;
+      leftShiftAmount = 15;
+      _b = operationRoundThree(_b, _c, _d, _a, x, blockIndex, leftShiftAmount);
+    }
+    // Update the registers at the end of each block
+    _a += aa;
+    _b += bb;
+    _c += cc;
+    _d += dd;
+  }
+}
+/******************************************************************************/
+/**
+ * Auxiliary function in the processing of the message, at round 1
+ *
+ * @brief Computes: res = (r1 + f(r2, r3, r4) + x[blockIndex]) <<<
+ * leftShiftAmount
+ *
+ * @param r1 The first 32 bit argument
+ * @param r2 The second 32 bit argument
+ * @param r3 The third 32 bit argument
+ * @param x  The block currently in process
+ * @param blockIndex The index of the block
+ * @param leftShiftAmount The amount to be left circularly shifted
+ * @return The auxiliary method result
+ */
+uint32_t MyCryptoLibrary::MD4::operationRoundOne(
+    uint32_t r1, uint32_t r2, uint32_t r3, uint32_t r4,
+    const std::vector<unsigned char> &x, std::size_t blockIndex,
+    std::size_t leftShiftAmount) {
+  return leftRotate(r1 + f(r2, r3, r4) + x[blockIndex], leftShiftAmount);
+}
+/******************************************************************************/
+/**
+ * Auxiliary function in the processing of the message, at round 2
+ *
+ * @brief Computes: res = (r1 + g(r2, r3, r4) + x[blockIndex] +
+ * _roundTwoConstant) <<< leftShiftAmount
+ *
+ * @param r1 The first 32 bit argument
+ * @param r2 The second 32 bit argument
+ * @param r3 The third 32 bit argument
+ * @param x  The block currently in process
+ * @param blockIndex The index of the block
+ * @param leftShiftAmount The amount to be left circularly shifted
+ * @return The auxiliary method result
+ */
+uint32_t MyCryptoLibrary::MD4::operationRoundTwo(
+    uint32_t r1, uint32_t r2, uint32_t r3, uint32_t r4,
+    const std::vector<unsigned char> &x, std::size_t blockIndex,
+    std::size_t leftShiftAmount) {
+  return leftRotate(r1 + g(r2, r3, r4) + x[blockIndex] + _roundTwoConstant,
+                    leftShiftAmount);
+}
+/******************************************************************************/
+/**
+ * Auxiliary function in the processing of the message, at round 3
+ *
+ * @brief Computes: res = (r1 + h(r2, r3, r4) + x[blockIndex] +
+ * _roundThreeConstant) <<< leftShiftAmount
+ *
+ * @param r1 The first 32 bit argument
+ * @param r2 The second 32 bit argument
+ * @param r3 The third 32 bit argument
+ * @param x  The block currently in process
+ * @param blockIndex The index of the block
+ * @param leftShiftAmount The amount to be left circularly shifted
+ * @return The auxiliary method result
+ */
+uint32_t MyCryptoLibrary::MD4::operationRoundThree(
+    uint32_t r1, uint32_t r2, uint32_t r3, uint32_t r4,
+    const std::vector<unsigned char> &x, std::size_t blockIndex,
+    std::size_t leftShiftAmount) {
+  return leftRotate(r1 + h(r2, r3, r4) + x[blockIndex] + _roundThreeConstant,
+                    leftShiftAmount);
+}
+/******************************************************************************/
 /**
  * Auxiliary function in the processing of the message
  *
