@@ -193,8 +193,7 @@ uint32_t MyCryptoLibrary::MD4::operationRoundThree(
     uint32_t r1, uint32_t r2, uint32_t r3, uint32_t r4,
     const std::vector<unsigned char> &x, std::size_t blockIndex,
     std::size_t leftShiftAmount) {
-  return leftRotate(r1 + MyCryptoLibrary::MD4::h(r2, r3, r4) + x[blockIndex] +
-                        _roundThreeConstant,
+  return leftRotate(r1 + h(r2, r3, r4) + x[blockIndex] + _roundThreeConstant,
                     leftShiftAmount);
 }
 /******************************************************************************/
