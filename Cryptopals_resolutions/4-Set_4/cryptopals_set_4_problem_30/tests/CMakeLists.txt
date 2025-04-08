@@ -27,6 +27,7 @@ set(SOURCE_FILES
 # Add test source files
 set(TEST_SOURCES
     test_attacker.cpp
+    test_md4.cpp
     test_server.cpp
 )
 
