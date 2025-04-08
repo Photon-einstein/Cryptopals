@@ -51,7 +51,7 @@ std::string Attacker::extractMessage(const std::string &messageLocation) const {
 std::vector<unsigned char>
 Attacker::computeMD4padding(const std::string &message) const {
   // Initialize padded input vector with original message
-  uint64_t messageLenght{message.size() * CHAR_BIT};
+  uint64_t messageLength{message.size() * CHAR_BIT};
   std::vector<unsigned char> inputVpadded(message.begin(), message.end());
   // Step 1: Append the bit '1' (equivalent to adding 0x80)
   inputVpadded.push_back(0x80);
@@ -63,10 +63,10 @@ Attacker::computeMD4padding(const std::string &message) const {
   }
 
   // Step 3: Append the original message length (ml) as a 64-bit little-endian
-  // integer _ml is already in bits
+  // uint64_t _ml is already in bits
   for (int i = 0; i < 8; ++i) {
     inputVpadded.push_back(
-        static_cast<unsigned char>((messageLenght >> (i * 8)) & 0xFF));
+        static_cast<unsigned char>((messageLength >> (i * 8)) & 0xFF));
   }
   if (Attacker::_debugFlagExtreme) {
     std::cout << "\nAttacker log | Message padded:\n'";
