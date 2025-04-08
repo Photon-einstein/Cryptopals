@@ -2,6 +2,8 @@
 #include <openssl/err.h>
 #include <openssl/evp.h>
 
+#include <stdexcept>
+
 #include "./../include/MD4.hpp"
 
 /* constructor / destructor */
@@ -69,7 +71,9 @@ void MyCryptoLibrary::MD4::preProcessing(
 void MyCryptoLibrary::MD4::processing() {
   // Process the padded input in 512-bit blocks / 16 word blocks / 64 bytes
   uint32_t aa, bb, cc, dd;
+  std::size_t roundNumber;
   std::size_t blockIndex, leftShiftAmount;
+  std::vector<std::size_t> blockRoundInitializer{0, 2, 1, 3};
   for (std::size_t i = 0; i < _inputVpadded.size(); i += 64) {
     std::vector<unsigned char> x(_inputVpadded.begin() + i,
                                  _inputVpadded.begin() + i + 64);
@@ -79,50 +83,64 @@ void MyCryptoLibrary::MD4::processing() {
     cc = _c;
     dd = _d;
     // Round 1
+    roundNumber = 1;
     blockIndex = -1;
     for (std::size_t roundOperations = 0; roundOperations < 4;
          ++roundOperations) {
       leftShiftAmount = 3;
-      _a = operationRoundOne(_a, _b, _c, _d, x, ++blockIndex, leftShiftAmount);
+      _a = operationRounds(_a, _b, _c, _d, x, ++blockIndex, leftShiftAmount,
+                           roundNumber);
       leftShiftAmount = 7;
-      _d = operationRoundOne(_d, _a, _b, _c, x, ++blockIndex, leftShiftAmount);
+      _d = operationRounds(_d, _a, _b, _c, x, ++blockIndex, leftShiftAmount,
+                           roundNumber);
       leftShiftAmount = 11;
-      _c = operationRoundOne(_c, _d, _a, _b, x, ++blockIndex, leftShiftAmount);
+      _c = operationRounds(_c, _d, _a, _b, x, ++blockIndex, leftShiftAmount,
+                           roundNumber);
       leftShiftAmount = 19;
-      _b = operationRoundOne(_b, _c, _d, _a, x, ++blockIndex, leftShiftAmount);
+      _b = operationRounds(_b, _c, _d, _a, x, ++blockIndex, leftShiftAmount,
+                           roundNumber);
     }
     // Round 2
+    roundNumber = 2;
     for (std::size_t roundOperations = 0; roundOperations < 4;
          ++roundOperations) {
       blockIndex = roundOperations;
       leftShiftAmount = 3;
-      _a = operationRoundTwo(_a, _b, _c, _d, x, blockIndex, leftShiftAmount);
+      _a = operationRounds(_a, _b, _c, _d, x, blockIndex, leftShiftAmount,
+                           roundNumber);
       blockIndex += 4;
       leftShiftAmount = 5;
-      _d = operationRoundTwo(_d, _a, _b, _c, x, blockIndex, leftShiftAmount);
+      _d = operationRounds(_d, _a, _b, _c, x, blockIndex, leftShiftAmount,
+                           roundNumber);
       blockIndex += 4;
       leftShiftAmount = 9;
-      _c = operationRoundTwo(_c, _d, _a, _b, x, blockIndex, leftShiftAmount);
+      _c = operationRounds(_c, _d, _a, _b, x, blockIndex, leftShiftAmount,
+                           roundNumber);
       blockIndex += 4;
       leftShiftAmount = 13;
-      _b = operationRoundTwo(_b, _c, _d, _a, x, blockIndex, leftShiftAmount);
+      _b = operationRounds(_b, _c, _d, _a, x, blockIndex, leftShiftAmount,
+                           roundNumber);
     }
     // Round 3
-    std::vector<std::size_t> blockRoundInitializer{0, 2, 1, 3};
+    roundNumber = 3;
     for (std::size_t roundOperations = 0; roundOperations < 4;
          ++roundOperations) {
       blockIndex = blockRoundInitializer[roundOperations];
       leftShiftAmount = 3;
-      _a = operationRoundThree(_a, _b, _c, _d, x, blockIndex, leftShiftAmount);
+      _a = operationRounds(_a, _b, _c, _d, x, blockIndex, leftShiftAmount,
+                           roundNumber);
       blockIndex += 8;
       leftShiftAmount = 9;
-      _d = operationRoundThree(_d, _a, _b, _c, x, blockIndex, leftShiftAmount);
+      _d = operationRounds(_d, _a, _b, _c, x, blockIndex, leftShiftAmount,
+                           roundNumber);
       blockIndex -= 4;
       leftShiftAmount = 11;
-      _c = operationRoundThree(_c, _d, _a, _b, x, blockIndex, leftShiftAmount);
+      _c = operationRounds(_c, _d, _a, _b, x, blockIndex, leftShiftAmount,
+                           roundNumber);
       blockIndex += 8;
       leftShiftAmount = 15;
-      _b = operationRoundThree(_b, _c, _d, _a, x, blockIndex, leftShiftAmount);
+      _b = operationRounds(_b, _c, _d, _a, x, blockIndex, leftShiftAmount,
+                           roundNumber);
     }
     // Update the registers at the end of each block
     _a += aa;
@@ -133,68 +151,50 @@ void MyCryptoLibrary::MD4::processing() {
 }
 /******************************************************************************/
 /**
- * Auxiliary function in the processing of the message, at round 1
+ * Auxiliary function in the processing of the message, at rounds 1/2/3
  *
- * @brief Computes: res = (r1 + f(r2, r3, r4) + x[blockIndex]) <<<
- * leftShiftAmount
+ * @brief Computes:
+ * Round 1: res = (r1 + g(r2, r3, r4) + x[blockIndex] +
+ * roundTwoConstant) <<< leftShiftAmount
  *
- * @param r1 The first 32 bit argument
- * @param r2 The second 32 bit argument
- * @param r3 The third 32 bit argument
- * @param x  The block currently in process
- * @param blockIndex The index of the block
- * @param leftShiftAmount The amount to be left circularly shifted
- * @return The auxiliary method result
- */
-uint32_t MyCryptoLibrary::MD4::operationRoundOne(
-    uint32_t r1, uint32_t r2, uint32_t r3, uint32_t r4,
-    const std::vector<unsigned char> &x, std::size_t blockIndex,
-    std::size_t leftShiftAmount) {
-  return leftRotate(r1 + f(r2, r3, r4) + x[blockIndex], leftShiftAmount);
-}
-/******************************************************************************/
-/**
- * Auxiliary function in the processing of the message, at round 2
+ * Round 2: res = (r1 + h(r2, r3, r4) + x[blockIndex] +
+ * roundThreeConstant) <<< leftShiftAmount
  *
- * @brief Computes: res = (r1 + g(r2, r3, r4) + x[blockIndex] +
- * _roundTwoConstant) <<< leftShiftAmount
+ * Round 3: res = (r1 + h(r2, r3, r4) + x[blockIndex] +
+ * roundThreeConstant) <<< leftShiftAmount
  *
  * @param r1 The first 32 bit argument
  * @param r2 The second 32 bit argument
  * @param r3 The third 32 bit argument
  * @param x  The block currently in process
  * @param blockIndex The index of the block
+ * @param roundNumber The round identifier
  * @param leftShiftAmount The amount to be left circularly shifted
  * @return The auxiliary method result
  */
-uint32_t MyCryptoLibrary::MD4::operationRoundTwo(
+uint32_t MyCryptoLibrary::MD4::operationRounds(
     uint32_t r1, uint32_t r2, uint32_t r3, uint32_t r4,
     const std::vector<unsigned char> &x, std::size_t blockIndex,
-    std::size_t leftShiftAmount) {
-  return leftRotate(r1 + g(r2, r3, r4) + x[blockIndex] + _roundTwoConstant,
-                    leftShiftAmount);
-}
-/******************************************************************************/
-/**
- * Auxiliary function in the processing of the message, at round 3
- *
- * @brief Computes: res = (r1 + h(r2, r3, r4) + x[blockIndex] +
- * _roundThreeConstant) <<< leftShiftAmount
- *
- * @param r1 The first 32 bit argument
- * @param r2 The second 32 bit argument
- * @param r3 The third 32 bit argument
- * @param x  The block currently in process
- * @param blockIndex The index of the block
- * @param leftShiftAmount The amount to be left circularly shifted
- * @return The auxiliary method result
- */
-uint32_t MyCryptoLibrary::MD4::operationRoundThree(
-    uint32_t r1, uint32_t r2, uint32_t r3, uint32_t r4,
-    const std::vector<unsigned char> &x, std::size_t blockIndex,
-    std::size_t leftShiftAmount) {
-  return leftRotate(r1 + h(r2, r3, r4) + x[blockIndex] + _roundThreeConstant,
-                    leftShiftAmount);
+    std::size_t leftShiftAmount, std::size_t roundNumber) {
+  switch (roundNumber) {
+  case 1:
+    /* code */
+    return leftRotate(r1 + f(r2, r3, r4) + x[blockIndex], leftShiftAmount);
+  case 2:
+    /* code */
+    return leftRotate(r1 + g(r2, r3, r4) + x[blockIndex] + _roundTwoConstant,
+                      leftShiftAmount);
+  case 3:
+    /* code */
+    return leftRotate(r1 + h(r2, r3, r4) + x[blockIndex] + _roundThreeConstant,
+                      leftShiftAmount);
+  default:
+    const std::string errorMessage{
+        "MD4 log | invalid round number received at method "
+        "'MyCryptoLibrary::MD4::operationRounds'"};
+    throw std::invalid_argument(errorMessage);
+  }
+  return 0;
 }
 /******************************************************************************/
 /**

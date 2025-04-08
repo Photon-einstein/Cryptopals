@@ -50,47 +50,16 @@ private:
   void processing();
 
   /**
-   * Auxiliary function in the processing of the message, at round 1
+   * Auxiliary function in the processing of the message, at rounds 1/2/3
    *
-   * @brief Computes: res = (r1 + f(r2, r3, r4) + x[blockIndex]) <<<
-   * leftShiftAmount
-   *
-   * @param r1 The first 32 bit argument
-   * @param r2 The second 32 bit argument
-   * @param r3 The third 32 bit argument
-   * @param x  The block currently in process
-   * @param blockIndex The index of the block
-   * @param leftShiftAmount The amount to be left circularly shifted
-   * @return The auxiliary method result
-   */
-  uint32_t operationRoundOne(uint32_t r1, uint32_t r2, uint32_t r3, uint32_t r4,
-                             const std::vector<unsigned char> &x,
-                             std::size_t blockIndex,
-                             std::size_t leftShiftAmount);
-
-  /**
-   * Auxiliary function in the processing of the message, at round 2
-   *
-   * @brief Computes: res = (r1 + g(r2, r3, r4) + x[blockIndex] +
+   * @brief Computes:
+   * Round 1: res = (r1 + g(r2, r3, r4) + x[blockIndex] +
    * roundTwoConstant) <<< leftShiftAmount
    *
-   * @param r1 The first 32 bit argument
-   * @param r2 The second 32 bit argument
-   * @param r3 The third 32 bit argument
-   * @param x  The block currently in process
-   * @param blockIndex The index of the block
-   * @param leftShiftAmount The amount to be left circularly shifted
-   * @return The auxiliary method result
-   */
-  uint32_t operationRoundTwo(uint32_t r1, uint32_t r2, uint32_t r3, uint32_t r4,
-                             const std::vector<unsigned char> &x,
-                             std::size_t blockIndex,
-                             std::size_t leftShiftAmount);
-
-  /**
-   * Auxiliary function in the processing of the message, at round 3
+   * Round 2: res = (r1 + h(r2, r3, r4) + x[blockIndex] +
+   * roundThreeConstant) <<< leftShiftAmount
    *
-   * @brief Computes: res = (r1 + h(r2, r3, r4) + x[blockIndex] +
+   * Round 3: res = (r1 + h(r2, r3, r4) + x[blockIndex] +
    * roundThreeConstant) <<< leftShiftAmount
    *
    * @param r1 The first 32 bit argument
@@ -98,13 +67,14 @@ private:
    * @param r3 The third 32 bit argument
    * @param x  The block currently in process
    * @param blockIndex The index of the block
+   * @param roundNumber The round identifier
    * @param leftShiftAmount The amount to be left circularly shifted
    * @return The auxiliary method result
    */
-  uint32_t operationRoundThree(uint32_t r1, uint32_t r2, uint32_t r3,
-                               uint32_t r4, const std::vector<unsigned char> &x,
-                               std::size_t blockIndex,
-                               std::size_t leftShiftAmount);
+  uint32_t operationRounds(uint32_t r1, uint32_t r2, uint32_t r3, uint32_t r4,
+                           const std::vector<unsigned char> &x,
+                           std::size_t blockIndex, std::size_t leftShiftAmount,
+                           std::size_t roundNumber);
 
   /**
    * Auxiliary function in the processing of the message
