@@ -40,6 +40,44 @@ MyCryptoLibrary::MD4::hash(const std::vector<unsigned char> &inputV) {
 }
 /******************************************************************************/
 /**
+ * @brief Computes the MD4 hash value
+ *
+ * Computes the MD4 hash of the given input vector from a predefined internal
+ * state
+ *
+ * @param inputV The input data as a vector of unsigned characters
+ * @param a Internal state of the MD4
+ * @param b Internal state of the MD4
+ * @param c Internal state of the MD4
+ * @param d Internal state of the MD4
+ * @param messageSize Size of the entire message that was intended to hash from
+ * the start
+ *
+ * @return A vector of bytes containing the computed hash
+ */
+std::vector<unsigned char>
+MyCryptoLibrary::MD4::hash(const std::vector<unsigned char> &inputV, uint32_t a,
+                           uint32_t b, uint32_t c, uint32_t d,
+                           std::size_t messageSize) {
+  initialization(messageSize, a, b, c, d);
+  preProcessing(inputV);
+  processing();
+  std::vector<unsigned char> hashV;
+  hashV.reserve(MD4_DIGEST_LENGTH);
+
+  const uint32_t hashParts[] = {_a, _b, _c, _d};
+
+  for (uint32_t part : hashParts) {
+    // extraction of bytes start at the lower order end
+    hashV.push_back(part & 0xFF);
+    hashV.push_back((part >> 8) & 0xFF);
+    hashV.push_back((part >> 16) & 0xFF);
+    hashV.push_back((part >> 24) & 0xFF);
+  }
+  return hashV;
+}
+/******************************************************************************/
+/**
  * Initializes internal state based on the input length
  *
  * @param sizeInputV The size of the original message in bytes
@@ -49,6 +87,27 @@ void MyCryptoLibrary::MD4::initialization(const std::size_t sizeInputV) {
   _b = 0xEFCDAB89;
   _c = 0x98BADCFE;
   _d = 0x10325476;
+  _ml = sizeInputV * CHAR_BIT; // message length in bits (always a multiple of
+                               // the number of bits in a character)
+}
+/******************************************************************************/
+/**
+ * Initializes internal state based on the input length and predefined input
+ * state
+ *
+ * @param sizeInputV The size of the original message in bytes
+ * @param a Internal state of the MD4
+ * @param b Internal state of the MD4
+ * @param c Internal state of the MD4
+ * @param d Internal state of the MD4
+ */
+void MyCryptoLibrary::MD4::initialization(const std::size_t sizeInputV,
+                                          uint32_t a, uint32_t b, uint32_t c,
+                                          uint32_t d) {
+  _a = a;
+  _b = b;
+  _c = c;
+  _d = d;
   _ml = sizeInputV * CHAR_BIT; // message length in bits (always a multiple of
                                // the number of bits in a character)
 }

@@ -30,6 +30,26 @@ public:
   virtual std::vector<unsigned char>
   hash(const std::vector<unsigned char> &inputV) override;
 
+  /**
+   * @brief Computes the MD4 hash value
+   *
+   * Computes the MD4 hash of the given input vector from a predefined internal
+   * state
+   *
+   * @param inputV The input data as a vector of unsigned characters
+   * @param a Internal state of the MD4
+   * @param b Internal state of the MD4
+   * @param c Internal state of the MD4
+   * @param d Internal state of the MD4
+   * @param messageSize Size of the entire message that was intended to hash
+   * from the start
+   *
+   * @return A vector of bytes containing the computed hash
+   */
+  std::vector<unsigned char> hash(const std::vector<unsigned char> &inputV,
+                                  uint32_t a, uint32_t b, uint32_t c,
+                                  uint32_t d, std::size_t messageSize);
+
 private:
   /**
    * Initializes internal state based on the input length
@@ -37,6 +57,19 @@ private:
    * @param sizeInputV The size of the original message in bytes
    */
   void initialization(const std::size_t sizeInputV);
+
+  /**
+   * Initializes internal state based on the input length and predefined input
+   * state
+   *
+   * @param sizeInputV The size of the original message in bytes
+   * @param a Internal state of the MD4
+   * @param b Internal state of the MD4
+   * @param c Internal state of the MD4
+   * @param d Internal state of the MD4
+   */
+  void initialization(const std::size_t sizeInputV, uint32_t a, uint32_t b,
+                      uint32_t c, uint32_t d);
 
   /**
    * Preprocesses the input data (padding, appending length) as required by the
