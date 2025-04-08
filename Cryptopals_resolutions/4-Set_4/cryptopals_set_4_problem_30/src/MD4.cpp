@@ -22,7 +22,21 @@ MyCryptoLibrary::MD4::~MD4() {}
 std::vector<unsigned char>
 MyCryptoLibrary::MD4::hash(const std::vector<unsigned char> &inputV) {
   initialization(inputV.size());
-  return inputV;
+  preProcessing(inputV);
+  processing();
+  std::vector<unsigned char> hashV;
+  hashV.reserve(MD4_DIGEST_LENGTH);
+
+  const uint32_t hashParts[] = {_a, _b, _c, _d};
+
+  for (uint32_t part : hashParts) {
+    // extraction of bytes start at the lower order end
+    hashV.push_back(part & 0xFF);
+    hashV.push_back((part >> 8) & 0xFF);
+    hashV.push_back((part >> 16) & 0xFF);
+    hashV.push_back((part >> 24) & 0xFF);
+  }
+  return hashV;
 }
 /******************************************************************************/
 /**
@@ -31,10 +45,10 @@ MyCryptoLibrary::MD4::hash(const std::vector<unsigned char> &inputV) {
  * @param sizeInputV The size of the original message in bytes
  */
 void MyCryptoLibrary::MD4::initialization(const std::size_t sizeInputV) {
-  _a = 0x01234567;
-  _b = 0x89ABCDEF;
-  _c = 0xFEDCBA98;
-  _d = 0x76543210;
+  _a = 0x67452301;
+  _b = 0xEFCDAB89;
+  _c = 0x98BADCFE;
+  _d = 0x10325476;
   _ml = sizeInputV * CHAR_BIT; // message length in bits (always a multiple of
                                // the number of bits in a character)
 }
@@ -77,6 +91,15 @@ void MyCryptoLibrary::MD4::processing() {
   for (std::size_t i = 0; i < _inputVpadded.size(); i += 64) {
     std::vector<unsigned char> x(_inputVpadded.begin() + i,
                                  _inputVpadded.begin() + i + 64);
+    std::vector<uint32_t> X;
+    X.reserve(MD4_DIGEST_LENGTH);
+    // conversion of 64 bytes into 16 words (32 bits) blocks
+    for (std::size_t j = 0; j < 16; ++j) {
+      X[j] = static_cast<uint32_t>(x[j * 4]) |
+             (static_cast<uint32_t>(x[j * 4 + 1]) << 8) |
+             (static_cast<uint32_t>(x[j * 4 + 2]) << 16) |
+             (static_cast<uint32_t>(x[j * 4 + 3]) << 24);
+    }
     // Save register values
     aa = _a;
     bb = _b;
@@ -88,16 +111,16 @@ void MyCryptoLibrary::MD4::processing() {
     for (std::size_t roundOperations = 0; roundOperations < 4;
          ++roundOperations) {
       leftShiftAmount = 3;
-      _a = operationRounds(_a, _b, _c, _d, x, ++blockIndex, leftShiftAmount,
+      _a = operationRounds(_a, _b, _c, _d, X, ++blockIndex, leftShiftAmount,
                            roundNumber);
       leftShiftAmount = 7;
-      _d = operationRounds(_d, _a, _b, _c, x, ++blockIndex, leftShiftAmount,
+      _d = operationRounds(_d, _a, _b, _c, X, ++blockIndex, leftShiftAmount,
                            roundNumber);
       leftShiftAmount = 11;
-      _c = operationRounds(_c, _d, _a, _b, x, ++blockIndex, leftShiftAmount,
+      _c = operationRounds(_c, _d, _a, _b, X, ++blockIndex, leftShiftAmount,
                            roundNumber);
       leftShiftAmount = 19;
-      _b = operationRounds(_b, _c, _d, _a, x, ++blockIndex, leftShiftAmount,
+      _b = operationRounds(_b, _c, _d, _a, X, ++blockIndex, leftShiftAmount,
                            roundNumber);
     }
     // Round 2
@@ -106,19 +129,19 @@ void MyCryptoLibrary::MD4::processing() {
          ++roundOperations) {
       blockIndex = roundOperations;
       leftShiftAmount = 3;
-      _a = operationRounds(_a, _b, _c, _d, x, blockIndex, leftShiftAmount,
+      _a = operationRounds(_a, _b, _c, _d, X, blockIndex, leftShiftAmount,
                            roundNumber);
       blockIndex += 4;
       leftShiftAmount = 5;
-      _d = operationRounds(_d, _a, _b, _c, x, blockIndex, leftShiftAmount,
+      _d = operationRounds(_d, _a, _b, _c, X, blockIndex, leftShiftAmount,
                            roundNumber);
       blockIndex += 4;
       leftShiftAmount = 9;
-      _c = operationRounds(_c, _d, _a, _b, x, blockIndex, leftShiftAmount,
+      _c = operationRounds(_c, _d, _a, _b, X, blockIndex, leftShiftAmount,
                            roundNumber);
       blockIndex += 4;
       leftShiftAmount = 13;
-      _b = operationRounds(_b, _c, _d, _a, x, blockIndex, leftShiftAmount,
+      _b = operationRounds(_b, _c, _d, _a, X, blockIndex, leftShiftAmount,
                            roundNumber);
     }
     // Round 3
@@ -127,19 +150,19 @@ void MyCryptoLibrary::MD4::processing() {
          ++roundOperations) {
       blockIndex = blockRoundInitializer[roundOperations];
       leftShiftAmount = 3;
-      _a = operationRounds(_a, _b, _c, _d, x, blockIndex, leftShiftAmount,
+      _a = operationRounds(_a, _b, _c, _d, X, blockIndex, leftShiftAmount,
                            roundNumber);
       blockIndex += 8;
       leftShiftAmount = 9;
-      _d = operationRounds(_d, _a, _b, _c, x, blockIndex, leftShiftAmount,
+      _d = operationRounds(_d, _a, _b, _c, X, blockIndex, leftShiftAmount,
                            roundNumber);
       blockIndex -= 4;
       leftShiftAmount = 11;
-      _c = operationRounds(_c, _d, _a, _b, x, blockIndex, leftShiftAmount,
+      _c = operationRounds(_c, _d, _a, _b, X, blockIndex, leftShiftAmount,
                            roundNumber);
       blockIndex += 8;
       leftShiftAmount = 15;
-      _b = operationRounds(_b, _c, _d, _a, x, blockIndex, leftShiftAmount,
+      _b = operationRounds(_b, _c, _d, _a, X, blockIndex, leftShiftAmount,
                            roundNumber);
     }
     // Update the registers at the end of each block
@@ -172,10 +195,12 @@ void MyCryptoLibrary::MD4::processing() {
  * @param leftShiftAmount The amount to be left circularly shifted
  * @return The auxiliary method result
  */
-uint32_t MyCryptoLibrary::MD4::operationRounds(
-    uint32_t r1, uint32_t r2, uint32_t r3, uint32_t r4,
-    const std::vector<unsigned char> &x, std::size_t blockIndex,
-    std::size_t leftShiftAmount, std::size_t roundNumber) {
+uint32_t MyCryptoLibrary::MD4::operationRounds(uint32_t r1, uint32_t r2,
+                                               uint32_t r3, uint32_t r4,
+                                               const std::vector<uint32_t> &x,
+                                               std::size_t blockIndex,
+                                               std::size_t leftShiftAmount,
+                                               std::size_t roundNumber) {
   switch (roundNumber) {
   case 1:
     /* code */
