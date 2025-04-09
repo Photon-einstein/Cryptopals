@@ -143,17 +143,18 @@ void MyCryptoLibrary::MD4::preProcessing(
 /// Processes the padded message in 512-bit blocks.
 void MyCryptoLibrary::MD4::processing() {
   // Process the padded input in 512-bit blocks / 16 word blocks / 64 bytes
+  const std::size_t bytesBlockSize{64}, wordsBlockSize{16};
   uint32_t aa, bb, cc, dd;
   std::size_t roundNumber;
   std::size_t blockIndex, leftShiftAmount;
   std::vector<std::size_t> blockRoundInitializer{0, 2, 1, 3};
-  for (std::size_t i = 0; i < _inputVpadded.size(); i += 64) {
+  for (std::size_t i = 0; i < _inputVpadded.size(); i += bytesBlockSize) {
     std::vector<unsigned char> x(_inputVpadded.begin() + i,
-                                 _inputVpadded.begin() + i + 64);
+                                 _inputVpadded.begin() + i + bytesBlockSize);
     std::vector<uint32_t> X;
     X.reserve(MD4_DIGEST_LENGTH);
     // conversion of 64 bytes into 16 words (32 bits) blocks
-    for (std::size_t j = 0; j < 16; ++j) {
+    for (std::size_t j = 0; j < wordsBlockSize; ++j) {
       X[j] = static_cast<uint32_t>(x[j * 4]) |
              (static_cast<uint32_t>(x[j * 4 + 1]) << 8) |
              (static_cast<uint32_t>(x[j * 4 + 2]) << 16) |

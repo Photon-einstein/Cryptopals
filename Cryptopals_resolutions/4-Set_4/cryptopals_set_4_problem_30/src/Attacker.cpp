@@ -9,9 +9,27 @@
 
 /* constructor / destructor */
 Attacker::Attacker(const std::shared_ptr<Server> &server, bool debugFlag)
-    : _debugFlag{debugFlag}, _server{server} {}
+    : _debugFlag{debugFlag}, _md4{std::make_shared<MyCryptoLibrary::MD4>()},
+      _server{server} {}
 /******************************************************************************/
 Attacker::~Attacker() {}
+/******************************************************************************/
+/**
+ * @brief This method will try perform the Length Extension Attack at
+ * the SHA1
+ *
+ * This method will try to perform the Length Extension Attack at the MD4
+ *
+ * @return A bool value, true if the attack was successful,
+ * false otherwise
+ */
+bool Attacker::lengthExtensionAttackAtMD4() {
+  std::string message = Attacker::extractMessage(Attacker::_messageLocation);
+  MessageFormat::MessageParsed msgParsed =
+      MessageExtractionFacility::parseMessage(message, Attacker::_debugFlag);
+  Attacker::computeMD4padding(msgParsed._msg);
+  return Attacker::tamperMessageTry(msgParsed);
+}
 /******************************************************************************/
 /**
  * @brief This method extracts the message intercepted
@@ -80,5 +98,136 @@ Attacker::computeMD4padding(const std::string &message) const {
     std::cout << "'.\n" << std::endl;
   }
   return inputVpadded;
+}
+/******************************************************************************/
+/**
+ * @brief This method will extract the internal state of the MD4
+ *
+ * This method will extract the internal state of the MD4 from a mac in a
+ * byte format input
+ *
+ * @param macByteFormat The MD4 mac in a byte format
+ * @return The internal state of the SHA1
+ */
+MD4InternalState::MD4InternalState Attacker::extractionMD4InternalState(
+    const std::vector<unsigned char> &macByteFormat) {
+  MD4InternalState::MD4InternalState md4InternalState;
+  const int internalStateRegisterSize{4}; // 32 bit / 4 byte each register
+  if (macByteFormat.size() != Attacker::_md4DigestLength) {
+    const std::string errorMessage =
+        "Attacker log | invalid size of the input macByteFormat at the method "
+        "Attacker::extractionSHA1InternalState,"
+        " expected " +
+        std::to_string(Attacker::_md4DigestLength) +
+        std::string(" bytes and got ") + std::to_string(macByteFormat.size()) +
+        " bytes instead.";
+    throw std::invalid_argument(errorMessage);
+  }
+  for (int registerSha1Counter = 0;
+       registerSha1Counter < internalStateRegisterSize; ++registerSha1Counter) {
+    uint32_t registerSha1Value =
+        static_cast<uint32_t>(macByteFormat[registerSha1Counter * 4]) |
+        (static_cast<uint32_t>(macByteFormat[registerSha1Counter * 4 + 1])
+         << 8) |
+        (static_cast<uint32_t>(macByteFormat[registerSha1Counter * 4 + 2])
+         << 16) |
+        (static_cast<uint32_t>(macByteFormat[registerSha1Counter * 4 + 3])
+         << 24);
+    md4InternalState._internalState.push_back(registerSha1Value);
+  }
+  return md4InternalState;
+}
+/******************************************************************************/
+/**
+ * @brief This method will try to tamper a message
+ *
+ * This method will try to tamper a message intercepted and
+ * deceive the server with another message authentication
+ * code (MAC)
+ *
+ * @param messageParsed The content of the message intercepted, parsed already
+ * @return A bool value, true if the attack was successful, false otherwise
+ */
+bool Attacker::tamperMessageTry(
+    const MessageFormat::MessageParsed &messageParsed) {
+  if (messageParsed._url.size() == 0 || messageParsed._msg.size() == 0 ||
+      messageParsed._mac.size() == 0) {
+    const std::string errorMessage =
+        "Attacker log | messageParsed empty as an input field at the method "
+        "Attacker::tamperMessageTry";
+    throw std::invalid_argument(errorMessage);
+  }
+  const unsigned int maxKeySize{64};
+  unsigned int keyLength, keyLengthFixed{0};
+  const std::string appendMessageGoal{"&admin=true"};
+  const std::vector<unsigned char> appendMessageGoalV(appendMessageGoal.begin(),
+                                                      appendMessageGoal.end());
+  std::vector<unsigned char> messagePadded, newMessage, macByteFormat, newMac;
+  std::string tamperedMessage{};
+  const char dummyChar = '#';
+  MD4InternalState::MD4InternalState md4InternalState;
+  // calculation of the new MAC
+  // conversion hex to bytes of the mac
+  macByteFormat = MessageExtractionFacility::hexToBytes(messageParsed._mac);
+  if (Attacker::_debugFlag) {
+    std::cout << "\nAttacker log | Size of the mac = " << macByteFormat.size()
+              << " bytes" << std::endl;
+  }
+  // extraction of the internal state of the MD4 of the current mac
+  md4InternalState = Attacker::extractionMD4InternalState(macByteFormat);
+  // Trial and error to find the length of private key of the server
+  for (keyLength = 1; keyLength <= maxKeySize; ++keyLength) {
+    std::string keyAndMessage(keyLength, dummyChar);
+    bool serverReply{false};
+    keyAndMessage += messageParsed._msg;
+    messagePadded = Attacker::computeMD4padding(keyAndMessage);
+    // Computation of the new MAC using MD4’s state from the intercepted
+    // message
+    newMac = _md4->hash(appendMessageGoalV, md4InternalState._internalState[0],
+                        md4InternalState._internalState[1],
+                        md4InternalState._internalState[2],
+                        md4InternalState._internalState[3],
+                        messagePadded.size() + appendMessageGoalV.size());
+    // construction of new forged message:   msg || padding || forged msg
+    newMessage.clear();
+    newMessage.assign(messagePadded.begin() + keyLength, messagePadded.end());
+    newMessage.insert(newMessage.end(), appendMessageGoalV.begin(),
+                      appendMessageGoalV.end());
+    // Test the keyLength in the server
+    serverReply = Attacker::_server->validateMac(newMessage, newMac);
+    if (Attacker::_debugFlag) {
+      std::cout << "For key length: " << keyLength
+                << " server reply: " << serverReply << std::endl;
+    }
+    if (serverReply) {
+      if (Attacker::_debugFlag) {
+        std::cout << "\nAttacker log | Size of the server key = " << keyLength
+                  << " bytes" << std::endl;
+      }
+      keyLengthFixed = keyLength;
+      tamperedMessage.assign(newMessage.begin(), newMessage.end());
+      break;
+    }
+  }
+  if (keyLengthFixed) {
+    if (Attacker::_debugFlag) {
+      std::cout << "\nAttacker log | Size of the server key = " << keyLength
+                << " bytes" << " |\nTampered message: '";
+      for (std::size_t i = 0; i < tamperedMessage.size(); ++i) {
+        if (i < messageParsed._msg.size() ||
+            i > messagePadded.size() - keyLengthFixed - 1) {
+          printf("%c", static_cast<unsigned char>(tamperedMessage[i]));
+        } else if (i == messagePadded.size() - keyLengthFixed - 1) {
+          printf(" x%02x ", static_cast<unsigned char>(tamperedMessage[i]));
+        } else {
+          printf(" x%02x", static_cast<unsigned char>(tamperedMessage[i]));
+        }
+      }
+      std::cout << "' |\nNew MAC = "
+                << MessageExtractionFacility::toHexString(newMac) << std::endl;
+    }
+    return true;
+  }
+  return false;
 }
 /******************************************************************************/
