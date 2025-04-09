@@ -1,10 +1,10 @@
-#ifndef SHA1_HPP
-#define SHA1_HPP
+#ifndef MD4_HPP
+#define MD4_HPP
 
 #include "./../include/MessageDigest.hpp"
 
 // Define MD4_DIGEST_LENGTH if it is not defined elsewhere.
-// MD4 produces a 128-bit (20-byte) digest.
+// MD4 produces a 128-bit (16-byte) digest.
 #ifndef MD4_DIGEST_LENGTH
 #define MD4_DIGEST_LENGTH 16
 #endif
