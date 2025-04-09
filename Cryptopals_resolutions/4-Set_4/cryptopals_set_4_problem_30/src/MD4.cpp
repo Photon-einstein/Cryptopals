@@ -144,30 +144,23 @@ void MyCryptoLibrary::MD4::preProcessing(
 void MyCryptoLibrary::MD4::processing() {
   // Process the padded input in 512-bit blocks / 16 word blocks / 64 bytes
   const std::size_t bytesBlockSize{64}, wordsBlockSize{16};
-  uint32_t aa, bb, cc, dd;
-  std::size_t roundNumber;
-  std::size_t blockIndex, leftShiftAmount;
+  std::size_t leftShiftAmount;
   std::vector<std::size_t> blockRoundInitializer{0, 2, 1, 3};
   for (std::size_t i = 0; i < _inputVpadded.size(); i += bytesBlockSize) {
     std::vector<unsigned char> x(_inputVpadded.begin() + i,
                                  _inputVpadded.begin() + i + bytesBlockSize);
     std::vector<uint32_t> X;
-    X.reserve(MD4_DIGEST_LENGTH);
     // conversion of 64 bytes into 16 words (32 bits) blocks
     for (std::size_t j = 0; j < wordsBlockSize; ++j) {
-      X[j] = static_cast<uint32_t>(x[j * 4]) |
-             (static_cast<uint32_t>(x[j * 4 + 1]) << 8) |
-             (static_cast<uint32_t>(x[j * 4 + 2]) << 16) |
-             (static_cast<uint32_t>(x[j * 4 + 3]) << 24);
+      X.push_back(static_cast<uint32_t>(x[j * 4]) |
+                  (static_cast<uint32_t>(x[j * 4 + 1]) << 8) |
+                  (static_cast<uint32_t>(x[j * 4 + 2]) << 16) |
+                  (static_cast<uint32_t>(x[j * 4 + 3]) << 24));
     }
     // Save register values
-    aa = _a;
-    bb = _b;
-    cc = _c;
-    dd = _d;
+    std::size_t aa = _a, bb = _b, cc = _c, dd = _d;
     // Round 1
-    roundNumber = 1;
-    blockIndex = -1;
+    std::size_t roundNumber = 1, blockIndex = -1;
     for (std::size_t roundOperations = 0; roundOperations < 4;
          ++roundOperations) {
       leftShiftAmount = 3;
@@ -260,7 +253,7 @@ uint32_t MyCryptoLibrary::MD4::operationRounds(uint32_t r1, uint32_t r2,
                                                const std::vector<uint32_t> &x,
                                                std::size_t blockIndex,
                                                std::size_t leftShiftAmount,
-                                               std::size_t roundNumber) {
+                                               std::size_t roundNumber) const {
   switch (roundNumber) {
   case 1:
     /* code */
