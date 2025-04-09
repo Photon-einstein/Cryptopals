@@ -107,7 +107,7 @@ private:
   uint32_t operationRounds(uint32_t r1, uint32_t r2, uint32_t r3, uint32_t r4,
                            const std::vector<uint32_t> &x,
                            std::size_t blockIndex, std::size_t leftShiftAmount,
-                           std::size_t roundNumber);
+                           std::size_t roundNumber) const;
 
   /**
    * Auxiliary function in the processing of the message
