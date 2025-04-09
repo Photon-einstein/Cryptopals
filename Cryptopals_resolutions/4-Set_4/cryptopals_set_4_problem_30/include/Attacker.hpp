@@ -26,6 +26,18 @@ public:
 
 private:
   /**
+   * @brief This method will extract the internal state of the MD4
+   *
+   * This method will extract the internal state of the MD4 from a mac in a
+   * byte format input
+   *
+   * @param macByteFormat The MD4 mac in a byte format
+   * @return The internal state of the MD4
+   */
+  static MD4InternalState::MD4InternalState
+  extractionMD4InternalState(const std::vector<unsigned char> &macByteFormat);
+
+  /**
    * @brief This method extracts the message intercepted
    *
    * This method will extract the message intercepted from a given file location
@@ -46,18 +58,6 @@ private:
    */
   std::vector<unsigned char>
   computeMD4padding(const std::string &message) const;
-
-  /**
-   * @brief This method will extract the internal state of the MD4
-   *
-   * This method will extract the internal state of the MD4 from a mac in a
-   * byte format input
-   *
-   * @param macByteFormat The MD4 mac in a byte format
-   * @return The internal state of the MD4
-   */
-  static MD4InternalState::MD4InternalState
-  extractionMD4InternalState(const std::vector<unsigned char> &macByteFormat);
 
   /**
    * @brief This method will try to tamper a message

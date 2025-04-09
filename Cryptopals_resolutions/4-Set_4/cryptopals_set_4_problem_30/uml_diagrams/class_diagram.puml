@@ -1,0 +1,80 @@
+@startuml
+
+namespace MessageFormat {
+    class MessageFormat <<struct>> {
+        + _url : std::string
+        + _msg : std::string
+        + _mac : std::string
+    }
+}
+
+namespace MD4InternalState {
+    class MD4InternalState <<struct>> {
+        + _internalState : std::vector<uint32_t>
+    }
+}
+
+class Server {
+    - _debugFlag : bool
+    - _debugFlagExtreme : bool
+    - _keyServer : std::vector<unsigned char>
+    - _md : std::shared_ptr<MyCryptoLibrary::MessageDigest>
+    
+    + Server(debugFlag : bool)
+    + ~Server()
+    + validateMac(msg : std::vector<unsigned char>, mac : std::vector<unsigned char>) : bool
+}
+
+namespace MyCryptoLibrary {
+    class MessageDigest <<abstract>> {
+        + MessageDigest()
+        + ~MessageDigest()
+        + hash(inputV : std::vector<unsigned char>) : std::vector<unsigned char>
+    }
+
+    class MD4 {
+        - _sizeOutputHash : std::size_t
+        - _inputVpadded : std::vector<unsigned char>
+        - _a : uint32_t
+        - _b : uint32_t
+        - _c : uint32_t
+        - _d : uint32_t
+        - _ml : uint64_t
+
+        + MD4()
+        + ~MD41()
+        + hash(inputV : std::vector<unsigned char>) : std::vector<unsigned char>
+        + hash(inputV : std::vector<unsigned char>, a : uint32_t, b : uint32_t, c : uint32_t, d : uint32_t, messageSize: std::size_t) : std::vector<unsigned char>
+        - initialization(sizeInputV : std::size_t) : void
+        - initialization(sizeInputV : std::size_t, a : uint32_t, b : uint32_t, c : uint32_t, d : uint32_t) : void
+        - preProcessing(inputV : std::vector<unsigned char>) : void
+        - processing() : void
+        - leftRotate(value : uint32_t, bits : int) : uint32_t
+    }
+
+    MessageDigest <|-- MD4 : "inherits"
+}
+
+class Attacker {
+    - _debugFlag : bool
+    - _debugFlagExtreme : bool
+    - _md4DigestLength : int {static}
+    - _messageLocation : std::string
+    - _md4 : std::shared_ptr<MyCryptoLibrary::MD4>
+    - _server : std::shared_ptr<Server>
+    - _msgParsed : MessageFormat::MessageParsed
+
+    + Attacker(server : std::shared_ptr<Server>, debugFlag : bool)
+    + ~Attacker()
+    + lengthExtensionAttackAtMD4 () : void
+    - extractionMD4InternalState(macByteFormat : std::vector<unsigned char>) : MD4InternalState::MD4InternalState {static}
+    - extractMessage(messageLocation : std::string) const : std::string
+    - computeMD4padding(message : std::string) const : std::vector<unsigned char>
+    - tamperMessageTry(messageParsed : MessageFormat::MessageParsed) : bool
+}
+
+Server --> MyCryptoLibrary.MessageDigest : "has a"
+Attacker --> MyCryptoLibrary.MD4 : "has a"
+Attacker --> Server : "has a"
+
+@enduml
