@@ -20,6 +20,12 @@ int main(void) {
   std::shared_ptr<Attacker> attacker =
       std::make_shared<Attacker>(server, debugFlag);
   // check attacker
+  bool attackResult = attacker->lengthExtensionAttackAtMD4();
+  std::map<int, std::string> m;
+  m.insert({0, "Failed"});
+  m.insert({1, "Succeed"});
+  std::cout << "\nAttacker result of LengthExtensionAttackMD4: "
+            << m[attackResult] << std::endl;
   /* end of the work */
   end = clock();
   time = (double)(end - start) / CLOCKS_PER_SEC;

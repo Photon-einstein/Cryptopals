@@ -30,5 +30,5 @@ protected:
  */
 TEST_F(AttackerTest,
        lengthExtensionAttackAtMD4_NoInputNeeded_ShouldSucceedInTheAttack) {
-  ASSERT_TRUE(true);
+  ASSERT_TRUE(_attacker->lengthExtensionAttackAtMD4());
 }
