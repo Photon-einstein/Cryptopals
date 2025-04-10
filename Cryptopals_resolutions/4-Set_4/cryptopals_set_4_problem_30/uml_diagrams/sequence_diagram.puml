@@ -5,7 +5,7 @@ actor Attacker
 participant "Attacker" as A
 participant "MessageExtractionFacility" as MEF
 participant "Server" as S
-participant "SHA1" as SHA1
+participant "MD4" as MD4
 
 A -> A : lengthExtensionAttackAtSHA1()
 activate A
@@ -20,7 +20,7 @@ activate MEF
 MEF --> A : MessageParsed
 deactivate MEF
 
-A -> A : computeSHA1padding(msgParsed._msg)
+A -> A : computeMD4padding(msgParsed._msg)
 activate A
 A --> A : return padded message
 deactivate A
@@ -33,24 +33,24 @@ activate MEF
 MEF --> A : macByteFormat
 deactivate MEF
 
-A -> A : extractionSHA1InternalState(macByteFormat)
+A -> A : extractionMD4InternalState(macByteFormat)
 activate A
-A --> A : return sha1InternalState
+A --> A : return md4InternalState
 deactivate A
 
 loop keyLength = 1 to maxKeySize
-    A -> SHA1 : hash(appendMessageGoalV, h0, h1, h2, h3, h4, messageSize)
-    activate SHA1
-    SHA1 --> A : newMac
-    deactivate SHA1
+    A -> MD4 : hash(appendMessageGoalV, a, b, c, d, messageSize)
+    activate MD4
+    MD4 --> A : newMac
+    deactivate MD4
     
     A -> S : validateMac(newMessage, newMac)
     activate S
     S -> S: Prepend server key to the message    
-    S -> SHA1: hash(key || newMessage)
-    activate SHA1
-    SHA1 --> S: hashServer
-    deactivate SHA1
+    S -> MD4: hash(key || newMessage)
+    activate MD4
+    MD4 --> S: hashServer
+    deactivate MD4
     S -> S: Check if hashServer == newMac 
     S --> A : serverReply
     deactivate S
