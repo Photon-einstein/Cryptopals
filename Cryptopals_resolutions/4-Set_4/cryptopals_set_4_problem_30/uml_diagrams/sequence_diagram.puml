@@ -7,7 +7,7 @@ participant "MessageExtractionFacility" as MEF
 participant "Server" as S
 participant "MD4" as MD4
 
-A -> A : lengthExtensionAttackAtSHA1()
+A -> A : lengthExtensionAttackAtMD4()
 activate A
 
 A -> A : extractMessage()
