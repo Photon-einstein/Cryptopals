@@ -1,0 +1,20 @@
+@startuml
+
+actor User
+
+participant "User" as U
+participant "MD4" as MD4
+
+U -> MD4 : hash(inputV)
+activate U
+
+MD4 -> MD4 : initialization(messageSize, a, b, c, d)
+activate MD4
+MD4 -> MD4 : preProcessing(inputV)
+MD4 -> MD4 : processing()
+MD4 --> U : return hashV
+deactivate MD4
+
+deactivate U
+
+@enduml
