@@ -23,8 +23,6 @@ protected:
 
   // cppcheck-suppress unusedStructMember
   std::unique_ptr<MyCryptoLibrary::HMAC> _hmacSha1;
-  std::string _testInput;
-  std::vector<unsigned char> _input, _hmac;
 };
 
 /**
@@ -151,4 +149,67 @@ TEST_F(HMAC_SHA1_Test, HMACSHA1_RFC2202TEST7_ShouldMatchReference) {
   std::string expected{"0xe8e99d0f45237d786d6bbaa7965c7808bbff1a91"};
   std::string hmacSha1S = MessageExtractionFacility::toHexString(hmacSha1);
   ASSERT_EQ(hmacSha1S, expected);
+}
+
+/**
+ * @test Test the correctness of the hash function.
+ * @brief Ensures that  hmac-sha1 output is the expected one for edge cases 1
+ */
+TEST_F(HMAC_SHA1_Test, HMACSHA1EdgeCaseTest1_ShouldMatchReference) {
+  std::vector<unsigned char> keyV;
+  std::string message{"some message"};
+  std::vector<unsigned char> messageV(message.begin(), message.end());
+  std::vector<unsigned char> hmacSha1 = _hmacSha1->hmac(keyV, messageV);
+  ASSERT_EQ(hmacSha1.size(), SHA1_DIGEST_LENGTH);
+  std::string expected{"0xcfda2dca77ff81d1feed4e0ece8dd3079dd6fe64"};
+  std::string hmacSha1S = MessageExtractionFacility::toHexString(hmacSha1);
+  ASSERT_EQ(hmacSha1S, expected);
+}
+
+/**
+ * @test Test the correctness of the hash function.
+ * @brief Ensures that  hmac-sha1 output is the expected one for edge cases 3
+ */
+TEST_F(HMAC_SHA1_Test, HMACSHA1EdgeCaseTest2_ShouldMatchReference) {
+  std::vector<unsigned char> keyV;
+  std::vector<unsigned char> messageV;
+  std::vector<unsigned char> hmacSha1 = _hmacSha1->hmac(keyV, messageV);
+  ASSERT_EQ(hmacSha1.size(), SHA1_DIGEST_LENGTH);
+  std::string expected{"0xfbdb1d1b18aa6c08324b7d64b71fb76370690e1d"};
+  std::string hmacSha1S = MessageExtractionFacility::toHexString(hmacSha1);
+  ASSERT_EQ(hmacSha1S, expected);
+}
+
+/**
+ * @test Test the correctness of the hash function.
+ * @brief Ensures that  hmac-sha1 output is the expected one for Negative test 1
+ */
+TEST_F(HMAC_SHA1_Test, HMACSHA1_NegativeTest1_ShouldMatchReference) {
+  const std::size_t keyLengthRFC2202Test6{80};
+  std::vector<unsigned char> keyV(keyLengthRFC2202Test6, 0xaa);
+  std::string message{"Test Using Larger Than Block-Size Key - Hash Key First"};
+  std::vector<unsigned char> messageV(message.begin(), message.end());
+  messageV[0] ^= 0x01; // flip one bit
+  std::vector<unsigned char> hmacSha1 = _hmacSha1->hmac(keyV, messageV);
+  ASSERT_EQ(hmacSha1.size(), SHA1_DIGEST_LENGTH);
+  std::string expected{"0xaa4ae5e15272d00e95705637ce8a3b55ed402112"};
+  std::string hmacSha1S = MessageExtractionFacility::toHexString(hmacSha1);
+  ASSERT_NE(hmacSha1S, expected);
+}
+
+/**
+ * @test Test the correctness of the hash function.
+ * @brief Ensures that  hmac-sha1 output is the expected one for Negative test 2
+ */
+TEST_F(HMAC_SHA1_Test, HMACSHA1_NegativeTest2_ShouldMatchReference) {
+  const std::size_t keyLengthRFC2202Test6{80};
+  std::vector<unsigned char> keyV(keyLengthRFC2202Test6, 0xaa);
+  keyV[0] ^= 0x01; // flip one bit
+  std::string message{"Test Using Larger Than Block-Size Key - Hash Key First"};
+  std::vector<unsigned char> messageV(message.begin(), message.end());
+  std::vector<unsigned char> hmacSha1 = _hmacSha1->hmac(keyV, messageV);
+  ASSERT_EQ(hmacSha1.size(), SHA1_DIGEST_LENGTH);
+  std::string expected{"0xaa4ae5e15272d00e95705637ce8a3b55ed402112"};
+  std::string hmacSha1S = MessageExtractionFacility::toHexString(hmacSha1);
+  ASSERT_NE(hmacSha1S, expected);
 }
