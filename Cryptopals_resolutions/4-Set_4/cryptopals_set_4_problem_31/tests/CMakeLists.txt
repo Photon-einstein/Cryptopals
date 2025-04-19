@@ -13,7 +13,9 @@ include_directories(${GTEST_INCLUDE_DIRS})
 
 # Find OpenSSL
 find_package(OpenSSL REQUIRED)
-include_directories(${OPENSSL_INCLUDE_DIR})
+include_directories(
+    ${OPENSSL_INCLUDE_DIR}
+)
 
 # Add source files (your implementation files)
 set(SOURCE_FILES
@@ -35,10 +37,18 @@ set(TEST_SOURCES
 # Define the test executable
 add_executable(run_tests ${TEST_SOURCES} ${SOURCE_FILES})
 
+
+message(STATUS "CMAKE_SOURCE_DIR is: ${CMAKE_SOURCE_DIR}")
+
+# Include Crow's header files
+target_include_directories(run_tests PRIVATE
+    ${OPENSSL_INCLUDE_DIR}
+    ${CMAKE_SOURCE_DIR}/../external/crow/include
+)
+
 # Link with Google Test, OpenSSL, and pthread
 target_link_libraries(run_tests PRIVATE ${GTEST_LIBRARIES} OpenSSL::Crypto pthread)
 
 # Enable testing
 enable_testing()
 add_test(NAME cryptopals_tests_set_4_problem_31 COMMAND run_tests)
-
