@@ -5,6 +5,8 @@
 #include <time.h>
 #include <vector>
 
+#include "./../include/HMAC.hpp"
+#include "./../include/HMAC_SHA1.hpp"
 #include "./../include/Server.hpp"
 
 int main(void) {
@@ -14,6 +16,8 @@ int main(void) {
   /* work to verify */
   const bool debugFlag{true};
   std::shared_ptr<Server> server = std::make_shared<Server>(debugFlag);
+  std::shared_ptr<MyCryptoLibrary::HMAC> hmac_sha1 =
+      std::make_shared<MyCryptoLibrary::HMAC_SHA1>();
   // check attacker
   /* end of the work */
   end = clock();

@@ -1,11 +1,7 @@
-#include <openssl/conf.h>
-#include <openssl/err.h>
-#include <openssl/evp.h>
-
 #include "./../include/SHA1.hpp"
 
 /* constructor / destructor */
-MyCryptoLibrary::SHA1::SHA1() : _sizeOutputHash{SHA_DIGEST_LENGTH} {}
+MyCryptoLibrary::SHA1::SHA1() : _sizeOutputHash{SHA1_DIGEST_LENGTH} {}
 /******************************************************************************/
 MyCryptoLibrary::SHA1::~SHA1() {}
 /******************************************************************************/
@@ -24,7 +20,7 @@ MyCryptoLibrary::SHA1::hash(const std::vector<unsigned char> &inputV) {
   preProcessing(inputV);
   processing();
   std::vector<unsigned char> hashV;
-  hashV.reserve(SHA_DIGEST_LENGTH);
+  hashV.reserve(SHA1_DIGEST_LENGTH);
 
   const uint32_t hashParts[] = {_h0, _h1, _h2, _h3, _h4};
 
@@ -63,7 +59,7 @@ MyCryptoLibrary::SHA1::hash(const std::vector<unsigned char> &inputV,
   preProcessing(inputV);
   processing();
   std::vector<unsigned char> hashV;
-  hashV.reserve(SHA_DIGEST_LENGTH);
+  hashV.reserve(SHA1_DIGEST_LENGTH);
 
   const uint32_t hashParts[] = {_h0, _h1, _h2, _h3, _h4};
 
@@ -146,9 +142,9 @@ void MyCryptoLibrary::SHA1::preProcessing(
 /// Processes the padded message in 512-bit blocks.
 void MyCryptoLibrary::SHA1::processing() {
   // Process the padded input in 512-bit blocks
-  for (std::size_t i = 0; i < _inputVpadded.size(); i += 64) {
-    std::vector<unsigned char> block(_inputVpadded.begin() + i,
-                                     _inputVpadded.begin() + i + 64);
+  for (std::size_t i = 0; i < _inputVpadded.size(); i += SHA1_BLOCK_SIZE) {
+    std::vector<unsigned char> block(
+        _inputVpadded.begin() + i, _inputVpadded.begin() + i + SHA1_BLOCK_SIZE);
     // Prepare the message schedule (W)
     uint32_t W[80];
 

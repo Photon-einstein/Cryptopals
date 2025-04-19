@@ -3,10 +3,20 @@
 
 #include "./../include/SHA.hpp"
 
+#include <openssl/conf.h>
+#include <openssl/err.h>
+#include <openssl/evp.h>
+
 // Define SHA_DIGEST_LENGTH if it is not defined elsewhere.
 // SHA-1 produces a 160-bit (20-byte) digest.
-#ifndef SHA_DIGEST_LENGTH
-#define SHA_DIGEST_LENGTH 20
+#ifndef SHA1_DIGEST_LENGTH
+#define SHA1_DIGEST_LENGTH 20
+#endif
+
+// Define SHA1_BLOCK_SIZE if it is not defined elsewhere.
+// SHA-1 works on blocks of 64 bytes
+#ifndef SHA1_BLOCK_SIZE
+#define SHA1_BLOCK_SIZE 64
 #endif
 
 namespace MyCryptoLibrary {
