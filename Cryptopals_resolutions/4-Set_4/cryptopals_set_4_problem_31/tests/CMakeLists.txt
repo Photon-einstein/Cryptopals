@@ -17,6 +17,9 @@ include_directories(${OPENSSL_INCLUDE_DIR})
 
 # Add source files (your implementation files)
 set(SOURCE_FILES
+    ../src/HMAC.cpp
+    ../src/HMAC_SHA1.cpp
+    ../src/MessageExtractionFacility.cpp
     ../src/SHA.cpp
     ../src/SHA1.cpp
     ../src/Server.cpp
@@ -24,6 +27,7 @@ set(SOURCE_FILES
 
 # Add test source files
 set(TEST_SOURCES
+    test_hmac_sha1.cpp
     test_sha1.cpp
     test_server.cpp
 )
