@@ -4,8 +4,7 @@
 /* constructor / destructor */
 MyCryptoLibrary::HMAC_SHA1::HMAC_SHA1()
     : _sha1(std::make_shared<MyCryptoLibrary::SHA1>()),
-      _ipadV{std::vector<unsigned char>(SHA1_BLOCK_SIZE, _ipad)},
-      _opadV{std::vector<unsigned char>(SHA1_BLOCK_SIZE, _opad)} {}
+      _ipadV(SHA1_BLOCK_SIZE, _ipad), _opadV(SHA1_BLOCK_SIZE, _opad) {}
 /******************************************************************************/
 MyCryptoLibrary::HMAC_SHA1::~HMAC_SHA1() {}
 /******************************************************************************/
