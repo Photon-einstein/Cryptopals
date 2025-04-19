@@ -11,8 +11,11 @@ find_package(OpenSSL REQUIRED)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# Include directories
-include_directories(include)
+# Include Crow (header-only) and your includes
+include_directories(
+    include
+    external/crow/include
+)
 
 # Automatically find all .cpp files in the src/ directory (but not subdirectories)
 aux_source_directory(src SOURCES)
@@ -20,7 +23,7 @@ aux_source_directory(src SOURCES)
 # Create the executable
 add_executable(cryptopals_set_4_problem_31 ${SOURCES})
 
-# Link OpenSSL libraries (crypto is typically sufficient for SHA-1 functions)
+# Link OpenSSL and Crow
 target_link_libraries(cryptopals_set_4_problem_31 OpenSSL::Crypto)
 
 # Optionally, if you want to specify output directories
