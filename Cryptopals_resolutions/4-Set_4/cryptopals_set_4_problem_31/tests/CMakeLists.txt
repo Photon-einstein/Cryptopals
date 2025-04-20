@@ -43,7 +43,7 @@ message(STATUS "CMAKE_SOURCE_DIR is: ${CMAKE_SOURCE_DIR}")
 # Include Crow's header files
 target_include_directories(run_tests PRIVATE
     ${OPENSSL_INCLUDE_DIR}
-    ${CMAKE_SOURCE_DIR}/external/crow/include
+    ${CMAKE_SOURCE_DIR}/../external/crow/include
 )
 
 # Link with Google Test, OpenSSL, and pthread
