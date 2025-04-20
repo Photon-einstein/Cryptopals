@@ -14,6 +14,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       
+      - name: Update git submodules
+        run: |
+          git submodule update --init --recursive
+
       - name: Set up environment variable
         run: |
           echo "AES_256_KEY_SERVER_SET_4_PROBLEM_28=${{ secrets.AES_256_KEY_SERVER_SET_4_PROBLEM_28 }}" >> $GITHUB_ENV
@@ -23,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y cmake g++ libgtest-dev libssl-dev nlohmann-json3-dev valgrind libboost-all-dev
+          sudo apt install -y cmake g++ libgtest-dev libssl-dev nlohmann-json3-dev valgrind libboost-all-dev libasio-dev
 
       - name: Build and run tests
         run: |
