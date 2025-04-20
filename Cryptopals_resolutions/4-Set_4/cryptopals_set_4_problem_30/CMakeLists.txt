@@ -20,7 +20,7 @@ aux_source_directory(src SOURCES)
 # Create the executable
 add_executable(cryptopals_set_4_problem_30 ${SOURCES})
 
-# Link OpenSSL libraries (crypto is typically sufficient for SHA-1 functions)
+# Link OpenSSL
 target_link_libraries(cryptopals_set_4_problem_30 OpenSSL::Crypto)
 
 # Optionally, if you want to specify output directories
