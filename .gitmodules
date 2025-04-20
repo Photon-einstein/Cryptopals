@@ -1,6 +1,3 @@
-[submodule "Cryptopals_resolutions/external/crow"]
-	path = Cryptopals_resolutions/external/crow
-	url = https://github.com/CrowCpp/crow.git
 [submodule "Cryptopals_resolutions/4-Set_4/cryptopals_set_4_problem_31/external/crow"]
 	path = Cryptopals_resolutions/4-Set_4/cryptopals_set_4_problem_31/external/crow
 	url = https://github.com/CrowCpp/crow.git
