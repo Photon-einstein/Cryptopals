@@ -1,0 +1,36 @@
+# Build directories
+**/build/
+CMakeFiles/
+CMakeCache.txt
+Makefile
+*.o
+*.so
+*.exe
+*.out
+*.a
+*.lib
+
+# IDE/editor specific files
+.vscode/
+*.code-workspace
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Generated test or coverage files
+Testing/
+test_detail.xml
+test_output/
+coverage/
+*.gcda
+*.gcno
+*.gcov
+
+
+# Crow specific (if using crow_all.h directly)
+**/external/crow/build/
