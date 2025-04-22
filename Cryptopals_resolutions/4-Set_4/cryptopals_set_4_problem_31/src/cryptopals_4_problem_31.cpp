@@ -21,9 +21,7 @@ int main(void) {
       std::make_shared<MyCryptoLibrary::HMAC_SHA1>();
   // check attacker
   crow::SimpleApp app;
-  CROW_ROUTE(app, "/") ([](){
-      return "Hello, World!";
-  });
+  CROW_ROUTE(app, "/")([]() { return "Hello, World!"; });
 
   app.port(18080).multithreaded().run();
   /* end of the work */
