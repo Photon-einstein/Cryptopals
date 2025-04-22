@@ -23,6 +23,7 @@ jobs:
           echo "AES_256_KEY_SERVER_SET_4_PROBLEM_28=${{ secrets.AES_256_KEY_SERVER_SET_4_PROBLEM_28 }}" >> $GITHUB_ENV
           echo "KEY_SERVER_SET_4_PROBLEM_29=${{ secrets.KEY_SERVER_SET_4_PROBLEM_29 }}" >> $GITHUB_ENV
           echo "KEY_SERVER_SET_4_PROBLEM_30=${{ secrets.KEY_SERVER_SET_4_PROBLEM_30 }}" >> $GITHUB_ENV
+          echo "KEY_SERVER_SET_4_PROBLEM_31=${{ secrets.KEY_SERVER_SET_4_PROBLEM_31 }}" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: |
