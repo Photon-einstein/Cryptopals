@@ -3,6 +3,8 @@
 
 #include "./../include/SHA.hpp"
 
+#include <cstdint>
+
 // Define SHA_DIGEST_LENGTH if it is not defined elsewhere.
 // SHA-1 produces a 160-bit (20-byte) digest.
 #ifndef SHA_DIGEST_LENGTH

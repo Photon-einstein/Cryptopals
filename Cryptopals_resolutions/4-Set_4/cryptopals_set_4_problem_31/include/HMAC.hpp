@@ -1,5 +1,5 @@
-#ifndef HMAC_H
-#define HMAC_H
+#ifndef HMAC_HPP
+#define HMAC_HPP
 
 #include <vector>
 

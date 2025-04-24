@@ -1,5 +1,5 @@
-#ifndef HMAC_SHA1_H
-#define HMAC_SHA1_H
+#ifndef HMAC_SHA1_HPP
+#define HMAC_SHA1_HPP
 
 #include "./../include/HMAC.hpp"
 #include "./../include/SHA1.hpp"
