@@ -1,5 +1,5 @@
-#ifndef SHA_H
-#define SHA_H
+#ifndef SHA_HPP
+#define SHA_HPP
 
 #include <vector>
 

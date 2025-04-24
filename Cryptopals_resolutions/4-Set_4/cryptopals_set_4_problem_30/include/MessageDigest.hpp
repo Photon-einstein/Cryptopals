@@ -1,5 +1,5 @@
-#ifndef MESSAGE_DIGEST_H
-#define MESSAGE_DIGEST_H
+#ifndef MESSAGE_DIGEST_HPP
+#define MESSAGE_DIGEST_HPP
 
 #include <vector>
 
