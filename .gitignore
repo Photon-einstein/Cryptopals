@@ -33,4 +33,4 @@ coverage/
 
 
 # Crow specific (if using crow_all.h directly)
-**/external/crow/build/
+**/external/
