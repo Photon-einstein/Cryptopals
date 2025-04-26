@@ -21,7 +21,32 @@ int main(void) {
       std::make_shared<MyCryptoLibrary::HMAC_SHA1>();
   // check attacker
   crow::SimpleApp app;
-  CROW_ROUTE(app, "/")([]() { return "Hello, World!"; });
+
+  // Root route
+  CROW_ROUTE(app, "/")
+  ([]() { return "Welcome to the Train Ticketing System!"; });
+
+  // Route to list trains
+  CROW_ROUTE(app, "/trains")([]() { return "List of all trains"; });
+
+  // Route to get a train by number
+  CROW_ROUTE(app, "/trains/<string>")
+  ([](const std::string &trainNumber) {
+    return "Details for train " + trainNumber;
+  });
+
+  // Route to purchase a ticket (POST)
+  CROW_ROUTE(app, "/tickets/purchase")
+      .methods(crow::HTTPMethod::POST)([](const crow::request &req) {
+        // You could parse JSON from req.body here
+        return crow::response(201, "Ticket purchased!");
+      });
+
+  // Route to cancel a ticket
+  CROW_ROUTE(app, "/tickets/cancel/<int>")
+      .methods(crow::HTTPMethod::DELETE)([](int ticketId) {
+        return "Ticket with ID " + std::to_string(ticketId) + " canceled";
+      });
 
   app.port(18080).multithreaded().run();
   /* end of the work */
