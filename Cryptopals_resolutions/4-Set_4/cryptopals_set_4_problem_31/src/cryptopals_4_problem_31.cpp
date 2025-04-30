@@ -20,35 +20,13 @@ int main(void) {
   std::shared_ptr<MyCryptoLibrary::HMAC> hmac_sha1 =
       std::make_shared<MyCryptoLibrary::HMAC_SHA1>();
   // check attacker
-  crow::SimpleApp app;
+  crow::SimpleApp appServer;
 
   // Root route
-  CROW_ROUTE(app, "/")
-  ([]() { return "Welcome to the Train Ticketing System!"; });
+  CROW_ROUTE(appServer, "/")
+  ([]() { return "Welcome to the Server"; });
 
-  // Route to list trains
-  CROW_ROUTE(app, "/trains")([]() { return "List of all trains"; });
-
-  // Route to get a train by number
-  CROW_ROUTE(app, "/trains/<string>")
-  ([](const std::string &trainNumber) {
-    return "Details for train " + trainNumber;
-  });
-
-  // Route to purchase a ticket (POST)
-  CROW_ROUTE(app, "/tickets/purchase")
-      .methods(crow::HTTPMethod::POST)([](const crow::request &req) {
-        // You could parse JSON from req.body here
-        return crow::response(201, "Ticket purchased!");
-      });
-
-  // Route to cancel a ticket
-  CROW_ROUTE(app, "/tickets/cancel/<int>")
-      .methods(crow::HTTPMethod::DELETE)([](int ticketId) {
-        return "Ticket with ID " + std::to_string(ticketId) + " canceled";
-      });
-
-  app.port(18080).multithreaded().run();
+  appServer.port(18080).multithreaded().run();
   /* end of the work */
   end = clock();
   time = (double)(end - start) / CLOCKS_PER_SEC;
