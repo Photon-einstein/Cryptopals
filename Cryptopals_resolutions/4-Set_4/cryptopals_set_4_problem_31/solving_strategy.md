@@ -20,12 +20,14 @@
 16. Add a secret key in the server side locally (Done)  
 17. Add a secret key in the server side remotely (Done)  
 
-18. Add the configuration for the Crow web server inside the server (in progress)  
+18. Add the configuration for the Crow web server inside the server (Done)  
 
-19. Test manually changing in the browser URL to verify that the server is working properly (TBD)  
-    19.1. Test URL with valid signature (TBD)  
-    19.2. Test URL with invalid signature (TBD)  
-20. Add unit tests in the Server side (TBD)  
-21. Add Attacker code to call the server's side with URL requests (TBD)  
+19. Test manually changing in the browser URL to verify that the server is working properly (Done)  
+    19.1. Test URL with valid signature (Done)  
+    19.2. Test URL with invalid signature (Done)
+
+20. Add unit tests in the Server side (Done)
+
+21. Add Attacker code to call the server's side with URL requests (in progress)  
     21.1. Test URL with valid signature, server side should accept request (TBD)  
     21.2. Test URL with invalid signature, server side should deny the request (TBD)  

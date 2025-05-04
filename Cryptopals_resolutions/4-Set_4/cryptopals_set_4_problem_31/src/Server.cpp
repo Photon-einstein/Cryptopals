@@ -82,14 +82,21 @@ void Server::signatureVerificationEndpoint() {
               MessageExtractionFacility::toHexString(signatureExpected);
           std::cout << "Signature expected: " << signatureExpectedS
                     << std::endl;
-          crow::json::wvalue message;
+
           if (signature.substr(0, 2) != "0x") {
             signature = "0x" + signature;
           }
-          message["file"] = file;
-          message["signature"] = signature;
-          message["serverTest"] = (signature == signatureExpectedS);
-          return crow::response(200, message);
+          if (signature == signatureExpectedS) {
+            crow::json::wvalue message;
+            message["file"] = file;
+            message["signature"] = signature;
+            message["verified"] = true;
+            return crow::response(200, message);
+          } else {
+            crow::json::wvalue err;
+            err["error"] = "Invalid signature. HMAC verification failed.";
+            return crow::response(401, err);
+          }
         } catch (const std::exception &e) {
           crow::json::wvalue err;
           err["error"] = e.what();
