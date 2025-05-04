@@ -7,7 +7,9 @@
 #include "./../include/Server.hpp"
 
 /* constructor / destructor */
-Server::Server(const bool debugFlag) : _debugFlag(debugFlag), _hmac(std::make_shared<MyCryptoLibrary::HMAC_SHA1>()) {
+Server::Server(const bool debugFlag)
+    : _debugFlag(debugFlag),
+      _hmac(std::make_shared<MyCryptoLibrary::HMAC_SHA1>()) {
   std::string hexServerKey{};
   if (std::getenv("KEY_SERVER_SET_4_PROBLEM_31") != nullptr) {
     hexServerKey = std::getenv("KEY_SERVER_SET_4_PROBLEM_31");
@@ -50,7 +52,7 @@ bool Server::validateMac(const std::vector<unsigned char> &msg,
  *
  * This method will serve as a confirmation that the server URL is up
  * and running at the root path
- */    
+ */
 void Server::rootEndpoint() {
   CROW_ROUTE(_app, "/").methods("GET"_method)([&]() {
     crow::json::wvalue rootMessage;
@@ -60,36 +62,40 @@ void Server::rootEndpoint() {
 }
 /******************************************************************************/
 /**
- * @brief This method is the endpoint that makes the verification of the signature
+ * @brief This method is the endpoint that makes the verification of the
+ * signature
  *
- * This method is the endpoint that makes the verification of the signature, namely
- * it assesses if HMAC(file) == signature
- * 
- */    
+ * This method is the endpoint that makes the verification of the signature,
+ * namely it assesses if HMAC(file) == signature
+ *
+ */
 void Server::signatureVerificationEndpoint() {
-  CROW_ROUTE(_app, "/test").methods("GET"_method) ([&](const crow::request& req){
-    try{
-      const std::string file = req.url_params.get("file");
-      std::string signature = req.url_params.get("signature");
-      std::vector<unsigned char> byteMessage(file.begin(), file.end());
-      std::vector<unsigned char> signatureExpected = _hmac->hmac(_keyServer, byteMessage);
-      const std::string signatureExpectedS = MessageExtractionFacility::toHexString(signatureExpected);
-      std::cout<<"Signature expected: "<<signatureExpectedS<<std::endl;
-      crow::json::wvalue message;
-       if (signature.substr(0, 2) != "0x") {
-        signature = "0x" + signature;
-      }
-      message["file"] = file;
-      message["signature"] = signature;
-      message["serverTest"] = (signature == signatureExpectedS);
-      return crow::response(200, message);
-    }
-    catch (const std::exception& e) {
-      crow::json::wvalue err;
-      err["error"] = e.what();
-      return crow::response(500, err);
-    }
-  });
+  CROW_ROUTE(_app, "/test")
+      .methods("GET"_method)([&](const crow::request &req) {
+        try {
+          const std::string file = req.url_params.get("file");
+          std::string signature = req.url_params.get("signature");
+          std::vector<unsigned char> byteMessage(file.begin(), file.end());
+          std::vector<unsigned char> signatureExpected =
+              _hmac->hmac(_keyServer, byteMessage);
+          const std::string signatureExpectedS =
+              MessageExtractionFacility::toHexString(signatureExpected);
+          std::cout << "Signature expected: " << signatureExpectedS
+                    << std::endl;
+          crow::json::wvalue message;
+          if (signature.substr(0, 2) != "0x") {
+            signature = "0x" + signature;
+          }
+          message["file"] = file;
+          message["signature"] = signature;
+          message["serverTest"] = (signature == signatureExpectedS);
+          return crow::response(200, message);
+        } catch (const std::exception &e) {
+          crow::json::wvalue err;
+          err["error"] = e.what();
+          return crow::response(500, err);
+        }
+      });
 }
 /******************************************************************************/
 void Server::setupRoutes() {
@@ -99,9 +105,9 @@ void Server::setupRoutes() {
 /******************************************************************************/
 /**
  * @brief This method will start all the server endpoints in a multi thread
- * environment 
+ * environment
  *
- * This method will start all the endpoints that the server provides to their 
+ * This method will start all the endpoints that the server provides to their
  * clients
  */
 void Server::runServer() {

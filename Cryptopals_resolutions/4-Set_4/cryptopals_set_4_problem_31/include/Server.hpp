@@ -7,7 +7,6 @@
 #include "./../include/HMAC.hpp"
 #include "./../include/HMAC_SHA1.hpp"
 
-
 class Server {
 public:
   /* constructor / destructor */
@@ -43,12 +42,13 @@ public:
   void rootEndpoint();
 
   /**
-   * @brief This method is the endpoint that makes the verification of the signature
+   * @brief This method is the endpoint that makes the verification of the
+   * signature
    *
-   * This method is the endpoint that makes the verification of the signature, namely
-   * it assesses if HMAC(file) == signature
-   * 
-   */    
+   * This method is the endpoint that makes the verification of the signature,
+   * namely it assesses if HMAC(file) == signature
+   *
+   */
   void signatureVerificationEndpoint();
 
   /**
@@ -75,9 +75,9 @@ private:
   std::vector<unsigned char> _keyServer{};
   crow::SimpleApp _app;
   std::shared_ptr<MyCryptoLibrary::HMAC> _hmac;
-  
+
   mutable std::mutex _mutex;
-  
+
   const int _portProduction{18080};
   const int _portTest{18081};
 };
