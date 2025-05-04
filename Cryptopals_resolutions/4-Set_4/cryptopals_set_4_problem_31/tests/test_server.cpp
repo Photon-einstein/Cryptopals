@@ -19,7 +19,6 @@ protected:
   void TearDown() override {
     // NOLINTNEXTLINE(clang-analyzer-optin.cplusplus.VirtualCall)
     // Cleanup (if needed)
-    _server->getApp().stop();
   }
 
   void StartServerOnce() {
