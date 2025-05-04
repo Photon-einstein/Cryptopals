@@ -1,4 +1,3 @@
-#include "crow.h"
 #include <iostream>
 #include <map>
 #include <memory>
@@ -19,14 +18,7 @@ int main(void) {
   std::shared_ptr<Server> server = std::make_shared<Server>(debugFlag);
   std::shared_ptr<MyCryptoLibrary::HMAC> hmac_sha1 =
       std::make_shared<MyCryptoLibrary::HMAC_SHA1>();
-  // check attacker
-  crow::SimpleApp appServer;
-
-  // Root route
-  CROW_ROUTE(appServer, "/")
-  ([]() { return "Welcome to the Server"; });
-
-  appServer.port(18080).multithreaded().run();
+  server->runServer();
   /* end of the work */
   end = clock();
   time = (double)(end - start) / CLOCKS_PER_SEC;
