@@ -13,6 +13,8 @@ public:
   explicit Server(const bool debugFlag);
   ~Server();
 
+  crow::SimpleApp &getApp();
+
   /**
    * @brief This method will validate if a given message produces the
    * given message authentication code (MAC)

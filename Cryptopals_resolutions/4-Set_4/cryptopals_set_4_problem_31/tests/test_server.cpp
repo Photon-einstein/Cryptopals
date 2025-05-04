@@ -11,6 +11,7 @@ protected:
   // cppcheck-suppress unusedFunction
   void SetUp() override {
     // NOLINTNEXTLINE(clang-analyzer-optin.cplusplus.VirtualCall)
+    _server = std::make_unique<Server>(_debugFlag);
     StartServerOnce();
   }
 
@@ -18,6 +19,7 @@ protected:
   void TearDown() override {
     // NOLINTNEXTLINE(clang-analyzer-optin.cplusplus.VirtualCall)
     // Cleanup (if needed)
+    _server->getApp().stop();
   }
 
   void StartServerOnce() {
@@ -25,8 +27,8 @@ protected:
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   }
 
+  std::unique_ptr<Server> _server;
   const bool _debugFlag{false};
-  std::unique_ptr<Server> _server = std::make_unique<Server>(_debugFlag);
   const std::string _portTest = std::to_string(18081);
 };
 
