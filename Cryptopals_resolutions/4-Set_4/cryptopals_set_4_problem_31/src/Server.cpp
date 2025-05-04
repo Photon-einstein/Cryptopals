@@ -30,8 +30,6 @@ Server::~Server() {
   }
 }
 /******************************************************************************/
-crow::SimpleApp &Server::getApp() { return _app; }
-/******************************************************************************/
 /**
  * @brief This method will validate if a given message produces the
  * given message authentication code (MAC)
