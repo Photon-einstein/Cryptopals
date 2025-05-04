@@ -1,5 +1,6 @@
 #include "./../include/MessageExtractionFacility.hpp"
 
+#include <charconv>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -65,15 +66,24 @@ MessageExtractionFacility::parseMessage(const std::string &message,
  */
 std::vector<unsigned char>
 MessageExtractionFacility::hexToBytes(const std::string &hexStr) {
+  bool flagOdd{false};
+  int step = 2;
   if (hexStr.length() % 2 != 0) {
-    throw std::invalid_argument("Invalid hex string: length must be even.");
+    flagOdd = true;
+    step = 1;
   }
   std::vector<unsigned char> bytes;
-  for (size_t i = 0; i < hexStr.length(); i += 2) {
-    std::string byteString = hexStr.substr(i, 2);
-    unsigned char byte =
-        static_cast<unsigned char>(std::stoi(byteString, nullptr, 16));
+  for (size_t i = 0; i < hexStr.length(); i += step) {
+    std::string byteString = hexStr.substr(i, step);
+    unsigned char byte;
+    // Using std::from_chars for faster conversion (C++17)
+    std::from_chars(byteString.data(), byteString.data() + byteString.size(),
+                    byte, 16);
     bytes.push_back(byte);
+    if (flagOdd) {
+      step = 2;
+      flagOdd = false;
+    }
   }
   return bytes;
 }
