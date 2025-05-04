@@ -7,6 +7,15 @@ set(CMAKE_BUILD_TYPE Debug)
 # Add extra flags for debugging (disable optimizations and include debug symbols)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
 
+# Fetch CPR
+include(FetchContent)
+FetchContent_Declare(
+  cpr
+  GIT_REPOSITORY https://github.com/libcpr/cpr.git
+  GIT_TAG 1.11.2
+)
+FetchContent_MakeAvailable(cpr)
+
 # Find Google Test
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
@@ -47,7 +56,14 @@ target_include_directories(run_tests PRIVATE
 )
 
 # Link with Google Test, OpenSSL, and pthread
-target_link_libraries(run_tests PRIVATE ${GTEST_LIBRARIES} OpenSSL::Crypto pthread)
+target_link_libraries(run_tests 
+    PRIVATE ${GTEST_LIBRARIES}
+    GTest::gtest
+    GTest::gtest_main
+    cpr::cpr 
+    OpenSSL::Crypto 
+    pthread
+)
 
 # Enable testing
 enable_testing()
