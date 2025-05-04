@@ -25,6 +25,9 @@ Server::Server(const bool debugFlag)
 Server::~Server() {
   // server graceful stop
   _app.stop();
+  if (_serverThread.joinable()) {
+    _serverThread.join(); // Wait for thread to finish
+  }
 }
 /******************************************************************************/
 crow::SimpleApp &Server::getApp() { return _app; }
@@ -125,9 +128,9 @@ void Server::runServer() {
 }
 /******************************************************************************/
 void Server::runServerTest() {
-  std::thread([this]() {
+  _serverThread = std::thread([this]() {
     setupRoutes();
     _app.port(_portTest).multithreaded().run();
-  }).detach(); // Let it live until process ends
+  }); // Let it live until process ends
 }
 /******************************************************************************/

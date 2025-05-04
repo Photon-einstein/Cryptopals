@@ -82,6 +82,8 @@ private:
 
   const int _portProduction{18080};
   const int _portTest{18081};
+
+  std::thread _serverThread;
 };
 
 #endif // SERVER_HPP
