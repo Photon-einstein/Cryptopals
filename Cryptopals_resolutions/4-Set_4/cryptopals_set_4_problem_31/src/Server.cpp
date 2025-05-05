@@ -83,9 +83,6 @@ void Server::signatureVerificationEndpoint() {
               _hmac->hmac(_keyServer, byteMessage);
           const std::string signatureExpectedS =
               MessageExtractionFacility::toHexString(signatureExpected);
-          std::cout << "Signature expected: " << signatureExpectedS
-                    << std::endl;
-
           if (signature.substr(0, 2) != "0x") {
             signature = "0x" + signature;
           }

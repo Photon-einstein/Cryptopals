@@ -28,6 +28,8 @@
 
 20. Add unit tests in the Server side (Done)
 
-21. Add Attacker code to call the server's side with URL requests (in progress)  
-    21.1. Test URL with valid signature, server side should accept request (TBD)  
-    21.2. Test URL with invalid signature, server side should deny the request (TBD)  
+21. Add Attacker code to call the server's side with URL requests (Done)
+
+    21.1. Test URL with valid signature, server side should accept request (Done)  
+    21.2. Test URL with invalid signature, server side should deny the request (Done) 
+ 

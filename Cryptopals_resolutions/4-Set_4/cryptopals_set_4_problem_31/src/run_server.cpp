@@ -16,8 +16,6 @@ int main(void) {
   /* work to verify */
   const bool debugFlag{true};
   std::shared_ptr<Server> server = std::make_shared<Server>(debugFlag);
-  std::shared_ptr<MyCryptoLibrary::HMAC> hmac_sha1 =
-      std::make_shared<MyCryptoLibrary::HMAC_SHA1>();
   server->runServer();
   /* end of the work */
   end = clock();

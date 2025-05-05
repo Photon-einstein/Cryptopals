@@ -1,0 +1,32 @@
+### To compile and run the program if the problem has a CMakeLists.txt file:
+
+Create a build directory and move into it
+
+```bash
+mkdir build
+cd build
+```
+
+Configure the poject with CMake
+
+```bash
+cmake ..
+```
+
+Build the executable:
+
+```bash
+make
+```
+
+Run the server side:
+
+```bash
+./build/server_main
+```
+
+Run the attacker side:
+
+```bash
+./build/attacker_main
+```

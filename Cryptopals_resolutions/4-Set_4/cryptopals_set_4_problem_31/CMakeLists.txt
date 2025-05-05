@@ -11,22 +11,50 @@ find_package(OpenSSL REQUIRED)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# Include Crow (header-only) and your includes
+# Fetch CPR
+include(FetchContent)
+FetchContent_Declare(
+  cpr
+  GIT_REPOSITORY https://github.com/libcpr/cpr.git
+  GIT_TAG 1.11.2
+)
+FetchContent_MakeAvailable(cpr)
+
+# Include directories
 include_directories(
     include
     external/crow/include
 )
 
-# Automatically find all .cpp files in the src/ directory (but not subdirectories)
-aux_source_directory(src SOURCES)
+# Automatically find all .cpp files in the src/ directory (except main files)
+file(GLOB COMMON_SOURCES "src/*.cpp")
+list(REMOVE_ITEM COMMON_SOURCES "${CMAKE_SOURCE_DIR}/src/run_server.cpp")
+list(REMOVE_ITEM COMMON_SOURCES "${CMAKE_SOURCE_DIR}/src/run_attacker.cpp")
 
-# Create the executable
-add_executable(cryptopals_set_4_problem_31 ${SOURCES})
+# === Server Executable ===
+add_executable(run_server
+    src/run_server.cpp
+    ${COMMON_SOURCES}
+)
+target_link_libraries(run_server 
+    OpenSSL::Crypto
+    cpr::cpr
+)
 
-# Link OpenSSL and Crow
-target_link_libraries(cryptopals_set_4_problem_31 OpenSSL::Crypto)
+set_target_properties(run_server PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build
+)
 
-# Optionally, if you want to specify output directories
-set_target_properties(cryptopals_set_4_problem_31 PROPERTIES
+# === Attacker Executable ===
+add_executable(run_attacker
+    src/run_attacker.cpp
+    ${COMMON_SOURCES}
+)
+target_link_libraries(run_attacker 
+    OpenSSL::Crypto
+    cpr::cpr
+)
+
+set_target_properties(run_attacker PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build
 )
