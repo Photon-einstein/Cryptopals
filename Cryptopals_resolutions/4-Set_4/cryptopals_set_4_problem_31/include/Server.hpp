@@ -70,6 +70,17 @@ public:
   void runServerTest();
 
 private:
+  /**
+   * @brief This method will do an insecure compare between two vector.
+   *
+   * This method will do an insecure compare between two vector, leaking time
+   * in the process.
+   *
+   * @return A bool value, true if the vectors are the same, false otherwise
+   */
+  bool insecureSignatureCompare(const std::vector<unsigned char> &v1,
+                                const std::vector<unsigned char> &v2);
+
   const bool _debugFlag;
   bool _debugFlagExtreme{false};
   std::vector<unsigned char> _keyServer{};

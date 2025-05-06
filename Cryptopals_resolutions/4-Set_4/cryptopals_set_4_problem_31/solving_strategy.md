@@ -31,5 +31,8 @@
 21. Add Attacker code to call the server's side with URL requests (Done)
 
     21.1. Test URL with valid signature, server side should accept request (Done)  
-    21.2. Test URL with invalid signature, server side should deny the request (Done) 
- 
+    21.2. Test URL with invalid signature, server side should deny the request (Done)
+
+22. Understand how the attack is done (Done)
+23. Implement the insecure compare (Done)
+24. Implementation of the attack on the attacker side (Done)

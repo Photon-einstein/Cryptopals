@@ -14,7 +14,8 @@ int main(void) {
   /* work to verify */
   const bool debugFlag{true};
   std::shared_ptr<Attacker> attacker = std::make_shared<Attacker>(debugFlag);
-  attacker->breakHmacSHA1();
+  const std::string fileName{"foo"};
+  attacker->breakHmacSHA1(fileName);
   /* end of the work */
   end = clock();
   time = (double)(end - start) / CLOCKS_PER_SEC;
