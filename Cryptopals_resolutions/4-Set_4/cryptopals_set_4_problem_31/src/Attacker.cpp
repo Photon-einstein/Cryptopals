@@ -34,9 +34,9 @@ Attacker::breakHmacSHA1(const std::string &fileName) {
     std::chrono::microseconds longestTime{0};
     for (std::size_t j = 0; j < sizeByte; ++j) {
       std::chrono::microseconds timeAverage{0};
+      signatureV[i] = j;
+      signature = MessageExtractionFacility::toHexString(signatureV);
       for (std::size_t k = 0; k < _attackSamples; ++k) {
-        signatureV[i] = j;
-        signature = MessageExtractionFacility::toHexString(signatureV);
         auto start = std::chrono::high_resolution_clock::now();
         serverResponse = Attacker::sendRequest(signature, fileName);
         auto end = std::chrono::high_resolution_clock::now();
