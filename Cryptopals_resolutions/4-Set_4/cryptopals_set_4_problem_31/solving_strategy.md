@@ -36,3 +36,6 @@
 22. Understand how the attack is done (Done)
 23. Implement the insecure compare (Done)
 24. Implementation of the attack on the attacker side (Done)
+25. Update the attack to be able to handle noise and statistical variation between samples. (Done)
+
+26. Add unit tests that bypass the delay induced by the attack (in progress)
