@@ -32,8 +32,6 @@ protected:
   const std::string _portTest = std::to_string(18081);
 };
 
-
-
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
