@@ -105,7 +105,6 @@ MessageExtractionFacility::toHexString(const std::vector<unsigned char> &data) {
     ss << std::setw(2)
        << static_cast<int>(byte); // Convert to int to print properly
   }
-  std::string hexString = "0x" + ss.str();
-  return hexString;
+  return ss.str();
 }
 /******************************************************************************/

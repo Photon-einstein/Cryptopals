@@ -4,6 +4,7 @@
 #include <crow.h>
 #include <vector>
 
+#include "../include/MessageExtractionFacility.hpp"
 #include "../include/Server.hpp"
 
 class ServerTest : public ::testing::Test {
@@ -90,7 +91,10 @@ TEST_F(ServerTest,
        signatureVerificationEndpoint_InvalidSignature_ShouldReturnErrorStatus) {
   std::string fileName = "foo";
   std::string correctSignature = "a039502c73f8bc0873a10af0ef49497b8918b06";
-  correctSignature[0] ^= 0x01; // 1 bit flip
+  std::vector<unsigned char> correctSignatureV =
+      MessageExtractionFacility::hexToBytes(correctSignature);
+  correctSignatureV[0] ^= 0x01; // 1 bit flip
+  correctSignature = MessageExtractionFacility::toHexString(correctSignatureV);
   cpr::Response response = cpr::Get(
       cpr::Url{"http://localhost:" + _portTest + "/test"},
       cpr::Parameters{{"file", fileName}, {"signature", correctSignature}});

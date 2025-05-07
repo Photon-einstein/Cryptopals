@@ -79,14 +79,12 @@ void Server::signatureVerificationEndpoint() {
           const std::string file = req.url_params.get("file");
           std::string signature = req.url_params.get("signature");
           std::vector<unsigned char> byteMessage(file.begin(), file.end());
-          std::vector<unsigned char> signatureExpected =
+          std::vector<unsigned char> signatureExpectedV =
               _hmac->hmac(_keyServer, byteMessage);
-          const std::string signatureExpectedS =
-              MessageExtractionFacility::toHexString(signatureExpected);
-          if (signature.substr(0, 2) != "0x") {
-            signature = "0x" + signature;
-          }
-          if (signature == signatureExpectedS) {
+          std::vector<unsigned char> signatureV =
+              MessageExtractionFacility::hexToBytes(signature);
+
+          if (insecureSignatureCompare(signatureV, signatureExpectedV)) {
             crow::json::wvalue message;
             message["file"] = file;
             message["signature"] = signature;
@@ -127,5 +125,29 @@ void Server::runServerTest() {
     setupRoutes();
     _app.port(_portTest).multithreaded().run();
   }); // Let it live until process ends
+}
+/******************************************************************************/
+/**
+ * @brief This method will do an insecure compare between two vector.
+ *
+ * This method will do an insecure compare between two vector, leaking time
+ * in the process.
+ *
+ * @return A bool value, true if the vectors are the same, false otherwise
+ */
+bool Server::insecureSignatureCompare(const std::vector<unsigned char> &v1,
+                                      const std::vector<unsigned char> &v2) {
+  if (v1.size() != v2.size()) {
+    return false;
+  }
+  const std::size_t size{v1.size()};
+  for (std::size_t i = 0; i < size; ++i) {
+    if (v1[i] != v2[i]) {
+      return false;
+    }
+    std::this_thread::sleep_for(
+        std::chrono::milliseconds(50)); // artificial timing leak
+  }
+  return true;
 }
 /******************************************************************************/
