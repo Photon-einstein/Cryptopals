@@ -5,20 +5,33 @@ on:
   push:
     branches:
       - main
+  # Allow manual triggering of the workflow
+  workflow_dispatch:
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project_path:
+          - cryptopals_set_4_problem_28
+          - cryptopals_set_4_problem_29
+          - cryptopals_set_4_problem_30
+          - cryptopals_set_4_problem_31 # Add all your project folders here
+          
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || (github.event_name == 'push' && contains(github.event.commits.*.modified, matrix.project_path)) || (github.event_name == 'push' && contains(github.event.commits.*.added, matrix.project_path)) || (github.event_name == 'push' && contains(github.event.commits.*.removed, matrix.project_path))
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Update git submodules
+        if: github.event_name != 'workflow_dispatch'
         run: |
           git submodule update --init --recursive
 
       - name: Set up environment variable
+        if: github.event_name != 'workflow_dispatch'
         run: |
           echo "AES_256_KEY_SERVER_SET_4_PROBLEM_28=${{ secrets.AES_256_KEY_SERVER_SET_4_PROBLEM_28 }}" >> $GITHUB_ENV
           echo "KEY_SERVER_SET_4_PROBLEM_29=${{ secrets.KEY_SERVER_SET_4_PROBLEM_29 }}" >> $GITHUB_ENV
@@ -26,35 +39,34 @@ jobs:
           echo "KEY_SERVER_SET_4_PROBLEM_31=${{ secrets.KEY_SERVER_SET_4_PROBLEM_31 }}" >> $GITHUB_ENV
 
       - name: Install dependencies
+        if: github.event_name != 'workflow_dispatch'
         run: |
           sudo apt update
           sudo apt install -y cmake g++ libgtest-dev libssl-dev nlohmann-json3-dev valgrind libboost-all-dev libasio-dev
 
-      - name: Build and run tests
+      - name: Build and run tests for ${{ matrix.project_path }}
+        working-directory: ${{ matrix.project_path }}
         run: |
-          for set_dir in $(find . -type d -name '*-Set_*'); do
-            for problem_dir in $(find "$set_dir" -type d -name 'cryptopals_set_*_problem_*'); do
-              test_dir="$problem_dir/tests"
-              if [ -f "$test_dir/CMakeLists.txt" ]; then
-                echo "Building in $test_dir"
-                mkdir -p "$test_dir/build"
-                cd "$test_dir/build"
-                
-                # Set CMake to Debug mode
-                cmake -DCMAKE_BUILD_TYPE=Debug ..
-                
-                make
-                # Run tests with Valgrind for memory error checking and check for leaks or errors
-                valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./run_tests 2>&1 | tee valgrind_output.log
-                if grep -q "ERROR SUMMARY: 0 errors from 0 contexts" valgrind_output.log; then
-                  echo "No memory leaks or errors detected."
-                else
-                  echo "Valgrind detected errors or memory leaks!"
-                  cat valgrind_output.log
-                  exit 1  # Fail the workflow
-                fi
-                
-                cd -
-              fi
-            done
-          done
+          test_dir="tests"
+          if [ -f "$test_dir/CMakeLists.txt" ]; then
+            echo "Building in $test_dir"
+            mkdir -p "$test_dir/build"
+            cd "$test_dir/build"
+
+            # Set CMake to Debug mode
+            cmake -DCMAKE_BUILD_TYPE=Debug ..
+
+            make
+            # Run tests with Valgrind for memory error checking and check for leaks or errors
+            valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./run_tests 2>&1 | tee valgrind_output.log
+            if grep -q "ERROR SUMMARY: 0 errors from 0 contexts" valgrind_output.log; then
+              echo "No memory leaks or errors detected."
+            else
+              echo "Valgrind detected errors or memory leaks!"
+              cat valgrind_output.log
+              exit 1  # Fail the workflow
+            fi
+            cd -
+          else
+            echo "No tests found in $test_dir for ${{ matrix.project_path }}"
+          fi
