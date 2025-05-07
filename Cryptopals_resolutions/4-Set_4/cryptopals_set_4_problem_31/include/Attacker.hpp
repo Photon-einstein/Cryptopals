@@ -49,6 +49,7 @@ private:
   bool _debugFlag;
   const int _portServerProduction{18080};
   const int _portServerTest{18081};
+  const int _attackSamples{10};
 };
 
 #endif // ATTACKER_HPP

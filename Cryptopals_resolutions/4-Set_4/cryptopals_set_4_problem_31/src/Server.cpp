@@ -146,7 +146,7 @@ bool Server::insecureSignatureCompare(const std::vector<unsigned char> &v1,
       return false;
     }
     std::this_thread::sleep_for(
-        std::chrono::milliseconds(50)); // artificial timing leak
+        std::chrono::milliseconds(5)); // artificial timing leak
   }
   return true;
 }
