@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 # Set the project name
-project(cryptopals_set_4_problem_31)
+project(cryptopals_set_4_problem_31_32)
 
 # Find the OpenSSL package
 find_package(OpenSSL REQUIRED)
