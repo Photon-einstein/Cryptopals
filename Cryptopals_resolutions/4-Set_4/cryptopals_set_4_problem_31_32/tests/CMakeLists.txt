@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(cryptopals_tests_set_4_problem_31)
+project(cryptopals_tests_set_4_problem_31_32)
 
 # Set the build type to Debug (this ensures debug symbols are included)
 set(CMAKE_BUILD_TYPE Debug)
@@ -67,4 +67,4 @@ target_link_libraries(run_tests
 
 # Enable testing
 enable_testing()
-add_test(NAME cryptopals_tests_set_4_problem_31 COMMAND run_tests)
+add_test(NAME cryptopals_tests_set_4_problem_31_32 COMMAND run_tests)

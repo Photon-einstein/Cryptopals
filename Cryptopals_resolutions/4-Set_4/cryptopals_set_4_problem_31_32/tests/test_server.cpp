@@ -74,8 +74,7 @@ TEST_F(ServerTest,
   crow::json::rvalue jsonResponse = crow::json::load(response.text);
   ASSERT_TRUE(jsonResponse);
   EXPECT_EQ(jsonResponse["file"].s(), fileName);
-  EXPECT_EQ(jsonResponse["signature"].s(),
-            std::string("0x") + correctSignature);
+  EXPECT_EQ(jsonResponse["signature"].s(), correctSignature);
   EXPECT_TRUE(jsonResponse["verified"].b());
 }
 

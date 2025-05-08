@@ -37,7 +37,7 @@ TEST_F(HMAC_SHA1_Test, HMACSHA1_EnglishSentenceInput_ShouldMatchReference) {
   std::vector<unsigned char> messageV(message.begin(), message.end());
   std::vector<unsigned char> hmacSha1 = _hmacSha1->hmac(keyV, messageV);
   ASSERT_EQ(hmacSha1.size(), SHA1_DIGEST_LENGTH);
-  std::string expected{"0xde7c9b85b8b78aa6bc8a7a36f70a90701c9db4d9"};
+  std::string expected{"de7c9b85b8b78aa6bc8a7a36f70a90701c9db4d9"};
   std::string hmacSha1S = MessageExtractionFacility::toHexString(hmacSha1);
   ASSERT_EQ(hmacSha1S, expected);
 }
@@ -52,7 +52,7 @@ TEST_F(HMAC_SHA1_Test, HMACSHA1_RFC2202TEST1_ShouldMatchReference) {
   std::vector<unsigned char> messageV(message.begin(), message.end());
   std::vector<unsigned char> hmacSha1 = _hmacSha1->hmac(keyV, messageV);
   ASSERT_EQ(hmacSha1.size(), SHA1_DIGEST_LENGTH);
-  std::string expected{"0xb617318655057264e28bc0b6fb378c8ef146be00"};
+  std::string expected{"b617318655057264e28bc0b6fb378c8ef146be00"};
   std::string hmacSha1S = MessageExtractionFacility::toHexString(hmacSha1);
   ASSERT_EQ(hmacSha1S, expected);
 }
@@ -67,7 +67,7 @@ TEST_F(HMAC_SHA1_Test, HMACSHA1_RFC2202TEST2_ShouldMatchReference) {
   std::vector<unsigned char> messageV(message.begin(), message.end());
   std::vector<unsigned char> hmacSha1 = _hmacSha1->hmac(keyV, messageV);
   ASSERT_EQ(hmacSha1.size(), SHA1_DIGEST_LENGTH);
-  std::string expected{"0xeffcdf6ae5eb2fa2d27416d5f184df9c259a7c79"};
+  std::string expected{"effcdf6ae5eb2fa2d27416d5f184df9c259a7c79"};
   std::string hmacSha1S = MessageExtractionFacility::toHexString(hmacSha1);
   ASSERT_EQ(hmacSha1S, expected);
 }
@@ -82,7 +82,7 @@ TEST_F(HMAC_SHA1_Test, HMACSHA1_RFC2202TEST3_ShouldMatchReference) {
   std::vector<unsigned char> messageV(messageLengthRFC2202Test3, 0xdd);
   std::vector<unsigned char> hmacSha1 = _hmacSha1->hmac(keyV, messageV);
   ASSERT_EQ(hmacSha1.size(), SHA1_DIGEST_LENGTH);
-  std::string expected{"0x125d7342b9ac11cd91a39af48aa17b4f63f175d3"};
+  std::string expected{"125d7342b9ac11cd91a39af48aa17b4f63f175d3"};
   std::string hmacSha1S = MessageExtractionFacility::toHexString(hmacSha1);
   ASSERT_EQ(hmacSha1S, expected);
 }
@@ -98,7 +98,7 @@ TEST_F(HMAC_SHA1_Test, HMACSHA1_RFC2202TEST4_ShouldMatchReference) {
   std::vector<unsigned char> messageV(messageLengthRFC2202Test4, 0xcd);
   std::vector<unsigned char> hmacSha1 = _hmacSha1->hmac(keyV, messageV);
   ASSERT_EQ(hmacSha1.size(), SHA1_DIGEST_LENGTH);
-  std::string expected{"0x4c9007f4026250c6bc8414f9bf50c86c2d7235da"};
+  std::string expected{"4c9007f4026250c6bc8414f9bf50c86c2d7235da"};
   std::string hmacSha1S = MessageExtractionFacility::toHexString(hmacSha1);
   ASSERT_EQ(hmacSha1S, expected);
 }
@@ -113,7 +113,7 @@ TEST_F(HMAC_SHA1_Test, HMACSHA1_RFC2202TEST5_ShouldMatchReference) {
   std::vector<unsigned char> messageV(message.begin(), message.end());
   std::vector<unsigned char> hmacSha1 = _hmacSha1->hmac(keyV, messageV);
   ASSERT_EQ(hmacSha1.size(), SHA1_DIGEST_LENGTH);
-  std::string expected{"0x4c1a03424b55e07fe7f27be1d58bb9324a9a5a04"};
+  std::string expected{"4c1a03424b55e07fe7f27be1d58bb9324a9a5a04"};
   std::string hmacSha1S = MessageExtractionFacility::toHexString(hmacSha1);
   ASSERT_EQ(hmacSha1S, expected);
 }
@@ -129,7 +129,7 @@ TEST_F(HMAC_SHA1_Test, HMACSHA1_RFC2202TEST6_ShouldMatchReference) {
   std::vector<unsigned char> messageV(message.begin(), message.end());
   std::vector<unsigned char> hmacSha1 = _hmacSha1->hmac(keyV, messageV);
   ASSERT_EQ(hmacSha1.size(), SHA1_DIGEST_LENGTH);
-  std::string expected{"0xaa4ae5e15272d00e95705637ce8a3b55ed402112"};
+  std::string expected{"aa4ae5e15272d00e95705637ce8a3b55ed402112"};
   std::string hmacSha1S = MessageExtractionFacility::toHexString(hmacSha1);
   ASSERT_EQ(hmacSha1S, expected);
 }
@@ -146,7 +146,7 @@ TEST_F(HMAC_SHA1_Test, HMACSHA1_RFC2202TEST7_ShouldMatchReference) {
   std::vector<unsigned char> messageV(message.begin(), message.end());
   std::vector<unsigned char> hmacSha1 = _hmacSha1->hmac(keyV, messageV);
   ASSERT_EQ(hmacSha1.size(), SHA1_DIGEST_LENGTH);
-  std::string expected{"0xe8e99d0f45237d786d6bbaa7965c7808bbff1a91"};
+  std::string expected{"e8e99d0f45237d786d6bbaa7965c7808bbff1a91"};
   std::string hmacSha1S = MessageExtractionFacility::toHexString(hmacSha1);
   ASSERT_EQ(hmacSha1S, expected);
 }
@@ -161,7 +161,7 @@ TEST_F(HMAC_SHA1_Test, HMACSHA1EdgeCaseTest1_ShouldMatchReference) {
   std::vector<unsigned char> messageV(message.begin(), message.end());
   std::vector<unsigned char> hmacSha1 = _hmacSha1->hmac(keyV, messageV);
   ASSERT_EQ(hmacSha1.size(), SHA1_DIGEST_LENGTH);
-  std::string expected{"0xcfda2dca77ff81d1feed4e0ece8dd3079dd6fe64"};
+  std::string expected{"cfda2dca77ff81d1feed4e0ece8dd3079dd6fe64"};
   std::string hmacSha1S = MessageExtractionFacility::toHexString(hmacSha1);
   ASSERT_EQ(hmacSha1S, expected);
 }
@@ -175,7 +175,7 @@ TEST_F(HMAC_SHA1_Test, HMACSHA1EdgeCaseTest2_ShouldMatchReference) {
   std::vector<unsigned char> messageV;
   std::vector<unsigned char> hmacSha1 = _hmacSha1->hmac(keyV, messageV);
   ASSERT_EQ(hmacSha1.size(), SHA1_DIGEST_LENGTH);
-  std::string expected{"0xfbdb1d1b18aa6c08324b7d64b71fb76370690e1d"};
+  std::string expected{"fbdb1d1b18aa6c08324b7d64b71fb76370690e1d"};
   std::string hmacSha1S = MessageExtractionFacility::toHexString(hmacSha1);
   ASSERT_EQ(hmacSha1S, expected);
 }
@@ -192,7 +192,7 @@ TEST_F(HMAC_SHA1_Test, HMACSHA1_NegativeTest1_ShouldMatchReference) {
   messageV[0] ^= 0x01; // flip one bit
   std::vector<unsigned char> hmacSha1 = _hmacSha1->hmac(keyV, messageV);
   ASSERT_EQ(hmacSha1.size(), SHA1_DIGEST_LENGTH);
-  std::string expected{"0xaa4ae5e15272d00e95705637ce8a3b55ed402112"};
+  std::string expected{"aa4ae5e15272d00e95705637ce8a3b55ed402112"};
   std::string hmacSha1S = MessageExtractionFacility::toHexString(hmacSha1);
   ASSERT_NE(hmacSha1S, expected);
 }
@@ -209,7 +209,7 @@ TEST_F(HMAC_SHA1_Test, HMACSHA1_NegativeTest2_ShouldMatchReference) {
   std::vector<unsigned char> messageV(message.begin(), message.end());
   std::vector<unsigned char> hmacSha1 = _hmacSha1->hmac(keyV, messageV);
   ASSERT_EQ(hmacSha1.size(), SHA1_DIGEST_LENGTH);
-  std::string expected{"0xaa4ae5e15272d00e95705637ce8a3b55ed402112"};
+  std::string expected{"aa4ae5e15272d00e95705637ce8a3b55ed402112"};
   std::string hmacSha1S = MessageExtractionFacility::toHexString(hmacSha1);
   ASSERT_NE(hmacSha1S, expected);
 }
