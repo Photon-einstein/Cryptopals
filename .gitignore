@@ -30,7 +30,3 @@ coverage/
 *.gcda
 *.gcno
 *.gcov
-
-
-# Crow specific (if using crow_all.h directly)
-**/external/
