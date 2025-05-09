@@ -45,7 +45,7 @@ find . -type f -name "CMakeLists.txt" ! -path "*/build/*" ! -path "*/external/*"
     # Run Cppcheck only if a src/ folder exists and is not inside 'external'
     if [ -d "$src_dir" ] && [[ "$src_dir" != *"/external"* ]]; then
         echo "🚀 Running Cppcheck in $src_dir"
-        cppcheck --enable=all --inconclusive --force --error-exitcode=1 "$src_dir" --suppress=missingIncludeSystem
+        cppcheck --enable=all --inconclusive --force --error-exitcode=1 "$src_dir" --suppress=missingIncludeSystem 
     fi
 
     # Run Cppcheck only if a tests/ folder exists and is not inside 'external'

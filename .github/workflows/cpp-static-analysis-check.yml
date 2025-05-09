@@ -23,6 +23,7 @@ jobs:
         run: |
           echo "🔍 Searching for CMakeLists.txt files (excluding 'external' and 'build' directories)..."
 
+
           # Find all directories containing a CMakeLists.txt file, excluding 'build' and 'external' directories and everything inside them
           find . -type f -name "CMakeLists.txt" ! -path "*/build/*" ! -path "*/external/*" | while read cmake_file; do
               dir=$(dirname "$cmake_file")
