@@ -23,7 +23,6 @@ jobs:
         run: |
           echo "🔍 Searching for CMakeLists.txt files (excluding 'external' and 'build' directories)..."
 
-          CROW_INCLUDE_DIR=$(find . -name crow.h -exec dirname {} \; | head -n1)
 
           # Find all directories containing a CMakeLists.txt file, excluding 'build' and 'external' directories and everything inside them
           find . -type f -name "CMakeLists.txt" ! -path "*/build/*" ! -path "*/external/*" | while read cmake_file; do
@@ -34,7 +33,7 @@ jobs:
               if [ -d "$src_dir" ] && [[ "$src_dir" != *"/external"* ]]; then
                   echo "🚀 Running Clang-Tidy in $src_dir"
                   for file in "$src_dir"/*.cpp; do
-                      [ -f "$file" ] && clang-tidy "$file" -- -I"$src_dir" -I"$CROW_INCLUDE_DIR"
+                      [ -f "$file" ] && clang-tidy "$file" -- -I"$src_dir"
                   done
               fi
 
@@ -42,7 +41,7 @@ jobs:
               if [ -d "$dir/tests" ] && [[ "$dir" != *"/external"* ]]; then
                   echo "🚀 Running Clang-Tidy in $dir/tests"
                   for file in "$dir/tests"/*.cpp; do
-                      [ -f "$file" ] && clang-tidy "$file" -- -I"$dir/tests" -I"$CROW_INCLUDE_DIR"
+                      [ -f "$file" ] && clang-tidy "$file" -- -I"$dir/tests"
                   done
               fi
 
