@@ -21,6 +21,8 @@ fi
 
 echo "🔍 Searching for CMakeLists.txt files (excluding 'external' and 'build' directories)..."
 
+CROW_INCLUDE_DIR=$(find . -name crow.h -exec dirname {} \; | head -n1)
+
 # Find all directories containing a CMakeLists.txt file, excluding 'build' and 'external' directories and everything inside them
 find . -type f -name "CMakeLists.txt" ! -path "*/build/*" ! -path "*/external/*" | while read cmake_file; do
     dir=$(dirname "$cmake_file")
@@ -30,7 +32,7 @@ find . -type f -name "CMakeLists.txt" ! -path "*/build/*" ! -path "*/external/*"
     if [ -d "$src_dir" ] && [[ "$src_dir" != *"/external"* ]]; then
         echo "🚀 Running Clang-Tidy in $src_dir"
         for file in "$src_dir"/*.cpp; do
-            [ -f "$file" ] && clang-tidy "$file" -- -I"$src_dir"
+            [ -f "$file" ] && clang-tidy "$file" -- -I"$src_dir" -I"$CROW_INCLUDE_DIR"
         done
     fi
 
@@ -38,14 +40,14 @@ find . -type f -name "CMakeLists.txt" ! -path "*/build/*" ! -path "*/external/*"
     if [ -d "$dir/tests" ] && [[ "$dir" != *"/external"* ]]; then
         echo "🚀 Running Clang-Tidy in $dir/tests"
         for file in "$dir/tests"/*.cpp; do
-            [ -f "$file" ] && clang-tidy "$file" -- -I"$dir/tests"
+            [ -f "$file" ] && clang-tidy "$file" -- -I"$dir/tests" -I"$CROW_INCLUDE_DIR"
         done
     fi
 
     # Run Cppcheck only if a src/ folder exists and is not inside 'external'
     if [ -d "$src_dir" ] && [[ "$src_dir" != *"/external"* ]]; then
         echo "🚀 Running Cppcheck in $src_dir"
-        cppcheck --enable=all --inconclusive --force --error-exitcode=1 "$src_dir" --suppress=missingIncludeSystem
+        cppcheck --enable=all --inconclusive --force --error-exitcode=1 "$src_dir" --suppress=missingIncludeSystem 
     fi
 
     # Run Cppcheck only if a tests/ folder exists and is not inside 'external'
