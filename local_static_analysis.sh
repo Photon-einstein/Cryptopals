@@ -14,50 +14,49 @@ export PATH=$PATH:/usr/bin:/usr/local/bin
 echo "Current PATH: $PATH"
 
 # Ensure Clang-Tidy and Cppcheck are installed
-if ! which clang-tidy &>/dev/null || ! which  cppcheck &>/dev/null; then
+if ! which clang-tidy &>/dev/null || ! which cppcheck &>/dev/null; then
     echo "Error: Clang-Tidy or Cppcheck is not installed. Install them first."
     exit 1
 fi
 
-echo "🔍 Searching for CMakeLists.txt files..."
+echo "🔍 Searching for CMakeLists.txt files (excluding 'external' and 'build' directories)..."
 
-# Find all directories containing a CMakeLists.txt file, excluding 'build' directories and everything inside them
-find . -type f -name "CMakeLists.txt" ! -path "*/build/*" | while read cmake_file; do
+# Find all directories containing a CMakeLists.txt file, excluding 'build' and 'external' directories and everything inside them
+find . -type f -name "CMakeLists.txt" ! -path "*/build/*" ! -path "*/external/*" | while read cmake_file; do
     dir=$(dirname "$cmake_file")
     src_dir="$dir/src"
-    
-    # Run Clang-Tidy only if a src/ folder exists
-    if [ -d "$src_dir" ]; then
+
+    # Run Clang-Tidy only if a src/ folder exists and is not inside 'external'
+    if [ -d "$src_dir" ] && [[ "$src_dir" != *"/external"* ]]; then
         echo "🚀 Running Clang-Tidy in $src_dir"
         for file in "$src_dir"/*.cpp; do
             [ -f "$file" ] && clang-tidy "$file" -- -I"$src_dir"
         done
     fi
 
-    # Run Clang-Tidy on cpp files in the 'tests' folder as well
-    if [ -d "$dir/tests" ]; then
+    # Run Clang-Tidy on cpp files in the 'tests' folder as well, excluding 'external'
+    if [ -d "$dir/tests" ] && [[ "$dir" != *"/external"* ]]; then
         echo "🚀 Running Clang-Tidy in $dir/tests"
         for file in "$dir/tests"/*.cpp; do
             [ -f "$file" ] && clang-tidy "$file" -- -I"$dir/tests"
         done
     fi
 
-    # Run Cppcheck only if a src/ folder exists
-    if [ -d "$src_dir" ]; then
+    # Run Cppcheck only if a src/ folder exists and is not inside 'external'
+    if [ -d "$src_dir" ] && [[ "$src_dir" != *"/external"* ]]; then
         echo "🚀 Running Cppcheck in $src_dir"
         cppcheck --enable=all --inconclusive --force --error-exitcode=1 "$src_dir" --suppress=missingIncludeSystem
     fi
 
-    # Run Cppcheck only if a tests/ folder exists
-    if [ -d "$dir/tests" ]; then
+    # Run Cppcheck only if a tests/ folder exists and is not inside 'external'
+    if [ -d "$dir/tests" ] && [[ "$dir" != *"/external"* ]]; then
         tst_dir="$dir/tests"
         echo "🚀 Running Cppcheck in $tst_dir"
-        
-        find "$tst_dir" -type f -name "*.cpp" ! -path "*/build/*" | while read file; do
+
+        find "$tst_dir" -type f -name "*.cpp" ! -path "*/build/*" ! -path "*/external/*" | while read file; do
             cppcheck --enable=all --std=c++17 --inconclusive --force --error-exitcode=1 --suppress=missingIncludeSystem --suppress=unusedStructMember --suppress=unusedFunction --suppress=unmatchedSuppression "$file"
         done
     fi
-
 
 done
 

@@ -7,7 +7,7 @@
 class Attacker {
 public:
   /* constructor / destructor*/
-  Attacker(bool debugFlag);
+  explicit Attacker(bool debugFlag);
   ~Attacker();
 
   /**
@@ -34,8 +34,8 @@ public:
    * code success, false otherwise
    * @return cpr::Response curl response from the server
    */
-  std::tuple<bool, cpr::Response> sendRequest(const std::string &signature,
-                                              const std::string &fileName);
+  std::tuple<bool, cpr::Response>
+  sendRequest(const std::string &signature, const std::string &fileName) const;
 
 private:
   /**
@@ -44,7 +44,7 @@ private:
    * This method will print in a structured way the server response to an
    * attacker curl request.
    */
-  void printServerResponse(const cpr::Response &response);
+  static void printServerResponse(const cpr::Response &response);
 
   bool _debugFlag;
   const int _portServerProduction{18080};

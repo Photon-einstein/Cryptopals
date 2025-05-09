@@ -4,7 +4,7 @@
 /* constructor / destructor */
 MyCryptoLibrary::HMAC_SHA1::HMAC_SHA1()
     : _sha1(std::make_shared<MyCryptoLibrary::SHA1>()),
-      _ipadV(SHA1_BLOCK_SIZE, _ipad), _opadV(SHA1_BLOCK_SIZE, _opad) {}
+      _opadV(SHA1_BLOCK_SIZE, _opad), _ipadV(SHA1_BLOCK_SIZE, _ipad) {}
 /******************************************************************************/
 MyCryptoLibrary::HMAC_SHA1::~HMAC_SHA1() {}
 /******************************************************************************/
@@ -21,7 +21,6 @@ MyCryptoLibrary::HMAC_SHA1::~HMAC_SHA1() {}
 std::vector<unsigned char>
 MyCryptoLibrary::HMAC_SHA1::hmac(const std::vector<unsigned char> &key,
                                  const std::vector<unsigned char> &message) {
-  std::vector<unsigned char> hmac;
   _keyBlock = computeBlockSizedKey(key, SHA1_BLOCK_SIZE);
   std::vector<unsigned char> o_key_pad, i_key_pad;
   for (std::size_t i = 0; i < SHA1_BLOCK_SIZE; ++i) {

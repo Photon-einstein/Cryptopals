@@ -73,8 +73,7 @@ Attacker::breakHmacSHA1(const std::string &fileName) {
  */
 std::tuple<bool, cpr::Response>
 Attacker::sendRequest(const std::string &signature,
-                      const std::string &fileName) {
-  bool retBool;
+                      const std::string &fileName) const {
   cpr::Response response = cpr::Get(
       cpr::Url{std::string("http://localhost:") +
                std::to_string(_portServerProduction) + std::string("/test")},
