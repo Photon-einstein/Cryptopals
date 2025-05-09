@@ -13,24 +13,6 @@ public:
   explicit Server(const bool debugFlag);
   ~Server();
 
-  /**
-   * @brief This method will validate if a given message produces the
-   * given message authentication code (MAC)
-   *
-   * This method will validate if a given message produces the
-   * given message authentication code (MAC), it will perform the following
-   * test: MD4(private server key || msg) == mac
-   *
-   * @param msg The message to be authenticated
-   * @param mac The message authentication code (mac) to be validated in
-   * binary format
-   *
-   * @return A bool value, true if the mac received matches the
-   * mac produced by the server, false otherwise
-   */
-  bool validateMac(const std::vector<unsigned char> &msg,
-                   const std::vector<unsigned char> &mac);
-
   void setupRoutes();
 
   /**
@@ -78,8 +60,8 @@ private:
    *
    * @return A bool value, true if the vectors are the same, false otherwise
    */
-  bool insecureSignatureCompare(const std::vector<unsigned char> &v1,
-                                const std::vector<unsigned char> &v2);
+  static bool insecureSignatureCompare(const std::vector<unsigned char> &v1,
+                                       const std::vector<unsigned char> &v2);
 
   const bool _debugFlag;
   bool _debugFlagExtreme{false};

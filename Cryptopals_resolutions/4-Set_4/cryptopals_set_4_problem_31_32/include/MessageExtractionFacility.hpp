@@ -1,22 +1,10 @@
 #ifndef MESSAGE_EXTRACTION_FACILITY_HPP
 #define MESSAGE_EXTRACTION_FACILITY_HPP
 
-#include "./../include/MessageFormat.hpp"
-
 #include <string>
 #include <vector>
 
 namespace MessageExtractionFacility {
-
-/**
- * @brief This method parses the message
- *
- * This method will parses the message, extracting url, message and mac fields
- *
- * @return The message parsed
- */
-MessageFormat::MessageParsed parseMessage(const std::string &message,
-                                          bool debugFlag);
 
 /**
  * @brief This method will convert hexadecimal string to a vector of bytes

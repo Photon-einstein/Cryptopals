@@ -37,5 +37,8 @@
 23. Implement the insecure compare (Done)
 24. Implementation of the attack on the attacker side (Done)
 25. Update the attack to be able to handle noise and statistical variation between samples. (Done)
+26. Run and fix the problems catch by the code static analysis (Done)
 
-26. Run and fix the problems catched by the code static analysis (in progress)
+27. Implement the class diagram (in progress)
+
+28. Implement the sequence diagram (TBD)
