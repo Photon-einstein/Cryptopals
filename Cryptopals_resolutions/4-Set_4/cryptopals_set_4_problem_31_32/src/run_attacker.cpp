@@ -12,8 +12,7 @@ int main(void) {
   double time;
   start = clock();
   /* work to verify */
-  const bool debugFlag{true};
-  std::shared_ptr<Attacker> attacker = std::make_shared<Attacker>(debugFlag);
+  std::shared_ptr<Attacker> attacker = std::make_shared<Attacker>();
   const std::string fileName{"foo"};
   attacker->breakHmacSHA1(fileName);
   /* end of the work */

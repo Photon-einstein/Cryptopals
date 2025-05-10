@@ -7,9 +7,7 @@
 #include "./../include/Server.hpp"
 
 /* constructor / destructor */
-Server::Server(const bool debugFlag)
-    : _debugFlag(debugFlag),
-      _hmac(std::make_shared<MyCryptoLibrary::HMAC_SHA1>()) {
+Server::Server() : _hmac(std::make_shared<MyCryptoLibrary::HMAC_SHA1>()) {
   std::string hexServerKey{};
   if (std::getenv("KEY_SERVER_SET_4_PROBLEM_31") != nullptr) {
     hexServerKey = std::getenv("KEY_SERVER_SET_4_PROBLEM_31");

@@ -1,10 +1,12 @@
 #include "./../include/HMAC_SHA1.hpp"
+#include "./../include/HMAC.hpp"
 #include "./../include/SHA1.hpp"
 
 /* constructor / destructor */
 MyCryptoLibrary::HMAC_SHA1::HMAC_SHA1()
-    : _sha1(std::make_shared<MyCryptoLibrary::SHA1>()),
-      _opadV(SHA1_BLOCK_SIZE, _opad), _ipadV(SHA1_BLOCK_SIZE, _ipad) {}
+    : _opadV(SHA1_BLOCK_SIZE, _opad), _ipadV(SHA1_BLOCK_SIZE, _ipad) {
+  _sha = std::make_shared<MyCryptoLibrary::SHA1>();
+}
 /******************************************************************************/
 MyCryptoLibrary::HMAC_SHA1::~HMAC_SHA1() {}
 /******************************************************************************/
@@ -30,11 +32,11 @@ MyCryptoLibrary::HMAC_SHA1::hmac(const std::vector<unsigned char> &key,
   std::vector<unsigned char> innerHashContent = i_key_pad;
   innerHashContent.insert(innerHashContent.end(), message.begin(),
                           message.end());
-  std::vector<unsigned char> innerHash = _sha1->hash(innerHashContent);
+  std::vector<unsigned char> innerHash = _sha->hash(innerHashContent);
   std::vector<unsigned char> hmacHashContent = o_key_pad;
   hmacHashContent.insert(hmacHashContent.end(), innerHash.begin(),
                          innerHash.end());
-  return _sha1->hash(hmacHashContent);
+  return _sha->hash(hmacHashContent);
 }
 /******************************************************************************/
 /**
@@ -51,7 +53,7 @@ std::vector<unsigned char> MyCryptoLibrary::HMAC_SHA1::computeBlockSizedKey(
     const std::vector<unsigned char> &key, const std::size_t blockSize) {
   _keyBlock = key;
   if (_keyBlock.size() > SHA1_BLOCK_SIZE) {
-    _keyBlock = _sha1->hash(key);
+    _keyBlock = _sha->hash(key);
   }
   if (_keyBlock.size() < SHA1_BLOCK_SIZE) {
     _keyBlock.resize(SHA1_BLOCK_SIZE, 0);

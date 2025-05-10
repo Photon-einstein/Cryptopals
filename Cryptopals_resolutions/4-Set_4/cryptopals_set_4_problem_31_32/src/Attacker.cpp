@@ -6,7 +6,7 @@
 #include "./../include/MessageExtractionFacility.hpp"
 
 /* constructor / destructor */
-Attacker::Attacker(bool debugFlag) : _debugFlag{debugFlag} {}
+Attacker::Attacker() {}
 /******************************************************************************/
 Attacker::~Attacker() {}
 /******************************************************************************/

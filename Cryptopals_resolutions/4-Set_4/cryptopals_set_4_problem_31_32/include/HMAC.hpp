@@ -1,6 +1,9 @@
 #ifndef HMAC_HPP
 #define HMAC_HPP
 
+#include "./../include/SHA.hpp"
+
+#include <memory>
 #include <vector>
 
 namespace MyCryptoLibrary {
@@ -42,6 +45,7 @@ protected:
   computeBlockSizedKey(const std::vector<unsigned char> &key,
                        const std::size_t blockSize) = 0;
 
+  std::shared_ptr<MyCryptoLibrary::SHA> _sha;
   const unsigned char _opad{0x5C};
   const unsigned char _ipad{0x36};
 };
