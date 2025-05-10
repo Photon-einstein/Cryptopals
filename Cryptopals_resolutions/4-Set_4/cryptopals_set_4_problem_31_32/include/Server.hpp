@@ -10,28 +10,8 @@
 class Server {
 public:
   /* constructor / destructor */
-  explicit Server(const bool debugFlag);
+  Server();
   ~Server();
-
-  void setupRoutes();
-
-  /**
-   * @brief This method is the entry point for the server URL address
-   *
-   * This method will serve as a confirmation that the server URL is up
-   * and running at the root path
-   */
-  void rootEndpoint();
-
-  /**
-   * @brief This method is the endpoint that makes the verification of the
-   * signature
-   *
-   * This method is the endpoint that makes the verification of the signature,
-   * namely it assesses if HMAC(file) == signature
-   *
-   */
-  void signatureVerificationEndpoint();
 
   /**
    * @brief This method will start all the server endpoints in a multi thread
@@ -53,6 +33,34 @@ public:
 
 private:
   /**
+   * @brief This method will start the endpoints that the server
+   * provides to his clients
+   *
+   * This method will start the endpoints that the server
+   * provides to his clients, namely the root endpoint and the signature
+   * verification endpoint
+   */
+  void setupRoutes();
+
+  /**
+   * @brief This method is the entry point for the server URL address
+   *
+   * This method will serve as a confirmation that the server URL is up
+   * and running at the root path
+   */
+  void rootEndpoint();
+
+  /**
+   * @brief This method is the endpoint that makes the verification of the
+   * signature
+   *
+   * This method is the endpoint that makes the verification of the signature,
+   * namely it assesses if HMAC(file) == signature
+   *
+   */
+  void signatureVerificationEndpoint();
+
+  /**
    * @brief This method will do an insecure compare between two vector.
    *
    * This method will do an insecure compare between two vector, leaking time
@@ -63,13 +71,9 @@ private:
   static bool insecureSignatureCompare(const std::vector<unsigned char> &v1,
                                        const std::vector<unsigned char> &v2);
 
-  const bool _debugFlag;
-  bool _debugFlagExtreme{false};
   std::vector<unsigned char> _keyServer{};
   crow::SimpleApp _app;
   std::shared_ptr<MyCryptoLibrary::HMAC> _hmac;
-
-  mutable std::mutex _mutex;
 
   const int _portProduction{18080};
   const int _portTest{18081};

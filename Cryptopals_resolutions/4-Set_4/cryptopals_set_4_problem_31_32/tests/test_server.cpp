@@ -12,7 +12,7 @@ protected:
   // cppcheck-suppress unusedFunction
   void SetUp() override {
     // NOLINTNEXTLINE(clang-analyzer-optin.cplusplus.VirtualCall)
-    _server = std::make_unique<Server>(_debugFlag);
+    _server = std::make_unique<Server>();
     StartServerOnce();
   }
 
@@ -28,7 +28,6 @@ protected:
   }
 
   std::unique_ptr<Server> _server;
-  const bool _debugFlag{false};
   const std::string _portTest = std::to_string(18081);
 };
 

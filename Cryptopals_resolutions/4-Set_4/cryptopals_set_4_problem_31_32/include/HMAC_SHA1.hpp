@@ -45,7 +45,6 @@ private:
   computeBlockSizedKey(const std::vector<unsigned char> &key,
                        const std::size_t blockSize) override;
 
-  std::shared_ptr<MyCryptoLibrary::SHA1> _sha1;
   const std::size_t _blockSize{64}; // bytes
   std::vector<unsigned char> _opadV, _ipadV, _keyBlock;
 };

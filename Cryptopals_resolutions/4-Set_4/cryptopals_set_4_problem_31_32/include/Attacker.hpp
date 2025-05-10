@@ -7,7 +7,7 @@
 class Attacker {
 public:
   /* constructor / destructor*/
-  explicit Attacker(bool debugFlag);
+  Attacker();
   ~Attacker();
 
   /**
@@ -24,6 +24,7 @@ public:
    */
   std::tuple<bool, std::string> breakHmacSHA1(const std::string &fileName);
 
+private:
   /**
    * @brief This method will send a request to the server to validate.
    *
@@ -37,7 +38,6 @@ public:
   std::tuple<bool, cpr::Response>
   sendRequest(const std::string &signature, const std::string &fileName) const;
 
-private:
   /**
    * @brief This method will print in a structured way the server response
    *
@@ -46,7 +46,6 @@ private:
    */
   static void printServerResponse(const cpr::Response &response);
 
-  bool _debugFlag;
   const int _portServerProduction{18080};
   const int _portServerTest{18081};
   const int _attackSamples{10};
