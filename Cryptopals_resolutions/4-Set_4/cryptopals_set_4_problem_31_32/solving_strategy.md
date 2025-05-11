@@ -39,5 +39,8 @@
 25. Update the attack to be able to handle noise and statistical variation between samples. (Done)
 26. Run and fix the problems catch by the code static analysis (Done)
 27. Implement the class diagram (Done)
+28. Implement the sequence diagram (Done)
 
-28. Implement the sequence diagram (in progress)
+29. Write the article (in progress)
+    29.1. Define the topics to cover in the article (TBD)
+    
