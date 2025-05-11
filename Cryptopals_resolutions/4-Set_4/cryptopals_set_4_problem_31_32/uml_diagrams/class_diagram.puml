@@ -84,7 +84,7 @@ class Attacker {
     + Attacker()
     + ~Attacker()
     + breakHmacSHA1(fileName : std::string) : std::tuple<bool, std::string>
-    - sendRequest(signature : std::string, fileName : std::string) : std::tuple<bool, cpr::Response> {static}
+    - sendRequest(signature : std::string, fileName : std::string) : std::tuple<bool, cpr::Response> {const}
     - printServerResponse(response : cpr::Response) : void {static}
 }
 

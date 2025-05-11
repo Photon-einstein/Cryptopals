@@ -92,6 +92,9 @@ private:
    */
   void preProcessing(const std::vector<unsigned char> &inputV);
 
+  /**
+   * Processes the padded message in 512-bit blocks
+   */
   /// Processes the padded message in 512-bit blocks.
   void processing();
 
@@ -103,8 +106,6 @@ private:
    * @return The rotated value.
    */
   static uint32_t leftRotate(uint32_t value, int bits);
-
-  // Internal state variables
 
   /// Expected output hash size in bytes.
   std::size_t _sizeOutputHash{};
