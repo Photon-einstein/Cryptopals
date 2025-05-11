@@ -38,7 +38,6 @@
 24. Implementation of the attack on the attacker side (Done)
 25. Update the attack to be able to handle noise and statistical variation between samples. (Done)
 26. Run and fix the problems catch by the code static analysis (Done)
+27. Implement the class diagram (Done)
 
-27. Implement the class diagram (in progress)
-
-28. Implement the sequence diagram (TBD)
+28. Implement the sequence diagram (in progress)
