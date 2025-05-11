@@ -30,3 +30,5 @@ Run the attacker side:
 ```bash
 ./build/attacker_main
 ```
+
+[![Watch the video with the solution demo](http://img.youtube.com/vi/6iz8u3MrVDQ/0.jpg)](https://www.youtube.com/watch?v=6iz8u3MrVDQ)
