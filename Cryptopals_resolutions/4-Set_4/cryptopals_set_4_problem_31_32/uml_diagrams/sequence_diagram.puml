@@ -1,0 +1,39 @@
+@startuml
+actor User
+participant "Attacker" as A
+participant "Server" as S
+participant "HMAC_SHA1" as H
+participant "MessageExtractionFacility" as M
+
+User -> A : breakHmacSHA1(fileName)
+loop for each byte (i) in signature
+  loop for each guess (j = 0..255)
+    A -> M : toHexString(signatureV)
+    M --> A : signature in hexadecimal
+    loop _attackSamples times
+      A -> S : sendRequest(signature, fileName)
+      activate S
+      S -> H : hmac(key, file)
+      H --> S: hmac
+      S -> M : hexToBytes(signature)
+      M --> S : signature in hexadecimal
+      S -> S : insecureSignatureCompare(sigGuess, sigExpected)
+      deactivate S
+      S --> A : cpr::Response (with timing leak)
+    end
+  end
+end
+
+A -> M : toHexString(signatureV)
+M --> A : signature in hexadecimal
+A -> S : sendRequest(final signature, fileName)
+activate S
+S -> H : hmac(key, file)
+H --> S: hmac
+S -> M : hexToBytes(signature)
+M --> S : signature in hexadecimal
+S -> S : insecureSignatureCompare(sigGuess, sigExpected)
+deactivate S
+S --> A : cpr::Response (success/fail)
+A --> User : (cpr::Response, signature)
+@enduml
