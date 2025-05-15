@@ -42,5 +42,15 @@
 28. Implement the sequence diagram (Done)
 
 29. Write the article (in progress)
-    29.1. Define the topics to cover in the article (TBD)
-    
+    29.1. Define the topics to cover in the article (Done)
+        29.1.1. What are timing leaks (Done)
+        29.1.2.0. Read the RFC2104: (https://datatracker.ietf.org/doc/html/rfc2104) (Done)
+        29.1.2. What are HMAC (in progress) 
+        29.1.3. How works HMAC (TBD)
+        29.1.4. Explanation of a practical example of an exploitation of a timing leak (TBD)
+            29.1.4.1. Explanation of the initial setup of the scenario (TBD)
+            29.1.4.2. Explanation of the timing leak vulnerability (TBD)
+            29.1.4.3. Explanation of the vulnerability explored by the attacker and the modus operandi (TBD)
+        29.1.5. How to defend against timing leaks (TBD)
+        29.1.6. Conclusions
+
