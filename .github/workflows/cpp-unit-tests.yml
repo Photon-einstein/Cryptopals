@@ -31,8 +31,6 @@ jobs:
           sudo apt install -y cmake g++ libgtest-dev libssl-dev nlohmann-json3-dev valgrind libboost-all-dev libasio-dev
 
       - name: Clone and build Crow
-        # Assuming Crow is cloned into a directory like 'external/Crow'
-        # Adjust 'REPO_ROOT/external/Crow' if your structure is different
         run: |
           cd external/Crow
           mkdir build && cd build
