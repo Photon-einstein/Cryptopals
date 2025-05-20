@@ -30,6 +30,17 @@ jobs:
           sudo apt update
           sudo apt install -y cmake g++ libgtest-dev libssl-dev nlohmann-json3-dev valgrind libboost-all-dev libasio-dev
 
+      - name: Clone and build Crow
+        # Assuming Crow is cloned into a directory like 'external/Crow'
+        # Adjust 'REPO_ROOT/external/Crow' if your structure is different
+        run: |
+          git clone --depth 1 https://github.com/ipkn/crow.git external/Crow
+          cd external/Crow
+          mkdir build && cd build
+          cmake ..
+          make -j$(nproc) # Use all available cores for faster build
+          sudo make install # Install it to /usr/local, where CMake can find it
+
       - name: Build and run tests
         run: |
           for set_dir in $(find . -type d -name '*-Set_*'); do
