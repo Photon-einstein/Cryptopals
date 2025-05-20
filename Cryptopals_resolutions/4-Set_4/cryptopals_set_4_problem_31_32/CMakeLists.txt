@@ -23,7 +23,7 @@ FetchContent_MakeAvailable(cpr)
 # Include directories
 include_directories(
     include
-    external/crow/include
+    ./../../../external/crow/include
 )
 
 # Automatically find all .cpp files in the src/ directory (except main files)
