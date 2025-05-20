@@ -34,7 +34,6 @@ jobs:
         # Assuming Crow is cloned into a directory like 'external/Crow'
         # Adjust 'REPO_ROOT/external/Crow' if your structure is different
         run: |
-          git clone --depth 1 https://github.com/ipkn/crow.git external/Crow
           cd external/Crow
           mkdir build && cd build
           cmake ..
