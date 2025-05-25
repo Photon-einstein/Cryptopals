@@ -4,6 +4,8 @@
 #include "crow.h"
 #include <vector>
 
+#include "Diffie_Hellman.hpp"
+
 class Server {
 public:
   /* constructor / destructor */
@@ -46,6 +48,8 @@ private:
    * and running at the root path
    */
   void rootEndpoint();
+
+  std::shared_ptr<MyCryptoLibrary::Diffie_Hellman> _diffieHellman;
 
   crow::SimpleApp _app;
 

@@ -126,8 +126,12 @@ json file dh_parameters.json (Done)
 
 https://datatracker.ietf.org/doc/html/rfc3526
 
-7. Creation of a client and a server to carry out the DH protocol (in progress)
+7. Creation of the skeleton for the client and the server to carry out the DH protocol (Done)
     7.1. Migration of the MessageExtractionFacility from the previous problems, to enable the hex to int conversion (Done)
     7.2. Creation of an empty server class (Done)
-    7.3. Creation of an empty client class (TBD)
-    
+    7.3. Creation of an empty client class (Done)
+    7.4. Run each executable for the server and the client separately (Done)
+
+8. Creation of an empty Diffie Hellman class (Done)
+
+9. Add capabilities to extract the parameters p and g from the public input file (in progress)

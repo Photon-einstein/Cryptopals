@@ -29,6 +29,7 @@ include_directories(
 # Automatically find all .cpp files in the src/ directory (except main files)
 file(GLOB COMMON_SOURCES "src/*.cpp")
 list(REMOVE_ITEM COMMON_SOURCES "${CMAKE_SOURCE_DIR}/src/run_server.cpp")
+list(REMOVE_ITEM COMMON_SOURCES "${CMAKE_SOURCE_DIR}/src/run_client.cpp")
 
 # === Server Executable ===
 add_executable(run_server
@@ -41,5 +42,19 @@ target_link_libraries(run_server
 )
 
 set_target_properties(run_server PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build
+)
+
+# === Client Executable ===
+add_executable(run_client
+    src/run_client.cpp
+    ${COMMON_SOURCES}
+)
+target_link_libraries(run_client 
+    OpenSSL::Crypto
+    cpr::cpr
+)
+
+set_target_properties(run_client PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build
 )
