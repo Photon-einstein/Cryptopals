@@ -4,6 +4,7 @@
 #include "crow.h"
 #include <vector>
 
+#include "DH_parameters_loader.hpp"
 #include "Diffie_Hellman.hpp"
 
 class Server {
@@ -49,6 +50,8 @@ private:
    */
   void rootEndpoint();
 
+  const std::string _dhParametersFilename{"./../input/dh_parameters.json"};
+  DHParametersLoader::DHParameters _dhParameter;
   std::shared_ptr<MyCryptoLibrary::Diffie_Hellman> _diffieHellman;
 
   crow::SimpleApp _app;

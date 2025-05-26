@@ -1,6 +1,9 @@
 #ifndef MESSAGE_EXTRACTION_FACILITY_HPP
 #define MESSAGE_EXTRACTION_FACILITY_HPP
 
+#include <memory>
+#include <openssl/bn.h>
+#include <openssl/err.h>
 #include <string>
 #include <vector>
 
@@ -28,6 +31,17 @@ std::vector<unsigned char> hexToBytes(const std::string &hexStr);
  * @return A string containing the chars with hexadecimal format, zero padded
  */
 std::string toHexString(const std::vector<unsigned char> &data);
+
+struct BIGNUM_deleter {
+  void operator()(BIGNUM *bn) const { BN_free(bn); }
+};
+using UniqueBIGNUM = std::unique_ptr<BIGNUM, BIGNUM_deleter>;
+
+UniqueBIGNUM hexToUniqueBIGNUM(const std::string &hex_str);
+
+std::string BIGNUMToHex(BIGNUM *bn);
+
+std::string BIGNUMToDec(BIGNUM *bn);
 
 }; // namespace MessageExtractionFacility
 
