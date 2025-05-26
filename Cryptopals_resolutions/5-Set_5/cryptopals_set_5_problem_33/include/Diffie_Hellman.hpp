@@ -15,6 +15,10 @@ public:
   /* public methods */
 
 private:
+  int p;
+  int g;
+  int privatekey;
+  int publicKey;
 };
 
 } // namespace MyCryptoLibrary
