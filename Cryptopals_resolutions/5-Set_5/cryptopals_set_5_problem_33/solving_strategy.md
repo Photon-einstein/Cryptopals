@@ -135,3 +135,4 @@ https://datatracker.ietf.org/doc/html/rfc3526
 8. Creation of an empty Diffie Hellman class (Done)
 
 9. Add capabilities to extract the parameters p and g from the public input file (in progress)
+Open SSL documentation: https://docs.openssl.org/3.0/man3/DH_get_1024_160/
