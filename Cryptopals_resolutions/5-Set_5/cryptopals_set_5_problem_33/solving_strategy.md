@@ -1,7 +1,7 @@
-1. See a youtube video about Diffie-Hellman key exchange (Done)
+1. See a YouTube video about Diffie-Hellman key exchange (Done)
 2. Extract the common dependency of Crow to an upper directory (Done)
 3. Read Wikipedia page about Diffie-Hellman work (Done)
-4. Read Diffie-Hellman paper, link: https://www-ee.stanford.edu/~hellman/publications/24.pdf  (done)
+4. Read Diffie-Hellman paper, link: https://www-ee.stanford.edu/~hellman/publications/24.pdf (done)
 5. Study and come up with an idea of a protocol between two parties so that they can exchange keys between then (done)
 
     1. Agreement on Public Parameters: Alice and Bob must agree on a large prime number p (modulus) and a generator g. These are public and can be known by anyone. (setup on this problem)
@@ -116,7 +116,7 @@
     Purpose: Tells the server which predefined p and g group the client intends to use. The server can then look up these parameters from its own copy of the shared JSON file.
     
     public_key_A (string - Hexadecimal):
-    Value: The hexadecimal string representation of Alice's computed public key A=g^a(modp).
+    Value: The hexadecimal string representation of Alice's computed public key A=g^a(mod p).
     Purpose: This is Alice's DH share that Bob needs to compute the shared secret.
 
     Software structure: DH class that takes care of setting the private key, public key and setting of the shared secret
@@ -134,5 +134,6 @@ https://datatracker.ietf.org/doc/html/rfc3526
 
 8. Creation of an empty Diffie Hellman class (Done)
 
-9. Add capabilities to extract the parameters p and g from the public input file (in progress)
+9. Add capabilities to extract the parameters p and g from the public input file (Done)
 Open SSL documentation: https://docs.openssl.org/3.0/man3/DH_get_1024_160/
+    9.1. Read OpenSSL Bignum documentation (Done)
