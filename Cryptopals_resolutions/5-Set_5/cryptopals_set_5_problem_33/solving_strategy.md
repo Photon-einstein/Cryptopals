@@ -137,3 +137,10 @@ https://datatracker.ietf.org/doc/html/rfc3526
 9. Add capabilities to extract the parameters p and g from the public input file (Done)
 Open SSL documentation: https://docs.openssl.org/3.0/man3/DH_get_1024_160/
     9.1. Read OpenSSL Bignum documentation (Done)
+
+10. Set the private key inside the Diffie Hellman class (Done)
+
+Choose a cryptographically secure random a.
+
+11. Set the public key inside the Diffie Hellman class (in progress)
+Compute A = g^a mod p.

@@ -4,6 +4,10 @@
 #include <memory>
 #include <vector>
 
+#include "DH_parameters_loader.hpp"
+#include "Diffie_Hellman.hpp"
+#include "MessageExtractionFacility.hpp"
+
 namespace MyCryptoLibrary {
 
 class Diffie_Hellman {
@@ -12,13 +16,14 @@ public:
   Diffie_Hellman();
   ~Diffie_Hellman();
 
+  void generatePrivateKey();
+
   /* public methods */
 
 private:
-  int p;
-  int g;
-  int privatekey;
-  int publicKey;
+  const std::string _dhParametersFilename{"./../input/dh_parameters.json"};
+  DHParametersLoader::DHParameters _dhParameter;
+  MessageExtractionFacility::UniqueBIGNUM _p, _g, _privateKey, _publicKey;
 };
 
 } // namespace MyCryptoLibrary
