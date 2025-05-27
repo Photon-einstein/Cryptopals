@@ -14,6 +14,7 @@ int main(void) {
   start = clock();
   /* work to verify */
   std::shared_ptr<Client> client = std::make_shared<Client>();
+  client->diffieHellmanKeyExchange();
   /* end of the work */
   end = clock();
   time = (double)(end - start) / CLOCKS_PER_SEC;

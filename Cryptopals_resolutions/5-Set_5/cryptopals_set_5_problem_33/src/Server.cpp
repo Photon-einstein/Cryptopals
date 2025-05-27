@@ -8,7 +8,11 @@
 
 /* constructor / destructor */
 Server::Server()
-    : _diffieHellman(std::make_unique<MyCryptoLibrary::Diffie_Hellman>()) {}
+    : _diffieHellman(std::make_unique<MyCryptoLibrary::Diffie_Hellman>()),
+      _serverNonceHex{
+          MessageExtractionFacility::generateCryptographicNonce(_nonceSize)} {
+  std::cout << "Server log | Nonce (hex): " << _serverNonceHex << std::endl;
+}
 /******************************************************************************/
 Server::~Server() {
   // server graceful stop
@@ -32,7 +36,20 @@ void Server::rootEndpoint() {
   });
 }
 /******************************************************************************/
-void Server::setupRoutes() { rootEndpoint(); }
+void Server::setupRoutes() {
+  rootEndpoint();
+  keyExchangeRoute();
+}
+/******************************************************************************/
+void Server::keyExchangeRoute() {
+  CROW_ROUTE(_app, "/keyExchange")
+      .methods("POST"_method)([&](const crow::request &req) {
+        auto body = crow::json::load(req.body);
+        crow::json::wvalue res;
+        res["message"] = "Diffie Hellman keys setup successfully!";
+        return crow::response(201, res);
+      });
+}
 /******************************************************************************/
 /**
  * @brief This method will start all the server endpoints in a multi thread

@@ -156,3 +156,15 @@ Party A (Initiator) Action:
     Choose a cryptographically secure random a.
     Compute A = g^a mod p.
     Send A to Party B.   <--- 
+
+Example of a server response to the initial client request:
+
+{
+  "message_type": "server_hello",
+  "protocol_version": "1.0",
+  "session_id": "aBcDeF12345",         // Echoes client's session ID
+  "nonce": "serverRandomNonceValue", // Server's own unique random nonce
+  "diffie_hellman": {
+    "public_key_B": "123456..."      // Server's public key
+  }
+}

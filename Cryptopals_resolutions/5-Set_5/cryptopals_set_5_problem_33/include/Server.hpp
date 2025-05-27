@@ -50,7 +50,14 @@ private:
    */
   void rootEndpoint();
 
+  void keyExchangeRoute();
+
   std::shared_ptr<MyCryptoLibrary::Diffie_Hellman> _diffieHellman;
+  std::map<std::string, std::string>
+      _sessionMap; // sessionId --> nonce, later replace by its own diffie
+                   // Hellman object
+  const std::size_t _nonceSize{16}; // bytes
+  std::string _serverNonceHex;
 
   crow::SimpleApp _app;
 

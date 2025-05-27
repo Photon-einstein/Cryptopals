@@ -13,7 +13,11 @@ public:
   Client();
   ~Client();
 
+  void diffieHellmanKeyExchange();
+
 private:
+  void printServerResponse(const cpr::Response &response);
+
   std::shared_ptr<MyCryptoLibrary::Diffie_Hellman> _diffieHellman;
   MessageExtractionFacility::UniqueBIGNUM _p, _g;
 
@@ -21,8 +25,8 @@ private:
   const int _portServerTest{18081};
 
   const std::string _clientId = "Bob";
-  std::string _clientNonceHex;
   const std::size_t _nonceSize{16}; // bytes
+  std::string _clientNonceHex;
 };
 
 #endif // CLIENT_HPP
