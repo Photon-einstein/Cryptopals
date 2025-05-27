@@ -18,9 +18,7 @@ DHParametersLoader::loadDhParameters(const std::string &filename) {
     throw std::runtime_error("Failed to parse JSON file: " +
                              std::string(e.what()));
   }
-
-  std::map<std::string, DHParametersLoader::DHParameters> params_map;
-
+  std::map<std::string, DHParametersLoader::DHParameters> paramsMap;
   if (j.contains("dh_parameters") && j["dh_parameters"].is_array()) {
     for (const auto &group : j["dh_parameters"]) {
       if (group.contains("name") && group.contains("p") &&
@@ -36,7 +34,7 @@ DHParametersLoader::loadDhParameters(const std::string &filename) {
         if (group.contains("notes")) {
           params.notes = group["notes"].get<std::string>();
         }
-        params_map[group["name"].get<std::string>()] = params;
+        paramsMap[group["name"].get<std::string>()] = params;
       } else {
         std::cerr << "Warning: Skipping malformed DH group entry in JSON."
                   << std::endl;
@@ -46,5 +44,5 @@ DHParametersLoader::loadDhParameters(const std::string &filename) {
     throw std::runtime_error(
         "JSON file does not contain a 'dh_parameters' array.");
   }
-  return params_map;
+  return paramsMap;
 }
