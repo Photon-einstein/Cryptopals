@@ -50,11 +50,7 @@ private:
    */
   void rootEndpoint();
 
-  const std::string _dhParametersFilename{"./../input/dh_parameters.json"};
-  DHParametersLoader::DHParameters _dhParameter;
   std::shared_ptr<MyCryptoLibrary::Diffie_Hellman> _diffieHellman;
-
-  MessageExtractionFacility::UniqueBIGNUM _p, _g;
 
   crow::SimpleApp _app;
 
