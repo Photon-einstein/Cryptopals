@@ -3,6 +3,7 @@
 #include <charconv>
 #include <iomanip>
 #include <iostream>
+#include <openssl/rand.h>
 #include <sstream>
 
 /**
@@ -101,5 +102,26 @@ std::string MessageExtractionFacility::BIGNUMToDec(BIGNUM *bn) {
   std::string dec_str(decChars); // Copy to std::string
   OPENSSL_free(decChars);        // Free the allocated C-style string
   return dec_str;
+}
+/******************************************************************************/
+/**
+ * @brief Generates a cryptographically secure random nonce.
+ *
+ * @param length The desired length of the nonce in bytes (e.g., 16 for
+ * 128-bit).
+ * @return A string containing the nonce, in hexadecimal format
+ * @throws std::runtime_error if nonce generation fails.
+ */
+const std::string MessageExtractionFacility::generateCryptographicNonce(
+    const std::size_t length) {
+  std::vector<unsigned char> nonce(length);
+  // RAND_bytes returns 1 on success, 0 on failure
+  if (RAND_bytes(nonce.data(), length) != 1) {
+    char errorBuffer[256];
+    ERR_error_string_n(ERR_get_error(), errorBuffer, sizeof(errorBuffer));
+    throw std::runtime_error("Failed to generate cryptographic nonce: " +
+                             std::string(errorBuffer));
+  }
+  return MessageExtractionFacility::toHexString(nonce);
 }
 /******************************************************************************/

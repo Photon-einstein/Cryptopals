@@ -17,6 +17,7 @@ public:
   ~Diffie_Hellman();
 
   /* public methods */
+  const std::string getPublicKey();
 
 private:
   /* private methods */

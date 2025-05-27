@@ -27,6 +27,10 @@ MyCryptoLibrary::Diffie_Hellman::Diffie_Hellman()
 /******************************************************************************/
 MyCryptoLibrary::Diffie_Hellman::~Diffie_Hellman() {}
 /******************************************************************************/
+const std::string MyCryptoLibrary::Diffie_Hellman::getPublicKey() {
+  return MessageExtractionFacility::BIGNUMToHex(_publicKey.get());
+}
+/******************************************************************************/
 void MyCryptoLibrary::Diffie_Hellman::generatePrivateKey() {
   // The private key 'a' must be 1 < a < p-1.
   // So, we need to generate a random number 'x' such that 0 <= x < (p-2).
@@ -114,3 +118,4 @@ void MyCryptoLibrary::Diffie_Hellman::generatePublicKey() {
   // }
   // --------------------------------------------------------------
 }
+/******************************************************************************/

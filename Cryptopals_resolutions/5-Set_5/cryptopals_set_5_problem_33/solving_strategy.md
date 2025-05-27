@@ -142,5 +142,17 @@ Open SSL documentation: https://docs.openssl.org/3.0/man3/DH_get_1024_160/
 
 Choose a cryptographically secure random a.
 
-11. Set the public key inside the Diffie Hellman class (in progress)
+11. Set the public key inside the Diffie Hellman class (Done)
 Compute A = g^a mod p.
+
+12. Implement getPublicKey in the Diffie Hellman class (Done)
+13. Implementation of a nonce in the client side (Done)
+
+13. On the client side implement the sending of the public key to the server (in progress)
+    
+Context:
+Party A (Initiator) Action:
+
+    Choose a cryptographically secure random a.
+    Compute A = g^a mod p.
+    Send A to Party B.   <--- 

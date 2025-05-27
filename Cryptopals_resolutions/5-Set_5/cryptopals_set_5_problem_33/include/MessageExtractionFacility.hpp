@@ -43,6 +43,8 @@ std::string BIGNUMToHex(BIGNUM *bn);
 
 std::string BIGNUMToDec(BIGNUM *bn);
 
+const std::string generateCryptographicNonce(const std::size_t length);
+
 }; // namespace MessageExtractionFacility
 
 #endif // MESSAGE_EXTRACTION_FACILITY_HPP
