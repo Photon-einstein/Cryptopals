@@ -16,11 +16,14 @@ public:
   Diffie_Hellman();
   ~Diffie_Hellman();
 
-  void generatePrivateKey();
-
   /* public methods */
 
 private:
+  /* private methods */
+  void generatePrivateKey();
+  void generatePublicKey();
+
+  /* private members */
   const std::string _dhParametersFilename{"./../input/dh_parameters.json"};
   DHParametersLoader::DHParameters _dhParameter;
   MessageExtractionFacility::UniqueBIGNUM _p, _g, _privateKey, _publicKey;
