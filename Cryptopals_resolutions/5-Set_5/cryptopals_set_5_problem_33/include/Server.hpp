@@ -54,6 +54,8 @@ private:
   DHParametersLoader::DHParameters _dhParameter;
   std::shared_ptr<MyCryptoLibrary::Diffie_Hellman> _diffieHellman;
 
+  MessageExtractionFacility::UniqueBIGNUM _p, _g;
+
   crow::SimpleApp _app;
 
   const int _portProduction{18080};
