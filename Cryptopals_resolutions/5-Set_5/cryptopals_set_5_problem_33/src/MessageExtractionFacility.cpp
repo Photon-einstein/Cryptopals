@@ -117,10 +117,10 @@ const std::string MessageExtractionFacility::generateCryptographicNonce(
   std::vector<unsigned char> nonce(length);
   // RAND_bytes returns 1 on success, 0 on failure
   if (RAND_bytes(nonce.data(), length) != 1) {
-    char err_buf[256];
-    ERR_error_string_n(ERR_get_error(), err_buf, sizeof(err_buf));
+    char errorBuffer[256];
+    ERR_error_string_n(ERR_get_error(), errorBuffer, sizeof(errorBuffer));
     throw std::runtime_error("Failed to generate cryptographic nonce: " +
-                             std::string(err_buf));
+                             std::string(errorBuffer));
   }
   return MessageExtractionFacility::toHexString(nonce);
 }
