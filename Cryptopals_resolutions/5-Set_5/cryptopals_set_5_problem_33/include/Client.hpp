@@ -10,7 +10,7 @@
 class Client {
 public:
   /* constructor / destructor*/
-  Client();
+  Client(const bool debugFlag);
   ~Client();
 
   void diffieHellmanKeyExchange();
@@ -27,6 +27,7 @@ private:
   const std::string _clientId = "Bob";
   const std::size_t _nonceSize{16}; // bytes
   std::string _clientNonceHex;
+  const bool _debugFlag;
 };
 
 #endif // CLIENT_HPP
