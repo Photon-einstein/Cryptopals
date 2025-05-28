@@ -10,7 +10,7 @@
 class Server {
 public:
   /* constructor / destructor */
-  Server();
+  Server(const bool debugFlag);
   ~Server();
 
   /**
@@ -65,6 +65,7 @@ private:
   const int _portTest{18081};
 
   std::thread _serverThread;
+  const bool _debugFlag;
 };
 
 #endif // SERVER_HPP

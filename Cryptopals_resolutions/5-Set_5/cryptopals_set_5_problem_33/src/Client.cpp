@@ -1,30 +1,48 @@
 #include "crow.h"
 #include <chrono>
+#include <fmt/core.h>
 #include <iostream>
 #include <openssl/rand.h>
 
 #include "./../include/Client.hpp"
 
 /* constructor / destructor */
-Client::Client()
-    : _diffieHellman(std::make_unique<MyCryptoLibrary::Diffie_Hellman>()),
+Client::Client(const bool debugFlag)
+    : _debugFlag{debugFlag},
+      _diffieHellman(std::make_unique<MyCryptoLibrary::Diffie_Hellman>()),
       _clientNonceHex{
           MessageExtractionFacility::generateCryptographicNonce(_nonceSize)} {
-  std::cout << "Client log | Nonce (hex): " << _clientNonceHex << "\n"
-            << std::endl;
+  if (_debugFlag) {
+    std::cout << "Client log | Nonce (hex): " << _clientNonceHex << "\n"
+              << std::endl;
+  }
 }
 /******************************************************************************/
 Client::~Client() {}
 /******************************************************************************/
 void Client::diffieHellmanKeyExchange() {
-  std::string requestBody = R"({})";
+  std::string requestBody =
+      fmt::format(R"({{
+    "message_type": "client_hello",
+    "protocol_version": "1.0",
+    "client_id": "{}",
+    "nonce": "{}",
+    "diffie_hellman": {{
+        "group_name": "{}",
+        "public_key_A": "{}"
+    }}
+}})",
+                  _clientId, _clientNonceHex, _diffieHellman->getGroupName(),
+                  _diffieHellman->getPublicKey());
   cpr::Response response =
       cpr::Post(cpr::Url{std::string("http://localhost:") +
                          std::to_string(_portServerProduction) +
                          std::string("/keyExchange")},
                 cpr::Header{{"Content-Type", "application/json"}},
                 cpr::Body{requestBody});
-  printServerResponse(response);
+  if (_debugFlag) {
+    printServerResponse(response);
+  }
 }
 /******************************************************************************/
 /**

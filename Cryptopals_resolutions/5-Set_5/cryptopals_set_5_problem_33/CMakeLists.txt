@@ -11,14 +11,21 @@ find_package(OpenSSL REQUIRED)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# Fetch CPR
+# Fetch fmt
 include(FetchContent)
+FetchContent_Declare(
+  fmt
+  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+  GIT_TAG 10.2.1
+)
+
+# Fetch CPR
 FetchContent_Declare(
   cpr
   GIT_REPOSITORY https://github.com/libcpr/cpr.git
   GIT_TAG 1.11.2
 )
-FetchContent_MakeAvailable(cpr)
+FetchContent_MakeAvailable(fmt cpr)
 
 # Include directories
 include_directories(
@@ -37,8 +44,7 @@ add_executable(run_server
     ${COMMON_SOURCES}
 )
 target_link_libraries(run_server 
-    OpenSSL::Crypto
-    cpr::cpr
+    PRIVATE OpenSSL::Crypto cpr::cpr fmt::fmt
 )
 
 set_target_properties(run_server PROPERTIES
@@ -51,8 +57,7 @@ add_executable(run_client
     ${COMMON_SOURCES}
 )
 target_link_libraries(run_client 
-    OpenSSL::Crypto
-    cpr::cpr
+    PRIVATE OpenSSL::Crypto cpr::cpr fmt::fmt
 )
 
 set_target_properties(run_client PROPERTIES

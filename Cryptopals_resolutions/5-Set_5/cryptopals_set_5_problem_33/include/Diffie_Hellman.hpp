@@ -18,6 +18,7 @@ public:
 
   /* public methods */
   const std::string getPublicKey();
+  const std::string getGroupName();
 
 private:
   /* private methods */

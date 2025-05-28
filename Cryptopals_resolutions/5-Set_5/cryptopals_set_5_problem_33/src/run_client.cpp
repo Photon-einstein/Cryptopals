@@ -13,7 +13,8 @@ int main(void) {
   double time;
   start = clock();
   /* work to verify */
-  std::shared_ptr<Client> client = std::make_shared<Client>();
+  const bool debugFlag{true};
+  std::shared_ptr<Client> client = std::make_shared<Client>(debugFlag);
   client->diffieHellmanKeyExchange();
   /* end of the work */
   end = clock();

@@ -168,3 +168,5 @@ Example of a server response to the initial client request:
     "public_key_B": "123456..."      // Server's public key
   }
 }
+
+13.1. Create a valid client request to the server (done)
