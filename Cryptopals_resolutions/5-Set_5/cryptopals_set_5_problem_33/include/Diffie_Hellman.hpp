@@ -1,6 +1,7 @@
 #ifndef DIFFIE_HELLMAN_HPP
 #define DIFFIE_HELLMAN_HPP
 
+#include <boost/uuid/uuid.hpp>
 #include <memory>
 #include <openssl/sha.h>
 #include <vector>

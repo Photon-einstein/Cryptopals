@@ -64,26 +64,23 @@ void Server::keyExchangeRoute() {
           }
           MessageExtractionFacility::UniqueBIGNUM peerPublicKey =
               MessageExtractionFacility::hexToUniqueBIGNUM(extractedPublicKeyA);
-          if (_diffieHellmanMap.find(extractedClientId) !=
-              _diffieHellmanMap.end()) {
-            _diffieHellmanMap.erase(extractedClientId);
-          }
-          _diffieHellmanMap[extractedClientId] =
-              std::make_unique<SessionData>(_nonceSize, extractedNonceClient);
+          boost::uuids::uuid sessionId = generateUniqueSessionId();
+          _diffieHellmanMap[sessionId] = std::make_unique<SessionData>(
+              _nonceSize, extractedNonceClient, extractedClientId);
           if (_debugFlag) {
-            std::cout << "Server log | ID " << extractedClientId
-                      << " --> Nonce server (hex): "
-                      << _diffieHellmanMap[extractedClientId]->_serverNonceHex
-                      << " | Nonce client (hex): "
-                      << _diffieHellmanMap[extractedClientId]->_clientNonceHex
+            std::cout << "Server log | sessionId " << sessionId
+                      << " --> clientId: " << extractedClientId
+                      << " | Nonce server (hex): "
+                      << _diffieHellmanMap[sessionId]->_serverNonceHex
+                      << "\n\t| Nonce client (hex): "
+                      << _diffieHellmanMap[sessionId]->_clientNonceHex
                       << std::endl;
           }
-          _diffieHellmanMap[extractedClientId]->_derivedKeyHex =
-              _diffieHellmanMap[extractedClientId]
-                  ->_diffieHellman->deriveSharedSecret(
-                      extractedPublicKeyA,
-                      _diffieHellmanMap[extractedClientId]->_serverNonceHex,
-                      _diffieHellmanMap[extractedClientId]->_clientNonceHex);
+          _diffieHellmanMap[sessionId]->_derivedKeyHex =
+              _diffieHellmanMap[sessionId]->_diffieHellman->deriveSharedSecret(
+                  extractedPublicKeyA,
+                  _diffieHellmanMap[sessionId]->_serverNonceHex,
+                  _diffieHellmanMap[sessionId]->_clientNonceHex);
         } catch (const nlohmann::json::exception &e) {
           std::cerr << "JSON parsing error: " << e.what() << std::endl;
         } catch (const std::exception &e) {
@@ -113,5 +110,18 @@ void Server::runServerTest() {
     setupRoutes();
     _app.port(_portTest).multithreaded().run();
   }); // Let it live until process ends
+}
+/******************************************************************************/
+boost::uuids::uuid Server::generateUniqueSessionId() {
+  bool uniqueSessionId{false};
+  boost::uuids::random_generator gen;
+  boost::uuids::uuid sessionId;
+  do {
+    sessionId = gen();
+    if (_diffieHellmanMap.find(sessionId) == _diffieHellmanMap.end()) {
+      uniqueSessionId = true;
+    }
+  } while (!uniqueSessionId);
+  return sessionId;
 }
 /******************************************************************************/
