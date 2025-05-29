@@ -2,6 +2,7 @@
 #define DIFFIE_HELLMAN_HPP
 
 #include <memory>
+#include <openssl/sha.h>
 #include <vector>
 
 #include "DH_parameters_loader.hpp"
@@ -19,7 +20,9 @@ public:
   /* public methods */
   const std::string getPublicKey();
   const std::string getGroupName();
-  const std::string deriveSharedSecret(const std::string &peerPublicKey);
+  const std::string deriveSharedSecret(const std::string &peerPublicKeyHex,
+                                       const std::string &serverNonceHex,
+                                       const std::string &clientNonceHex);
 
 private:
   /* private methods */

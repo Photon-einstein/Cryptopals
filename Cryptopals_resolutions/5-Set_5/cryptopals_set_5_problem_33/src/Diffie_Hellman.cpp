@@ -125,7 +125,8 @@ void MyCryptoLibrary::Diffie_Hellman::generatePublicKey() {
 }
 /******************************************************************************/
 const std::string MyCryptoLibrary::Diffie_Hellman::deriveSharedSecret(
-    const std::string &peerPublicKeyHex) {
+    const std::string &peerPublicKeyHex, const std::string &serverNonceHex,
+    const std::string &clientNonceHex) {
   if (!_privateKey || BN_is_zero(_privateKey.get())) {
     throw std::runtime_error("Private key has not been generated for the "
                              "derivation of the shared secret");
@@ -176,6 +177,51 @@ const std::string MyCryptoLibrary::Diffie_Hellman::deriveSharedSecret(
             << std::endl;
   // }
   // --------------------------------------------------------------
-  return sharedSecretHex;
+  // --- KDF Step: Incorporate nonces into the key material derivation ---
+
+  // 1. Convert the raw BIGNUM shared secret to a byte array
+  int numBytes = BN_num_bytes(_sharedSecret.get());
+  std::vector<unsigned char> sharedSecretRawBytes(numBytes);
+  if (BN_bn2bin(_sharedSecret.get(), sharedSecretRawBytes.data()) != numBytes) {
+    throw std::runtime_error(
+        "Failed to convert shared secret BIGNUM to bytes.");
+  }
+
+  // 2. Decode nonce hex strings to byte vectors
+  std::vector<unsigned char> serverNonceBytes =
+      MessageExtractionFacility::hexToBytes(serverNonceHex);
+  std::vector<unsigned char> clientNonceBytes =
+      MessageExtractionFacility::hexToBytes(clientNonceHex);
+
+  // 3. Concatenate shared_secret_raw_bytes || clientNonceBytes ||
+  // serverNonceBytes
+  //    (Order can sometimes matter, but for Cryptopals, often simple
+  //    concatenation is fine)
+  std::vector<unsigned char> dataToHash;
+  dataToHash.reserve(sharedSecretRawBytes.size() + clientNonceBytes.size() +
+                     serverNonceBytes.size());
+  dataToHash.insert(dataToHash.end(), sharedSecretRawBytes.begin(),
+                    sharedSecretRawBytes.end());
+  dataToHash.insert(dataToHash.end(), clientNonceBytes.begin(),
+                    clientNonceBytes.end());
+  dataToHash.insert(dataToHash.end(), serverNonceBytes.begin(),
+                    serverNonceBytes.end());
+
+  // 4. Hash the concatenated data
+  std::vector<unsigned char> keyMaterial(
+      SHA256_DIGEST_LENGTH); // SHA256_DIGEST_LENGTH is 32 bytes
+  SHA256(dataToHash.data(), dataToHash.size(), keyMaterial.data());
+
+  // --- Optional: For debugging/logging ---
+  std::cout << "\nDerived raw shared secret (hex): "
+            << MessageExtractionFacility::BIGNUMToHex(_sharedSecret.get())
+            << std::endl;
+  std::cout << "Client Nonce (hex): " << clientNonceHex << std::endl;
+  std::cout << "Server Nonce (hex): " << serverNonceHex << std::endl;
+  std::cout << "Derived key material (SHA256 hex): "
+            << MessageExtractionFacility::toHexString(keyMaterial) << std::endl;
+  // ----------------------------------------
+
+  return MessageExtractionFacility::toHexString(keyMaterial);
 }
 /******************************************************************************/

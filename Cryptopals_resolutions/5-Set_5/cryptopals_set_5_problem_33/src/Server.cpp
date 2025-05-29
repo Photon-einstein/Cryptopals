@@ -78,8 +78,12 @@ void Server::keyExchangeRoute() {
                       << _diffieHellmanMap[extractedClientId]->_clientNonceHex
                       << std::endl;
           }
-          // TBD std::vector<unsigned char> derivedKey =
-          // yourDiffieHellmanInstance.deriveSharedSecret(extracted_public_key_A);
+          _diffieHellmanMap[extractedClientId]->_derivedKeyHex =
+              _diffieHellmanMap[extractedClientId]
+                  ->_diffieHellman->deriveSharedSecret(
+                      extractedPublicKeyA,
+                      _diffieHellmanMap[extractedClientId]->_serverNonceHex,
+                      _diffieHellmanMap[extractedClientId]->_clientNonceHex);
         } catch (const nlohmann::json::exception &e) {
           std::cerr << "JSON parsing error: " << e.what() << std::endl;
         } catch (const std::exception &e) {
