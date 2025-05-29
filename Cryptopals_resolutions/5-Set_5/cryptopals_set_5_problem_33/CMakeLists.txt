@@ -43,7 +43,12 @@ add_executable(run_server
     src/run_server.cpp
     ${COMMON_SOURCES}
 )
-target_link_libraries(run_server 
+
+# Manually link Boost UUID
+find_package(Boost REQUIRED)  # Find Boost core
+include_directories(${Boost_INCLUDE_DIRS})
+
+target_link_libraries(run_server
     PRIVATE OpenSSL::Crypto cpr::cpr fmt::fmt
 )
 

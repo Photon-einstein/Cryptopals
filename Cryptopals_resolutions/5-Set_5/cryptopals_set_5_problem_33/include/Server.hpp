@@ -2,6 +2,9 @@
 #define SERVER_HPP
 
 #include "crow.h"
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #include <vector>
 
 #include "DH_parameters_loader.hpp"
@@ -37,11 +40,13 @@ private:
     std::string _serverNonceHex;
     std::string _clientNonceHex;
     std::string _derivedKeyHex;
-    SessionData(const std::size_t nonceSize, const std::string &clientNonceHex)
+    std::string _clientId;
+    SessionData(const std::size_t nonceSize, const std::string &clientNonceHex,
+                const std::string &clientId)
         : _diffieHellman(std::make_unique<MyCryptoLibrary::Diffie_Hellman>()),
           _serverNonceHex(
               MessageExtractionFacility::generateCryptographicNonce(nonceSize)),
-          _clientNonceHex{clientNonceHex} {}
+          _clientNonceHex{clientNonceHex}, _clientId{clientId} {}
   };
 
   /**
@@ -64,7 +69,9 @@ private:
 
   void keyExchangeRoute();
 
-  std::map<std::string, std::unique_ptr<SessionData>> _diffieHellmanMap;
+  boost::uuids::uuid generateUniqueSessionId();
+
+  std::map<boost::uuids::uuid, std::unique_ptr<SessionData>> _diffieHellmanMap;
   const std::size_t _nonceSize{16}; // bytes
 
   crow::SimpleApp _app;
