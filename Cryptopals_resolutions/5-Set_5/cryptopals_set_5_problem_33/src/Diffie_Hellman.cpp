@@ -8,7 +8,8 @@
 /* constructor / destructor */
 MyCryptoLibrary::Diffie_Hellman::Diffie_Hellman()
     : _privateKey{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
-      _publicKey{MessageExtractionFacility::UniqueBIGNUM(BN_new())} {
+      _publicKey{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
+      _sharedSecret{MessageExtractionFacility::UniqueBIGNUM(BN_new())} {
   std::map<std::string, DHParametersLoader::DHParameters> dhParametersMap =
       DHParametersLoader::loadDhParameters(_dhParametersFilename);
   if (dhParametersMap.find("cryptopals-group-33-small") !=
@@ -121,5 +122,60 @@ void MyCryptoLibrary::Diffie_Hellman::generatePublicKey() {
             << std::endl;
   // }
   // --------------------------------------------------------------
+}
+/******************************************************************************/
+const std::string MyCryptoLibrary::Diffie_Hellman::deriveSharedSecret(
+    const std::string &peerPublicKeyHex) {
+  if (!_privateKey || BN_is_zero(_privateKey.get())) {
+    throw std::runtime_error("Private key has not been generated for the "
+                             "derivation of the shared secret");
+  }
+  if (!_g || BN_is_zero(_g.get())) {
+    throw std::runtime_error("Generator 'g' is not initialized for the "
+                             "derivation of the shared secret");
+  }
+  if (!_p || BN_is_zero(_p.get())) {
+    throw std::runtime_error("Modulus 'p' is not initialized for the "
+                             "derivation of the shared secret");
+  }
+  MessageExtractionFacility::UniqueBIGNUM peerPublicKey =
+      MessageExtractionFacility::hexToUniqueBIGNUM(peerPublicKeyHex);
+  if (!peerPublicKey || BN_is_zero(peerPublicKey.get())) {
+    throw std::runtime_error("peerPublicKey is not initialized for the "
+                             "derivation of the shared secret");
+  }
+  BN_CTX *ctx = BN_CTX_new();
+  if (!ctx) {
+    throw std::runtime_error(
+        "Failed to create BIGNUM context for public key calculation.");
+  }
+  // Compute _sharedSecret = (peerPublicKey ^ _privateKey) % _p
+  // BN_mod_exp(result, base, exponent, modulus, context)
+  if (!BN_mod_exp(_sharedSecret.get(), peerPublicKey.get(), _privateKey.get(),
+                  _p.get(), ctx)) {
+    // Handle error from OpenSSL
+    char errorBuffer[256];
+    ERR_error_string_n(ERR_get_error(), errorBuffer, sizeof(errorBuffer));
+    BN_CTX_free(ctx); // Free context on error
+    throw std::runtime_error(
+        "Failed to calculate shared secret (BN_mod_exp): " +
+        std::string(errorBuffer));
+  }
+  BN_CTX_free(ctx);
+  const std::string sharedSecretHex{
+      MessageExtractionFacility::BIGNUMToHex(_sharedSecret.get())};
+  // --- Optional: For debugging/logging (remove in production) ---
+  std::cout << "\nGenerated shared secret (hex): "
+            << MessageExtractionFacility::BIGNUMToHex(_sharedSecret.get())
+            << std::endl;
+  std::cout << "Generated shared secret (dec): "
+            << MessageExtractionFacility::BIGNUMToDec(_sharedSecret.get())
+            << std::endl;
+  std::cout << "Generated shared secret bit length: "
+            << BN_num_bits(_sharedSecret.get()) << "\n"
+            << std::endl;
+  // }
+  // --------------------------------------------------------------
+  return sharedSecretHex;
 }
 /******************************************************************************/

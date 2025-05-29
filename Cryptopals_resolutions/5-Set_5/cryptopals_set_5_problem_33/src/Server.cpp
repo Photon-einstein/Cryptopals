@@ -1,3 +1,4 @@
+#include <nlohmann/json.hpp>
 #include <openssl/conf.h>
 #include <openssl/err.h>
 #include <openssl/evp.h>
@@ -7,15 +8,7 @@
 #include "./../include/Server.hpp"
 
 /* constructor / destructor */
-Server::Server(const bool debugFlag)
-    : _debugFlag{debugFlag},
-      _diffieHellman(std::make_unique<MyCryptoLibrary::Diffie_Hellman>()),
-      _serverNonceHex{
-          MessageExtractionFacility::generateCryptographicNonce(_nonceSize)} {
-  if (_debugFlag) {
-    std::cout << "Server log | Nonce (hex): " << _serverNonceHex << std::endl;
-  }
-}
+Server::Server(const bool debugFlag) : _debugFlag{debugFlag} {}
 /******************************************************************************/
 Server::~Server() {
   // server graceful stop
@@ -50,7 +43,49 @@ void Server::keyExchangeRoute() {
         if (_debugFlag) {
           std::cout << "Received request body:\n" << req.body << std::endl;
         }
-        auto body = crow::json::load(req.body);
+        try {
+          nlohmann::json parsedJson = nlohmann::json::parse(req.body);
+          std::string extractedClientId =
+              parsedJson.at("clientId").get<std::string>();
+          std::string extractedNonceClient =
+              parsedJson.at("nonce").get<std::string>();
+          std::string extractedGroupName =
+              parsedJson.at("diffieHellman").at("groupName").get<std::string>();
+          std::string extractedPublicKeyA = parsedJson.at("diffieHellman")
+                                                .at("publicKeyA")
+                                                .get<std::string>();
+          if (_debugFlag) {
+            std::cout << "\n--- Extracted Data ---" << std::endl;
+            std::cout << "Client ID: " << extractedClientId << std::endl;
+            std::cout << "Nonce: " << extractedNonceClient << std::endl;
+            std::cout << "Group Name: " << extractedGroupName << std::endl;
+            std::cout << "Public Key A: " << extractedPublicKeyA << std::endl;
+            std::cout << "----------------------" << std::endl;
+          }
+          MessageExtractionFacility::UniqueBIGNUM peerPublicKey =
+              MessageExtractionFacility::hexToUniqueBIGNUM(extractedPublicKeyA);
+          if (_diffieHellmanMap.find(extractedClientId) !=
+              _diffieHellmanMap.end()) {
+            _diffieHellmanMap.erase(extractedClientId);
+          }
+          _diffieHellmanMap[extractedClientId] =
+              std::make_unique<SessionData>(_nonceSize, extractedNonceClient);
+          if (_debugFlag) {
+            std::cout << "Server log | ID " << extractedClientId
+                      << " --> Nonce server (hex): "
+                      << _diffieHellmanMap[extractedClientId]->_serverNonceHex
+                      << " | Nonce client (hex): "
+                      << _diffieHellmanMap[extractedClientId]->_clientNonceHex
+                      << std::endl;
+          }
+          // TBD std::vector<unsigned char> derivedKey =
+          // yourDiffieHellmanInstance.deriveSharedSecret(extracted_public_key_A);
+        } catch (const nlohmann::json::exception &e) {
+          std::cerr << "JSON parsing error: " << e.what() << std::endl;
+        } catch (const std::exception &e) {
+          std::cerr << "An unexpected error occurred: " << e.what()
+                    << std::endl;
+        }
         crow::json::wvalue res;
         res["message"] = "Diffie Hellman keys setup successfully!";
         return crow::response(201, res);

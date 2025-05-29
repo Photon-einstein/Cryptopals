@@ -170,3 +170,13 @@ Example of a server response to the initial client request:
 }
 
 13.1. Create a valid client request to the server (done)
+
+14. Create a shared secret on the server side (in progress)
+    Send A to Party B. (Done)
+    Party B (Responder) Action:
+
+    Receive A from Party A. (Done)
+    Choose a cryptographically secure random b. (Done)
+    Compute B = g^b mod p. (Done)
+    Compute shared secret candidate S_B = A^b mod p. (in progress) <----
+    Send B to Party A.

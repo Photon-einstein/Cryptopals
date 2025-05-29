@@ -32,6 +32,17 @@ public:
   void runServerTest();
 
 private:
+  struct SessionData {
+    std::unique_ptr<MyCryptoLibrary::Diffie_Hellman> _diffieHellman;
+    std::string _serverNonceHex;
+    std::string _clientNonceHex;
+    SessionData(const std::size_t nonceSize, const std::string &clientNonceHex)
+        : _diffieHellman(std::make_unique<MyCryptoLibrary::Diffie_Hellman>()),
+          _serverNonceHex(
+              MessageExtractionFacility::generateCryptographicNonce(nonceSize)),
+          _clientNonceHex{clientNonceHex} {}
+  };
+
   /**
    * @brief This method will start the endpoints that the server
    * provides to his clients
@@ -52,12 +63,8 @@ private:
 
   void keyExchangeRoute();
 
-  std::shared_ptr<MyCryptoLibrary::Diffie_Hellman> _diffieHellman;
-  std::map<std::string, std::string>
-      _sessionMap; // sessionId --> nonce, later replace by its own diffie
-                   // Hellman object
+  std::map<std::string, std::unique_ptr<SessionData>> _diffieHellmanMap;
   const std::size_t _nonceSize{16}; // bytes
-  std::string _serverNonceHex;
 
   crow::SimpleApp _app;
 

@@ -23,13 +23,13 @@ Client::~Client() {}
 void Client::diffieHellmanKeyExchange() {
   std::string requestBody =
       fmt::format(R"({{
-    "message_type": "client_hello",
-    "protocol_version": "1.0",
-    "client_id": "{}",
+    "messageType": "client_hello",
+    "protocolVersion": "1.0",
+    "clientId": "{}",
     "nonce": "{}",
-    "diffie_hellman": {{
-        "group_name": "{}",
-        "public_key_A": "{}"
+    "diffieHellman": {{
+        "groupName": "{}",
+        "publicKeyA": "{}"
     }}
 }})",
                   _clientId, _clientNonceHex, _diffieHellman->getGroupName(),
