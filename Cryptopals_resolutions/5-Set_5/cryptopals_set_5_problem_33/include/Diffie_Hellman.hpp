@@ -19,6 +19,7 @@ public:
   /* public methods */
   const std::string getPublicKey();
   const std::string getGroupName();
+  const std::string deriveSharedSecret(const std::string &peerPublicKey);
 
 private:
   /* private methods */
@@ -28,7 +29,8 @@ private:
   /* private members */
   const std::string _dhParametersFilename{"./../input/dh_parameters.json"};
   DHParametersLoader::DHParameters _dhParameter;
-  MessageExtractionFacility::UniqueBIGNUM _p, _g, _privateKey, _publicKey;
+  MessageExtractionFacility::UniqueBIGNUM _p, _g, _privateKey, _publicKey,
+      _sharedSecret;
 };
 
 } // namespace MyCryptoLibrary
