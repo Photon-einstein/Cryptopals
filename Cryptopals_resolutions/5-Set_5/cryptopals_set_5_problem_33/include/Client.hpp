@@ -20,6 +20,9 @@ private:
 
   std::shared_ptr<MyCryptoLibrary::Diffie_Hellman> _diffieHellman;
   MessageExtractionFacility::UniqueBIGNUM _p, _g;
+  std::string _sessionId;
+  std::string _extractedNonceServer;
+  std::string _derivedKeyHex;
 
   const int _portServerProduction{18080};
   const int _portServerTest{18081};
