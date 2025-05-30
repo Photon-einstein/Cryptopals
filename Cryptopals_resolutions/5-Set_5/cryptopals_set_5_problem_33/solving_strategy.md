@@ -178,5 +178,6 @@ Example of a server response to the initial client request:
     Receive A from Party A. (Done)
     Choose a cryptographically secure random b. (Done)
     Compute B = g^b mod p. (Done)
-    Compute shared secret candidate S_B = A^b mod p. (in progress) <----
-    Send B to Party A.
+    Compute shared secret candidate S_B = A^b mod p. (Done)
+    Send B to Party A. (Done)
+    
