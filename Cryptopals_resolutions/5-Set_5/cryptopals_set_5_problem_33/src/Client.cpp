@@ -11,20 +11,15 @@
 #include "./../include/Client.hpp"
 
 /* constructor / destructor */
-Client::Client(const bool debugFlag)
-    : _debugFlag{debugFlag},
-      _diffieHellman(std::make_unique<MyCryptoLibrary::Diffie_Hellman>()),
-      _clientNonceHex{
-          MessageExtractionFacility::generateCryptographicNonce(_nonceSize)} {
-  if (_debugFlag) {
-    std::cout << "Client log | Nonce (hex): " << _clientNonceHex << "\n"
-              << std::endl;
-  }
-}
+Client::Client(const bool debugFlag) : _debugFlag{debugFlag} {}
 /******************************************************************************/
 Client::~Client() {}
 /******************************************************************************/
 void Client::diffieHellmanKeyExchange() {
+  std::unique_ptr<MyCryptoLibrary::Diffie_Hellman> diffieHellman(
+      std::make_unique<MyCryptoLibrary::Diffie_Hellman>());
+  std::string clientNonceHex{
+      MessageExtractionFacility::generateCryptographicNonce(_nonceSize)};
   std::string requestBody =
       fmt::format(R"({{
     "messageType": "client_hello",
@@ -36,8 +31,8 @@ void Client::diffieHellmanKeyExchange() {
         "publicKeyA": "{}"
     }}
 }})",
-                  _clientId, _clientNonceHex, _diffieHellman->getGroupName(),
-                  _diffieHellman->getPublicKey());
+                  _clientId, clientNonceHex, diffieHellman->getGroupName(),
+                  diffieHellman->getPublicKey());
   cpr::Response response =
       cpr::Post(cpr::Url{std::string("http://localhost:") +
                          std::to_string(_portServerProduction) +
@@ -52,24 +47,27 @@ void Client::diffieHellmanKeyExchange() {
       throw std::runtime_error("Diffie Hellman key exchange failed");
     }
     nlohmann::json parsedJson = nlohmann::json::parse(response.text);
-    _sessionId = parsedJson.at("sessionId").get<std::string>();
-    _extractedNonceServer = parsedJson.at("nonce").get<std::string>();
+    std::string sessionId = parsedJson.at("sessionId").get<std::string>();
+    std::string extractedNonceServer =
+        parsedJson.at("nonce").get<std::string>();
     std::string extractedGroupName =
         parsedJson.at("diffieHellman").at("groupName").get<std::string>();
     std::string extractedPublicKeyB =
         parsedJson.at("diffieHellman").at("publicKeyB").get<std::string>();
     if (_debugFlag) {
       std::cout << "\n--- Extracted Data ---" << std::endl;
-      std::cout << "Session id: " << _sessionId << std::endl;
-      std::cout << "Nonce: " << _extractedNonceServer << std::endl;
+      std::cout << "Session id: " << sessionId << std::endl;
+      std::cout << "Nonce: " << extractedNonceServer << std::endl;
       std::cout << "Group Name: " << extractedGroupName << std::endl;
       std::cout << "Public Key B: " << extractedPublicKeyB << std::endl;
       std::cout << "----------------------" << std::endl;
     }
-    MessageExtractionFacility::UniqueBIGNUM peerPublicKey =
-        MessageExtractionFacility::hexToUniqueBIGNUM(extractedPublicKeyB);
-    _derivedKeyHex = _diffieHellman->deriveSharedSecret(
-        extractedPublicKeyB, _extractedNonceServer, _clientNonceHex);
+    _diffieHellmanMap[sessionId] = std::make_unique<SessionData>(
+        std::move(diffieHellman), extractedNonceServer, clientNonceHex);
+    _diffieHellmanMap[sessionId]->_derivedKeyHex =
+        _diffieHellmanMap[sessionId]->_diffieHellman->deriveSharedSecret(
+            extractedPublicKeyB, _diffieHellmanMap[sessionId]->_serverNonceHex,
+            _diffieHellmanMap[sessionId]->_clientNonceHex);
   } catch (const std::exception &e) {
     std::cerr << "Client log | secret key derivation step: " << e.what()
               << std::endl;

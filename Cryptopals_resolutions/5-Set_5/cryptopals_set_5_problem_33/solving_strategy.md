@@ -186,8 +186,10 @@ Example of a server response to the initial client request:
         Compute shared secret candidate S_A = B^a mod p.
         Verify S_A is non-zero (i.e., not 1). If S_A is 1, it indicates a bad choice of g or a malicious attack aiming to force a trivial shared secret.
     
-    15.2. Phase 2: Key Derivation and Confirmation (Crucial for Security) (TBD)
+    15.2. Phase 2: Key Derivation and Confirmation (Crucial for Security) (Done)
         The raw shared secret S from DH is just a large number. It should never be used directly as a symmetric encryption key.
 
         Key Derivation Function (KDF):
         Both parties use a robust KDF (e.g., HKDF-SHA256, PBKDF2) to derive one or more session keys from the shared secret S, in this case it can be used a SHA256
+
+16. Implement a dictionary of sessions also on the client side (Done)
