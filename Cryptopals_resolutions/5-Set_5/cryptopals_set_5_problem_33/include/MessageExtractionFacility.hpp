@@ -1,6 +1,9 @@
 #ifndef MESSAGE_EXTRACTION_FACILITY_HPP
 #define MESSAGE_EXTRACTION_FACILITY_HPP
 
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #include <memory>
 #include <openssl/bn.h>
 #include <openssl/err.h>
