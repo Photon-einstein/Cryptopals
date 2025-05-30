@@ -43,6 +43,7 @@ void Server::keyExchangeRoute() {
         if (_debugFlag) {
           std::cout << "Received request body:\n" << req.body << std::endl;
         }
+        crow::json::wvalue res;
         try {
           nlohmann::json parsedJson = nlohmann::json::parse(req.body);
           std::string extractedClientId =
@@ -68,27 +69,39 @@ void Server::keyExchangeRoute() {
           _diffieHellmanMap[sessionId] = std::make_unique<SessionData>(
               _nonceSize, extractedNonceClient, extractedClientId);
           if (_debugFlag) {
-            std::cout << "Server log | sessionId " << sessionId
-                      << " --> clientId: " << extractedClientId
-                      << " | Nonce server (hex): "
-                      << _diffieHellmanMap[sessionId]->_serverNonceHex
-                      << "\n\t| Nonce client (hex): "
-                      << _diffieHellmanMap[sessionId]->_clientNonceHex
-                      << std::endl;
+            std::cout
+                << "Server log | sessionId " << sessionId
+                << " --> clientId: " << extractedClientId
+                << " | Nonce server (hex): "
+                << _diffieHellmanMap[sessionId]->_serverNonceHex
+                << "\n\t| Nonce client (hex): "
+                << _diffieHellmanMap[sessionId]->_clientNonceHex
+                << " | Group Name: "
+                << _diffieHellmanMap[sessionId]->_diffieHellman->getGroupName()
+                << std::endl;
           }
           _diffieHellmanMap[sessionId]->_derivedKeyHex =
               _diffieHellmanMap[sessionId]->_diffieHellman->deriveSharedSecret(
                   extractedPublicKeyA,
                   _diffieHellmanMap[sessionId]->_serverNonceHex,
                   _diffieHellmanMap[sessionId]->_clientNonceHex);
+          res["message"] = "Diffie Hellman keys setup successfully!";
+          res["sessionId"] = boost::uuids::to_string(sessionId);
+          res["diffieHellman"] = {
+              {"groupName",
+               _diffieHellmanMap[sessionId]->_diffieHellman->getGroupName()},
+              {"publicKeyB",
+               _diffieHellmanMap[sessionId]->_diffieHellman->getPublicKey()}};
+          res["nonce"] = _diffieHellmanMap[sessionId]->_serverNonceHex;
         } catch (const nlohmann::json::exception &e) {
-          std::cerr << "JSON parsing error: " << e.what() << std::endl;
+          crow::json::wvalue err;
+          err["message"] = std::string("JSON parsing error: ") + e.what();
+          return crow::response(400, err);
         } catch (const std::exception &e) {
-          std::cerr << "An unexpected error occurred: " << e.what()
-                    << std::endl;
+          crow::json::wvalue err;
+          err["message"] =
+              std::string("An unexpected error occurred: ") + e.what();
         }
-        crow::json::wvalue res;
-        res["message"] = "Diffie Hellman keys setup successfully!";
         return crow::response(201, res);
       });
 }

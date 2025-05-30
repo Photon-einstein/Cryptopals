@@ -2,6 +2,7 @@
 #include <chrono>
 #include <fmt/core.h>
 #include <iostream>
+#include <nlohmann/json.hpp>
 #include <openssl/rand.h>
 
 #include "./../include/Client.hpp"
@@ -57,6 +58,19 @@ void Client::printServerResponse(const cpr::Response &response) {
   for (const auto &header : response.header) {
     std::cout << header.first << ": " << header.second << "\n";
   }
-  std::cout << "Body:\n" << response.text << "\n";
+  std::cout << "Body:\n";
+  if (response.text.empty()) {
+    std::cout << "[Empty Body]\n";
+  } else {
+    try {
+      nlohmann::json parsedJson = nlohmann::json::parse(response.text);
+      std::cout << parsedJson.dump(2) << "\n"; // '2' for 2-space indentation
+    } catch (const nlohmann::json::exception &e) {
+      // Not valid JSON, print as raw text
+      std::cout << response.text << "\n";
+      std::cerr << "Warning: Body is not valid JSON, printing raw. Error: "
+                << e.what() << "\n";
+    }
+  }
 }
 /******************************************************************************/
