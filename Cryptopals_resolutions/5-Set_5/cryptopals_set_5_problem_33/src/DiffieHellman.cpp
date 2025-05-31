@@ -3,10 +3,10 @@
 #include <openssl/err.h>
 #include <stdexcept>
 
-#include "./../include/Diffie_Hellman.hpp"
+#include "./../include/DiffieHellman.hpp"
 
 /* constructor / destructor */
-MyCryptoLibrary::Diffie_Hellman::Diffie_Hellman(const bool debugFlag)
+MyCryptoLibrary::DiffieHellman::DiffieHellman(const bool debugFlag)
     : _debugFlag{debugFlag},
       _privateKey{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
       _publicKey{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
@@ -31,17 +31,39 @@ MyCryptoLibrary::Diffie_Hellman::Diffie_Hellman(const bool debugFlag)
   }
 }
 /******************************************************************************/
-MyCryptoLibrary::Diffie_Hellman::~Diffie_Hellman() {}
+MyCryptoLibrary::DiffieHellman::~DiffieHellman() {}
 /******************************************************************************/
-const std::string MyCryptoLibrary::Diffie_Hellman::getPublicKey() {
+/**
+ * @brief This method will return the public key.
+ *
+ * This method will return the public key used at the Diffie Hellman
+ * key exchange protocol.
+ *
+ * @return The public key (hex) in a string format.
+ */
+const std::string MyCryptoLibrary::DiffieHellman::getPublicKey() {
   return MessageExtractionFacility::BIGNUMToHex(_publicKey.get());
 }
 /******************************************************************************/
-const std::string MyCryptoLibrary::Diffie_Hellman::getGroupName() {
+/**
+ * @brief This method will return the group name.
+ *
+ * This method will return the group name used at the Diffie Hellman
+ * key exchange protocol.
+ *
+ * @return The group name in a string format.
+ */
+const std::string MyCryptoLibrary::DiffieHellman::getGroupName() {
   return _dhParameter.groupName;
 }
 /******************************************************************************/
-void MyCryptoLibrary::Diffie_Hellman::generatePrivateKey() {
+/**
+ * @brief This method will generate a private key.
+ *
+ * This method will generate a private key to be used at a Diffie
+ * Hellman key exchange protocol.
+ */
+void MyCryptoLibrary::DiffieHellman::generatePrivateKey() {
   // The private key 'a' must be 1 < a < p-1.
   // So, we need to generate a random number 'x' such that 0 <= x < (p-2).
   // Then, set 'a = x + 2'. This ensures 'a' is in the range [2, p-1).
@@ -88,8 +110,13 @@ void MyCryptoLibrary::Diffie_Hellman::generatePrivateKey() {
   }
 }
 /******************************************************************************/
-// New method to calculate the public key: A = g^a mod p
-void MyCryptoLibrary::Diffie_Hellman::generatePublicKey() {
+/**
+ * @brief This method will generate a public key.
+ *
+ * This method will generate a public key to be used at a Diffie
+ * Hellman key exchange protocol. A = g^a mod p
+ */
+void MyCryptoLibrary::DiffieHellman::generatePublicKey() {
   if (!_privateKey || BN_is_zero(_privateKey.get())) {
     throw std::runtime_error(
         "Diffie Hellman log | generatePublicKey(): Private key has not been "
@@ -121,7 +148,6 @@ void MyCryptoLibrary::Diffie_Hellman::generatePublicKey() {
                              "Failed to calculate public key (BN_mod_exp): " +
                              std::string(errorBuffer));
   }
-
   BN_CTX_free(ctx);
   if (_debugFlag) {
     std::cout << "\nDiffie Hellman log | Generated public key (hex): "
@@ -136,7 +162,19 @@ void MyCryptoLibrary::Diffie_Hellman::generatePublicKey() {
   }
 }
 /******************************************************************************/
-const std::string MyCryptoLibrary::Diffie_Hellman::deriveSharedSecret(
+/**
+ * @brief This method will derive a symmetric encryption key.
+ *
+ * This method will derive a symmetric encryption key as the derived
+ * shared secret from the execution of the Diffie Hellman Key Exchange.
+ *
+ * @param peerPublicKeyHex The peer public key (hex)
+ * @param serverNonceHex  The server nonce (hex)
+ * @param clientNonceHex  The client nonce (hex)
+ *
+ * @return The symmetric encryption key (hex) in a string format.
+ */
+const std::string MyCryptoLibrary::DiffieHellman::deriveSharedSecret(
     const std::string &peerPublicKeyHex, const std::string &serverNonceHex,
     const std::string &clientNonceHex) {
   if (!_privateKey || BN_is_zero(_privateKey.get())) {

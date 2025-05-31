@@ -17,14 +17,14 @@ Client::~Client() {}
 /******************************************************************************/
 /**
  * @brief This method will perform the Diffie Hellman key exchange protocol with
- * a given server
+ * a given server.
  *
  * This method will perform the Diffie Hellman key exchange protocol with
- * a given server, in order to agree on a given symmetric encryption key
+ * a given server, in order to agree on a given symmetric encryption key.
  */
 void Client::diffieHellmanKeyExchange() {
-  std::unique_ptr<MyCryptoLibrary::Diffie_Hellman> diffieHellman(
-      std::make_unique<MyCryptoLibrary::Diffie_Hellman>(_debugFlag));
+  std::unique_ptr<MyCryptoLibrary::DiffieHellman> diffieHellman(
+      std::make_unique<MyCryptoLibrary::DiffieHellman>(_debugFlag));
   std::string clientNonceHex{
       MessageExtractionFacility::generateCryptographicNonce(_nonceSize)};
   std::string requestBody =
@@ -91,8 +91,8 @@ void Client::diffieHellmanKeyExchange() {
  * key exchange protocol. The response is a json text, and it will be printed
  * in a structured way.
  *
- * * @param response The response received by the server during the execution of
- * the Diffie Hellman key exchange protocol
+ * @param response The response received by the server during the execution of
+ * the Diffie Hellman key exchange protocol.
  */
 void Client::printServerResponse(const cpr::Response &response) {
   std::cout << "Status Code: " << response.status_code << "\n";
