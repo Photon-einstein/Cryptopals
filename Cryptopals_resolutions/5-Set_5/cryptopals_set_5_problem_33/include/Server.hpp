@@ -35,12 +35,14 @@ public:
   void runServerTest();
 
 private:
+  /* private structures */
   struct SessionData {
     std::unique_ptr<MyCryptoLibrary::DiffieHellman> _diffieHellman;
     std::string _serverNonceHex;
     std::string _clientNonceHex;
     std::string _derivedKeyHex;
     std::string _clientId;
+
     SessionData(const std::size_t nonceSize, const std::string &clientNonceHex,
                 const std::string &clientId, const bool debugFlag)
         : _diffieHellman(
@@ -49,6 +51,8 @@ private:
               MessageExtractionFacility::generateCryptographicNonce(nonceSize)),
           _clientNonceHex{clientNonceHex}, _clientId{clientId} {}
   };
+
+  /* private methods */
 
   /**
    * @brief This method will start the endpoints that the server
@@ -68,9 +72,26 @@ private:
    */
   void rootEndpoint();
 
+  /**
+   * @brief This method runs the route that performs the Diffie Hellman
+   * key exchange protocol.
+   *
+   * This method runs the route that performs the Diffie Hellman
+   * key exchange protocol. I receives requests and make all the calculations
+   * to response to the requests, creating a symmetric key for each connection
+   * request.
+   */
   void keyExchangeRoute();
 
+  /**
+   * @brief This method will generate a unique session id.
+   *
+   * This method will generate a unique session id for a given connection
+   * request.
+   */
   boost::uuids::uuid generateUniqueSessionId();
+
+  /* private fields */
 
   std::map<boost::uuids::uuid, std::unique_ptr<SessionData>> _diffieHellmanMap;
   const std::size_t _nonceSize{16}; // bytes

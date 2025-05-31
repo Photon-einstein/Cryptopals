@@ -47,7 +47,8 @@ MessageExtractionFacility::hexToBytes(const std::string &hexStr) {
  * characters, padded with zero
  *
  * @param data The vector with bytes to be converted
- * @return A string containing the chars with hexadecimal format, zero padded
+ *
+ * @return A string containing the chars with hexadecimal format, zero padded.
  */
 std::string
 MessageExtractionFacility::toHexString(const std::vector<unsigned char> &data) {
@@ -60,12 +61,22 @@ MessageExtractionFacility::toHexString(const std::vector<unsigned char> &data) {
   return ss.str();
 }
 /******************************************************************************/
-// Function to convert hex string to UniqueBIGNUM
+/**
+ * @brief This method will convert an hexadecimal number to an unique big
+ * number.
+ *
+ * This method will convert an hexadecimal number to an unique big number.
+ *
+ * @param hexNumber The number in hexadecimal format.
+ *
+ * @return The number in an UniqueBIGNUM format.
+ * @throws std::runtime_error if conversion fails.
+ */
 MessageExtractionFacility::UniqueBIGNUM
-MessageExtractionFacility::hexToUniqueBIGNUM(const std::string &hexStr) {
+MessageExtractionFacility::hexToUniqueBIGNUM(const std::string &hexNumber) {
   BIGNUM *bnPtr = nullptr; // BN_hex2bn needs a pointer to a BIGNUM*
                            // It will allocate the BIGNUM itself.
-  if (!BN_hex2bn(&bnPtr, hexStr.c_str())) {
+  if (!BN_hex2bn(&bnPtr, hexNumber.c_str())) {
     // OpenSSL functions return 0 on error, non-zero on success.
     // Get OpenSSL error string for more details.
     char errBuf[256];
@@ -78,7 +89,18 @@ MessageExtractionFacility::hexToUniqueBIGNUM(const std::string &hexStr) {
   return UniqueBIGNUM(bnPtr); // Wrap the raw pointer in UniqueBIGNUM
 }
 /******************************************************************************/
-// Function to convert BIGNUM to hex string for display
+/**
+ * @brief This method will convert a number in a BIGNUM format to
+ * a hexadecimal format.
+ *
+ * This method will convert a number in a BIGNUM format to
+ * a hexadecimal format, performing all the calculations necessary.
+ *
+ * @param bn The number in a BIGNUM format.
+ *
+ * @return The number converted to a hexadecimal format.
+ * @throws std::runtime_error if conversion fails.
+ */
 std::string MessageExtractionFacility::BIGNUMToHex(BIGNUM *bn) {
   char *hexChars = BN_bn2hex(bn); // Allocates memory
   if (!hexChars) {
@@ -90,7 +112,18 @@ std::string MessageExtractionFacility::BIGNUMToHex(BIGNUM *bn) {
   return hexStr;
 }
 /******************************************************************************/
-// Helper function to convert BIGNUM to a decimal string
+/**
+ * @brief This method will convert a number in a BIGNUM format to
+ * a decimal format.
+ *
+ * This method will convert a number in a BIGNUM format to
+ * a decimal format, performing all the calculations necessary.
+ *
+ * @param bn The number in a BIGNUM format.
+ *
+ * @return The number converted to a decimal format.
+ * @throws std::runtime_error if conversion fails.
+ */
 std::string MessageExtractionFacility::BIGNUMToDec(BIGNUM *bn) {
   if (!bn) {
     return "";
@@ -113,7 +146,8 @@ std::string MessageExtractionFacility::BIGNUMToDec(BIGNUM *bn) {
  *
  * @param length The desired length of the nonce in bytes (e.g., 16 for
  * 128-bit).
- * @return A string containing the nonce, in hexadecimal format
+ *
+ * @return A string containing the nonce, in hexadecimal format.
  * @throws std::runtime_error if nonce generation fails.
  */
 const std::string MessageExtractionFacility::generateCryptographicNonce(
