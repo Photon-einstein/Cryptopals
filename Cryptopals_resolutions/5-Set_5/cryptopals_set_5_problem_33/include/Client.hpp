@@ -31,6 +31,7 @@ private:
     std::string _serverNonceHex;
     std::string _clientNonceHex;
     std::string _derivedKeyHex;
+
     SessionData(std::unique_ptr<MyCryptoLibrary::DiffieHellman> diffieHellman,
                 const std::string &serverNonceHex,
                 const std::string &clientNonceHex)

@@ -33,11 +33,28 @@ void Server::rootEndpoint() {
   });
 }
 /******************************************************************************/
+/**
+ * @brief This method will start the endpoints that the server
+ * provides to his clients
+ *
+ * This method will start the endpoints that the server
+ * provides to his clients, namely the root endpoint and the signature
+ * verification endpoint
+ */
 void Server::setupRoutes() {
   rootEndpoint();
   keyExchangeRoute();
 }
 /******************************************************************************/
+/**
+ * @brief This method runs the route that performs the Diffie Hellman
+ * key exchange protocol.
+ *
+ * This method runs the route that performs the Diffie Hellman
+ * key exchange protocol. I receives requests and make all the calculations
+ * to response to the requests, creating a symmetric key for each connection
+ * request.
+ */
 void Server::keyExchangeRoute() {
   CROW_ROUTE(_app, "/keyExchange")
       .methods("POST"_method)([&](const crow::request &req) {
@@ -109,6 +126,13 @@ void Server::runServer() {
   _app.port(_portProduction).multithreaded().run();
 }
 /******************************************************************************/
+/**
+ * @brief This method will start all the server endpoints in a multi thread
+ * environment for a test scenario
+ *
+ * This method will start all the endpoints that the server provides to their
+ * clients, for a given test
+ */
 void Server::runServerTest() {
   _serverThread = std::thread([this]() {
     setupRoutes();
@@ -116,6 +140,12 @@ void Server::runServerTest() {
   }); // Let it live until process ends
 }
 /******************************************************************************/
+/**
+ * @brief This method will generate a unique session id.
+ *
+ * This method will generate a unique session id for a given connection
+ * request.
+ */
 boost::uuids::uuid Server::generateUniqueSessionId() {
   bool uniqueSessionId{false};
   boost::uuids::random_generator gen;
