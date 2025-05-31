@@ -17,7 +17,7 @@ Client::~Client() {}
 /******************************************************************************/
 void Client::diffieHellmanKeyExchange() {
   std::unique_ptr<MyCryptoLibrary::Diffie_Hellman> diffieHellman(
-      std::make_unique<MyCryptoLibrary::Diffie_Hellman>());
+      std::make_unique<MyCryptoLibrary::Diffie_Hellman>(_debugFlag));
   std::string clientNonceHex{
       MessageExtractionFacility::generateCryptographicNonce(_nonceSize)};
   std::string requestBody =

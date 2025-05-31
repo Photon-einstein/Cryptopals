@@ -15,7 +15,7 @@ namespace MyCryptoLibrary {
 class Diffie_Hellman {
 public:
   /* constructor / destructor*/
-  Diffie_Hellman();
+  Diffie_Hellman(const bool debugFlag);
   ~Diffie_Hellman();
 
   /* public methods */
@@ -35,6 +35,7 @@ private:
   DHParametersLoader::DHParameters _dhParameter;
   MessageExtractionFacility::UniqueBIGNUM _p, _g, _privateKey, _publicKey,
       _sharedSecret;
+  bool _debugFlag;
 };
 
 } // namespace MyCryptoLibrary

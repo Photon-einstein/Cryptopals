@@ -67,7 +67,7 @@ void Server::keyExchangeRoute() {
               MessageExtractionFacility::hexToUniqueBIGNUM(extractedPublicKeyA);
           boost::uuids::uuid sessionId = generateUniqueSessionId();
           _diffieHellmanMap[sessionId] = std::make_unique<SessionData>(
-              _nonceSize, extractedNonceClient, extractedClientId);
+              _nonceSize, extractedNonceClient, extractedClientId, _debugFlag);
           if (_debugFlag) {
             std::cout
                 << "Server log | sessionId " << sessionId
