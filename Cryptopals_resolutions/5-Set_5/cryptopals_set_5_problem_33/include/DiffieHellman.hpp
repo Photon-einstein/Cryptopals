@@ -23,17 +23,17 @@ public:
   /**
    * @brief This method will return the public key.
    *
-   * This method will return the public key used at the Diffie Hellman 
+   * This method will return the public key used at the Diffie Hellman
    * key exchange protocol.
    *
    * @return The public key (hex) in a string format.
    */
   const std::string getPublicKey();
-  
+
   /**
    * @brief This method will return the group name.
    *
-   * This method will return the group name used at the Diffie Hellman 
+   * This method will return the group name used at the Diffie Hellman
    * key exchange protocol.
    *
    * @return The group name in a string format.
@@ -45,7 +45,7 @@ public:
    *
    * This method will derive a symmetric encryption key as the derived
    * shared secret from the execution of the Diffie Hellman Key Exchange.
-   * 
+   *
    * @param peerPublicKeyHex The peer public key (hex).
    * @param serverNonceHex  The server nonce (hex).
    * @param clientNonceHex  The client nonce (hex).
@@ -66,7 +66,7 @@ private:
    * Hellman key exchange protocol.
    */
   void generatePrivateKey();
-  
+
   /**
    * @brief This method will generate a public key.
    *
@@ -78,7 +78,8 @@ private:
   /* private members */
   const std::string _dhParametersFilename{"./../input/dh_parameters.json"};
   DHParametersLoader::DHParameters _dhParameter;
-  MessageExtractionFacility::UniqueBIGNUM _p, _g, _privateKey, _publicKey, _sharedSecret;
+  MessageExtractionFacility::UniqueBIGNUM _p, _g, _privateKey, _publicKey,
+      _sharedSecret;
   bool _debugFlag;
 };
 

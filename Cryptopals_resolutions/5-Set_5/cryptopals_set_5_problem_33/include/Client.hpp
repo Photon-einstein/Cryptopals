@@ -54,7 +54,7 @@ private:
   void printServerResponse(const cpr::Response &response);
 
   /* private fields */
-  
+
   std::map<std::string, std::unique_ptr<SessionData>> _diffieHellmanMap;
 
   const int _portServerProduction{18080};
