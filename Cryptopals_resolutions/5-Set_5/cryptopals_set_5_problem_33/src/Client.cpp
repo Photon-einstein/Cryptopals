@@ -15,6 +15,13 @@ Client::Client(const bool debugFlag) : _debugFlag{debugFlag} {}
 /******************************************************************************/
 Client::~Client() {}
 /******************************************************************************/
+/**
+ * @brief This method will perform the Diffie Hellman key exchange protocol with
+ * a given server
+ *
+ * This method will perform the Diffie Hellman key exchange protocol with
+ * a given server, in order to agree on a given symmetric encryption key
+ */
 void Client::diffieHellmanKeyExchange() {
   std::unique_ptr<MyCryptoLibrary::Diffie_Hellman> diffieHellman(
       std::make_unique<MyCryptoLibrary::Diffie_Hellman>(_debugFlag));
@@ -44,7 +51,8 @@ void Client::diffieHellmanKeyExchange() {
   }
   try {
     if (response.status_code != 201) {
-      throw std::runtime_error("Client log | diffieHellmanKeyExchange(): Diffie Hellman key exchange failed");
+      throw std::runtime_error("Client log | diffieHellmanKeyExchange(): "
+                               "Diffie Hellman key exchange failed");
     }
     nlohmann::json parsedJson = nlohmann::json::parse(response.text);
     std::string sessionId = parsedJson.at("sessionId").get<std::string>();
@@ -69,16 +77,22 @@ void Client::diffieHellmanKeyExchange() {
             extractedPublicKeyB, _diffieHellmanMap[sessionId]->_serverNonceHex,
             _diffieHellmanMap[sessionId]->_clientNonceHex);
   } catch (const std::exception &e) {
-    std::cerr << "Client log | diffieHellmanKeyExchange(): secret key derivation step: " << e.what()
-              << std::endl;
+    std::cerr << "Client log | diffieHellmanKeyExchange(): secret key "
+                 "derivation step: "
+              << e.what() << std::endl;
   }
 }
 /******************************************************************************/
 /**
- * @brief This method will print in a structured way the server response
+ * @brief This method will print the server response to the Diffie Hellman
+ * key exchange protocol.
  *
- * This method will print in a structured way the server response to a client
- * curl request.
+ * This method will print the server response to the Diffie Hellman
+ * key exchange protocol. The response is a json text, and it will be printed
+ * in a structured way.
+ *
+ * * @param response The response received by the server during the execution of
+ * the Diffie Hellman key exchange protocol
  */
 void Client::printServerResponse(const cpr::Response &response) {
   std::cout << "Status Code: " << response.status_code << "\n";
