@@ -7,8 +7,8 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <vector>
 
-#include "DH_parameters_loader.hpp"
-#include "Diffie_Hellman.hpp"
+#include "DhParametersLoader.hpp"
+#include "DiffieHellman.hpp"
 
 class Server {
 public:
@@ -36,7 +36,7 @@ public:
 
 private:
   struct SessionData {
-    std::unique_ptr<MyCryptoLibrary::Diffie_Hellman> _diffieHellman;
+    std::unique_ptr<MyCryptoLibrary::DiffieHellman> _diffieHellman;
     std::string _serverNonceHex;
     std::string _clientNonceHex;
     std::string _derivedKeyHex;
@@ -44,7 +44,7 @@ private:
     SessionData(const std::size_t nonceSize, const std::string &clientNonceHex,
                 const std::string &clientId, const bool debugFlag)
         : _diffieHellman(
-              std::make_unique<MyCryptoLibrary::Diffie_Hellman>(debugFlag)),
+              std::make_unique<MyCryptoLibrary::DiffieHellman>(debugFlag)),
           _serverNonceHex(
               MessageExtractionFacility::generateCryptographicNonce(nonceSize)),
           _clientNonceHex{clientNonceHex}, _clientId{clientId} {}

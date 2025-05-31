@@ -35,12 +35,12 @@ include_directories(
 
 # Automatically find all .cpp files in the src/ directory (except main files)
 file(GLOB COMMON_SOURCES "src/*.cpp")
-list(REMOVE_ITEM COMMON_SOURCES "${CMAKE_SOURCE_DIR}/src/run_server.cpp")
-list(REMOVE_ITEM COMMON_SOURCES "${CMAKE_SOURCE_DIR}/src/run_client.cpp")
+list(REMOVE_ITEM COMMON_SOURCES "${CMAKE_SOURCE_DIR}/src/runServer.cpp")
+list(REMOVE_ITEM COMMON_SOURCES "${CMAKE_SOURCE_DIR}/src/runClient.cpp")
 
 # === Server Executable ===
-add_executable(run_server
-    src/run_server.cpp
+add_executable(runServer
+    src/runServer.cpp
     ${COMMON_SOURCES}
 )
 
@@ -48,23 +48,23 @@ add_executable(run_server
 find_package(Boost REQUIRED)  # Find Boost core
 include_directories(${Boost_INCLUDE_DIRS})
 
-target_link_libraries(run_server
+target_link_libraries(runServer
     PRIVATE OpenSSL::Crypto cpr::cpr fmt::fmt
 )
 
-set_target_properties(run_server PROPERTIES
+set_target_properties(runServer PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build
 )
 
 # === Client Executable ===
-add_executable(run_client
-    src/run_client.cpp
+add_executable(runClient
+    src/runClient.cpp
     ${COMMON_SOURCES}
 )
-target_link_libraries(run_client 
+target_link_libraries(runClient 
     PRIVATE OpenSSL::Crypto cpr::cpr fmt::fmt
 )
 
-set_target_properties(run_client PROPERTIES
+set_target_properties(runClient PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build
 )

@@ -3,7 +3,7 @@
 #include <nlohmann/json.hpp>
 #include <stdexcept>
 
-#include "./../include/DH_parameters_loader.hpp"
+#include "./../include/DhParametersLoader.hpp"
 
 /**
  * @brief This method extracts the content of a given file.

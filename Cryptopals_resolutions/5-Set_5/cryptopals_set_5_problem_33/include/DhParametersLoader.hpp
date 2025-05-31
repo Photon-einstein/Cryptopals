@@ -26,8 +26,7 @@ struct DHParameters {
  *
  * @return The file content in a structured dictionary.
  */
-std::map<std::string, DHParameters>
-loadDhParameters(const std::string &filename);
+std::map<std::string, DHParameters> loadDhParameters(const std::string &filename);
 
 }; // namespace DHParametersLoader
 

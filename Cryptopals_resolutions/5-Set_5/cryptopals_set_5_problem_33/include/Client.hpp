@@ -3,8 +3,8 @@
 
 #include <cpr/cpr.h>
 
-#include "DH_parameters_loader.hpp"
-#include "Diffie_Hellman.hpp"
+#include "DhParametersLoader.hpp"
+#include "DiffieHellman.hpp"
 #include "MessageExtractionFacility.hpp"
 
 class Client {
@@ -13,30 +13,32 @@ public:
   Client(const bool debugFlag);
   ~Client();
 
+  /* public methods */
+
   /**
    * @brief This method will perform the Diffie Hellman key exchange protocol
-   * with a given server
+   * with a given server.
    *
    * This method will perform the Diffie Hellman key exchange protocol with
-   * a given server, in order to agree on a given symmetric encryption key
+   * a given server, in order to agree on a given symmetric encryption key.
    */
   void diffieHellmanKeyExchange();
 
 private:
-  // private structures
+  /* private structures */
   struct SessionData {
-    std::unique_ptr<MyCryptoLibrary::Diffie_Hellman> _diffieHellman;
+    std::unique_ptr<MyCryptoLibrary::DiffieHellman> _diffieHellman;
     std::string _serverNonceHex;
     std::string _clientNonceHex;
     std::string _derivedKeyHex;
-    SessionData(std::unique_ptr<MyCryptoLibrary::Diffie_Hellman> diffieHellman,
+    SessionData(std::unique_ptr<MyCryptoLibrary::DiffieHellman> diffieHellman,
                 const std::string &serverNonceHex,
                 const std::string &clientNonceHex)
         : _diffieHellman(std::move(diffieHellman)),
           _serverNonceHex{serverNonceHex}, _clientNonceHex{clientNonceHex} {}
   };
 
-  // private methods
+  /* private methods */
 
   /**
    * @brief This method will print the server response to the Diffie Hellman
@@ -51,7 +53,8 @@ private:
    */
   void printServerResponse(const cpr::Response &response);
 
-  // privata fields
+  /* private fields */
+  
   std::map<std::string, std::unique_ptr<SessionData>> _diffieHellmanMap;
 
   const int _portServerProduction{18080};
