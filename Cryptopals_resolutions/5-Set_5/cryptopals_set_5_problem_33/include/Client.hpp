@@ -46,8 +46,8 @@ private:
    * key exchange protocol. The response is a json text, and it will be printed
    * in a structured way.
    *
-   * * @param response The response received by the server during the execution
-   * of the Diffie Hellman key exchange protocol
+   * @param response The response received by the server during the execution
+   * of the Diffie Hellman key exchange protocol.
    */
   void printServerResponse(const cpr::Response &response);
 

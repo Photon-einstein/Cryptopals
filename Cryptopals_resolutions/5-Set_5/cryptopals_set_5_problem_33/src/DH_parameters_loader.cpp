@@ -5,6 +5,17 @@
 
 #include "./../include/DH_parameters_loader.hpp"
 
+/**
+ * @brief This method extracts the content of a given file.
+ *
+ * This method will extract the content of a given file that contain
+ * the public configurations of the Diffie Hellman key exchange protocol.
+ *
+ * @param filename The file address where the public configurations of
+ * the Diffie Hellman key Exchange protocol are.
+ *
+ * @return The file content in a structured dictionary.
+ */
 std::map<std::string, DHParametersLoader::DHParameters>
 DHParametersLoader::loadDhParameters(const std::string &filename) {
   std::ifstream file(filename);
