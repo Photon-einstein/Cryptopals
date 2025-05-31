@@ -193,7 +193,16 @@ Example of a server response to the initial client request:
         Both parties use a robust KDF (e.g., HKDF-SHA256, PBKDF2) to derive one or more session keys from the shared secret S, in this case it can be used a SHA256
 
 16. Implement a dictionary of sessions also on the client side (Done)
-
 17. Implement a debug flag on the Diffie Hellman class (Done)
+18. Review and format the logs at the Server class (Done)
+19. Review and format the logs at the Client class (Done) 
+20. Review and format the logs at the DH_parameters_loader class (Done)
+21. Review and format the logs at the MessageExtractionFacility class (Done)
+22. Add comments to all the methods at the Client class (Done)
+23. Add comments to all the methods at the DH_parameters_loader class (Done)
 
-18. Review and format the logs at the Server class (in progress) 
+24. Add comments to all the methods at the DiffieHellman class (in progress)
+
+25. Add comments to all the methods at the MessageExtractionFacility class (TBD)
+26. Add comments to all the methods at the Server class (TBD)
+27. Run and fix all the problems caught by the static code analysis (TBD)

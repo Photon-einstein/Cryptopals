@@ -27,7 +27,8 @@ Server::~Server() {
 void Server::rootEndpoint() {
   CROW_ROUTE(_app, "/").methods("GET"_method)([&]() {
     crow::json::wvalue rootMessage;
-    rootMessage["message"] = "Root endpoint, Server up and running";
+    rootMessage["message"] =
+        "Server log | Root endpoint, server up and running";
     return crow::response(200, rootMessage);
   });
 }
@@ -40,9 +41,6 @@ void Server::setupRoutes() {
 void Server::keyExchangeRoute() {
   CROW_ROUTE(_app, "/keyExchange")
       .methods("POST"_method)([&](const crow::request &req) {
-        if (_debugFlag) {
-          std::cout << "Received request body:\n" << req.body << std::endl;
-        }
         crow::json::wvalue res;
         try {
           nlohmann::json parsedJson = nlohmann::json::parse(req.body);
@@ -56,11 +54,14 @@ void Server::keyExchangeRoute() {
                                                 .at("publicKeyA")
                                                 .get<std::string>();
           if (_debugFlag) {
-            std::cout << "\n--- Extracted Data ---" << std::endl;
-            std::cout << "Client ID: " << extractedClientId << std::endl;
-            std::cout << "Nonce: " << extractedNonceClient << std::endl;
-            std::cout << "Group Name: " << extractedGroupName << std::endl;
-            std::cout << "Public Key A: " << extractedPublicKeyA << std::endl;
+            std::cout
+                << "\n--- Server log | Extracted Data from a new client ---"
+                << std::endl;
+            std::cout << "\tClient ID: " << extractedClientId << std::endl;
+            std::cout << "\tClient nonce: " << extractedNonceClient
+                      << std::endl;
+            std::cout << "\tGroup Name: " << extractedGroupName << std::endl;
+            std::cout << "\tPublic Key A: " << extractedPublicKeyA << std::endl;
             std::cout << "----------------------" << std::endl;
           }
           MessageExtractionFacility::UniqueBIGNUM peerPublicKey =
@@ -68,18 +69,6 @@ void Server::keyExchangeRoute() {
           boost::uuids::uuid sessionId = generateUniqueSessionId();
           _diffieHellmanMap[sessionId] = std::make_unique<SessionData>(
               _nonceSize, extractedNonceClient, extractedClientId, _debugFlag);
-          if (_debugFlag) {
-            std::cout
-                << "Server log | sessionId " << sessionId
-                << " --> clientId: " << extractedClientId
-                << " | Nonce server (hex): "
-                << _diffieHellmanMap[sessionId]->_serverNonceHex
-                << "\n\t| Nonce client (hex): "
-                << _diffieHellmanMap[sessionId]->_clientNonceHex
-                << " | Group Name: "
-                << _diffieHellmanMap[sessionId]->_diffieHellman->getGroupName()
-                << std::endl;
-          }
           _diffieHellmanMap[sessionId]->_derivedKeyHex =
               _diffieHellmanMap[sessionId]->_diffieHellman->deriveSharedSecret(
                   extractedPublicKeyA,
@@ -95,12 +84,14 @@ void Server::keyExchangeRoute() {
           res["nonce"] = _diffieHellmanMap[sessionId]->_serverNonceHex;
         } catch (const nlohmann::json::exception &e) {
           crow::json::wvalue err;
-          err["message"] = std::string("JSON parsing error: ") + e.what();
+          err["message"] =
+              std::string("Server log | JSON parsing error: ") + e.what();
           return crow::response(400, err);
         } catch (const std::exception &e) {
           crow::json::wvalue err;
           err["message"] =
-              std::string("An unexpected error occurred: ") + e.what();
+              std::string("Server log | An unexpected error occurred: ") +
+              e.what();
         }
         return crow::response(201, res);
       });

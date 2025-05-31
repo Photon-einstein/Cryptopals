@@ -70,8 +70,10 @@ MessageExtractionFacility::hexToUniqueBIGNUM(const std::string &hexStr) {
     // Get OpenSSL error string for more details.
     char errBuf[256];
     ERR_error_string_n(ERR_get_error(), errBuf, sizeof(errBuf));
-    throw std::runtime_error("Failed to convert hex string to BIGNUM: " +
-                             std::string(errBuf));
+    throw std::runtime_error(
+        "MessageExtractionFacility log | hexToUniqueBIGNUM(): "
+        "Failed to convert hex string to BIGNUM: " +
+        std::string(errBuf));
   }
   return UniqueBIGNUM(bnPtr); // Wrap the raw pointer in UniqueBIGNUM
 }
@@ -80,7 +82,8 @@ MessageExtractionFacility::hexToUniqueBIGNUM(const std::string &hexStr) {
 std::string MessageExtractionFacility::BIGNUMToHex(BIGNUM *bn) {
   char *hexChars = BN_bn2hex(bn); // Allocates memory
   if (!hexChars) {
-    throw std::runtime_error("Failed to convert BIGNUM to hex string.");
+    throw std::runtime_error("MessageExtractionFacility log | BIGNUMToHex(): "
+                             "Failed to convert BIGNUM to hex string.");
   }
   std::string hexStr(hexChars);
   OPENSSL_free(hexChars); // Free memory allocated by BN_bn2hex
@@ -96,7 +99,8 @@ std::string MessageExtractionFacility::BIGNUMToDec(BIGNUM *bn) {
   if (!decChars) {
     char errBuf[256];
     ERR_error_string_n(ERR_get_error(), errBuf, sizeof(errBuf));
-    throw std::runtime_error("Failed to convert BIGNUM to decimal string: " +
+    throw std::runtime_error("MessageExtractionFacility log | BIGNUMToDec(): "
+                             "Failed to convert BIGNUM to decimal string: " +
                              std::string(errBuf));
   }
   std::string dec_str(decChars); // Copy to std::string
@@ -119,8 +123,10 @@ const std::string MessageExtractionFacility::generateCryptographicNonce(
   if (RAND_bytes(nonce.data(), length) != 1) {
     char errorBuffer[256];
     ERR_error_string_n(ERR_get_error(), errorBuffer, sizeof(errorBuffer));
-    throw std::runtime_error("Failed to generate cryptographic nonce: " +
-                             std::string(errorBuffer));
+    throw std::runtime_error(
+        "MessageExtractionFacility log | generateCryptographicNonce(): "
+        "Failed to generate cryptographic nonce: " +
+        std::string(errorBuffer));
   }
   return MessageExtractionFacility::toHexString(nonce);
 }
