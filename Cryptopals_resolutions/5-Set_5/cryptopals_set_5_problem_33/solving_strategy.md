@@ -193,3 +193,7 @@ Example of a server response to the initial client request:
         Both parties use a robust KDF (e.g., HKDF-SHA256, PBKDF2) to derive one or more session keys from the shared secret S, in this case it can be used a SHA256
 
 16. Implement a dictionary of sessions also on the client side (Done)
+
+17. Implement a debug flag on the Diffie Hellman class (Done)
+
+18. Review and format the logs at the Server class (in progress) 
