@@ -9,14 +9,15 @@ std::map<std::string, DHParametersLoader::DHParameters>
 DHParametersLoader::loadDhParameters(const std::string &filename) {
   std::ifstream file(filename);
   if (!file.is_open()) {
-    throw std::runtime_error("Could not open DH parameters file: " + filename);
+    throw std::runtime_error("DHParametersLoader log | loadDhParameters(): "
+      "Could not open DH parameters file: " + filename);
   }
   nlohmann::json j;
   try {
     file >> j;
   } catch (const nlohmann::json::parse_error &e) {
-    throw std::runtime_error("Failed to parse JSON file: " +
-                             std::string(e.what()));
+    throw std::runtime_error("DHParametersLoader log | loadDhParameters(): "
+      "Failed to parse JSON file: " + std::string(e.what()));
   }
   std::map<std::string, DHParametersLoader::DHParameters> paramsMap;
   if (j.contains("dh_parameters") && j["dh_parameters"].is_array()) {
@@ -36,13 +37,15 @@ DHParametersLoader::loadDhParameters(const std::string &filename) {
         }
         paramsMap[group["name"].get<std::string>()] = params;
       } else {
-        std::cerr << "Warning: Skipping malformed DH group entry in JSON."
+        std::cerr << "DHParametersLoader log | loadDhParameters(): "
+                      "Warning: Skipping malformed DH group entry in JSON."
                   << std::endl;
       }
     }
   } else {
     throw std::runtime_error(
-        "JSON file does not contain a 'dh_parameters' array.");
+      "DHParametersLoader log | loadDhParameters(): "
+      "JSON file does not contain a 'dh_parameters' array.");
   }
   return paramsMap;
 }

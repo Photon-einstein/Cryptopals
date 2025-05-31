@@ -44,7 +44,7 @@ void Client::diffieHellmanKeyExchange() {
   }
   try {
     if (response.status_code != 201) {
-      throw std::runtime_error("Diffie Hellman key exchange failed");
+      throw std::runtime_error("Client log | diffieHellmanKeyExchange(): Diffie Hellman key exchange failed");
     }
     nlohmann::json parsedJson = nlohmann::json::parse(response.text);
     std::string sessionId = parsedJson.at("sessionId").get<std::string>();
@@ -55,11 +55,11 @@ void Client::diffieHellmanKeyExchange() {
     std::string extractedPublicKeyB =
         parsedJson.at("diffieHellman").at("publicKeyB").get<std::string>();
     if (_debugFlag) {
-      std::cout << "\n--- Extracted Data ---" << std::endl;
-      std::cout << "Session id: " << sessionId << std::endl;
-      std::cout << "Nonce: " << extractedNonceServer << std::endl;
-      std::cout << "Group Name: " << extractedGroupName << std::endl;
-      std::cout << "Public Key B: " << extractedPublicKeyB << std::endl;
+      std::cout << "\n--- Client log | Extracted Data ---" << std::endl;
+      std::cout << "\tSession id: " << sessionId << std::endl;
+      std::cout << "\tNonce: " << extractedNonceServer << std::endl;
+      std::cout << "\tGroup Name: " << extractedGroupName << std::endl;
+      std::cout << "\tPublic Key B: " << extractedPublicKeyB << std::endl;
       std::cout << "----------------------" << std::endl;
     }
     _diffieHellmanMap[sessionId] = std::make_unique<SessionData>(
@@ -69,7 +69,7 @@ void Client::diffieHellmanKeyExchange() {
             extractedPublicKeyB, _diffieHellmanMap[sessionId]->_serverNonceHex,
             _diffieHellmanMap[sessionId]->_clientNonceHex);
   } catch (const std::exception &e) {
-    std::cerr << "Client log | secret key derivation step: " << e.what()
+    std::cerr << "Client log | diffieHellmanKeyExchange(): secret key derivation step: " << e.what()
               << std::endl;
   }
 }
