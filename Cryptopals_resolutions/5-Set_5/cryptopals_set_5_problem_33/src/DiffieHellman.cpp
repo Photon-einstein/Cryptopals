@@ -271,6 +271,39 @@ const std::string MyCryptoLibrary::DiffieHellman::deriveSharedSecret(
               << MessageExtractionFacility::toHexString(keyMaterial)
               << std::endl;
   }
-  return MessageExtractionFacility::toHexString(keyMaterial);
+  _derivedSymmetricKeyHex = MessageExtractionFacility::toHexString(keyMaterial);
+  return _derivedSymmetricKeyHex;
+}
+/******************************************************************************/
+/**
+ * @brief This method will return the SHA256 from the derived symmetric
+ * key from both parties that performed the Diffie Hellman key exchange
+ * protocol.
+ *
+ * This method will return the SHA256 from the derived symmetric
+ * key from both parties that performed the Diffie Hellman key exchange
+ * protocol, it will return the value in hexadecimal format.
+ *
+ *
+ * @return SHA256(symmetric derived key) in hexadecimal format
+ */
+const std::string
+MyCryptoLibrary::DiffieHellman::getSha256HashFromDerivedSymmetricKeyHex()
+    const {
+  std::vector<unsigned char> rawKeyBytes =
+      MessageExtractionFacility::hexToBytes(_derivedSymmetricKeyHex);
+  if (rawKeyBytes.size() != SHA256_DIGEST_LENGTH) {
+    throw std::runtime_error(
+        "Diffie Hellman log | getSha256HashFromDerivedSymmetricKeyHex(): "
+        "Symmetric derived key is still not derived");
+  }
+  std::vector<unsigned char> hashKeyMaterial(SHA256_DIGEST_LENGTH);
+  SHA256(rawKeyBytes.data(), rawKeyBytes.size(), hashKeyMaterial.data());
+  const std::string hashSymmetricKeyHex =
+      MessageExtractionFacility::toHexString(hashKeyMaterial);
+  std::cout << "Diffie Hellman log | SHA256(Derived Symmetric key) (hex): "
+            << hashSymmetricKeyHex << std::endl;
+
+  return hashSymmetricKeyHex;
 }
 /******************************************************************************/

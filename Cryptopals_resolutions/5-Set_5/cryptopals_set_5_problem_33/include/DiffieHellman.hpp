@@ -56,6 +56,20 @@ public:
                                        const std::string &serverNonceHex,
                                        const std::string &clientNonceHex);
 
+  /**
+   * @brief This method will return the SHA256 from the derived symmetric
+   * key from both parties that performed the Diffie Hellman key exchange
+   * protocol.
+   *
+   * This method will return the SHA256 from the derived symmetric
+   * key from both parties that performed the Diffie Hellman key exchange
+   * protocol, it will return the value in hexadecimal format.
+   *
+   *
+   * @return SHA256(symmetric derived key) in hexadecimal format
+   */
+  const std::string getSha256HashFromDerivedSymmetricKeyHex() const;
+
 private:
   /* private methods */
 
@@ -81,6 +95,7 @@ private:
   MessageExtractionFacility::UniqueBIGNUM _p, _g, _privateKey, _publicKey,
       _sharedSecret;
   bool _debugFlag;
+  std::string _derivedSymmetricKeyHex = "";
 };
 
 } // namespace MyCryptoLibrary

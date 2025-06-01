@@ -99,6 +99,8 @@ void Server::keyExchangeRoute() {
               {"publicKeyB",
                _diffieHellmanMap[sessionId]->_diffieHellman->getPublicKey()}};
           res["nonce"] = _diffieHellmanMap[sessionId]->_serverNonceHex;
+          _diffieHellmanMap[sessionId]
+              ->_diffieHellman->getSha256HashFromDerivedSymmetricKeyHex();
         } catch (const nlohmann::json::exception &e) {
           crow::json::wvalue err;
           err["message"] =
