@@ -82,17 +82,6 @@ std::string BIGNUMToHex(BIGNUM *bn);
  */
 std::string BIGNUMToDec(BIGNUM *bn);
 
-/**
- * @brief Generates a cryptographically secure random nonce.
- *
- * @param length The desired length of the nonce in bytes (e.g., 16 for
- * 128-bit).
- *
- * @return A string containing the nonce, in hexadecimal format.
- * @throws std::runtime_error if nonce generation fails.
- */
-const std::string generateCryptographicNonce(const std::size_t length);
-
 }; // namespace MessageExtractionFacility
 
 #endif // MESSAGE_EXTRACTION_FACILITY_HPP

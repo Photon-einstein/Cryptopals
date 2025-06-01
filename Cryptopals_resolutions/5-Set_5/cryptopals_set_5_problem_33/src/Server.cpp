@@ -4,6 +4,7 @@
 #include <openssl/evp.h>
 #include <openssl/sha.h>
 
+#include "./../include/EncryptionUtility.hpp"
 #include "./../include/MessageExtractionFacility.hpp"
 #include "./../include/Server.hpp"
 
@@ -101,6 +102,9 @@ void Server::keyExchangeRoute() {
           res["nonce"] = _diffieHellmanMap[sessionId]->_serverNonceHex;
           _diffieHellmanMap[sessionId]
               ->_diffieHellman->getSha256HashFromDerivedSymmetricKeyHex();
+          std::cout << "Server log | IV(hex): "
+                    << MessageExtractionFacility::toHexString(
+                           EncryptionUtility::generateRandomIV(_ivLength));
         } catch (const nlohmann::json::exception &e) {
           crow::json::wvalue err;
           err["message"] =
