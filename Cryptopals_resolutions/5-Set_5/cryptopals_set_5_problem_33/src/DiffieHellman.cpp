@@ -7,10 +7,10 @@
 
 /* constructor / destructor */
 MyCryptoLibrary::DiffieHellman::DiffieHellman(const bool debugFlag)
-    : _debugFlag{debugFlag},
-      _privateKey{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
+    : _privateKey{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
       _publicKey{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
-      _sharedSecret{MessageExtractionFacility::UniqueBIGNUM(BN_new())} {
+      _sharedSecret{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
+      _debugFlag{debugFlag} {
   std::map<std::string, DHParametersLoader::DHParameters> dhParametersMap =
       DHParametersLoader::loadDhParameters(_dhParametersFilename);
   if (dhParametersMap.find("cryptopals-group-33-small") !=
@@ -41,7 +41,7 @@ MyCryptoLibrary::DiffieHellman::~DiffieHellman() {}
  *
  * @return The public key (hex) in a string format.
  */
-const std::string MyCryptoLibrary::DiffieHellman::getPublicKey() {
+const std::string MyCryptoLibrary::DiffieHellman::getPublicKey() const {
   return MessageExtractionFacility::BIGNUMToHex(_publicKey.get());
 }
 /******************************************************************************/
@@ -53,7 +53,7 @@ const std::string MyCryptoLibrary::DiffieHellman::getPublicKey() {
  *
  * @return The group name in a string format.
  */
-const std::string MyCryptoLibrary::DiffieHellman::getGroupName() {
+const std::string &MyCryptoLibrary::DiffieHellman::getGroupName() const {
   return _dhParameter.groupName;
 }
 /******************************************************************************/
@@ -223,8 +223,7 @@ const std::string MyCryptoLibrary::DiffieHellman::deriveSharedSecret(
       MessageExtractionFacility::BIGNUMToHex(_sharedSecret.get())};
   if (_debugFlag) {
     std::cout << "\nDiffie Hellman log | Generated shared secret (hex): "
-              << MessageExtractionFacility::BIGNUMToHex(_sharedSecret.get())
-              << std::endl;
+              << sharedSecretHex << std::endl;
     std::cout << "Diffie Hellman log | Generated shared secret (dec): "
               << MessageExtractionFacility::BIGNUMToDec(_sharedSecret.get())
               << std::endl;
@@ -263,8 +262,7 @@ const std::string MyCryptoLibrary::DiffieHellman::deriveSharedSecret(
   SHA256(dataToHash.data(), dataToHash.size(), keyMaterial.data());
   if (_debugFlag) {
     std::cout << "\nDiffie Hellman log | Derived raw shared secret (hex): "
-              << MessageExtractionFacility::BIGNUMToHex(_sharedSecret.get())
-              << std::endl;
+              << sharedSecretHex << std::endl;
     std::cout << "Diffie Hellman log | Client Nonce (hex): " << clientNonceHex
               << std::endl;
     std::cout << "Diffie Hellman log | Server Nonce (hex): " << serverNonceHex

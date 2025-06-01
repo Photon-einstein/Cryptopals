@@ -203,5 +203,4 @@ Example of a server response to the initial client request:
 24. Add comments to all the methods at the DiffieHellman class (Done)
 25. Add comments to all the methods at the MessageExtractionFacility class (Done)
 26. Add comments to all the methods at the Server class (Done)
-
-27. Run and fix all the problems caught by the static code analysis (TBD)
+27. Run and fix all the problems caught by the static code analysis up to this moment (Done)

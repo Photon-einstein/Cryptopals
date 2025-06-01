@@ -15,7 +15,7 @@ namespace MyCryptoLibrary {
 class DiffieHellman {
 public:
   /* constructor / destructor*/
-  DiffieHellman(const bool debugFlag);
+  explicit DiffieHellman(const bool debugFlag);
   ~DiffieHellman();
 
   /* public methods */
@@ -28,7 +28,7 @@ public:
    *
    * @return The public key (hex) in a string format.
    */
-  const std::string getPublicKey();
+  const std::string getPublicKey() const;
 
   /**
    * @brief This method will return the group name.
@@ -38,7 +38,7 @@ public:
    *
    * @return The group name in a string format.
    */
-  const std::string getGroupName();
+  const std::string &getGroupName() const;
 
   /**
    * @brief This method will derive a symmetric encryption key.
