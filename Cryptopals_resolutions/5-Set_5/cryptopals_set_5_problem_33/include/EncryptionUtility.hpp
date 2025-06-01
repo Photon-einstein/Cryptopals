@@ -28,7 +28,7 @@ const std::string generateCryptographicNonce(const std::size_t length);
  *
  * This method generates a random initialization vector for cryptographic
  * purposes.
- * 
+ *
  * @param ivLength The desired length of the IV in bytes.
  *
  * @return A vector containing the IV generated.
