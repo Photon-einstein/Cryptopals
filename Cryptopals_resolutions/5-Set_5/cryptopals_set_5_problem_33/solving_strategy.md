@@ -204,3 +204,5 @@ Example of a server response to the initial client request:
 25. Add comments to all the methods at the MessageExtractionFacility class (Done)
 26. Add comments to all the methods at the Server class (Done)
 27. Run and fix all the problems caught by the static code analysis up to this moment (Done)
+
+28. Add get hashed secret key method to the Diffie Hellman class, for testing purpose (in progress)
