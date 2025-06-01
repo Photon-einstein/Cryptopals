@@ -10,7 +10,7 @@
 class Client {
 public:
   /* constructor / destructor*/
-  Client(const bool debugFlag);
+  explicit Client(const bool debugFlag);
   ~Client();
 
   /* public methods */
@@ -52,7 +52,7 @@ private:
    * @param response The response received by the server during the execution
    * of the Diffie Hellman key exchange protocol.
    */
-  void printServerResponse(const cpr::Response &response);
+  static void printServerResponse(const cpr::Response &response);
 
   /* private fields */
 
