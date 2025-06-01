@@ -69,6 +69,7 @@
     This message initiates the key exchange and sends the client's public DH share.
 
     JSON Structure:
+    ```json
     {
     "message_type": "client_hello",
     "protocol_version": "1.0",
@@ -80,6 +81,7 @@
         "public_key_A": "Hexadecimal_representation_of_A"
     }
     }
+    ```
 
     Field Explanations:
 
@@ -158,17 +160,17 @@ Party A (Initiator) Action:
     Send A to Party B.   <--- 
 
 Example of a server response to the initial client request:
-
+```json
 {
-  "message_type": "server_hello",
-  "protocol_version": "1.0",
-  "session_id": "aBcDeF12345",         // Echoes client's session ID
-  "nonce": "serverRandomNonceValue", // Server's own unique random nonce
-  "diffie_hellman": {
+"message_type": "server_hello",
+"protocol_version": "1.0",
+"session_id": "aBcDeF12345",         // Echoes client's session ID
+"nonce": "serverRandomNonceValue", // Server's own unique random nonce
+"diffie_hellman": {
     "public_key_B": "123456..."      // Server's public key
-  }
 }
-
+}
+```
 13.1. Create a valid client request to the server (done)
 
 14. Create a shared secret on the server side (in progress)
@@ -204,5 +206,26 @@ Example of a server response to the initial client request:
 25. Add comments to all the methods at the MessageExtractionFacility class (Done)
 26. Add comments to all the methods at the Server class (Done)
 27. Run and fix all the problems caught by the static code analysis up to this moment (Done)
+28. Add get hashed secret key method to the Diffie Hellman class, for testing purpose (Done)
 
-28. Add get hashed secret key method to the Diffie Hellman class, for testing purpose (in progress)
+29. Add confirmation step on the server side (in progress)
+    29.1. Add generation of random IV to the server (Done)
+    29.2. Add encryption aes_256 to the encryption utility (in progress)
+    29.2. Add decryption aes_256 to the encryption utility (TBD)
+    29.1. Add new fields to the json response of the server (TBD)
+    
+    ```json
+    {
+    "message": "Diffie Hellman keys setup successfully!",
+    "sessionId": "abc123",
+    "diffieHellman": {
+        "groupName": "modp14",
+        "publicKeyB": "..."
+    },
+    "nonce": "server_nonce",
+    "confirmation": { // new field
+        "ciphertext": "<AES-CBC or AES-GCM encrypted JSON>", // new field
+        "iv": "<initialization vector>" // new field
+    }
+    }
+    ```

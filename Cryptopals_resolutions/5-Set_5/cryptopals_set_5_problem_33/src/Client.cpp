@@ -9,6 +9,7 @@
 #include <openssl/rand.h>
 
 #include "./../include/Client.hpp"
+#include "./../include/EncryptionUtility.hpp"
 
 /* constructor / destructor */
 Client::Client(const bool debugFlag) : _debugFlag{debugFlag} {}
@@ -26,7 +27,7 @@ void Client::diffieHellmanKeyExchange() {
   std::unique_ptr<MyCryptoLibrary::DiffieHellman> diffieHellman(
       std::make_unique<MyCryptoLibrary::DiffieHellman>(_debugFlag));
   std::string clientNonceHex{
-      MessageExtractionFacility::generateCryptographicNonce(_nonceSize)};
+      EncryptionUtility::generateCryptographicNonce(_nonceSize)};
   std::string requestBody =
       fmt::format(R"({{
     "messageType": "client_hello",

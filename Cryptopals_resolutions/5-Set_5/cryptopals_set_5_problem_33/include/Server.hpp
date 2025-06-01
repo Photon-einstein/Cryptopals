@@ -9,6 +9,7 @@
 
 #include "DhParametersLoader.hpp"
 #include "DiffieHellman.hpp"
+#include "EncryptionUtility.hpp"
 
 class Server {
 public:
@@ -48,7 +49,7 @@ private:
         : _diffieHellman(
               std::make_unique<MyCryptoLibrary::DiffieHellman>(debugFlag)),
           _serverNonceHex(
-              MessageExtractionFacility::generateCryptographicNonce(nonceSize)),
+              EncryptionUtility::generateCryptographicNonce(nonceSize)),
           _clientNonceHex{clientNonceHex}, _clientId{clientId} {}
   };
 
@@ -103,6 +104,7 @@ private:
 
   std::thread _serverThread;
   const bool _debugFlag;
+  const std::size_t _ivLength{16}; // bytes
 };
 
 #endif // SERVER_HPP
