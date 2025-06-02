@@ -210,8 +210,8 @@ Example of a server response to the initial client request:
 
 29. Add confirmation step on the server side (in progress)
     29.1. Add generation of random IV to the server (Done)
-    29.2. Add encryption aes_256 to the encryption utility (in progress)
-    29.2. Add decryption aes_256 to the encryption utility (TBD)
+    29.2. Add encryption aes_256 to the encryption utility (Done)
+    29.2. Add decryption aes_256 to the decryption utility (in progress)
     29.1. Add new fields to the json response of the server (TBD)
     
     ```json

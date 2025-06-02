@@ -34,7 +34,23 @@ const std::string generateCryptographicNonce(const std::size_t length);
  * @return A vector containing the IV generated.
  * @throws std::runtime_error if IV generation fails.
  */
-std::vector<unsigned char> generateRandomIV(std::size_t ivLength);
+std::vector<uint8_t> generateRandomIV(std::size_t ivLength);
+
+/**
+ * @brief Encrypts a plaintext message using AES-256-CBC mode
+ *
+ * Encrypts a plaintext message using AES-256-CBC mode, using openssl library.
+ *
+ * @param plaintext The text to be encrypted.
+ * @param key The key to be used in the encryption process.
+ * @param iv The initialization vector to be used in the encryption process.
+ *
+ * @return The ciphertext, in a hexadecimal string format.
+ * @throws std::runtime_error if IV or key size does not meet the requirements.
+ */
+std::string encryptMessageAes256CbcMode(const std::string &plaintext,
+                                        const std::vector<uint8_t> &key,
+                                        const std::vector<uint8_t> &iv);
 
 }; // namespace EncryptionUtility
 

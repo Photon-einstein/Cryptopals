@@ -70,6 +70,17 @@ public:
    */
   const std::string getSha256HashFromDerivedSymmetricKeyHex() const;
 
+  /**
+   * @brief This method returns the symmetric key after the Diffie
+   * Hellman key exchange protocol has been completed.
+   *
+   *
+   * @return Symmetric key
+   * @throws std::runtime_error if the Diffie Hellman key exchange protocol
+   * has still not complete.
+   */
+  const std::vector<uint8_t> &getSymmetricKey();
+
 private:
   /* private methods */
 
@@ -95,6 +106,7 @@ private:
   MessageExtractionFacility::UniqueBIGNUM _p, _g, _privateKey, _publicKey,
       _sharedSecret;
   bool _debugFlag;
+  std::vector<uint8_t> _derivedSymmetricKey;
   std::string _derivedSymmetricKeyHex = "";
 };
 
