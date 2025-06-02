@@ -1,6 +1,7 @@
 #include <iostream>
 #include <openssl/bn.h>
 #include <openssl/err.h>
+#include <openssl/evp.h>
 #include <stdexcept>
 
 #include "./../include/DiffieHellman.hpp"
@@ -57,6 +58,27 @@ const std::string &MyCryptoLibrary::DiffieHellman::getGroupName() const {
   return _dhParameter.groupName;
 }
 /******************************************************************************/
+/**
+ * @brief This method returns the symmetric key after the Diffie
+ * Hellman key exchange protocol has been completed.
+ *
+ *
+ * @return Symmetric key
+ * @throws std::runtime_error if the Diffie Hellman key exchange protocol
+ * has still not complete.
+ */
+const std::vector<uint8_t> &MyCryptoLibrary::DiffieHellman::getSymmetricKey() {
+  const int keyLength = EVP_CIPHER_key_length(EVP_aes_256_cbc());
+  if (_derivedSymmetricKey.size() != keyLength) {
+    throw std::runtime_error(
+        "Diffie Hellman log | getSymmetricKey(): Diffie Hellman key exchange "
+        "protocol "
+        "must be completed before retrieving the derived symmetric key.");
+  }
+  return _derivedSymmetricKey;
+}
+/******************************************************************************/
+
 /**
  * @brief This method will generate a private key.
  *
@@ -257,7 +279,7 @@ const std::string MyCryptoLibrary::DiffieHellman::deriveSharedSecret(
   dataToHash.insert(dataToHash.end(), serverNonceBytes.begin(),
                     serverNonceBytes.end());
   // 4. Hash the concatenated data
-  std::vector<unsigned char> keyMaterial(
+  std::vector<uint8_t> keyMaterial(
       SHA256_DIGEST_LENGTH); // SHA256_DIGEST_LENGTH is 32 bytes
   SHA256(dataToHash.data(), dataToHash.size(), keyMaterial.data());
   if (_debugFlag) {
@@ -271,6 +293,8 @@ const std::string MyCryptoLibrary::DiffieHellman::deriveSharedSecret(
               << MessageExtractionFacility::toHexString(keyMaterial)
               << std::endl;
   }
+  _derivedSymmetricKey.clear();
+  _derivedSymmetricKey = keyMaterial;
   _derivedSymmetricKeyHex = MessageExtractionFacility::toHexString(keyMaterial);
   return _derivedSymmetricKeyHex;
 }
@@ -283,7 +307,6 @@ const std::string MyCryptoLibrary::DiffieHellman::deriveSharedSecret(
  * This method will return the SHA256 from the derived symmetric
  * key from both parties that performed the Diffie Hellman key exchange
  * protocol, it will return the value in hexadecimal format.
- *
  *
  * @return SHA256(symmetric derived key) in hexadecimal format
  */
