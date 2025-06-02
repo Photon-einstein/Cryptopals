@@ -77,8 +77,6 @@ void Client::diffieHellmanKeyExchange() {
         _diffieHellmanMap[sessionId]->_diffieHellman->deriveSharedSecret(
             extractedPublicKeyB, _diffieHellmanMap[sessionId]->_serverNonceHex,
             _diffieHellmanMap[sessionId]->_clientNonceHex);
-    _diffieHellmanMap[sessionId]
-        ->_diffieHellman->getSha256HashFromDerivedSymmetricKeyHex();
   } catch (const std::exception &e) {
     std::cerr << "Client log | diffieHellmanKeyExchange(): secret key "
                  "derivation step: "

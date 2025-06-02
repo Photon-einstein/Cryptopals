@@ -43,14 +43,17 @@ private:
     std::string _clientNonceHex;
     std::string _derivedKeyHex;
     std::string _clientId;
+    std::vector<uint8_t> _iv;
 
     SessionData(const std::size_t nonceSize, const std::string &clientNonceHex,
-                const std::string &clientId, const bool debugFlag)
+                const std::string &clientId, const bool debugFlag,
+                const std::size_t ivLength)
         : _diffieHellman(
               std::make_unique<MyCryptoLibrary::DiffieHellman>(debugFlag)),
           _serverNonceHex(
               EncryptionUtility::generateCryptographicNonce(nonceSize)),
-          _clientNonceHex{clientNonceHex}, _clientId{clientId} {}
+          _clientNonceHex{clientNonceHex}, _clientId{clientId},
+          _iv{EncryptionUtility::generateRandomIV(ivLength)} {}
   };
 
   /* private methods */

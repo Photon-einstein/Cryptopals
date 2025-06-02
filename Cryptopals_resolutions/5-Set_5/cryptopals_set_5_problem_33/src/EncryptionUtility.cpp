@@ -58,8 +58,10 @@ std::vector<uint8_t> EncryptionUtility::generateRandomIV(std::size_t ivLength) {
  * Encrypts a plaintext message using AES-256-CBC mode, using openssl library.
  *
  * @param plaintext The text to be encrypted.
- * @param key The key to be used in the encryption process.
- * @param iv The initialization vector to be used in the encryption process.
+ * @param key The key to be used in the encryption process (32 bytes for
+ * AES-256).
+ * @param iv The initialization vector to be used in the encryption process
+ * (16 bytes).
  *
  * @return The ciphertext, in a hexadecimal string format.
  * @throws std::runtime_error if IV or key size does not meet the requirements.
@@ -97,5 +99,60 @@ EncryptionUtility::encryptMessageAes256CbcMode(const std::string &plaintext,
   ciphertext.resize(ciphertext_len);
   EVP_CIPHER_CTX_free(ctx);
   return MessageExtractionFacility::toHexString(ciphertext);
+}
+/******************************************************************************/
+/**
+ * @brief Decrypts a ciphertext message using AES-256-CBC mode.
+ *
+ * Decrypts a ciphertext message using AES-256-CBC mode using the OpenSSL
+ * library.
+ *
+ * @param ciphertextHex The ciphertext in hexadecimal string format.
+ * @param key The key used in the encryption process (32 bytes for AES-256).
+ * @param iv The initialization vector used in the encryption process (16
+ * bytes).
+ *
+ * @return The decrypted plaintext as a standard string.
+ * @throws std::runtime_error if IV or key size is invalid or decryption fails.
+ */
+std::string
+EncryptionUtility::decryptMessageAes256CbcMode(const std::string &ciphertextHex,
+                                               const std::vector<uint8_t> &key,
+                                               const std::vector<uint8_t> &iv) {
+  if (iv.size() != AES_BLOCK_SIZE) {
+    throw std::runtime_error(
+        "EncryptionUtility log | decryptMessageAes256CbcMode(): "
+        "Initialization vector must be " +
+        std::to_string(AES_BLOCK_SIZE) + " bytes.");
+  }
+
+  const int keyLength = EVP_CIPHER_key_length(EVP_aes_256_cbc());
+  if (key.size() != keyLength) {
+    throw std::runtime_error(
+        "EncryptionUtility log | decryptMessageAes256CbcMode(): "
+        "Key must be " +
+        std::to_string(keyLength) + " bytes for AES-256-CBC mode");
+  }
+  std::vector<uint8_t> ciphertextBytes =
+      MessageExtractionFacility::hexToBytes(ciphertextHex);
+  EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+  std::vector<uint8_t> plaintext(ciphertextBytes.size());
+  int len = 0, plaintext_len = 0;
+  EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr, key.data(), iv.data());
+  EVP_DecryptUpdate(ctx, plaintext.data(), &len, ciphertextBytes.data(),
+                    ciphertextBytes.size());
+  plaintext_len = len;
+  int final_len = 0;
+  if (EVP_DecryptFinal_ex(ctx, plaintext.data() + len, &final_len) != 1) {
+    EVP_CIPHER_CTX_free(ctx);
+    throw std::runtime_error(
+        "EncryptionUtility log | decryptMessageAes256CbcMode(): "
+        "Decryption failed. Possibly due to wrong key, IV, or corrupted "
+        "ciphertext.");
+  }
+  plaintext_len += final_len;
+  EVP_CIPHER_CTX_free(ctx);
+  plaintext.resize(plaintext_len);
+  return std::string(plaintext.begin(), plaintext.end());
 }
 /******************************************************************************/

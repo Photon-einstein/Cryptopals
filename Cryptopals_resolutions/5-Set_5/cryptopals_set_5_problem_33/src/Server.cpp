@@ -85,13 +85,17 @@ void Server::keyExchangeRoute() {
           MessageExtractionFacility::UniqueBIGNUM peerPublicKey =
               MessageExtractionFacility::hexToUniqueBIGNUM(extractedPublicKeyA);
           boost::uuids::uuid sessionId = generateUniqueSessionId();
+
           _diffieHellmanMap[sessionId] = std::make_unique<SessionData>(
-              _nonceSize, extractedNonceClient, extractedClientId, _debugFlag);
+              _nonceSize, extractedNonceClient, extractedClientId, _debugFlag,
+              _ivLength);
+
           _diffieHellmanMap[sessionId]->_derivedKeyHex =
               _diffieHellmanMap[sessionId]->_diffieHellman->deriveSharedSecret(
                   extractedPublicKeyA,
                   _diffieHellmanMap[sessionId]->_serverNonceHex,
                   _diffieHellmanMap[sessionId]->_clientNonceHex);
+
           res["message"] = "Diffie Hellman keys setup successfully!";
           res["sessionId"] = boost::uuids::to_string(sessionId);
           res["diffieHellman"] = {
@@ -100,11 +104,6 @@ void Server::keyExchangeRoute() {
               {"publicKeyB",
                _diffieHellmanMap[sessionId]->_diffieHellman->getPublicKey()}};
           res["nonce"] = _diffieHellmanMap[sessionId]->_serverNonceHex;
-          _diffieHellmanMap[sessionId]
-              ->_diffieHellman->getSha256HashFromDerivedSymmetricKeyHex();
-          std::cout << "Server log | IV(hex): "
-                    << MessageExtractionFacility::toHexString(
-                           EncryptionUtility::generateRandomIV(_ivLength));
         } catch (const nlohmann::json::exception &e) {
           crow::json::wvalue err;
           err["message"] =
