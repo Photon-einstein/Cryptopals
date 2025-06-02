@@ -87,6 +87,8 @@ private:
    */
   void keyExchangeRoute();
 
+  void getSessionsDataEndpoint();
+
   /**
    * @brief This method will generate a unique session id.
    *

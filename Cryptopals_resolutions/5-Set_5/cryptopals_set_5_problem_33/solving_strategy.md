@@ -213,7 +213,7 @@ Example of a server response to the initial client request:
     29.2. Add encryption aes_256 to the encryption utility (Done)
     29.3. Add decryption aes_256 to the encryption utility (Done)
     
-    29.4. Add new fields to the json response of the server (in progress)
+    29.4. Add new fields to the json response of the server (Done)
     
     ```json
     {
@@ -230,3 +230,10 @@ Example of a server response to the initial client request:
     }
     }
     ```
+
+30. Create an endpoint that prints all the information on the server side for each session (Done)
+
+31. Add a client id to the client constructor (in progress)
+
+32. Add two more clients, meaning runClient2, runClient3 (TBD)
+33. Create a confirmation on the client side (TBD)

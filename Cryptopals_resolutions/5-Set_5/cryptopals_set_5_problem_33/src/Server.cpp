@@ -20,18 +20,29 @@ Server::~Server() {
 }
 /******************************************************************************/
 /**
- * @brief This method is the entry point for the server URL address
+ * @brief This method will start all the server endpoints in a multi thread
+ * environment
  *
- * This method will serve as a confirmation that the server URL is up
- * and running at the root path
+ * This method will start all the endpoints that the server provides to their
+ * clients
  */
-void Server::rootEndpoint() {
-  CROW_ROUTE(_app, "/").methods("GET"_method)([&]() {
-    crow::json::wvalue rootMessage;
-    rootMessage["message"] =
-        "Server log | Root endpoint, server up and running";
-    return crow::response(200, rootMessage);
-  });
+void Server::runServer() {
+  setupRoutes();
+  _app.port(_portProduction).multithreaded().run();
+}
+/******************************************************************************/
+/**
+ * @brief This method will start all the server endpoints in a multi thread
+ * environment for a test scenario
+ *
+ * This method will start all the endpoints that the server provides to their
+ * clients, for a given test
+ */
+void Server::runServerTest() {
+  _serverThread = std::thread([this]() {
+    setupRoutes();
+    _app.port(_portTest).multithreaded().run();
+  }); // Let it live until process ends
 }
 /******************************************************************************/
 /**
@@ -45,6 +56,22 @@ void Server::rootEndpoint() {
 void Server::setupRoutes() {
   rootEndpoint();
   keyExchangeRoute();
+  getSessionsDataEndpoint();
+}
+/******************************************************************************/
+/**
+ * @brief This method is the entry point for the server URL address
+ *
+ * This method will serve as a confirmation that the server URL is up
+ * and running at the root path
+ */
+void Server::rootEndpoint() {
+  CROW_ROUTE(_app, "/").methods("GET"_method)([&]() {
+    crow::json::wvalue rootMessage;
+    rootMessage["message"] =
+        "Server log | Root endpoint, server up and running";
+    return crow::response(200, rootMessage);
+  });
 }
 /******************************************************************************/
 /**
@@ -104,6 +131,24 @@ void Server::keyExchangeRoute() {
               {"publicKeyB",
                _diffieHellmanMap[sessionId]->_diffieHellman->getPublicKey()}};
           res["nonce"] = _diffieHellmanMap[sessionId]->_serverNonceHex;
+          // confirmation payload
+          nlohmann::json confirmationPayload = {
+              {"sessionId", boost::uuids::to_string(sessionId)},
+              {"clientId", extractedClientId},
+              {"clientNonce", extractedNonceClient},
+              {"serverNonce", _diffieHellmanMap[sessionId]->_serverNonceHex},
+              {"message", "Key exchange complete"}};
+          const std::string confirmationString = confirmationPayload.dump();
+          std::string encryptedConfirmationHex =
+              EncryptionUtility::encryptMessageAes256CbcMode(
+                  confirmationString,
+                  _diffieHellmanMap[sessionId]
+                      ->_diffieHellman->getSymmetricKey(),
+                  _diffieHellmanMap[sessionId]->_iv);
+          res["confirmation"] = {
+              {"ciphertext", encryptedConfirmationHex},
+              {"iv", MessageExtractionFacility::toHexString(
+                         _diffieHellmanMap[sessionId]->_iv)}};
         } catch (const nlohmann::json::exception &e) {
           crow::json::wvalue err;
           err["message"] =
@@ -119,30 +164,30 @@ void Server::keyExchangeRoute() {
       });
 }
 /******************************************************************************/
-/**
- * @brief This method will start all the server endpoints in a multi thread
- * environment
- *
- * This method will start all the endpoints that the server provides to their
- * clients
- */
-void Server::runServer() {
-  setupRoutes();
-  _app.port(_portProduction).multithreaded().run();
-}
-/******************************************************************************/
-/**
- * @brief This method will start all the server endpoints in a multi thread
- * environment for a test scenario
- *
- * This method will start all the endpoints that the server provides to their
- * clients, for a given test
- */
-void Server::runServerTest() {
-  _serverThread = std::thread([this]() {
-    setupRoutes();
-    _app.port(_portTest).multithreaded().run();
-  }); // Let it live until process ends
+void Server::getSessionsDataEndpoint() {
+  CROW_ROUTE(_app, "/sessionsData")
+      .methods("GET"_method)([&](const crow::request &req) {
+        try {
+          crow::json::wvalue res;
+          for (const auto &entry : _diffieHellmanMap) {
+            const auto &sessionId = entry.first;
+            const auto &sessionData = entry.second;
+            std::string sessionIdStr = boost::uuids::to_string(sessionId);
+            res[sessionIdStr] = {{"sessionId", sessionIdStr},
+                                 {"clientId", sessionData->_clientId},
+                                 {"clientNonce", sessionData->_clientNonceHex},
+                                 {"serverNonce", sessionData->_serverNonceHex},
+                                 {"derivedKey", sessionData->_derivedKeyHex},
+                                 {"iv", MessageExtractionFacility::toHexString(
+                                            sessionData->_iv)}};
+          }
+          return crow::response(200, res);
+        } catch (const std::exception &e) {
+          crow::json::wvalue err;
+          err["error"] = e.what();
+          return crow::response(500, err);
+        }
+      });
 }
 /******************************************************************************/
 /**
