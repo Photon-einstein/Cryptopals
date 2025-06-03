@@ -48,9 +48,6 @@ void Client::diffieHellmanKeyExchange() {
                          std::string("/keyExchange")},
                 cpr::Header{{"Content-Type", "application/json"}},
                 cpr::Body{requestBody});
-  if (_debugFlag) {
-    printServerResponse(response);
-  }
   try {
     if (response.status_code != 201) {
       throw std::runtime_error("Client log | diffieHellmanKeyExchange(): "
@@ -106,8 +103,17 @@ void Client::diffieHellmanKeyExchange() {
       std::cout << "Client log | diffieHellmanKeyExchange(): Diffie Hellman "
                    "key exchange succeed"
                 << std::endl;
-      std::cout << "\tciphertext decrypted: "
-                << std::get<1>(connectionTestResult) << std::endl;
+      try {
+        const std::string &decrypted = std::get<1>(connectionTestResult);
+        nlohmann::json parsed = nlohmann::json::parse(decrypted);
+        std::cout << "Ciphertext decrypted:\n" << parsed.dump(4) << std::endl;
+      } catch (const nlohmann::json::exception &e) {
+        std::cerr << "\tWarning: Decrypted ciphertext is not valid JSON, "
+                     "printing raw. Error: "
+                  << e.what() << std::endl;
+        std::cout << "\tCiphertext decrypted (raw): "
+                  << std::get<1>(connectionTestResult) << std::endl;
+      }
       std::cout << "-----------------------------------------------------------"
                    "------------------\n"
                 << std::endl;
@@ -162,8 +168,6 @@ std::tuple<bool, std::string> Client::confirmationServerResponse(
   try {
     plaintext =
         EncryptionUtility::decryptMessageAes256CbcMode(ciphertext, key, iv);
-    std::cout << "Client log | confirmationServerResponse(), plaintext: '"
-              << plaintext << "'" << std::endl;
     nlohmann::json parsedJson = nlohmann::json::parse(plaintext);
     std::string sessionIdExtracted =
         parsedJson.at("sessionId").get<std::string>();
