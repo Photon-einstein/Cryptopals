@@ -67,7 +67,8 @@ const std::string &MyCryptoLibrary::DiffieHellman::getGroupName() const {
  * @throws std::runtime_error if the Diffie Hellman key exchange protocol
  * has still not complete.
  */
-const std::vector<uint8_t> &MyCryptoLibrary::DiffieHellman::getSymmetricKey() {
+const std::vector<uint8_t> &
+MyCryptoLibrary::DiffieHellman::getSymmetricKey() const {
   const int keyLength = EVP_CIPHER_key_length(EVP_aes_256_cbc());
   if (_derivedSymmetricKey.size() != keyLength) {
     throw std::runtime_error(

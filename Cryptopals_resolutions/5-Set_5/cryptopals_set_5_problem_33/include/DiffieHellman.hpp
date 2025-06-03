@@ -65,7 +65,7 @@ public:
    * @throws std::runtime_error if the Diffie Hellman key exchange protocol
    * has still not complete.
    */
-  const std::vector<uint8_t> &getSymmetricKey();
+  const std::vector<uint8_t> &getSymmetricKey() const;
 
   const std::string &getConfirmationMessage() const;
 
