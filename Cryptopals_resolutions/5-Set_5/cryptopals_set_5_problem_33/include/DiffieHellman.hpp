@@ -67,6 +67,8 @@ public:
    */
   const std::vector<uint8_t> &getSymmetricKey();
 
+  const std::string &getConfirmationMessage() const;
+
 private:
   /* private methods */
 
@@ -94,6 +96,7 @@ private:
   bool _debugFlag;
   std::vector<uint8_t> _derivedSymmetricKey;
   std::string _derivedSymmetricKeyHex = "";
+  const std::string _confirmationMessage{"Key exchange complete"};
 };
 
 } // namespace MyCryptoLibrary

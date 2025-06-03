@@ -78,7 +78,11 @@ const std::vector<uint8_t> &MyCryptoLibrary::DiffieHellman::getSymmetricKey() {
   return _derivedSymmetricKey;
 }
 /******************************************************************************/
-
+const std::string &
+MyCryptoLibrary::DiffieHellman::getConfirmationMessage() const {
+  return _confirmationMessage;
+}
+/******************************************************************************/
 /**
  * @brief This method will generate a private key.
  *

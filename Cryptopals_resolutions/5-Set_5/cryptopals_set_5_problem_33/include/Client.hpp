@@ -31,12 +31,15 @@ private:
     std::string _serverNonceHex;
     std::string _clientNonceHex;
     std::string _derivedKeyHex;
+    std::vector<uint8_t> _iv;
 
     SessionData(std::unique_ptr<MyCryptoLibrary::DiffieHellman> diffieHellman,
                 const std::string &serverNonceHex,
-                const std::string &clientNonceHex)
+                const std::string &clientNonceHex,
+                const std::vector<uint8_t> iv)
         : _diffieHellman(std::move(diffieHellman)),
-          _serverNonceHex{serverNonceHex}, _clientNonceHex{clientNonceHex} {}
+          _serverNonceHex{serverNonceHex}, _clientNonceHex{clientNonceHex},
+          _iv{iv} {}
   };
 
   /* private methods */
@@ -54,8 +57,13 @@ private:
    */
   static void printServerResponse(const cpr::Response &response);
 
-  /* private fields */
+  std::tuple<bool, std::string> confirmationServerResponse(
+      const std::string &ciphertext, const std::vector<uint8_t> &key,
+      const std::vector<uint8_t> &iv, const std::string &sessionId,
+      const std::string &clientId, const std::string &clientNonce,
+      const std::string &serverNonce, const std::string &message);
 
+  /* private fields */
   std::map<std::string, std::unique_ptr<SessionData>> _diffieHellmanMap;
 
   const int _portServerProduction{18080};
