@@ -233,7 +233,14 @@ Example of a server response to the initial client request:
 
 30. Create an endpoint that prints all the information on the server side for each session (Done)
 
-31. Add a client id to the client constructor (in progress)
+Endpoint URL: 
+On the browser:
+```bash
+http://localhost:18080/sessionsData
+```
 
-32. Add two more clients, meaning runClient2, runClient3 (TBD)
-33. Create a confirmation on the client side (TBD)
+31. Add a client ID to the client constructor (Done)
+32. Add two more clients, meaning runClient2, runClient3 (Done)
+33. Add concurrency apparat in place to deal with multiple clients (Done)
+
+34. Create a confirmation on the client side (in progress)

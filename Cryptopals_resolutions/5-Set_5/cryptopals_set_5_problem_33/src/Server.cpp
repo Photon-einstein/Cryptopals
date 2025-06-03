@@ -113,6 +113,7 @@ void Server::keyExchangeRoute() {
               MessageExtractionFacility::hexToUniqueBIGNUM(extractedPublicKeyA);
           boost::uuids::uuid sessionId = generateUniqueSessionId();
 
+          std::lock_guard<std::mutex> lock(_diffieHellmanMapMutex);
           _diffieHellmanMap[sessionId] = std::make_unique<SessionData>(
               _nonceSize, extractedNonceClient, extractedClientId, _debugFlag,
               _ivLength);
@@ -169,6 +170,7 @@ void Server::getSessionsDataEndpoint() {
       .methods("GET"_method)([&](const crow::request &req) {
         try {
           crow::json::wvalue res;
+          std::lock_guard<std::mutex> lock(_diffieHellmanMapMutex);
           for (const auto &entry : _diffieHellmanMap) {
             const auto &sessionId = entry.first;
             const auto &sessionData = entry.second;
@@ -200,6 +202,7 @@ boost::uuids::uuid Server::generateUniqueSessionId() {
   bool uniqueSessionId{false};
   boost::uuids::random_generator gen;
   boost::uuids::uuid sessionId;
+  std::lock_guard<std::mutex> lock(_diffieHellmanMapMutex);
   do {
     sessionId = gen();
     if (_diffieHellmanMap.find(sessionId) == _diffieHellmanMap.end()) {

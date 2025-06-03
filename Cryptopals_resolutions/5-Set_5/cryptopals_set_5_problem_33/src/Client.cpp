@@ -12,7 +12,8 @@
 #include "./../include/EncryptionUtility.hpp"
 
 /* constructor / destructor */
-Client::Client(const bool debugFlag) : _debugFlag{debugFlag} {}
+Client::Client(const std::string &clientId, const bool debugFlag)
+    : _clientId{clientId}, _debugFlag{debugFlag} {}
 /******************************************************************************/
 Client::~Client() {}
 /******************************************************************************/

@@ -10,7 +10,7 @@
 class Client {
 public:
   /* constructor / destructor*/
-  explicit Client(const bool debugFlag);
+  explicit Client(const std::string &clientId, const bool debugFlag);
   ~Client();
 
   /* public methods */
@@ -61,7 +61,7 @@ private:
   const int _portServerProduction{18080};
   const int _portServerTest{18081};
 
-  const std::string _clientId = "Bob";
+  const std::string _clientId{};
   const std::size_t _nonceSize{16}; // bytes
   const bool _debugFlag;
 };
