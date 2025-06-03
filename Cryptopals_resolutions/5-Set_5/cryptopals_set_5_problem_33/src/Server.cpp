@@ -124,7 +124,8 @@ void Server::keyExchangeRoute() {
                   _diffieHellmanMap[sessionId]->_serverNonceHex,
                   _diffieHellmanMap[sessionId]->_clientNonceHex);
 
-          res["message"] = "Diffie Hellman keys setup successfully!";
+          res["message"] = _diffieHellmanMap[sessionId]
+                               ->_diffieHellman->getConfirmationMessage();
           res["sessionId"] = boost::uuids::to_string(sessionId);
           res["diffieHellman"] = {
               {"groupName",
@@ -138,7 +139,8 @@ void Server::keyExchangeRoute() {
               {"clientId", extractedClientId},
               {"clientNonce", extractedNonceClient},
               {"serverNonce", _diffieHellmanMap[sessionId]->_serverNonceHex},
-              {"message", "Key exchange complete"}};
+              {"message", _diffieHellmanMap[sessionId]
+                              ->_diffieHellman->getConfirmationMessage()}};
           const std::string confirmationString = confirmationPayload.dump();
           std::string encryptedConfirmationHex =
               EncryptionUtility::encryptMessageAes256CbcMode(

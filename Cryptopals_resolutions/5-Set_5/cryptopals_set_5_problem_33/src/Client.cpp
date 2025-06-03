@@ -64,20 +64,54 @@ void Client::diffieHellmanKeyExchange() {
         parsedJson.at("diffieHellman").at("groupName").get<std::string>();
     std::string extractedPublicKeyB =
         parsedJson.at("diffieHellman").at("publicKeyB").get<std::string>();
+    std::string ciphertext =
+        parsedJson.at("confirmation").at("ciphertext").get<std::string>();
+    std::string ivHex =
+        parsedJson.at("confirmation").at("iv").get<std::string>();
+    std::vector<uint8_t> iv = MessageExtractionFacility::hexToBytes(ivHex);
     if (_debugFlag) {
       std::cout << "\n--- Client log | Extracted Data ---" << std::endl;
       std::cout << "\tSession id: " << sessionId << std::endl;
       std::cout << "\tNonce: " << extractedNonceServer << std::endl;
       std::cout << "\tGroup Name: " << extractedGroupName << std::endl;
       std::cout << "\tPublic Key B: " << extractedPublicKeyB << std::endl;
+      std::cout << "\tCiphertext: " << ciphertext << std::endl;
+      std::cout << "\tIV(hex): " << ivHex << std::endl;
       std::cout << "----------------------" << std::endl;
     }
     _diffieHellmanMap[sessionId] = std::make_unique<SessionData>(
-        std::move(diffieHellman), extractedNonceServer, clientNonceHex);
+        std::move(diffieHellman), extractedNonceServer, clientNonceHex, iv);
     _diffieHellmanMap[sessionId]->_derivedKeyHex =
         _diffieHellmanMap[sessionId]->_diffieHellman->deriveSharedSecret(
             extractedPublicKeyB, _diffieHellmanMap[sessionId]->_serverNonceHex,
             _diffieHellmanMap[sessionId]->_clientNonceHex);
+    // confirmation of the data received
+    std::tuple<bool, std::string> connectionTestResult =
+        confirmationServerResponse(
+            ciphertext,
+            MessageExtractionFacility::hexToBytes(
+                _diffieHellmanMap[sessionId]->_derivedKeyHex),
+            _diffieHellmanMap[sessionId]->_iv, sessionId, _clientId,
+            _diffieHellmanMap[sessionId]->_clientNonceHex,
+            _diffieHellmanMap[sessionId]->_serverNonceHex,
+            _diffieHellmanMap[sessionId]
+                ->_diffieHellman->getConfirmationMessage());
+    if (std::get<0>(connectionTestResult) == false) {
+      throw std::runtime_error("Client log | diffieHellmanKeyExchange(): "
+                               "Diffie Hellman key exchange failed");
+    } else {
+      std::cout << "\n\n-------------------------------------------------------"
+                   "----------------------"
+                << std::endl;
+      std::cout << "Client log | diffieHellmanKeyExchange(): Diffie Hellman "
+                   "key exchange succeed"
+                << std::endl;
+      std::cout << "\tciphertext decrypted: "
+                << std::get<1>(connectionTestResult) << std::endl;
+      std::cout << "-----------------------------------------------------------"
+                   "------------------\n"
+                << std::endl;
+    }
   } catch (const std::exception &e) {
     std::cerr << "Client log | diffieHellmanKeyExchange(): secret key "
                  "derivation step: "
@@ -116,5 +150,40 @@ void Client::printServerResponse(const cpr::Response &response) {
                 << e.what() << "\n";
     }
   }
+}
+/******************************************************************************/
+std::tuple<bool, std::string> Client::confirmationServerResponse(
+    const std::string &ciphertext, const std::vector<uint8_t> &key,
+    const std::vector<uint8_t> &iv, const std::string &sessionId,
+    const std::string &clientId, const std::string &clientNonce,
+    const std::string &serverNonce, const std::string &message) {
+  bool comparisonRes{false};
+  std::string plaintext;
+  try {
+    plaintext =
+        EncryptionUtility::decryptMessageAes256CbcMode(ciphertext, key, iv);
+    std::cout << "Client log | confirmationServerResponse(), plaintext: '"
+              << plaintext << "'" << std::endl;
+    nlohmann::json parsedJson = nlohmann::json::parse(plaintext);
+    std::string sessionIdExtracted =
+        parsedJson.at("sessionId").get<std::string>();
+    std::string clientIdExtracted =
+        parsedJson.at("clientId").get<std::string>();
+    std::string clientNonceExtracted =
+        parsedJson.at("clientNonce").get<std::string>();
+    std::string serverNonceExtracted =
+        parsedJson.at("serverNonce").get<std::string>();
+    std::string messageExtracted = parsedJson.at("message").get<std::string>();
+    if (sessionId == sessionIdExtracted && clientId == clientIdExtracted &&
+        clientNonce == clientNonceExtracted &&
+        serverNonce == serverNonceExtracted && message == messageExtracted) {
+      comparisonRes = true;
+    }
+  } catch (const std::exception &e) {
+    std::cerr << "Client log | confirmationServerResponse(): " << e.what()
+              << std::endl;
+    return std::make_tuple(comparisonRes, plaintext);
+  }
+  return std::make_tuple(comparisonRes, plaintext);
 }
 /******************************************************************************/
