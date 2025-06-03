@@ -14,7 +14,9 @@ int main(void) {
   start = clock();
   /* work to verify */
   const bool debugFlag{true};
-  std::shared_ptr<Client> client = std::make_shared<Client>(debugFlag);
+  const std::string clientId{"Bob"};
+  std::shared_ptr<Client> client =
+      std::make_shared<Client>(clientId, debugFlag);
   client->diffieHellmanKeyExchange();
   /* end of the work */
   end = clock();

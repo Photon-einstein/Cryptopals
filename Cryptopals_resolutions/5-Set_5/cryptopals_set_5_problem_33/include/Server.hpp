@@ -98,8 +98,9 @@ private:
   boost::uuids::uuid generateUniqueSessionId();
 
   /* private fields */
-
+  mutable std::mutex _diffieHellmanMapMutex;
   std::map<boost::uuids::uuid, std::unique_ptr<SessionData>> _diffieHellmanMap;
+
   const std::size_t _nonceSize{16}; // bytes
 
   crow::SimpleApp _app;
