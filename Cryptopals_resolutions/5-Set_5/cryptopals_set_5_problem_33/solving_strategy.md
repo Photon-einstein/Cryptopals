@@ -242,5 +242,8 @@ http://localhost:18080/sessionsData
 31. Add a client ID to the client constructor (Done)
 32. Add two more clients, meaning runClient2, runClient3 (Done)
 33. Add concurrency apparat in place to deal with multiple clients (Done)
+34. Create a confirmation on the client side (Done)
+35. Add comments to the new methods (Done)
+36. Run the static code analysis errors again (Done)
 
-34. Create a confirmation on the client side (in progress)
+37. Implement the tests in the DhParametersLoader structure (in progress)

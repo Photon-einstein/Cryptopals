@@ -36,7 +36,7 @@ private:
     SessionData(std::unique_ptr<MyCryptoLibrary::DiffieHellman> diffieHellman,
                 const std::string &serverNonceHex,
                 const std::string &clientNonceHex,
-                const std::vector<uint8_t> iv)
+                const std::vector<uint8_t> &iv)
         : _diffieHellman(std::move(diffieHellman)),
           _serverNonceHex{serverNonceHex}, _clientNonceHex{clientNonceHex},
           _iv{iv} {}
@@ -57,6 +57,37 @@ private:
    */
   static void printServerResponse(const cpr::Response &response);
 
+  /**
+   * @brief This method will perform the decryption of the ciphertext received
+   * by the server and test it against the plaintext data received.
+   *
+   * This method will perform the decryption of the ciphertext received by
+   * the server and test it against the plaintext data received. The test passes
+   * if the data matches for every fields.
+   *
+   * @param ciphertext The ciphertext send by the server as the challenge to
+   * check if the Diffie Hellman key exchange protocol was executed successfully
+   * by the client.
+   * @param key The symmetric key derived by the client in raw bytes, after the
+   * conclusion of the Diffie Hellman key exchange protocol.
+   * @param iv The initialization vector of the AES-256-CBC mode encryption
+   * process, sent by the server, in raw bytes.
+   * @param sessionId The unique session ID sent by the server.
+   * @param clientId The client ID associated with this connection.
+   * @param clientNonce The client nonce associated with this connection, in
+   * hexadecimal format.
+   * @param serverNonce The server nonce associated with this connection, in
+   * hexadecimal format.
+   * @param message The conclusion message expected from this protocol (e.g.,
+   * "Key exchange complete").
+   *
+   * @retval true Decryption and validation were successful.
+   * @retval false Decryption or validation failed.
+   * @return A tuple containing:
+   *         - bool: indicating success or failure of validation.
+   *         - std::string: the decrypted plaintext message. If decryption
+   * fails, this may contain garbage or incomplete data.
+   */
   std::tuple<bool, std::string> confirmationServerResponse(
       const std::string &ciphertext, const std::vector<uint8_t> &key,
       const std::vector<uint8_t> &iv, const std::string &sessionId,

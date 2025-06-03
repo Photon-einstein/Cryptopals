@@ -167,6 +167,14 @@ void Server::keyExchangeRoute() {
       });
 }
 /******************************************************************************/
+/**
+ * @brief This method runs the route that gets all the current available
+ * sessions created using the Diffie Hellman key exchange protocol.
+ *
+ * This method runs the route that gets all the current available sessions
+ * created using the Diffie Hellman key exchange protocol. It outputs all the
+ * session data in json format.
+ */
 void Server::getSessionsDataEndpoint() {
   CROW_ROUTE(_app, "/sessionsData")
       .methods("GET"_method)([&](const crow::request &req) {
@@ -199,6 +207,8 @@ void Server::getSessionsDataEndpoint() {
  *
  * This method will generate a unique session id for a given connection
  * request.
+ *
+ * @return A unique session ID to be used.
  */
 boost::uuids::uuid Server::generateUniqueSessionId() {
   bool uniqueSessionId{false};

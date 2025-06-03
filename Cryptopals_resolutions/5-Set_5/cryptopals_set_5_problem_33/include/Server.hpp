@@ -5,6 +5,7 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <openssl/aes.h>
 #include <vector>
 
 #include "DhParametersLoader.hpp"
@@ -87,6 +88,14 @@ private:
    */
   void keyExchangeRoute();
 
+  /**
+   * @brief This method runs the route that gets all the current available
+   * sessions created using the Diffie Hellman key exchange protocol.
+   *
+   * This method runs the route that gets all the current available sessions
+   * created using the Diffie Hellman key exchange protocol. It outputs all the
+   * session data in json format.
+   */
   void getSessionsDataEndpoint();
 
   /**
@@ -94,6 +103,8 @@ private:
    *
    * This method will generate a unique session id for a given connection
    * request.
+   *
+   * @return A unique session ID to be used.
    */
   boost::uuids::uuid generateUniqueSessionId();
 
@@ -110,7 +121,7 @@ private:
 
   std::thread _serverThread;
   const bool _debugFlag;
-  const std::size_t _ivLength{16}; // bytes
+  const std::size_t _ivLength{AES_BLOCK_SIZE}; // bytes
 };
 
 #endif // SERVER_HPP
