@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -123,4 +124,28 @@ TEST_F(DhParametersLoaderTest,
       "D1721D03F482D7CE6E74FEF6D55E702F46980C82B5A84031900B1C9E59E7C97FBEC7E8F3"
       "23A97A7E36CC88BE0F1D45B7FF585AC54BD407B22B4154AA");
   ASSERT_EQ(_dhParametersMap["rfc3526-group-18"].gHex, "02");
+}
+
+/**
+ * @test Test the correctness of the method loadDhParameters
+ * @brief Ensures that if a faulty input filename is provided,
+ * the loadDhParameters() will throw a runtime exception error.
+ */
+TEST_F(DhParametersLoaderTest,
+       loadDhParameters_WithIncorrectFilename_ShouldMatchThrowAnException) {
+  std::string filename = _diffieHellman->getDhParametersFilenameLocation();
+  std::string faultyFilename =
+      _diffieHellman->getDhParametersFilenameLocation();
+  faultyFilename[0] ^= 0x01; // flip one bit
+  try {
+    _dhParametersMap = DhParametersLoader::loadDhParameters(faultyFilename);
+  } catch (const std::runtime_error &e) {
+    const std::string errorMessage =
+        std::string("DhParametersLoader log | loadDhParameters(): ") +
+        std::string("Could not open DH parameters file: ") +
+        std::filesystem::path(faultyFilename).lexically_normal().string();
+    EXPECT_STREQ(e.what(), errorMessage.c_str());
+  } catch (...) {
+    FAIL() << "Expected std::invalid_argument, but got a different exception";
+  }
 }
