@@ -67,7 +67,24 @@ public:
    */
   const std::vector<uint8_t> &getSymmetricKey() const;
 
+  /**
+   * @brief This method returns the expected confirmation message of successful
+   * Diffie Hellman key exchange.
+   *
+   * @return Expected confirmation message of a successful Diffie Hellman key
+   * exchange.
+   * @throws std::runtime_error if the confirmation message is empty.
+   */
   const std::string &getConfirmationMessage() const;
+
+  /**
+   * @brief This method returns the location of the file where the public
+   * configurations of the Diffie Hellman key exchange protocol are available.
+   *
+   * @return Filename where the public configurations of the Diffie Hellman key
+   * exchange protocol are available.
+   */
+  const std::string &getDhParametersFilenameLocation() const;
 
 private:
   /* private methods */
@@ -89,8 +106,8 @@ private:
   void generatePublicKey();
 
   /* private members */
-  const std::string _dhParametersFilename{"./../input/dh_parameters.json"};
-  DHParametersLoader::DHParameters _dhParameter;
+  const std::string _dhParametersFilename{"./../input/DhParameters.json"};
+  DhParametersLoader::DhParameters _dhParameter;
   MessageExtractionFacility::UniqueBIGNUM _p, _g, _privateKey, _publicKey,
       _sharedSecret;
   bool _debugFlag;

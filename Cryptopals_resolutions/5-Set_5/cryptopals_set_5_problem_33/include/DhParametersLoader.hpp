@@ -5,9 +5,9 @@
 #include <string>
 #include <vector>
 
-namespace DHParametersLoader {
+namespace DhParametersLoader {
 
-struct DHParameters {
+struct DhParameters {
   std::string groupName;
   std::string pHex;
   std::string gHex;
@@ -26,9 +26,9 @@ struct DHParameters {
  *
  * @return The file content in a structured dictionary.
  */
-std::map<std::string, DHParameters>
+std::map<std::string, DhParameters>
 loadDhParameters(const std::string &filename);
 
-}; // namespace DHParametersLoader
+}; // namespace DhParametersLoader
 
 #endif // DH_PARAMETERS_LOADER_HPP
