@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <nlohmann/json.hpp>
@@ -20,9 +21,10 @@ std::map<std::string, DhParametersLoader::DhParameters>
 DhParametersLoader::loadDhParameters(const std::string &filename) {
   std::ifstream file(filename);
   if (!file.is_open()) {
-    throw std::runtime_error("DhParametersLoader log | loadDhParameters(): "
-                             "Could not open DH parameters file: " +
-                             filename);
+    throw std::runtime_error(
+        "DhParametersLoader log | loadDhParameters(): "
+        "Could not open DH parameters file: " +
+        std::filesystem::path(filename).lexically_normal().string());
   }
   nlohmann::json j;
   try {

@@ -245,5 +245,4 @@ http://localhost:18080/sessionsData
 34. Create a confirmation on the client side (Done)
 35. Add comments to the new methods (Done)
 36. Run the static code analysis errors again (Done)
-
-37. Implement the tests in the DhParametersLoader structure (in progress)
+37. Implement the tests in the DhParametersLoader structure (Done)
