@@ -133,7 +133,6 @@ TEST_F(DhParametersLoaderTest,
  */
 TEST_F(DhParametersLoaderTest,
        loadDhParameters_WithIncorrectFilename_ShouldMatchThrowAnException) {
-  std::string filename = _diffieHellman->getDhParametersFilenameLocation();
   std::string faultyFilename =
       _diffieHellman->getDhParametersFilenameLocation();
   faultyFilename[0] ^= 0x01; // flip one bit
