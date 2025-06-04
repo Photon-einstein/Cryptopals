@@ -16,11 +16,11 @@
  *
  * @return The file content in a structured dictionary.
  */
-std::map<std::string, DHParametersLoader::DHParameters>
-DHParametersLoader::loadDhParameters(const std::string &filename) {
+std::map<std::string, DhParametersLoader::DhParameters>
+DhParametersLoader::loadDhParameters(const std::string &filename) {
   std::ifstream file(filename);
   if (!file.is_open()) {
-    throw std::runtime_error("DHParametersLoader log | loadDhParameters(): "
+    throw std::runtime_error("DhParametersLoader log | loadDhParameters(): "
                              "Could not open DH parameters file: " +
                              filename);
   }
@@ -28,16 +28,16 @@ DHParametersLoader::loadDhParameters(const std::string &filename) {
   try {
     file >> j;
   } catch (const nlohmann::json::parse_error &e) {
-    throw std::runtime_error("DHParametersLoader log | loadDhParameters(): "
+    throw std::runtime_error("DhParametersLoader log | loadDhParameters(): "
                              "Failed to parse JSON file: " +
                              std::string(e.what()));
   }
-  std::map<std::string, DHParametersLoader::DHParameters> paramsMap;
+  std::map<std::string, DhParametersLoader::DhParameters> paramsMap;
   if (j.contains("dh_parameters") && j["dh_parameters"].is_array()) {
     for (const auto &group : j["dh_parameters"]) {
       if (group.contains("name") && group.contains("p") &&
           group.contains("g")) {
-        DHParametersLoader::DHParameters params;
+        DhParametersLoader::DhParameters params;
         params.groupName = group["name"].get<std::string>();
         params.pHex = group["p"].get<std::string>();
         params.gHex = group["g"].get<std::string>();
@@ -50,14 +50,14 @@ DHParametersLoader::loadDhParameters(const std::string &filename) {
         }
         paramsMap[group["name"].get<std::string>()] = params;
       } else {
-        std::cerr << "DHParametersLoader log | loadDhParameters(): "
+        std::cerr << "DhParametersLoader log | loadDhParameters(): "
                      "Warning: Skipping malformed DH group entry in JSON."
                   << std::endl;
       }
     }
   } else {
     throw std::runtime_error(
-        "DHParametersLoader log | loadDhParameters(): "
+        "DhParametersLoader log | loadDhParameters(): "
         "JSON file does not contain a 'dh_parameters' array.");
   }
   return paramsMap;

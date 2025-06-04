@@ -12,8 +12,8 @@ MyCryptoLibrary::DiffieHellman::DiffieHellman(const bool debugFlag)
       _publicKey{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
       _sharedSecret{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
       _debugFlag{debugFlag} {
-  std::map<std::string, DHParametersLoader::DHParameters> dhParametersMap =
-      DHParametersLoader::loadDhParameters(_dhParametersFilename);
+  std::map<std::string, DhParametersLoader::DhParameters> dhParametersMap =
+      DhParametersLoader::loadDhParameters(_dhParametersFilename);
   if (dhParametersMap.find("cryptopals-group-33-small") !=
       dhParametersMap.end()) {
     _dhParameter = dhParametersMap["cryptopals-group-33-small"];
@@ -73,15 +73,45 @@ MyCryptoLibrary::DiffieHellman::getSymmetricKey() const {
   if (_derivedSymmetricKey.size() != keyLength) {
     throw std::runtime_error(
         "Diffie Hellman log | getSymmetricKey(): Diffie Hellman key exchange "
-        "protocol "
-        "must be completed before retrieving the derived symmetric key.");
+        "protocol must be completed before retrieving the derived symmetric "
+        "key.");
   }
   return _derivedSymmetricKey;
 }
 /******************************************************************************/
+/**
+ * @brief This method returns the expected confirmation message of successful
+ * Diffie Hellman key exchange.
+ *
+ * @return Expected confirmation message of a successful Diffie Hellman key
+ * exchange.
+ * @throws std::runtime_error if the confirmation message is empty.
+ */
 const std::string &
 MyCryptoLibrary::DiffieHellman::getConfirmationMessage() const {
+  if (_confirmationMessage.empty()) {
+    throw std::runtime_error("Diffie Hellman log | getConfirmationMessage(): "
+                             "confirmation message is empty.");
+  }
   return _confirmationMessage;
+}
+/******************************************************************************/
+/**
+ * @brief This method returns the location of the file where the public
+ * configurations of the Diffie Hellman key exchange protocol are available.
+ *
+ * @return Filename where the public configurations of the Diffie Hellman key
+ * exchange protocol are available.
+ */
+const std::string &
+MyCryptoLibrary::DiffieHellman::getDhParametersFilenameLocation() const {
+  if (_dhParametersFilename.empty()) {
+    throw std::runtime_error(
+        "Diffie Hellman log | getDhParametersFilenameLocation(): public DH "
+        "parameters "
+        "filename location is empty.");
+  }
+  return _dhParametersFilename;
 }
 /******************************************************************************/
 /**
