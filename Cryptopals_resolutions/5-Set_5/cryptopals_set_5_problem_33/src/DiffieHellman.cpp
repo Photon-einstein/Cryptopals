@@ -105,11 +105,10 @@ MyCryptoLibrary::DiffieHellman::getConfirmationMessage() const {
  */
 const std::string &
 MyCryptoLibrary::DiffieHellman::getDhParametersFilenameLocation() const {
-  if (_dhParametersFilename.empty()) {
+  if (_dhParametersFilename.size() == 0) {
     throw std::runtime_error(
         "Diffie Hellman log | getDhParametersFilenameLocation(): public DH "
-        "parameters "
-        "filename location is empty.");
+        "parameters filename location is empty.");
   }
   return _dhParametersFilename;
 }

@@ -13,7 +13,12 @@
 
 /* constructor / destructor */
 Client::Client(const std::string &clientId, const bool debugFlag)
-    : _clientId{clientId}, _debugFlag{debugFlag} {}
+    : _clientId{clientId}, _debugFlag{debugFlag} {
+  if (_clientId.size() == 0) {
+    throw std::runtime_error("Client log | constructor(): "
+                             "Client ID is null");
+  }
+}
 /******************************************************************************/
 Client::~Client() {}
 /******************************************************************************/
@@ -21,10 +26,19 @@ Client::~Client() {}
  * @brief This method will perform the Diffie Hellman key exchange protocol with
  * a given server.
  *
+ * @param portServerNumber The number of the server to use in this exchange.
+ *
  * This method will perform the Diffie Hellman key exchange protocol with
  * a given server, in order to agree on a given symmetric encryption key.
+ *
+ * @throw runtime_error if portServerNumber < 1024
  */
-void Client::diffieHellmanKeyExchange() {
+void Client::diffieHellmanKeyExchange(const int portServerNumber) {
+  if (portServerNumber < 1023) {
+    throw std::runtime_error(
+        "Client log | diffieHellmanKeyExchange(): "
+        "Invalid port server number used, should be greater than 1023.");
+  }
   std::unique_ptr<MyCryptoLibrary::DiffieHellman> diffieHellman(
       std::make_unique<MyCryptoLibrary::DiffieHellman>(_debugFlag));
   std::string clientNonceHex{
@@ -42,12 +56,11 @@ void Client::diffieHellmanKeyExchange() {
 }})",
                   _clientId, clientNonceHex, diffieHellman->getGroupName(),
                   diffieHellman->getPublicKey());
-  cpr::Response response =
-      cpr::Post(cpr::Url{std::string("http://localhost:") +
-                         std::to_string(_portServerProduction) +
-                         std::string("/keyExchange")},
-                cpr::Header{{"Content-Type", "application/json"}},
-                cpr::Body{requestBody});
+  cpr::Response response = cpr::Post(
+      cpr::Url{std::string("http://localhost:") +
+               std::to_string(portServerNumber) + std::string("/keyExchange")},
+      cpr::Header{{"Content-Type", "application/json"}},
+      cpr::Body{requestBody});
   try {
     if (response.status_code != 201) {
       throw std::runtime_error("Client log | diffieHellmanKeyExchange(): "
@@ -122,11 +135,54 @@ void Client::diffieHellmanKeyExchange() {
                 << std::endl;
     }
   } catch (const std::exception &e) {
-    std::cerr << "Client log | diffieHellmanKeyExchange(): secret key "
-                 "derivation step: "
-              << e.what() << std::endl;
+    std::cerr << "Client log | diffieHellmanKeyExchange(): " << e.what()
+              << std::endl;
   }
 }
+/******************************************************************************/
+/**
+ * @brief This method will confirm if a given session id is correctly setup
+ *
+ * This method will confirm if a given session id is correctly setup on the
+ * client side.
+ *
+ * @return A bool value, true if the sessionId exists, false otherwise.
+ */
+bool Client::confirmSessionId(const std::string &sessionId) {
+  return _diffieHellmanMap.find(sessionId) != _diffieHellmanMap.end();
+}
+/******************************************************************************/
+/**
+ * @brief This method return the client ID.
+ *
+ * This method return the client ID of a given client.
+ *
+ * @return A string, the client ID.
+ * @throw runtime_error if the client ID is null.
+ */
+const std::string &Client::getClientId() const {
+  if (_clientId.size() == 0) {
+    throw std::runtime_error("Client log | constructor(): "
+                             "Client ID is null");
+  }
+  return _clientId;
+}
+/******************************************************************************/
+/**
+ * @brief This method will return the production port of the server.
+ *
+ * This method will return the production port of the server to establish a
+ * connection.
+ */
+const int Client::getProductionPort() const { return _portServerProduction; }
+/******************************************************************************/
+/**
+ * @brief This method will return the test port of the server.
+ *
+ * This method will return the test port of the server to establish a
+ * connection.
+ */
+const int Client::getTestPort() const { return _portServerTest; }
 /******************************************************************************/
 /**
  * @brief This method will print the server response to the Diffie Hellman

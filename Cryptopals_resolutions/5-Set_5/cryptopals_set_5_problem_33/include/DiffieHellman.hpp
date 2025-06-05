@@ -106,7 +106,7 @@ private:
   void generatePublicKey();
 
   /* private members */
-  const std::string _dhParametersFilename{"./../input/DhParameters.json"};
+  const std::string _dhParametersFilename{"../input/DhParameters.json"};
   DhParametersLoader::DhParameters _dhParameter;
   MessageExtractionFacility::UniqueBIGNUM _p, _g, _privateKey, _publicKey,
       _sharedSecret;
