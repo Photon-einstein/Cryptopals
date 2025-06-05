@@ -30,9 +30,12 @@ protected:
   const bool _debugFlag{false};
   const std::string _clientId1{"Ana"}, _clientId2{"Eve"}, _clientId3{"Bob"};
   std::unique_ptr<Server> _server{std::make_unique<Server>(_debugFlag)};
-  std::unique_ptr<Client> _client1{std::make_unique<Client>(_clientId1, _debugFlag)};
-  std::unique_ptr<Client> _client2{std::make_unique<Client>(_clientId2, _debugFlag)};
-  std::unique_ptr<Client> _client3{std::make_unique<Client>(_clientId3, _debugFlag)};
+  std::unique_ptr<Client> _client1{
+      std::make_unique<Client>(_clientId1, _debugFlag)};
+  std::unique_ptr<Client> _client2{
+      std::make_unique<Client>(_clientId2, _debugFlag)};
+  std::unique_ptr<Client> _client3{
+      std::make_unique<Client>(_clientId3, _debugFlag)};
 };
 
 /**
@@ -41,10 +44,11 @@ protected:
  */
 TEST_F(DiffieHellmanKeyExchangeProtocolTest,
        GetRootEndpoint_WithServerRunning_ShouldReturnSuccessStatus) {
-  auto response =
-      cpr::Get(cpr::Url{"http://localhost:" + std::to_string(_server->getTestPort()) + "/"});
+  auto response = cpr::Get(cpr::Url{
+      "http://localhost:" + std::to_string(_server->getTestPort()) + "/"});
   EXPECT_EQ(response.status_code, 200);
   crow::json::rvalue jsonResponse = crow::json::load(response.text);
   ASSERT_TRUE(jsonResponse);
-  EXPECT_EQ(jsonResponse["message"].s(), "Server log | Root endpoint, server up and running");
+  EXPECT_EQ(jsonResponse["message"].s(),
+            "Server log | Root endpoint, server up and running");
 }
