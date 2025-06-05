@@ -64,6 +64,19 @@ public:
    */
   const int getTestPort() const;
 
+  /**
+   * @brief This method verify if this entry exists on the client side.
+   *
+   * This method verify if this entry exists on the client side. These arguments
+   * are one entry from the endpoint of the server named GET '/sessionsData'.
+   *
+   * @return Bool value, true if there is a match, false otherwise.
+   */
+  const bool verifyServerSessionDataEntryEndpoint(
+      const std::string &sessionId, const std::string &clientId,
+      const std::string &clientNonce, const std::string &serverNonce,
+      const std::string &derivedKey, const std::string &iv) const;
+
 private:
   /* private structures */
   struct SessionData {

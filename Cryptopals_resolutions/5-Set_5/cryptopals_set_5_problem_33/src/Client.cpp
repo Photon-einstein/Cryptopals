@@ -185,6 +185,30 @@ const int Client::getProductionPort() const { return _portServerProduction; }
 const int Client::getTestPort() const { return _portServerTest; }
 /******************************************************************************/
 /**
+ * @brief This method verify if this entry exists on the client side.
+ *
+ * This method verify if this entry exists on the client side. These arguments
+ * are one entry from the endpoint of the server named GET '/sessionsData'.
+ *
+ * @return Bool value, true if there is a match, false otherwise.
+ */
+const bool Client::verifyServerSessionDataEntryEndpoint(
+    const std::string &sessionId, const std::string &clientId,
+    const std::string &clientNonce, const std::string &serverNonce,
+    const std::string &derivedKey, const std::string &iv) const {
+  if (_diffieHellmanMap.find(sessionId) == _diffieHellmanMap.end() ||
+      clientId != _clientId ||
+      _diffieHellmanMap.at(sessionId)->_clientNonceHex != clientNonce ||
+      _diffieHellmanMap.at(sessionId)->_serverNonceHex != serverNonce ||
+      _diffieHellmanMap.at(sessionId)->_derivedKeyHex != derivedKey ||
+      MessageExtractionFacility::toHexString(
+          _diffieHellmanMap.at(sessionId)->_iv) != iv) {
+    return false;
+  }
+  return true;
+}
+/******************************************************************************/
+/**
  * @brief This method will print the server response to the Diffie Hellman
  * key exchange protocol.
  *

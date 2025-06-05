@@ -13,6 +13,9 @@ protected:
     // NOLINTNEXTLINE(clang-analyzer-optin.cplusplus.VirtualCall)
     StartServerOnce();
     _server->clearDiffieHellmanSessionData();
+    _mapUsers[_clientId1] = std::make_unique<Client>(_clientId1, _debugFlag);
+    _mapUsers[_clientId2] = std::make_unique<Client>(_clientId2, _debugFlag);
+    _mapUsers[_clientId3] = std::make_unique<Client>(_clientId3, _debugFlag);
   }
 
   // cppcheck-suppress unusedFunction
@@ -30,6 +33,7 @@ protected:
   const bool _debugFlag{false};
   const std::string _clientId1{"Ana"}, _clientId2{"Eve"}, _clientId3{"Bob"};
   std::unique_ptr<Server> _server{std::make_unique<Server>(_debugFlag)};
+  std::map<std::string, std::unique_ptr<Client>> _mapUsers;
   std::unique_ptr<Client> _client1{
       std::make_unique<Client>(_clientId1, _debugFlag)};
   std::unique_ptr<Client> _client2{
@@ -58,8 +62,9 @@ TEST_F(DiffieHellmanKeyExchangeProtocolTest,
  * @brief Ensures that the Diffie Hellman key exchange is completed successfully
  */
 TEST_F(DiffieHellmanKeyExchangeProtocolTest,
-       DiffieHellmanKeyExchange_WithServerRunning_ShouldNotThrow) {
-  EXPECT_NO_THROW(_client1->diffieHellmanKeyExchange(_client1->getTestPort()));
+       DiffieHellmanKeyExchange_WithServerRunning1User_ShouldMatchReference) {
+  EXPECT_NO_THROW(_mapUsers[_clientId1]->diffieHellmanKeyExchange(
+      _mapUsers[_clientId1]->getTestPort()));
   auto response = cpr::Get(
       cpr::Url{"http://localhost:" + std::to_string(_server->getTestPort()) +
                "/sessionsData"});
@@ -68,22 +73,23 @@ TEST_F(DiffieHellmanKeyExchangeProtocolTest,
   ASSERT_TRUE(jsonResponse);
   bool sessionFound{false};
   std::string sessionIdFound{};
-  std::string expectedClientId{_client1->getClientId()};
-  std::cout << response.text << std::endl;
+  std::string expectedClientId{_mapUsers[_clientId1]->getClientId()};
   for (const std::string &sessionId : jsonResponse.keys()) {
     const crow::json::rvalue &sessionData = jsonResponse[sessionId];
     std::string clientId = sessionData["clientId"].s();
     if (clientId == expectedClientId) {
       sessionFound = true;
       sessionIdFound = sessionId;
-      EXPECT_TRUE(sessionData["derivedKey"].s().size());
-      EXPECT_TRUE(sessionData["sessionId"].s().size());
-      EXPECT_TRUE(sessionData["iv"].s().size());
-      EXPECT_TRUE(sessionData["clientNonce"].s().size());
-      EXPECT_TRUE(sessionData["serverNonce"].s().size());
+      const std::string derivedKey{sessionData["derivedKey"].s()};
+      const std::string sessionIdReceived{sessionData["sessionId"].s()};
+      const std::string iv{sessionData["iv"].s()};
+      const std::string clientNonce{sessionData["clientNonce"].s()};
+      const std::string serverNonce{sessionData["serverNonce"].s()};
+      EXPECT_TRUE(_mapUsers[_clientId1]->verifyServerSessionDataEntryEndpoint(
+          sessionIdFound, clientId, clientNonce, serverNonce, derivedKey, iv));
       break;
     }
   }
   EXPECT_TRUE(sessionFound);
-  EXPECT_TRUE(_client1->confirmSessionId(sessionIdFound));
+  EXPECT_TRUE(_mapUsers[_clientId1]->confirmSessionId(sessionIdFound));
 }
