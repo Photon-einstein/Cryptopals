@@ -17,7 +17,7 @@ int main(void) {
   const std::string clientId{"Ana"};
   std::shared_ptr<Client> client =
       std::make_shared<Client>(clientId, debugFlag);
-  client->diffieHellmanKeyExchange();
+  client->diffieHellmanKeyExchange(client->getProductionPort());
   /* end of the work */
   end = clock();
   time = (double)(end - start) / CLOCKS_PER_SEC;
