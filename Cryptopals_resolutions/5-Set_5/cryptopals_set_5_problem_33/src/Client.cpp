@@ -197,7 +197,7 @@ const bool Client::verifyServerSessionDataEntryEndpoint(
     const std::string &clientNonce, const std::string &serverNonce,
     const std::string &derivedKey, const std::string &iv) const {
   if (_diffieHellmanMap.find(sessionId) == _diffieHellmanMap.end() ||
-      clientId != _clientId ||
+      _clientId != clientId ||
       _diffieHellmanMap.at(sessionId)->_clientNonceHex != clientNonce ||
       _diffieHellmanMap.at(sessionId)->_serverNonceHex != serverNonce ||
       _diffieHellmanMap.at(sessionId)->_derivedKeyHex != derivedKey ||
