@@ -141,8 +141,8 @@ TEST_F(DhParametersLoaderTest,
   } catch (const std::runtime_error &e) {
     const std::string errorMessage =
         std::string("DhParametersLoader log | loadDhParameters(): ") +
-        std::string("Could not open DH parameters file: ") +
-        std::filesystem::path(faultyFilename).lexically_normal().string();
+        std::string("Could not open DH parameters file: '") + faultyFilename +
+        "'.";
     EXPECT_STREQ(e.what(), errorMessage.c_str());
   } catch (...) {
     FAIL() << "Expected std::invalid_argument, but got a different exception";

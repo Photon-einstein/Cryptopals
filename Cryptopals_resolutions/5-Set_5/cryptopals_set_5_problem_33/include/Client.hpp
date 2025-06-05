@@ -19,10 +19,50 @@ public:
    * @brief This method will perform the Diffie Hellman key exchange protocol
    * with a given server.
    *
+   * @param portServerNumber The number of the server to use in this exchange.
+   *
    * This method will perform the Diffie Hellman key exchange protocol with
    * a given server, in order to agree on a given symmetric encryption key.
+   *
+   * @throw runtime_error if portServerNumber < 1024
    */
-  void diffieHellmanKeyExchange();
+  void diffieHellmanKeyExchange(const int portServerNumber);
+
+  /**
+   * @brief This method will confirm if a given session id is correctly setup.
+   *
+   * This method will confirm if a given session id is correctly setup on the
+   * client side.
+   *
+   * @return A bool value, true if the sessionId exists, false otherwise.
+   */
+  bool confirmSessionId(const std::string &sessionId);
+
+  /**
+   * @brief This method return the client ID.
+   *
+   * This method return the client ID of a given client.
+   *
+   * @return A string, the client ID.
+   * @throw runtime_error if the client ID is null.
+   */
+  const std::string &getClientId() const;
+
+  /**
+   * @brief This method will return the production port of the server.
+   *
+   * This method will return the production port of the server to establish a
+   * connection.
+   */
+  const int getProductionPort() const;
+
+  /**
+   * @brief This method will return the test port of the server.
+   *
+   * This method will return the test port of the server to establish a
+   * connection.
+   */
+  const int getTestPort() const;
 
 private:
   /* private structures */
