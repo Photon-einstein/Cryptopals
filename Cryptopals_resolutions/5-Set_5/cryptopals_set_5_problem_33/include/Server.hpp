@@ -36,6 +36,30 @@ public:
    */
   void runServerTest();
 
+  /**
+   * @brief This method will clear all the sessions in memory.
+   *
+   * This method will clear all the sessions in memory that were created
+   * executing the Diffie Hellman key exchange protocol.
+   */
+  void clearDiffieHellmanSessionData();
+
+  /**
+   * @brief This method will return the production port of the server.
+   *
+   * This method will return the production port of the server to establish a
+   * connection.
+   */
+  const int getProductionPort() const;
+
+  /**
+   * @brief This method will return the test port of the server.
+   *
+   * This method will return the test port of the server to establish a
+   * connection.
+   */
+  const int getTestPort() const;
+
 private:
   /* private structures */
   struct SessionData {

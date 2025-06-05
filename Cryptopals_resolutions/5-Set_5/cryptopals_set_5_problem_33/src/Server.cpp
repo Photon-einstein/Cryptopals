@@ -46,6 +46,33 @@ void Server::runServerTest() {
 }
 /******************************************************************************/
 /**
+ * @brief This method will clear all the sessions in memory.
+ *
+ * This method will clear all the sessions in memory that were created executing
+ * the Diffie Hellman key exchange protocol.
+ */
+void Server::clearDiffieHellmanSessionData() {
+  std::lock_guard<std::mutex> lock(_diffieHellmanMapMutex);
+  _diffieHellmanMap.clear();
+}
+/******************************************************************************/
+/**
+ * @brief This method will return the production port of the server.
+ *
+ * This method will return the production port of the server to establish a
+ * connection.
+ */
+const int Server::getProductionPort() const { return _portProduction; }
+/******************************************************************************/
+/**
+ * @brief This method will return the test port of the server.
+ *
+ * This method will return the test port of the server to establish a
+ * connection.
+ */
+const int Server::getTestPort() const { return _portTest; }
+/******************************************************************************/
+/**
  * @brief This method will start the endpoints that the server
  * provides to his clients
  *
@@ -69,7 +96,7 @@ void Server::rootEndpoint() {
   CROW_ROUTE(_app, "/").methods("GET"_method)([&]() {
     crow::json::wvalue rootMessage;
     rootMessage["message"] =
-        "Server log | Root endpoint, server up and running";
+        std::string("Server log | Root endpoint, server up and running");
     return crow::response(200, rootMessage);
   });
 }
