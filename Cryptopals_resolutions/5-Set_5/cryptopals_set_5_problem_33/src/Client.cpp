@@ -196,13 +196,13 @@ const bool Client::verifyServerSessionDataEntryEndpoint(
     const std::string &sessionId, const std::string &clientId,
     const std::string &clientNonce, const std::string &serverNonce,
     const std::string &derivedKey, const std::string &iv) const {
-  if ((_diffieHellmanMap.find(sessionId) == _diffieHellmanMap.end() ||
-       clientId != _clientId) ||
-      (_diffieHellmanMap.at(sessionId)->_clientNonceHex != clientNonce ||
-       _diffieHellmanMap.at(sessionId)->_serverNonceHex != serverNonce ||
-       _diffieHellmanMap.at(sessionId)->_derivedKeyHex != derivedKey ||
-       MessageExtractionFacility::toHexString(
-           _diffieHellmanMap.at(sessionId)->_iv) != iv)) {
+  if (_diffieHellmanMap.find(sessionId) == _diffieHellmanMap.end() ||
+      clientId != _clientId ||
+      _diffieHellmanMap.at(sessionId)->_clientNonceHex != clientNonce ||
+      _diffieHellmanMap.at(sessionId)->_serverNonceHex != serverNonce ||
+      _diffieHellmanMap.at(sessionId)->_derivedKeyHex != derivedKey ||
+      MessageExtractionFacility::toHexString(
+          _diffieHellmanMap.at(sessionId)->_iv) != iv) {
     return false;
   }
   return true;
