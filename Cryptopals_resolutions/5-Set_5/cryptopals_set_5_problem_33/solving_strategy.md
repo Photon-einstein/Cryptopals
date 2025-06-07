@@ -246,5 +246,12 @@ http://localhost:18080/sessionsData
 35. Add comments to the new methods (Done)
 36. Run the static code analysis errors again (Done)
 37. Implement the tests in the DhParametersLoader structure (Done)
+38. Implement the tests in the Diffie Hellman Protocol (Done)
 
-38. Implement the tests in the Diffie Hellman Protocol (in progress)
+39. Write an article about this work (in progress)
+    39.1. What is the Diffie Hellman key exchange protocol (in progress)
+    39.2. Where is it used for (TBD)
+    39.3. How does it work (TBD)
+    39.4. Small example (TBD)
+    39.5. Real life example (TBD)
+    39.6. Demo of the DH key exchange protocol (TBD)
