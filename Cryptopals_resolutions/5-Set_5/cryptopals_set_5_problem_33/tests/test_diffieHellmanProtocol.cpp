@@ -35,12 +35,6 @@ protected:
   const std::string _clientId1{"Ana"}, _clientId2{"Eve"}, _clientId3{"Bob"};
   std::unique_ptr<Server> _server{std::make_unique<Server>(_debugFlag)};
   std::map<std::string, std::unique_ptr<Client>> _mapUsers;
-  std::unique_ptr<Client> _client1{
-      std::make_unique<Client>(_clientId1, _debugFlag)};
-  std::unique_ptr<Client> _client2{
-      std::make_unique<Client>(_clientId2, _debugFlag)};
-  std::unique_ptr<Client> _client3{
-      std::make_unique<Client>(_clientId3, _debugFlag)};
 };
 
 /**
@@ -61,6 +55,7 @@ TEST_F(DiffieHellmanKeyExchangeProtocolTest,
 /**
  * @test Test the correctness of setup of the Diffie Hellman key exchange
  * @brief Ensures that the Diffie Hellman key exchange is completed successfully
+ * with one single user attempting to set up the DH key exchange.
  */
 TEST_F(DiffieHellmanKeyExchangeProtocolTest,
        DiffieHellmanKeyExchange_WithServerRunning1User_ShouldMatchReference) {
@@ -96,8 +91,9 @@ TEST_F(DiffieHellmanKeyExchangeProtocolTest,
 }
 
 /**
- * @test Test the correctness of setup of the Diffie Hellman key exchange
- * @brief Ensures that the Diffie Hellman key exchange is completed successfully
+ * @test Test the error detection of the Diffie Hellman key exchange protocol.
+ * @brief Ensures that the Diffie Hellman key exchange protocol is able to
+ * detect errors on small changes in the data used in the protocol.
  */
 TEST_F(
     DiffieHellmanKeyExchangeProtocolTest,
@@ -126,30 +122,30 @@ TEST_F(
       std::string serverNonce{sessionData["serverNonce"].s()};
       EXPECT_TRUE(_mapUsers[_clientId2]->verifyServerSessionDataEntryEndpoint(
           sessionIdFound, clientId, clientNonce, serverNonce, derivedKey, iv));
-      sessionIdFound[0] ^= 0x01;
+      sessionIdFound[0] ^= 0x01; // trigger an error
       EXPECT_FALSE(_mapUsers[_clientId2]->verifyServerSessionDataEntryEndpoint(
           sessionIdFound, clientId, clientNonce, serverNonce, derivedKey, iv));
-      sessionIdFound[0] ^= 0x01;
-      clientId[0] ^= 0x01;
+      sessionIdFound[0] ^= 0x01; // reestablish the correct data
+      clientId[0] ^= 0x01;       // trigger an error
       EXPECT_FALSE(_mapUsers[_clientId2]->verifyServerSessionDataEntryEndpoint(
           sessionIdFound, clientId, clientNonce, serverNonce, derivedKey, iv));
-      clientId[0] ^= 0x01;
-      clientNonce[0] ^= 0x01;
+      clientId[0] ^= 0x01;    // reestablish the correct data
+      clientNonce[0] ^= 0x01; // trigger an error
       EXPECT_FALSE(_mapUsers[_clientId2]->verifyServerSessionDataEntryEndpoint(
           sessionIdFound, clientId, clientNonce, serverNonce, derivedKey, iv));
-      clientNonce[0] ^= 0x01;
-      serverNonce[0] ^= 0x01;
+      clientNonce[0] ^= 0x01; // reestablish the correct data
+      serverNonce[0] ^= 0x01; // trigger an error
       EXPECT_FALSE(_mapUsers[_clientId2]->verifyServerSessionDataEntryEndpoint(
           sessionIdFound, clientId, clientNonce, serverNonce, derivedKey, iv));
-      serverNonce[0] ^= 0x01;
-      derivedKey[0] ^= 0x01;
+      serverNonce[0] ^= 0x01; // reestablish the correct data
+      derivedKey[0] ^= 0x01;  // trigger an error
       EXPECT_FALSE(_mapUsers[_clientId2]->verifyServerSessionDataEntryEndpoint(
           sessionIdFound, clientId, clientNonce, serverNonce, derivedKey, iv));
-      derivedKey[0] ^= 0x01;
-      iv[0] ^= 0x01;
+      derivedKey[0] ^= 0x01; // reestablish the correct data
+      iv[0] ^= 0x01;         // trigger an error
       EXPECT_FALSE(_mapUsers[_clientId2]->verifyServerSessionDataEntryEndpoint(
           sessionIdFound, clientId, clientNonce, serverNonce, derivedKey, iv));
-      iv[0] ^= 0x01;
+      iv[0] ^= 0x01; // reestablish the correct data
       break;
     }
   }
@@ -158,7 +154,8 @@ TEST_F(
 }
 
 /**
- * @test Test the correctness of setup of the Diffie Hellman key exchange
+ * @test Test the correctness of setup of the Diffie Hellman key exchange with
+ * several users.
  * @brief Ensures that the Diffie Hellman key exchange is completed successfully
  * with several users sessions established with different clients.
  */
