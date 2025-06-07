@@ -14,9 +14,8 @@ MyCryptoLibrary::DiffieHellman::DiffieHellman(const bool debugFlag)
       _debugFlag{debugFlag} {
   std::map<std::string, DhParametersLoader::DhParameters> dhParametersMap =
       DhParametersLoader::loadDhParameters(_dhParametersFilename);
-  if (dhParametersMap.find("cryptopals-group-33-small") !=
-      dhParametersMap.end()) {
-    _dhParameter = dhParametersMap["cryptopals-group-33-small"];
+  if (dhParametersMap.find("rfc3526-group-17") != dhParametersMap.end()) {
+    _dhParameter = dhParametersMap["rfc3526-group-17"];
     _p = MessageExtractionFacility::hexToUniqueBIGNUM(_dhParameter.pHex);
     _g = MessageExtractionFacility::hexToUniqueBIGNUM(_dhParameter.gHex);
     if (_debugFlag) {

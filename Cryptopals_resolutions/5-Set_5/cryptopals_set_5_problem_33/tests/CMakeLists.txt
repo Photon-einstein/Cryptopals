@@ -47,6 +47,7 @@ set(SOURCE_FILES
 # Add test source files
 set(TEST_SOURCES
     test_dhParametersLoader.cpp
+    test_diffieHellman.cpp
     test_diffieHellmanProtocol.cpp
 )
 
