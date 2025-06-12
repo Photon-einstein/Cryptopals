@@ -54,7 +54,7 @@ void Client::diffieHellmanKeyExchange(const int portServerNumber) {
         "publicKeyA": "{}"
     }}
 }})",
-                  _clientId, clientNonceHex, diffieHellman->getGroupName(),
+                  getClientId(), clientNonceHex, diffieHellman->getGroupName(),
                   diffieHellman->getPublicKey());
   cpr::Response response = cpr::Post(
       cpr::Url{std::string("http://localhost:") +
@@ -104,7 +104,7 @@ void Client::diffieHellmanKeyExchange(const int portServerNumber) {
             ciphertext,
             MessageExtractionFacility::hexToBytes(
                 _diffieHellmanMap[sessionId]->_derivedKeyHex),
-            _diffieHellmanMap[sessionId]->_iv, sessionId, _clientId,
+            _diffieHellmanMap[sessionId]->_iv, sessionId, getClientId(),
             _diffieHellmanMap[sessionId]->_clientNonceHex,
             _diffieHellmanMap[sessionId]->_serverNonceHex,
             _diffieHellmanMap[sessionId]

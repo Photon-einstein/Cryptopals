@@ -81,6 +81,7 @@ TEST_F(DiffieHellmanKeyExchangeProtocolTest,
       const std::string iv{sessionData["iv"].s()};
       const std::string clientNonce{sessionData["clientNonce"].s()};
       const std::string serverNonce{sessionData["serverNonce"].s()};
+      EXPECT_EQ(sessionIdReceived, sessionId);
       EXPECT_TRUE(_mapUsers[_clientId1]->verifyServerSessionDataEntryEndpoint(
           sessionIdFound, clientId, clientNonce, serverNonce, derivedKey, iv));
       break;
@@ -120,6 +121,7 @@ TEST_F(
       std::string iv{sessionData["iv"].s()};
       std::string clientNonce{sessionData["clientNonce"].s()};
       std::string serverNonce{sessionData["serverNonce"].s()};
+      EXPECT_EQ(sessionIdReceived, sessionId);
       EXPECT_TRUE(_mapUsers[_clientId2]->verifyServerSessionDataEntryEndpoint(
           sessionIdFound, clientId, clientNonce, serverNonce, derivedKey, iv));
       sessionIdFound[0] ^= 0x01; // trigger an error
@@ -182,7 +184,7 @@ TEST_F(
   EXPECT_EQ(response.status_code, 200);
   crow::json::rvalue jsonResponse = crow::json::load(response.text);
   ASSERT_TRUE(jsonResponse);
-  int numberSessionsFound{0};
+  int numberSessionsFound{0}, numbersSessionsCreated{7};
   for (const std::string &sessionId : jsonResponse.keys()) {
     const crow::json::rvalue &sessionData = jsonResponse[sessionId];
     const std::string clientId = sessionData["clientId"].s();
@@ -191,8 +193,11 @@ TEST_F(
     const std::string iv{sessionData["iv"].s()};
     const std::string clientNonce{sessionData["clientNonce"].s()};
     const std::string serverNonce{sessionData["serverNonce"].s()};
+    EXPECT_EQ(sessionIdReceived, sessionId);
     EXPECT_TRUE(_mapUsers[clientId]->verifyServerSessionDataEntryEndpoint(
         sessionIdReceived, clientId, clientNonce, serverNonce, derivedKey, iv));
     EXPECT_TRUE(_mapUsers[clientId]->confirmSessionId(sessionId));
+    ++numberSessionsFound;
   }
+  EXPECT_EQ(numbersSessionsCreated, numberSessionsFound);
 }
