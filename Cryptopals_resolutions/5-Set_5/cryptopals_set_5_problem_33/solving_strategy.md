@@ -248,9 +248,9 @@ http://localhost:18080/sessionsData
 37. Implement the tests in the DhParametersLoader structure (Done)
 38. Implement the tests in the Diffie Hellman Protocol (Done)
 
-39. Fix the static code analysis problems (in progress)
+39. Fix the static code analysis problems (Done)
 
-40. Create the class diagram (TBD)
+40. Create the class diagram (in progress)
 41. Create the sequence diagram (TBD)
 
 42. Write an article about this work (in progress)

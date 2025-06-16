@@ -17,6 +17,7 @@ Server::~Server() {
   if (_serverThread.joinable()) {
     _serverThread.join(); // Wait for thread to finish
   }
+  clearDiffieHellmanSessionData();
 }
 /******************************************************************************/
 /**
