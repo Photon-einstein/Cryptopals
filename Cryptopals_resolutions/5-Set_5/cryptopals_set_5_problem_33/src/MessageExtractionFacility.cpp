@@ -1,10 +1,10 @@
-#include "./../include/MessageExtractionFacility.hpp"
-
 #include <charconv>
 #include <iomanip>
 #include <iostream>
 #include <openssl/rand.h>
 #include <sstream>
+
+#include "./../include/MessageExtractionFacility.hpp"
 
 /**
  * @brief This method will convert hexadecimal string to a vector of bytes
