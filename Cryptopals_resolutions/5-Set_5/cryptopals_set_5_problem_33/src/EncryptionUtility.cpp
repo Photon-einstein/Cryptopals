@@ -1,12 +1,12 @@
-#include "./../include/EncryptionUtility.hpp"
-#include "./../include/MessageExtractionFacility.hpp"
-
 #include <charconv>
 #include <iomanip>
 #include <iostream>
 #include <openssl/aes.h>
 #include <openssl/rand.h>
 #include <sstream>
+
+#include "./../include/EncryptionUtility.hpp"
+#include "./../include/MessageExtractionFacility.hpp"
 
 /**
  * @brief Generates a cryptographically secure random nonce.

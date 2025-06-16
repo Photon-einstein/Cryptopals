@@ -1,0 +1,152 @@
+@startuml
+
+participant "main (runClient1)" as Main
+participant "Client (Bob)" as Client
+participant "DiffieHellman" as DH
+participant "DHParametersLoader" as DHLoader
+participant "MessageExtractionFacility" as MEF
+participant "EncryptionUtility" as EU
+participant "Server (API)" as Server
+
+activate Main
+
+Main -> Client : Create Client("Bob", debugFlag)
+activate Client
+
+Client -> DH : Create DiffieHellman(debugFlag)
+activate DH
+    DH -> DHLoader : loadDhParameters(getDhParametersFilenameLocation())
+    activate DHLoader
+        note right
+            DHParamsLoader reads "rfc3526-group-17"
+            p and g from file
+        end note
+    DHLoader --> DH : Returns DHParameters map
+    deactivate DHLoader
+
+    DH -> DH : generatePrivateKey()
+    activate DH
+        note right
+            Uses OpenSSL's BN_rand_range to get 'a'
+            Ensures 1 < a < p-1
+        end note
+        DH -> MEF : hexToUniqueBIGNUM(p)
+        activate MEF
+        MEF --> DH : UniqueBIGNUM
+        deactivate MEF
+    deactivate DH
+
+    DH -> DH : generatePublicKey()
+    activate DH
+        note right
+            Computes A = (g^a) % p
+            Uses OpenSSL's BN_mod_exp
+        end note
+        DH -> MEF : BIGNUMToHex(_publicKey.get())
+        activate MEF
+        MEF --> DH : Public Key A (hex)
+        deactivate MEF
+    deactivate DH
+DH --> Client : DiffieHellman instance ready
+deactivate DH
+
+Main -> Client : diffieHellmanKeyExchange(productionPort)
+activate Client
+    Client -> EU : generateCryptographicNonce(nonceSize)
+    activate EU
+    EU --> Client : clientNonceHex
+    deactivate EU
+
+    note left
+        Client constructs JSON "client_hello"
+        with clientId, clientNonce,
+        groupName, publicKeyA
+    end note
+
+    Client -> Server : HTTP POST /keyExchange (ClientHello JSON)
+    activate Server
+    note right
+        Server receives request, processes DH,
+        generates its private key 'b', public key 'B',
+        derives shared secret, encrypts confirmation
+        message with AES-256-CBC, and sends response.
+    end note
+    Server --> Client : HTTP 201 OK (ServerHello JSON)
+    deactivate Server
+
+    Client -> Client : Parse ServerHello JSON response
+    note right
+        Extracts sessionId, serverNonce,
+        groupName, publicKeyB, ciphertext, ivHex
+    end note
+
+    Client -> MEF : hexToBytes(ivHex)
+    activate MEF
+    MEF --> Client : iv (vector<uint8_t>)
+    deactivate MEF
+
+    Client -> Client : Store SessionData in _diffieHellmanMap
+    Client -> DH : deriveSharedSecret(publicKeyB, serverNonceHex, clientNonceHex)
+    activate DH
+        note right
+            Computes shared secret s = (publicKeyB ^ privateKeyA) % p
+            Uses OpenSSL's BN_mod_exp
+        end note
+        DH -> MEF : hexToUniqueBIGNUM(publicKeyB)
+        activate MEF
+        MEF --> DH : UniqueBIGNUM
+        deactivate MEF
+
+        note right
+            Converts s to raw bytes
+            Converts nonces to raw bytes
+            Concatenates s || clientNonce || serverNonce
+            Hashes concatenated data with SHA256
+        end note
+        DH -> MEF : hexToBytes(serverNonceHex)
+        activate MEF
+        MEF --> DH : serverNonceBytes
+        deactivate MEF
+
+        DH -> MEF : hexToBytes(clientNonceHex)
+        activate MEF
+        MEF --> DH : clientNonceBytes
+        deactivate MEF
+
+        note right
+            _derivedSymmetricKey is set from SHA256 output
+        end note
+        DH -> MEF : toHexString(keyMaterial)
+        activate MEF
+        MEF --> DH : _derivedSymmetricKeyHex
+        deactivate MEF
+    DH --> Client : _derivedSymmetricKeyHex
+    deactivate DH
+
+    Client -> Client : confirmationServerResponse(...)
+    activate Client
+        Client -> EU : decryptMessageAes256CbcMode(ciphertext, derivedKey, iv)
+        activate EU
+        EU --> Client : decryptedPlaintext
+        deactivate EU
+
+        Client -> Client : Parse decryptedPlaintext (JSON)
+        note right
+            Compares extracted fields
+            (sessionId, clientId, nonces, message)
+            with expected values.
+        end note
+    Client --> Client : (bool validationResult, string decryptedMessage)
+    deactivate Client
+
+    alt validationResult == true
+        Client -> Main : Logs "Diffie Hellman key exchange succeed" and decrypted message
+    else validationResult == false
+        Client -> Main : Logs "Diffie Hellman key exchange failed"
+    end
+deactivate Client
+
+Main -> Main : Program ends
+deactivate Main
+
+@enduml
