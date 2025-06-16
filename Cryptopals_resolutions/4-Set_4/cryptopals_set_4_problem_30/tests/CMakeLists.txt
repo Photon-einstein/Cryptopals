@@ -32,12 +32,12 @@ set(TEST_SOURCES
 )
 
 # Define the test executable
-add_executable(run_tests ${TEST_SOURCES} ${SOURCE_FILES})
+add_executable(runTests ${TEST_SOURCES} ${SOURCE_FILES})
 
 # Link with Google Test, OpenSSL, and pthread
-target_link_libraries(run_tests PRIVATE ${GTEST_LIBRARIES} OpenSSL::Crypto pthread)
+target_link_libraries(runTests PRIVATE ${GTEST_LIBRARIES} OpenSSL::Crypto pthread)
 
 # Enable testing
 enable_testing()
-add_test(NAME cryptopals_tests_set_4_problem_30 COMMAND run_tests)
+add_test(NAME cryptopals_tests_set_4_problem_30 COMMAND runTests)
 

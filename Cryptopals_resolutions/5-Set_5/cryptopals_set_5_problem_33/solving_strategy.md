@@ -249,14 +249,15 @@ http://localhost:18080/sessionsData
 38. Implement the tests in the Diffie Hellman Protocol (Done)
 
 39. Fix the static code analysis problems (Done)
+40. Create the class diagram (Done)
 
-40. Create the class diagram (in progress)
-41. Create the sequence diagram (TBD)
+41. Create the sequence diagram (in progress)
 
-42. Write an article about this work (in progress)
+42. Write an article about this work (on hold)
     42.1. What is the Diffie Hellman key exchange protocol (Done)
     42.2. Where is it used for (Done)
     42.3. How does it work (Done)
     42.4. Small example to explain the mechanism (Done)
     42.5. Real life example implemented in this project (Done)
-    42.6. Demo of the DH key exchange protocol (TBD)
+    42.6. Explanation of the software structure of this work (TBD)
+    42.7. Demo of the DH key exchange protocol (TBD)
