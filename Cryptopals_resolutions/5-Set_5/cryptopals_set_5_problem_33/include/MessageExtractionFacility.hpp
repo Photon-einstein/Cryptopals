@@ -12,6 +12,11 @@
 
 namespace MessageExtractionFacility {
 
+struct BIGNUM_deleter {
+  void operator()(BIGNUM *bn) const { BN_free(bn); }
+};
+using UniqueBIGNUM = std::unique_ptr<BIGNUM, BIGNUM_deleter>;
+
 /**
  * @brief This method will convert hexadecimal string to a vector of bytes.
  *
@@ -35,11 +40,6 @@ std::vector<unsigned char> hexToBytes(const std::string &hexStr);
  * @return A string containing the chars with hexadecimal format, zero padded.
  */
 std::string toHexString(const std::vector<unsigned char> &data);
-
-struct BIGNUM_deleter {
-  void operator()(BIGNUM *bn) const { BN_free(bn); }
-};
-using UniqueBIGNUM = std::unique_ptr<BIGNUM, BIGNUM_deleter>;
 
 /**
  * @brief This method will convert an hexadecimal number to an unique big

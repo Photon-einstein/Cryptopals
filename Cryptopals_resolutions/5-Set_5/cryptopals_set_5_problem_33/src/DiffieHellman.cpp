@@ -16,8 +16,8 @@ MyCryptoLibrary::DiffieHellman::DiffieHellman(const bool debugFlag)
       DhParametersLoader::loadDhParameters(getDhParametersFilenameLocation());
   if (dhParametersMap.find("rfc3526-group-17") != dhParametersMap.end()) {
     _dhParameter = dhParametersMap["rfc3526-group-17"];
-    _p = MessageExtractionFacility::hexToUniqueBIGNUM(_dhParameter.pHex);
-    _g = MessageExtractionFacility::hexToUniqueBIGNUM(_dhParameter.gHex);
+    _p = MessageExtractionFacility::hexToUniqueBIGNUM(_dhParameter._pHex);
+    _g = MessageExtractionFacility::hexToUniqueBIGNUM(_dhParameter._gHex);
     if (_debugFlag) {
       std::cout << "Diffie Hellman log | p (decimal) = "
                 << MessageExtractionFacility::BIGNUMToDec(_p.get())
@@ -54,7 +54,7 @@ const std::string MyCryptoLibrary::DiffieHellman::getPublicKey() const {
  * @return The group name in a string format.
  */
 const std::string &MyCryptoLibrary::DiffieHellman::getGroupName() const {
-  return _dhParameter.groupName;
+  return _dhParameter._groupName;
 }
 /******************************************************************************/
 /**

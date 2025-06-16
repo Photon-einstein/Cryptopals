@@ -53,7 +53,7 @@ jobs:
                 
                 make
                 # Run tests with Valgrind for memory error checking and check for leaks or errors
-                valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./run_tests 2>&1 | tee valgrind_output.log
+                valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./runTests 2>&1 | tee valgrind_output.log
                 if grep -q "ERROR SUMMARY: 0 errors from 0 contexts" valgrind_output.log; then
                   echo "No memory leaks or errors detected."
                 else

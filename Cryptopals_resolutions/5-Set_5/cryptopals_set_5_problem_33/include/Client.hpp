@@ -6,6 +6,7 @@
 #include "DhParametersLoader.hpp"
 #include "DiffieHellman.hpp"
 #include "MessageExtractionFacility.hpp"
+#include "SessionData.hpp"
 
 class Client {
 public:
@@ -78,23 +79,6 @@ public:
       const std::string &derivedKey, const std::string &iv) const;
 
 private:
-  /* private structures */
-  struct SessionData {
-    std::unique_ptr<MyCryptoLibrary::DiffieHellman> _diffieHellman;
-    std::string _serverNonceHex;
-    std::string _clientNonceHex;
-    std::string _derivedKeyHex;
-    std::vector<uint8_t> _iv;
-
-    SessionData(std::unique_ptr<MyCryptoLibrary::DiffieHellman> diffieHellman,
-                const std::string &serverNonceHex,
-                const std::string &clientNonceHex,
-                const std::vector<uint8_t> &iv)
-        : _diffieHellman(std::move(diffieHellman)),
-          _serverNonceHex{serverNonceHex}, _clientNonceHex{clientNonceHex},
-          _iv{iv} {}
-  };
-
   /* private methods */
 
   /**
