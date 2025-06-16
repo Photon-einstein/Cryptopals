@@ -13,7 +13,7 @@ MyCryptoLibrary::DiffieHellman::DiffieHellman(const bool debugFlag)
       _sharedSecret{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
       _debugFlag{debugFlag} {
   std::map<std::string, DhParametersLoader::DhParameters> dhParametersMap =
-      DhParametersLoader::loadDhParameters(_dhParametersFilename);
+      DhParametersLoader::loadDhParameters(getDhParametersFilenameLocation());
   if (dhParametersMap.find("rfc3526-group-17") != dhParametersMap.end()) {
     _dhParameter = dhParametersMap["rfc3526-group-17"];
     _p = MessageExtractionFacility::hexToUniqueBIGNUM(_dhParameter.pHex);
