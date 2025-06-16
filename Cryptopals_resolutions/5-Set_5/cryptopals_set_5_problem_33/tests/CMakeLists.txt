@@ -52,7 +52,7 @@ set(TEST_SOURCES
 )
 
 # Define the test executable
-add_executable(run_tests ${TEST_SOURCES} ${SOURCE_FILES})
+add_executable(runTests ${TEST_SOURCES} ${SOURCE_FILES})
 
 
 message(STATUS "CMAKE_SOURCE_DIR is: ${CMAKE_SOURCE_DIR}")
@@ -62,13 +62,13 @@ find_package(Boost REQUIRED)  # Find Boost core
 include_directories(${Boost_INCLUDE_DIRS})
 
 # Include Crow's header files
-target_include_directories(run_tests PRIVATE
+target_include_directories(runTests PRIVATE
     ${OPENSSL_INCLUDE_DIR}
     ${CMAKE_SOURCE_DIR}/../../../../external/crow/include
 )
 
 # Link with Google Test, OpenSSL, and pthread
-target_link_libraries(run_tests 
+target_link_libraries(runTests 
     PRIVATE ${GTEST_LIBRARIES}
     GTest::gtest
     GTest::gtest_main
@@ -80,4 +80,4 @@ target_link_libraries(run_tests
 
 # Enable testing
 enable_testing()
-add_test(NAME cryptopals_tests_set_4_problem_33 COMMAND run_tests)
+add_test(NAME cryptopals_tests_set_4_problem_33 COMMAND runTests)

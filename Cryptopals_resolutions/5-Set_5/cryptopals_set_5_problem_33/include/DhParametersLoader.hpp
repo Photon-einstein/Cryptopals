@@ -8,11 +8,11 @@
 namespace DhParametersLoader {
 
 struct DhParameters {
-  std::string groupName;
-  std::string pHex;
-  std::string gHex;
-  std::string description;
-  std::string notes;
+  std::string _groupName;
+  std::string _pHex;
+  std::string _gHex;
+  std::string _description;
+  std::string _notes;
 };
 
 /**

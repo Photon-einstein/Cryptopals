@@ -39,15 +39,15 @@ DhParametersLoader::loadDhParameters(const std::string &filename) {
       if (group.contains("name") && group.contains("p") &&
           group.contains("g")) {
         DhParametersLoader::DhParameters params;
-        params.groupName = group["name"].get<std::string>();
-        params.pHex = group["p"].get<std::string>();
-        params.gHex = group["g"].get<std::string>();
+        params._groupName = group["name"].get<std::string>();
+        params._pHex = group["p"].get<std::string>();
+        params._gHex = group["g"].get<std::string>();
         // Optional fields
         if (group.contains("description")) {
-          params.description = group["description"].get<std::string>();
+          params._description = group["description"].get<std::string>();
         }
         if (group.contains("notes")) {
-          params.notes = group["notes"].get<std::string>();
+          params._notes = group["notes"].get<std::string>();
         }
         paramsMap[group["name"].get<std::string>()] = params;
       } else {

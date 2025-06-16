@@ -4,7 +4,6 @@
 #include <openssl/evp.h>
 #include <openssl/sha.h>
 
-#include "./../include/EncryptionUtility.hpp"
 #include "./../include/MessageExtractionFacility.hpp"
 #include "./../include/Server.hpp"
 
