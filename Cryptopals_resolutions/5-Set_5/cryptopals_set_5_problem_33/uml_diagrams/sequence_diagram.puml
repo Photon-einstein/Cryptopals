@@ -1,61 +1,70 @@
 @startuml
 
-participant "main (runClient1)" as Main
-participant "Client (Bob)" as Client
-participant "DiffieHellman" as DH
-participant "DHParametersLoader" as DHLoader
-participant "MessageExtractionFacility" as MEF
-participant "EncryptionUtility" as EU
-participant "Server (API)" as Server
+box "Client Environment" #LightYellow
+    participant "main (runClient1)" as Main
+    participant "Client (Bob)" as Client
+    participant "Client:DiffieHellman" as ClientDH
+    participant "Client:DHParamsLoader" as ClientDHLoader
+    participant "Client:MessageExtractionFacility" as ClientMEF
+    participant "Client:EncryptionUtility" as ClientEU
+end box
+
+box "Server Environment" #LightBlue
+    participant "Server (API)" as ServerAPI
+    participant "Server:DiffieHellman" as ServerDH
+    participant "Server:DHParamsLoader" as ServerDHLoader
+    participant "Server:MessageExtractionFacility" as ServerMEF
+    participant "Server:EncryptionUtility" as ServerEU
+end box
 
 activate Main
 
 Main -> Client : Create Client("Bob", debugFlag)
 activate Client
 
-Client -> DH : Create DiffieHellman(debugFlag)
-activate DH
-    DH -> DHLoader : loadDhParameters(getDhParametersFilenameLocation())
-    activate DHLoader
+Client -> ClientDH : Create DiffieHellman(debugFlag)
+activate ClientDH
+    ClientDH -> ClientDHLoader : loadDhParameters(getDhParametersFilenameLocation())
+    activate ClientDHLoader
         note right
-            DHParamsLoader reads "rfc3526-group-17"
+            Client DHParamsLoader reads "rfc3526-group-17"
             p and g from file
         end note
-    DHLoader --> DH : Returns DHParameters map
-    deactivate DHLoader
+    ClientDHLoader --> ClientDH : Returns DHParameters map
+    deactivate ClientDHLoader
 
-    DH -> DH : generatePrivateKey()
-    activate DH
+    ClientDH -> ClientDH : generatePrivateKey()
+    activate ClientDH
         note right
-            Uses OpenSSL's BN_rand_range to get 'a'
+            Client uses OpenSSL's BN_rand_range to get 'a'
             Ensures 1 < a < p-1
         end note
-        DH -> MEF : hexToUniqueBIGNUM(p)
-        activate MEF
-        MEF --> DH : UniqueBIGNUM
-        deactivate MEF
-    deactivate DH
+        ClientDH -> ClientMEF : hexToUniqueBIGNUM(p)
+        activate ClientMEF
+        ClientMEF --> ClientDH : UniqueBIGNUM
+        deactivate ClientMEF
+    deactivate ClientDH
 
-    DH -> DH : generatePublicKey()
-    activate DH
+    ClientDH -> ClientDH : generatePublicKey()
+    activate ClientDH
         note right
-            Computes A = (g^a) % p
+            Client computes A = (g^a) % p
             Uses OpenSSL's BN_mod_exp
         end note
-        DH -> MEF : BIGNUMToHex(_publicKey.get())
-        activate MEF
-        MEF --> DH : Public Key A (hex)
-        deactivate MEF
-    deactivate DH
-DH --> Client : DiffieHellman instance ready
-deactivate DH
+        ClientDH -> ClientMEF : BIGNUMToHex(_publicKey.get())
+        activate ClientMEF
+        ClientMEF --> ClientDH : Public Key A (hex)
+        deactivate ClientMEF
+    deactivate ClientDH
+ClientDH --> Client : Client:DiffieHellman instance ready
+deactivate ClientDH
 
 Main -> Client : diffieHellmanKeyExchange(productionPort)
 activate Client
-    Client -> EU : generateCryptographicNonce(nonceSize)
-    activate EU
-    EU --> Client : clientNonceHex
-    deactivate EU
+    Client -> ClientEU : generateCryptographicNonce(nonceSize)
+    activate ClientEU
+    ClientEU --> Client : clientNonceHex
+    deactivate ClientEU
 
     note left
         Client constructs JSON "client_hello"
@@ -63,39 +72,128 @@ activate Client
         groupName, publicKeyA
     end note
 
-    Client -> Server : HTTP POST /keyExchange (ClientHello JSON)
-    activate Server
-    note right
-        Server receives request, processes DH,
-        generates its private key 'b', public key 'B',
-        derives shared secret, encrypts confirmation
-        message with AES-256-CBC, and sends response.
-    end note
-    Server --> Client : HTTP 201 OK (ServerHello JSON)
-    deactivate Server
+    Client -> ServerAPI : HTTP POST /keyExchange (ClientHello JSON)
+    activate ServerAPI
+
+        ServerAPI -> ServerAPI : Parse ClientHello JSON
+        note right
+            Server extracts clientId, clientNonce,
+            publicKeyA from client request.
+        end note
+
+        ServerAPI -> ServerEU : generateCryptographicNonce(nonceSize)
+        activate ServerEU
+        ServerEU --> ServerAPI : serverNonceHex
+        deactivate ServerEU
+
+        ServerAPI -> ServerDH : Create DiffieHellman(debugFlag)
+        activate ServerDH
+            ServerDH -> ServerDHLoader : loadDhParameters(getDhParametersFilenameLocation())
+            activate ServerDHLoader
+                note right
+                    Server DHParamsLoader reads "rfc3526-group-17"
+                    p and g from file (must match client's)
+                end note
+            ServerDHLoader --> ServerDH : Returns DHParameters map
+            deactivate ServerDHLoader
+
+            ServerDH -> ServerDH : generatePrivateKey()
+            activate ServerDH
+                note right
+                    Server uses OpenSSL's BN_rand_range to get 'b'
+                    Ensures 1 < b < p-1
+                end note
+                ServerDH -> ServerMEF : hexToUniqueBIGNUM(p)
+                activate ServerMEF
+                ServerMEF --> ServerDH : UniqueBIGNUM
+                deactivate ServerMEF
+            deactivate ServerDH
+
+            ServerDH -> ServerDH : generatePublicKey()
+            activate ServerDH
+                note right
+                    Server computes B = (g^b) % p
+                    Uses OpenSSL's BN_mod_exp
+                end note
+                ServerDH -> ServerMEF : BIGNUMToHex(_publicKey.get())
+                activate ServerMEF
+                ServerMEF --> ServerDH : Public Key B (hex)
+                deactivate ServerMEF
+            deactivate ServerDH
+        ServerDH --> ServerAPI : Server:DiffieHellman instance ready
+        deactivate ServerDH
+
+
+        ServerAPI -> ServerDH : deriveSharedSecret(publicKeyA, serverNonceHex, clientNonceHex)
+        activate ServerDH
+            note right
+                Server computes shared secret s' = (publicKeyA ^ privateKeyB) % p
+                Uses OpenSSL's BN_mod_exp
+            end note
+            ServerDH -> ServerMEF : hexToUniqueBIGNUM(publicKeyA)
+            activate ServerMEF
+            ServerMEF --> ServerDH : UniqueBIGNUM
+            deactivate ServerMEF
+
+            note right
+                Converts s' to raw bytes
+                Converts nonces to raw bytes
+                Concatenates s' || clientNonce || serverNonce
+                Hashes concatenated data with SHA256 to get symmetric key
+            end note
+            ServerDH -> ServerMEF : hexToBytes(serverNonceHex)
+            activate ServerMEF
+            ServerMEF --> ServerDH : serverNonceBytes
+            deactivate ServerMEF
+
+            ServerDH -> ServerMEF : hexToBytes(clientNonceHex)
+            activate ServerMEF
+            ServerMEF --> ServerDH : clientNonceBytes
+            deactivate ServerMEF
+
+            ServerDH -> ServerMEF : toHexString(keyMaterial)
+            activate ServerMEF
+            ServerMEF --> ServerDH : _derivedSymmetricKeyHex
+            deactivate ServerMEF
+        ServerDH --> ServerAPI : _derivedSymmetricKeyHex (symmetric key)
+        deactivate ServerDH
+
+        ServerAPI -> ServerEU : encryptMessageAes256CbcMode(confirmationMsg, symmetricKey, generatedIv)
+        activate ServerEU
+        ServerEU --> ServerAPI : ciphertext, ivHex
+        deactivate ServerEU
+
+        note left
+            Server constructs JSON response
+            with sessionId, serverNonce, publicKeyB,
+            encrypted confirmation (ciphertext, ivHex)
+        end note
+
+    ServerAPI --> Client : HTTP 201 OK (ServerHello JSON)
+    deactivate ServerAPI
 
     Client -> Client : Parse ServerHello JSON response
     note right
-        Extracts sessionId, serverNonce,
+        Client extracts sessionId, serverNonce,
         groupName, publicKeyB, ciphertext, ivHex
     end note
 
-    Client -> MEF : hexToBytes(ivHex)
-    activate MEF
-    MEF --> Client : iv (vector<uint8_t>)
-    deactivate MEF
+    Client -> ClientMEF : hexToBytes(ivHex)
+    activate ClientMEF
+    ClientMEF --> Client : iv (vector<uint8_t>)
+    deactivate ClientMEF
 
     Client -> Client : Store SessionData in _diffieHellmanMap
-    Client -> DH : deriveSharedSecret(publicKeyB, serverNonceHex, clientNonceHex)
-    activate DH
+    Client -> ClientDH : deriveSharedSecret(publicKeyB, serverNonceHex, clientNonceHex)
+    activate ClientDH
         note right
-            Computes shared secret s = (publicKeyB ^ privateKeyA) % p
+            Client computes shared secret s = (publicKeyB ^ privateKeyA) % p
             Uses OpenSSL's BN_mod_exp
         end note
-        DH -> MEF : hexToUniqueBIGNUM(publicKeyB)
-        activate MEF
-        MEF --> DH : UniqueBIGNUM
-        deactivate MEF
+        ClientDH -> ClientMEF : hexToUniqueBIGNUM(publicKeyB)
+        activate ClientMEF
+        ClientMEF --> ClientDH : UniqueBIGNUM
+        deactivate ClientMEF
 
         note right
             Converts s to raw bytes
@@ -103,32 +201,29 @@ activate Client
             Concatenates s || clientNonce || serverNonce
             Hashes concatenated data with SHA256
         end note
-        DH -> MEF : hexToBytes(serverNonceHex)
-        activate MEF
-        MEF --> DH : serverNonceBytes
-        deactivate MEF
+        ClientDH -> ClientMEF : hexToBytes(serverNonceHex)
+        activate ClientMEF
+        ClientMEF --> ClientDH : serverNonceBytes
+        deactivate ClientMEF
 
-        DH -> MEF : hexToBytes(clientNonceHex)
-        activate MEF
-        MEF --> DH : clientNonceBytes
-        deactivate MEF
+        ClientDH -> ClientMEF : hexToBytes(clientNonceHex)
+        activate ClientMEF
+        ClientMEF --> ClientDH : clientNonceBytes
+        deactivate ClientMEF
 
-        note right
-            _derivedSymmetricKey is set from SHA256 output
-        end note
-        DH -> MEF : toHexString(keyMaterial)
-        activate MEF
-        MEF --> DH : _derivedSymmetricKeyHex
-        deactivate MEF
-    DH --> Client : _derivedSymmetricKeyHex
-    deactivate DH
+        ClientDH -> ClientMEF : toHexString(keyMaterial)
+        activate ClientMEF
+        ClientMEF --> ClientDH : _derivedSymmetricKeyHex
+        deactivate ClientMEF
+    ClientDH --> Client : _derivedSymmetricKeyHex
+    deactivate ClientDH
 
     Client -> Client : confirmationServerResponse(...)
     activate Client
-        Client -> EU : decryptMessageAes256CbcMode(ciphertext, derivedKey, iv)
-        activate EU
-        EU --> Client : decryptedPlaintext
-        deactivate EU
+        Client -> ClientEU : decryptMessageAes256CbcMode(ciphertext, derivedKey, iv)
+        activate ClientEU
+        ClientEU --> Client : decryptedPlaintext
+        deactivate ClientEU
 
         Client -> Client : Parse decryptedPlaintext (JSON)
         note right
