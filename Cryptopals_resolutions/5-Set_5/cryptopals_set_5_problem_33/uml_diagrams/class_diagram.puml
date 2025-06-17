@@ -1,16 +1,64 @@
 @startuml
 
-namespace DhParametersLoader {
-    class DhParameters <<struct>> {
-        + _groupName : std::string
-        + _pHex : std::string
-        + _gHex : std::string
-        + _description : std::string
-        + _notes : std::string
-    }
-    class Loader {
-        {static} + loadDhParameters(filename : std::string) : std::map<std::string, DhParameters>
-    }
+
+class Server {
+    - _diffieHellmanMapMutex : std::mutex
+    - _diffieHellmanMap : std::map<boost::uuids::uuid, std::unique_ptr<SessionData>>
+    - _nonceSize : std::size_t
+    - _app : crow::SimpleApp
+    - _portProduction : int
+    - _portTest : int
+    - _serverThread : std::thread
+    - _debugFlag : bool
+    - _ivLength : std::size_t
+    
+    + Server(debugFlag : bool) {explicit}
+    + ~Server()
+    + runServer() : void
+    + runServerTest() : void
+    + clearDiffieHellmanSessionData() : void
+    + getProductionPort() : int
+    + getTestPort() : int
+    - setupRoutes() : void
+    - rootEndpoint() : void
+    - keyExchangeRoute() : void
+    - getSessionsDataEndpoint() : void
+    - generateUniqueSessionId() : boost::uuids::uuid
+}
+
+note "Exposes API Endpoints:\n- **POST /keyExchange** (Diffie-Hellman Key Exchange)\n- **GET /sessionsData** (Retrieve Session Data)" as ServerEndpointsNote
+Server .. ServerEndpointsNote
+
+class Client {
+    - _diffieHellmanMap : std::map<std::string, std::unique_ptr<SessionData>>
+    - _portServerProduction : int
+    - _portServerTest : int 
+    - _clientId : std::string
+    - _nonceSize : std::size_t
+    - _debugFlag : bool
+
+    + Client(clientId : std::string, debugFlag : bool) {explicit}
+    + ~Client()
+    + diffieHellmanKeyExchange(portServerNumber : int) : void
+    + confirmSessionId(sessionId : std::string) : bool
+    + getClientId() : std::string {const}
+    + getProductionPort() : int {const}
+    + getTestPort() : int {const}
+    + verifyServerSessionDataEntryEndpoint(sessionId : std::string, clientId : std::string, clientNonce : std::string, serverNonce : std::string, derivedKey : std::string, iv : std::string) : bool {const}
+    - printServerResponse(response : cpr::Response) : void {static}
+    - confirmationServerResponse(ciphertext : std::string, key : std::vector<uint8_t>, iv : std::vector<uint8_t>, sessionId : std::string, clientId : std::string, clientNonce : std::string, serverNonce : std::string, message : std::string) :  std::tuple<bool, std::string>
+}
+
+class SessionData <<struct>> {
+    - _diffieHellman : std::unique_ptr<MyCryptoLibrary::DiffieHellman>
+    - _serverNonceHex : std::string
+    - _clientNonceHex : std::string
+    - _derivedKeyHex : std::string
+    - _clientId : std::string
+    - _iv : std::vector<uint8_t>
+
+    + SessionData(nonceSize : std::size_t, clientNonceHex : std::string, clientId : std::string, debugFlag : bool, ivLength : std::size_t)
+    + SessionData(diffieHellman : std::unique_ptr<MyCryptoLibrary::DiffieHellman>, serverNonceHex : std::string, clientNonceHex : std::string, iv : std::vector<uint8_t>)
 }
 
 namespace MyCryptoLibrary {
@@ -54,68 +102,27 @@ namespace MessageExtractionFacility {
   }
 }
 
-class Server {
-    - _diffieHellmanMapMutex : std::mutex
-    - _diffieHellmanMap : std::map<boost::uuids::uuid, std::unique_ptr<SessionData>>
-    - _nonceSize : std::size_t
-    - _app : crow::SimpleApp
-    - _portProduction : int
-    - _portTest : int
-    - _serverThread : std::thread
-    - _debugFlag : bool
-    - _ivLength : std::size_t
-    
-    + Server(debugFlag : bool) {explicit}
-    + ~Server()
-    + runServer() : void
-    + runServerTest() : void
-    + clearDiffieHellmanSessionData() : void
-    + getProductionPort() : int
-    + getTestPort() : int
-    - setupRoutes() : void
-    - rootEndpoint() : void
-    - keyExchangeRoute() : void
-    - getSessionsDataEndpoint() : void
-    - generateUniqueSessionId() : boost::uuids::uuid
+namespace DhParametersLoader {
+    class DhParameters <<struct>> {
+        + _groupName : std::string
+        + _pHex : std::string
+        + _gHex : std::string
+        + _description : std::string
+        + _notes : std::string
+    }
+    class Loader {
+        {static} + loadDhParameters(filename : std::string) : std::map<std::string, DhParameters>
+    }
 }
 
-class Client {
-    - _diffieHellmanMap : std::map<std::string, std::unique_ptr<SessionData>>
-    - _portServerProduction : int
-    - _portServerTest : int 
-    - _clientId : std::string
-    - _nonceSize : std::size_t
-    - _debugFlag : bool
-
-    + Client(clientId : std::string, debugFlag : bool) {explicit}
-    + ~Client()
-    + diffieHellmanKeyExchange(portServerNumber : int) : void
-    + confirmSessionId(sessionId : std::string) : bool
-    + getClientId() : std::string {const}
-    + getProductionPort() : int {const}
-    + getTestPort() : int {const}
-    + verifyServerSessionDataEntryEndpoint(sessionId : std::string, clientId : std::string, clientNonce : std::string, serverNonce : std::string, derivedKey : std::string, iv : std::string) : bool {const}
-    - printServerResponse(response : cpr::Response) : void {static}
-    - confirmationServerResponse(ciphertext : std::string, key : std::vector<uint8_t>, iv : std::vector<uint8_t>, sessionId : std::string, clientId : std::string, clientNonce : std::string, serverNonce : std::string, message : std::string) :  std::tuple<bool, std::string>
-}
-
-class SessionData <<struct>> {
-    - _diffieHellman : std::unique_ptr<MyCryptoLibrary::DiffieHellman>
-    - _serverNonceHex : std::string
-    - _clientNonceHex : std::string
-    - _derivedKeyHex : std::string
-    - _clientId : std::string
-    - _iv : std::vector<uint8_t>
-
-    + SessionData(nonceSize : std::size_t, clientNonceHex : std::string, clientId : std::string, debugFlag : bool, ivLength : std::size_t)
-    + SessionData(diffieHellman : std::unique_ptr<MyCryptoLibrary::DiffieHellman>, serverNonceHex : std::string, clientNonceHex : std::string, iv : std::vector<uint8_t>)
-}
 
 MyCryptoLibrary.DiffieHellman --> DhParametersLoader : uses
 MyCryptoLibrary.DiffieHellman --> MessageExtractionFacility : uses
 
 Server --> SessionData : uses
 Client --> SessionData : uses
+
+Client --> Server : "<<uses HTTP requests>>"
 
 SessionData --> MyCryptoLibrary.DiffieHellman : "has a"
 
