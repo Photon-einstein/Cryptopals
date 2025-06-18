@@ -150,7 +150,7 @@ Compute A = g^a mod p.
 12. Implement getPublicKey in the Diffie Hellman class (Done)
 13. Implementation of a nonce in the client side (Done)
 
-13. On the client side implement the sending of the public key to the server (in progress)
+14. On the client side implement the sending of the public key to the server (Done)
     
 Context:
 Party A (Initiator) Action:
@@ -171,9 +171,9 @@ Example of a server response to the initial client request:
 }
 }
 ```
-13.1. Create a valid client request to the server (done)
+14.1. Create a valid client request to the server (done)
 
-14. Create a shared secret on the server side (in progress)
+15. Create a shared secret on the server side (Done)
     Send A to Party B. (Done)
     Party B (Responder) Action:
 
@@ -183,37 +183,37 @@ Example of a server response to the initial client request:
     Compute shared secret candidate S_B = A^b mod p. (Done)
     Send B to Party A. (Done)
 
-15. At the client side perform the following steps
-    15.1. Computation of the shared secret on the client side (in progress)
+16. At the client side perform the following steps
+    16.1. Computation of the shared secret on the client side (Done)
         Compute shared secret candidate S_A = B^a mod p.
         Verify S_A is non-zero (i.e., not 1). If S_A is 1, it indicates a bad choice of g or a malicious attack aiming to force a trivial shared secret.
     
-    15.2. Phase 2: Key Derivation and Confirmation (Crucial for Security) (Done)
+    16.2. Phase 2: Key Derivation and Confirmation (Crucial for Security) (Done)
         The raw shared secret S from DH is just a large number. It should never be used directly as a symmetric encryption key.
 
         Key Derivation Function (KDF):
         Both parties use a robust KDF (e.g., HKDF-SHA256, PBKDF2) to derive one or more session keys from the shared secret S, in this case it can be used a SHA256
 
-16. Implement a dictionary of sessions also on the client side (Done)
-17. Implement a debug flag on the Diffie Hellman class (Done)
-18. Review and format the logs at the Server class (Done)
-19. Review and format the logs at the Client class (Done) 
-20. Review and format the logs at the DH_parameters_loader class (Done)
-21. Review and format the logs at the MessageExtractionFacility class (Done)
-22. Add comments to all the methods at the Client class (Done)
-23. Add comments to all the methods at the DhParametersLoader class (Done)
-24. Add comments to all the methods at the DiffieHellman class (Done)
-25. Add comments to all the methods at the MessageExtractionFacility class (Done)
-26. Add comments to all the methods at the Server class (Done)
-27. Run and fix all the problems caught by the static code analysis up to this moment (Done)
-28. Add get hashed secret key method to the Diffie Hellman class, for testing purpose (Done)
+17. Implement a dictionary of sessions also on the client side (Done)
+18. Implement a debug flag on the Diffie Hellman class (Done)
+19. Review and format the logs at the Server class (Done)
+20. Review and format the logs at the Client class (Done) 
+21. Review and format the logs at the DH_parameters_loader class (Done)
+22. Review and format the logs at the MessageExtractionFacility class (Done)
+23. Add comments to all the methods at the Client class (Done)
+24. Add comments to all the methods at the DhParametersLoader class (Done)
+25. Add comments to all the methods at the DiffieHellman class (Done)
+26. Add comments to all the methods at the MessageExtractionFacility class (Done)
+27. Add comments to all the methods at the Server class (Done)
+28. Run and fix all the problems caught by the static code analysis up to this moment (Done)
+29. Add get hashed secret key method to the Diffie Hellman class, for testing purpose (Done)
 
-29. Add confirmation step on the server side (in progress)
-    29.1. Add generation of random IV to the server (Done)
-    29.2. Add encryption aes_256 to the encryption utility (Done)
-    29.3. Add decryption aes_256 to the encryption utility (Done)
+30. Add confirmation step on the server side (Done)
+    30.1. Add generation of random IV to the server (Done)
+    30.2. Add encryption aes_256 to the encryption utility (Done)
+    30.3. Add decryption aes_256 to the encryption utility (Done)
     
-    29.4. Add new fields to the json response of the server (Done)
+    30.4. Add new fields to the json response of the server (Done)
     
     ```json
     {
@@ -231,7 +231,7 @@ Example of a server response to the initial client request:
     }
     ```
 
-30. Create an endpoint that prints all the information on the server side for each session (Done)
+31. Create an endpoint that prints all the information on the server side for each session (Done)
 
 Endpoint URL: 
 On the browser:
@@ -239,26 +239,26 @@ On the browser:
 http://localhost:18080/sessionsData
 ```
 
-31. Add a client ID to the client constructor (Done)
-32. Add two more clients, meaning runClient2, runClient3 (Done)
-33. Add concurrency apparat in place to deal with multiple clients (Done)
-34. Create a confirmation on the client side (Done)
-35. Add comments to the new methods (Done)
-36. Run the static code analysis errors again (Done)
-37. Implement the tests in the DhParametersLoader structure (Done)
-38. Implement the tests in the Diffie Hellman Protocol (Done)
-39. Fix the static code analysis problems (Done)
-40. Create the class diagram (Done)
-41. Create the sequence diagram (Done)
+32. Add a client ID to the client constructor (Done)
+33. Add two more clients, meaning runClient2, runClient3 (Done)
+34. Add concurrency apparat in place to deal with multiple clients (Done)
+35. Create a confirmation on the client side (Done)
+36. Add comments to the new methods (Done)
+37. Run the static code analysis errors again (Done)
+38. Implement the tests in the DhParametersLoader structure (Done)
+39. Implement the tests in the Diffie Hellman Protocol (Done)
+40. Fix the static code analysis problems (Done)
+41. Create the class diagram (Done)
+42. Create the sequence diagram (Done)
 
-42. Write an article about this work (Done)
-    42.1. What is the Diffie Hellman key exchange protocol (Done)
-    42.2. Where is it used for (Done)
-    42.3. How does it work (Done)
-    42.4. Small example to explain the mechanism (Done)
-    42.5. Real life example implemented in this project (Done)
-    42.6. Explanation of the software structure of this work (Done)
-    42.7. Demo of the DH key exchange protocol (Done)
-    42.8. Conclusion (in progress)
+43. Write an article about this work (Done)
+    43.1. What is the Diffie Hellman key exchange protocol (Done)
+    43.2. Where is it used for (Done)
+    43.3. How does it work (Done)
+    43.4. Small example to explain the mechanism (Done)
+    43.5. Real life example implemented in this project (Done)
+    43.6. Explanation of the software structure of this work (Done)
+    43.7. Demo of the DH key exchange protocol (Done)
+    43.8. Conclusion (Done)
 
-43. Add YouTube demo (Done)
+44. Add YouTube demo (Done)
