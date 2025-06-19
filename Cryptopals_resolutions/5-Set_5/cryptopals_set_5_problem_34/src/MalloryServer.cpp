@@ -4,8 +4,8 @@
 #include <openssl/evp.h>
 #include <openssl/sha.h>
 
-#include "./../include/MessageExtractionFacility.hpp"
 #include "./../include/MalloryServer.hpp"
+#include "./../include/MessageExtractionFacility.hpp"
 
 /* constructor / destructor */
 MalloryServer::MalloryServer(const bool debugFlag) : _debugFlag{debugFlag} {}
@@ -95,8 +95,8 @@ void MalloryServer::setupRoutes() {
 void MalloryServer::rootEndpoint() {
   CROW_ROUTE(_app, "/").methods("GET"_method)([&]() {
     crow::json::wvalue rootMessage;
-    rootMessage["message"] =
-        std::string("Mallory Server log | Root endpoint, server up and running");
+    rootMessage["message"] = std::string(
+        "Mallory Server log | Root endpoint, server up and running");
     return crow::response(200, rootMessage);
   });
 }
@@ -182,12 +182,14 @@ void MalloryServer::keyExchangeRoute() {
         } catch (const nlohmann::json::exception &e) {
           crow::json::wvalue err;
           err["message"] =
-              std::string("Mallory Server log | JSON parsing error: ") + e.what();
+              std::string("Mallory Server log | JSON parsing error: ") +
+              e.what();
           return crow::response(400, err);
         } catch (const std::exception &e) {
           crow::json::wvalue err;
           err["message"] =
-              std::string("Mallory Server log | An unexpected error occurred: ") +
+              std::string(
+                  "Mallory Server log | An unexpected error occurred: ") +
               e.what();
         }
         return crow::response(201, res);

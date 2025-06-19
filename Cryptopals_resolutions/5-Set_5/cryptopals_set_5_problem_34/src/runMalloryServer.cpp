@@ -5,8 +5,8 @@
 #include <time.h>
 #include <vector>
 
-#include "./../include/MessageExtractionFacility.hpp"
 #include "./../include/MalloryServer.hpp"
+#include "./../include/MessageExtractionFacility.hpp"
 
 int main(void) {
   clock_t start, end;
@@ -14,7 +14,8 @@ int main(void) {
   start = clock();
   /* work to verify */
   const bool debugFlag{false};
-  std::shared_ptr<MalloryServer> server = std::make_shared<MalloryServer>(debugFlag);
+  std::shared_ptr<MalloryServer> server =
+      std::make_shared<MalloryServer>(debugFlag);
   server->runServer();
   /* end of the work */
   end = clock();
