@@ -5,8 +5,8 @@
 #include <time.h>
 #include <vector>
 
-#include "./../include/Client.hpp"
 #include "./../include/MessageExtractionFacility.hpp"
+#include "./../include/MalloryServer.hpp"
 
 int main(void) {
   clock_t start, end;
@@ -14,10 +14,8 @@ int main(void) {
   start = clock();
   /* work to verify */
   const bool debugFlag{false};
-  const std::string clientId{"Eve"};
-  std::shared_ptr<Client> client =
-      std::make_shared<Client>(clientId, debugFlag);
-  client->diffieHellmanKeyExchange(client->getProductionPort());
+  std::shared_ptr<MalloryServer> server = std::make_shared<MalloryServer>(debugFlag);
+  server->runServer();
   /* end of the work */
   end = clock();
   time = (double)(end - start) / CLOCKS_PER_SEC;
