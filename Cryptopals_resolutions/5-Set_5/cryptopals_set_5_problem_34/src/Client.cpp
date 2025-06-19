@@ -61,6 +61,7 @@ void Client::diffieHellmanKeyExchange(const int portServerNumber) {
                std::to_string(portServerNumber) + std::string("/keyExchange")},
       cpr::Header{{"Content-Type", "application/json"}},
       cpr::Body{requestBody});
+
   try {
     if (response.status_code != 201) {
       throw std::runtime_error("Client log | diffieHellmanKeyExchange(): "

@@ -11,6 +11,7 @@
 #include "DhParametersLoader.hpp"
 #include "DiffieHellman.hpp"
 #include "EncryptionUtility.hpp"
+#include "MallorySessionData.hpp"
 #include "SessionData.hpp"
 
 class MalloryServer {
@@ -115,7 +116,8 @@ private:
 
   /* private fields */
   mutable std::mutex _diffieHellmanMapMutex;
-  std::map<boost::uuids::uuid, std::unique_ptr<SessionData>> _diffieHellmanMap;
+  std::map<boost::uuids::uuid, std::unique_ptr<MallorySessionData>>
+      _diffieHellmanMap;
 
   const std::size_t _nonceSize{16}; // bytes
 
