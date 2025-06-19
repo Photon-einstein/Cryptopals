@@ -1,5 +1,5 @@
-#ifndef SERVER_HPP
-#define SERVER_HPP
+#ifndef MALLORY_SERVER_HPP
+#define MALLORY_SERVER_HPP
 
 #include "crow.h"
 #include <boost/uuid/uuid.hpp>
@@ -13,11 +13,11 @@
 #include "EncryptionUtility.hpp"
 #include "SessionData.hpp"
 
-class Server {
+class MalloryServer {
 public:
   /* constructor / destructor */
-  explicit Server(const bool debugFlag);
-  ~Server();
+  explicit MalloryServer(const bool debugFlag);
+  ~MalloryServer();
 
   /**
    * @brief This method will start all the server endpoints in a multi thread
@@ -121,12 +121,12 @@ private:
 
   crow::SimpleApp _app;
 
-  const int _portProduction{18082};
-  const int _portTest{18083};
+  const int _portProduction{18080};
+  const int _portTest{18081};
 
   std::thread _serverThread;
   const bool _debugFlag;
   const std::size_t _ivLength{AES_BLOCK_SIZE}; // bytes
 };
 
-#endif // SERVER_HPP
+#endif // MALLORY_SERVER_HPP

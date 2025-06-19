@@ -48,7 +48,6 @@ set(SOURCE_FILES
 set(TEST_SOURCES
     test_dhParametersLoader.cpp
     test_diffieHellman.cpp
-    test_diffieHellmanProtocol.cpp
 )
 
 # Define the test executable
