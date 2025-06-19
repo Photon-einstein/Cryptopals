@@ -141,44 +141,16 @@ void MalloryServer::keyExchangeRoute() {
           boost::uuids::uuid sessionId = generateUniqueSessionId();
 
           std::lock_guard<std::mutex> lock(_diffieHellmanMapMutex);
-          _diffieHellmanMap[sessionId] = std::make_unique<SessionData>(
+          _diffieHellmanMap[sessionId] = std::make_unique<MallorySessionData>(
               _nonceSize, extractedNonceClient, extractedClientId, _debugFlag,
               _ivLength);
 
-          _diffieHellmanMap[sessionId]->_derivedKeyHex =
-              _diffieHellmanMap[sessionId]->_diffieHellman->deriveSharedSecret(
-                  extractedPublicKeyA,
-                  _diffieHellmanMap[sessionId]->_serverNonceHex,
-                  _diffieHellmanMap[sessionId]->_clientNonceHex);
-
-          res["message"] = _diffieHellmanMap[sessionId]
-                               ->_diffieHellman->getConfirmationMessage();
-          res["sessionId"] = boost::uuids::to_string(sessionId);
-          res["diffieHellman"] = {
-              {"groupName",
-               _diffieHellmanMap[sessionId]->_diffieHellman->getGroupName()},
-              {"publicKeyB",
-               _diffieHellmanMap[sessionId]->_diffieHellman->getPublicKey()}};
-          res["nonce"] = _diffieHellmanMap[sessionId]->_serverNonceHex;
-          // confirmation payload
-          nlohmann::json confirmationPayload = {
-              {"sessionId", boost::uuids::to_string(sessionId)},
-              {"clientId", extractedClientId},
-              {"clientNonce", extractedNonceClient},
-              {"serverNonce", _diffieHellmanMap[sessionId]->_serverNonceHex},
-              {"message", _diffieHellmanMap[sessionId]
-                              ->_diffieHellman->getConfirmationMessage()}};
-          const std::string confirmationString = confirmationPayload.dump();
-          std::string encryptedConfirmationHex =
-              EncryptionUtility::encryptMessageAes256CbcMode(
-                  confirmationString,
-                  _diffieHellmanMap[sessionId]
-                      ->_diffieHellman->getSymmetricKey(),
-                  _diffieHellmanMap[sessionId]->_iv);
-          res["confirmation"] = {
-              {"ciphertext", encryptedConfirmationHex},
-              {"iv", MessageExtractionFacility::toHexString(
-                         _diffieHellmanMap[sessionId]->_iv)}};
+          _diffieHellmanMap[sessionId]->_AMderivedKeyHex =
+              _diffieHellmanMap[sessionId]
+                  ->_AMdiffieHellman->deriveSharedSecret(
+                      extractedPublicKeyA,
+                      _diffieHellmanMap[sessionId]->_AMserverNonceHex,
+                      _diffieHellmanMap[sessionId]->_AMclientNonceHex);
         } catch (const nlohmann::json::exception &e) {
           crow::json::wvalue err;
           err["message"] =
@@ -214,13 +186,17 @@ void MalloryServer::getSessionsDataEndpoint() {
             const auto &sessionId = entry.first;
             const auto &sessionData = entry.second;
             std::string sessionIdStr = boost::uuids::to_string(sessionId);
-            res[sessionIdStr] = {{"sessionId", sessionIdStr},
-                                 {"clientId", sessionData->_clientId},
-                                 {"clientNonce", sessionData->_clientNonceHex},
-                                 {"serverNonce", sessionData->_serverNonceHex},
-                                 {"derivedKey", sessionData->_derivedKeyHex},
-                                 {"iv", MessageExtractionFacility::toHexString(
-                                            sessionData->_iv)}};
+            res[sessionIdStr] = {
+                {"sessionId (Alice to Mallory)", sessionIdStr},
+                {"clientId (Alice to Mallory)", sessionData->_AMclientId},
+                {"clientNonce (Alice to Mallory)",
+                 sessionData->_AMclientNonceHex},
+                {"serverNonce (Alice to Mallory)",
+                 sessionData->_AMserverNonceHex},
+                {"derivedKey (Alice to Mallory)",
+                 sessionData->_AMderivedKeyHex},
+                {"iv (Alice to Mallory)",
+                 MessageExtractionFacility::toHexString(sessionData->_AMiv)}};
           }
           return crow::response(200, res);
         } catch (const std::exception &e) {
