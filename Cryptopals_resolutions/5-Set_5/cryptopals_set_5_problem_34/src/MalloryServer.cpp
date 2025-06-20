@@ -151,18 +151,71 @@ void MalloryServer::keyExchangeRoute() {
                       extractedPublicKeyA,
                       _diffieHellmanMap[sessionId]->_AMserverNonceHex,
                       _diffieHellmanMap[sessionId]->_AMclientNonceHex);
+          // generate fake client
+          _diffieHellmanMap[sessionId]->_MSfakeClient =
+              std::make_unique<Client>(
+                  _diffieHellmanMap[sessionId]->_AMclientId, _debugFlag);
+          std::tuple<bool, std::string> serverResponse =
+              _diffieHellmanMap[sessionId]
+                  ->_MSfakeClient->diffieHellmanKeyExchange(
+                      _portRealServerProduction);
+          // extract info from response of server to fake client
+          if (std::get<0>(serverResponse) == false) {
+            throw std::runtime_error(
+                "Mallory Server log | keyExchangeRoute(): "
+                "Fake client Diffie Hellman key exchange failed");
+          }
+          parsedJson.clear();
+          parsedJson = nlohmann::json::parse(std::get<1>(serverResponse));
+          std::string sessionIdExtracted =
+              parsedJson.at("sessionId").get<std::string>();
+          std::string clientIdExtracted =
+              parsedJson.at("clientId").get<std::string>();
+          std::string clientNonceExtracted =
+              parsedJson.at("clientNonce").get<std::string>();
+          std::string serverNonceExtracted =
+              parsedJson.at("serverNonce").get<std::string>();
+          std::string messageExtracted =
+              parsedJson.at("message").get<std::string>();
+          // generate fake response to client
+          res["message"] = messageExtracted;
+          res["sessionId"] = sessionIdExtracted;
+          res["diffieHellman"] = {
+              {"groupName", extractedGroupName},
+              {"publicKeyB",
+               _diffieHellmanMap[sessionId]->_AMdiffieHellman->getPublicKey()}};
+          res["nonce"] = _diffieHellmanMap[sessionId]->_AMserverNonceHex;
+          // confirmation payload
+          nlohmann::json confirmationPayload = {
+              {"sessionId", sessionIdExtracted},
+              {"clientId", extractedClientId},
+              {"clientNonce", _diffieHellmanMap[sessionId]->_AMclientNonceHex},
+              {"serverNonce", _diffieHellmanMap[sessionId]->_AMserverNonceHex},
+              {"message", messageExtracted}};
+          const std::string confirmationString = confirmationPayload.dump();
+          std::string encryptedConfirmationHex =
+              EncryptionUtility::encryptMessageAes256CbcMode(
+                  confirmationString,
+                  _diffieHellmanMap[sessionId]
+                      ->_AMdiffieHellman->getSymmetricKey(),
+                  _diffieHellmanMap[sessionId]->_AMiv);
+          res["confirmation"] = {
+              {"ciphertext", encryptedConfirmationHex},
+              {"iv", MessageExtractionFacility::toHexString(
+                         _diffieHellmanMap[sessionId]->_AMiv)}};
         } catch (const nlohmann::json::exception &e) {
           crow::json::wvalue err;
           err["message"] =
               std::string("Mallory Server log | JSON parsing error: ") +
               e.what();
-          return crow::response(400, err);
+          return crow::response(404, err);
         } catch (const std::exception &e) {
           crow::json::wvalue err;
           err["message"] =
               std::string(
                   "Mallory Server log | An unexpected error occurred: ") +
               e.what();
+          return crow::response(400, err);
         }
         return crow::response(201, res);
       });

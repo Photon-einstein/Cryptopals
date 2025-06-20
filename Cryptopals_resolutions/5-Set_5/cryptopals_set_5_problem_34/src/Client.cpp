@@ -31,14 +31,22 @@ Client::~Client() {}
  * This method will perform the Diffie Hellman key exchange protocol with
  * a given server, in order to agree on a given symmetric encryption key.
  *
+ * @retval true Decryption and validation were successful.
+ * @retval false Decryption or validation failed.
+ * @return A tuple containing:
+ *         - bool: indicating success or failure of validation.
+ *         - std::string: the decrypted plaintext message. If decryption
+ * fails, this may contain garbage or incomplete data.
  * @throw runtime_error if portServerNumber < 1024
  */
-void Client::diffieHellmanKeyExchange(const int portServerNumber) {
+const std::tuple<bool, std::string>
+Client::diffieHellmanKeyExchange(const int portServerNumber) {
   if (portServerNumber < 1023) {
     throw std::runtime_error(
         "Client log | diffieHellmanKeyExchange(): "
         "Invalid port server number used, should be greater than 1023.");
   }
+  std::tuple<bool, std::string> connectionTestResult;
   std::unique_ptr<MyCryptoLibrary::DiffieHellman> diffieHellman(
       std::make_unique<MyCryptoLibrary::DiffieHellman>(_debugFlag));
   std::string clientNonceHex{
@@ -100,16 +108,14 @@ void Client::diffieHellmanKeyExchange(const int portServerNumber) {
             extractedPublicKeyB, _diffieHellmanMap[sessionId]->_serverNonceHex,
             _diffieHellmanMap[sessionId]->_clientNonceHex);
     // confirmation of the data received
-    std::tuple<bool, std::string> connectionTestResult =
-        confirmationServerResponse(
-            ciphertext,
-            MessageExtractionFacility::hexToBytes(
-                _diffieHellmanMap[sessionId]->_derivedKeyHex),
-            _diffieHellmanMap[sessionId]->_iv, sessionId, getClientId(),
-            _diffieHellmanMap[sessionId]->_clientNonceHex,
-            _diffieHellmanMap[sessionId]->_serverNonceHex,
-            _diffieHellmanMap[sessionId]
-                ->_diffieHellman->getConfirmationMessage());
+    connectionTestResult = confirmationServerResponse(
+        ciphertext,
+        MessageExtractionFacility::hexToBytes(
+            _diffieHellmanMap[sessionId]->_derivedKeyHex),
+        _diffieHellmanMap[sessionId]->_iv, sessionId, getClientId(),
+        _diffieHellmanMap[sessionId]->_clientNonceHex,
+        _diffieHellmanMap[sessionId]->_serverNonceHex,
+        _diffieHellmanMap[sessionId]->_diffieHellman->getConfirmationMessage());
     if (std::get<0>(connectionTestResult) == false) {
       throw std::runtime_error("Client log | diffieHellmanKeyExchange(): "
                                "Diffie Hellman key exchange failed");
@@ -136,9 +142,10 @@ void Client::diffieHellmanKeyExchange(const int portServerNumber) {
                 << std::endl;
     }
   } catch (const std::exception &e) {
-    std::cerr << "Client log | diffieHellmanKeyExchange(): " << e.what()
+    std::cerr << "Client log | diffieHellmanKeyExchange() here: " << e.what()
               << std::endl;
   }
+  return connectionTestResult;
 }
 /******************************************************************************/
 /**

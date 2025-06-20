@@ -25,9 +25,16 @@ public:
    * This method will perform the Diffie Hellman key exchange protocol with
    * a given server, in order to agree on a given symmetric encryption key.
    *
+   * @retval true Decryption and validation were successful.
+   * @retval false Decryption or validation failed.
+   * @return A tuple containing:
+   *         - bool: indicating success or failure of validation.
+   *         - std::string: the decrypted plaintext message. If decryption
+   * fails, this may contain garbage or incomplete data.
    * @throw runtime_error if portServerNumber < 1024
    */
-  void diffieHellmanKeyExchange(const int portServerNumber);
+  const std::tuple<bool, std::string>
+  diffieHellmanKeyExchange(const int portServerNumber);
 
   /**
    * @brief This method will confirm if a given session id is correctly setup.
