@@ -130,6 +130,7 @@ private:
   std::thread _serverThread;
   const bool _debugFlag;
   const std::size_t _ivLength{AES_BLOCK_SIZE}; // bytes
+  std::string _serverId{"Mallory_Server_"};
 };
 
 #endif // MALLORY_SERVER_HPP

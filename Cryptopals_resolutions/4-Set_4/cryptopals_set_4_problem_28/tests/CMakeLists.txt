@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
 project(cryptopals_tests_set_4_problem_28)
 
+# Set the C++ standard
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
 # Find Google Test
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})

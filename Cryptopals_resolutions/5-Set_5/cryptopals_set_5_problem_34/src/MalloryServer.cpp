@@ -8,7 +8,10 @@
 #include "./../include/MessageExtractionFacility.hpp"
 
 /* constructor / destructor */
-MalloryServer::MalloryServer(const bool debugFlag) : _debugFlag{debugFlag} {}
+MalloryServer::MalloryServer(const bool debugFlag) : _debugFlag{debugFlag} {
+  boost::uuids::random_generator gen;
+  _serverId += boost::uuids::to_string(gen());
+}
 /******************************************************************************/
 MalloryServer::~MalloryServer() {
   // server graceful stop
