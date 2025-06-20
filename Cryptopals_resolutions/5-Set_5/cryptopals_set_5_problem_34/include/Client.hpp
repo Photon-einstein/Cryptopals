@@ -122,8 +122,8 @@ private:
    * hexadecimal format.
    * @param serverNonce The server nonce associated with this connection, in
    * hexadecimal format.
-   * @param message The conclusion message expected from this protocol (e.g.,
-   * "Key exchange complete").
+   * @param message The conclusion message expected from this protocol starts
+   * with the expected message (e.g. "Key exchange complete").
    *
    * @retval true Decryption and validation were successful.
    * @retval false Decryption or validation failed.

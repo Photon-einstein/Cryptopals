@@ -7,6 +7,7 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <openssl/rand.h>
+#include <string_view>
 
 #include "./../include/Client.hpp"
 #include "./../include/EncryptionUtility.hpp"
@@ -142,7 +143,7 @@ Client::diffieHellmanKeyExchange(const int portServerNumber) {
                 << std::endl;
     }
   } catch (const std::exception &e) {
-    std::cerr << "Client log | diffieHellmanKeyExchange() here: " << e.what()
+    std::cerr << "Client log | diffieHellmanKeyExchange(): " << e.what()
               << std::endl;
   }
   return connectionTestResult;
@@ -270,8 +271,8 @@ void Client::printServerResponse(const cpr::Response &response) {
  * hexadecimal format.
  * @param serverNonce The server nonce associated with this connection, in
  * hexadecimal format.
- * @param message The conclusion message expected from this protocol (e.g., "Key
- * exchange complete").
+ * @param message The conclusion message expected from this protocol starts with
+ * the expected message (e.g. "Key exchange complete").
  *
  * @retval true Decryption and validation were successful.
  * @retval false Decryption or validation failed.
@@ -302,7 +303,8 @@ std::tuple<bool, std::string> Client::confirmationServerResponse(
     std::string messageExtracted = parsedJson.at("message").get<std::string>();
     if (sessionId == sessionIdExtracted && clientId == clientIdExtracted &&
         clientNonce == clientNonceExtracted &&
-        serverNonce == serverNonceExtracted && message == messageExtracted) {
+        serverNonce == serverNonceExtracted &&
+        messageExtracted.starts_with(message)) {
       comparisonRes = true;
     }
   } catch (const std::exception &e) {

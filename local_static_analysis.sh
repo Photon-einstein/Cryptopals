@@ -54,7 +54,7 @@ find . -type f -name "CMakeLists.txt" ! -path "*/build/*" ! -path "*/external/*"
         echo "🚀 Running Cppcheck in $tst_dir"
 
         find "$tst_dir" -type f -name "*.cpp" ! -path "*/build/*" ! -path "*/external/*" | while read file; do
-            cppcheck --enable=all --std=c++17 --inconclusive --force --error-exitcode=1 --suppress=missingIncludeSystem --suppress=unusedStructMember --suppress=unusedFunction --suppress=unmatchedSuppression "$file"
+            cppcheck --enable=all --std=c++20 --inconclusive --force --error-exitcode=1 --suppress=missingIncludeSystem --suppress=unusedStructMember --suppress=unusedFunction --suppress=unmatchedSuppression "$file"
         done
     fi
 

@@ -8,7 +8,10 @@
 #include "./../include/Server.hpp"
 
 /* constructor / destructor */
-Server::Server(const bool debugFlag) : _debugFlag{debugFlag} {}
+Server::Server(const bool debugFlag) : _debugFlag{debugFlag} {
+  boost::uuids::random_generator gen;
+  _serverId += boost::uuids::to_string(gen());
+}
 /******************************************************************************/
 Server::~Server() {
   // server graceful stop
@@ -161,13 +164,16 @@ void Server::keyExchangeRoute() {
                _diffieHellmanMap[sessionId]->_diffieHellman->getPublicKey()}};
           res["nonce"] = _diffieHellmanMap[sessionId]->_serverNonceHex;
           // confirmation payload
+          std::string serverConfirmationMessage =
+              _diffieHellmanMap[sessionId]
+                  ->_diffieHellman->getConfirmationMessage() +
+              " with " + _serverId;
           nlohmann::json confirmationPayload = {
               {"sessionId", boost::uuids::to_string(sessionId)},
               {"clientId", extractedClientId},
               {"clientNonce", extractedNonceClient},
               {"serverNonce", _diffieHellmanMap[sessionId]->_serverNonceHex},
-              {"message", _diffieHellmanMap[sessionId]
-                              ->_diffieHellman->getConfirmationMessage()}};
+              {"message", serverConfirmationMessage}};
           const std::string confirmationString = confirmationPayload.dump();
           std::string encryptedConfirmationHex =
               EncryptionUtility::encryptMessageAes256CbcMode(
