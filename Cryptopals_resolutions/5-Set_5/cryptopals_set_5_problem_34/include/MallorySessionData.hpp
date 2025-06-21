@@ -22,6 +22,7 @@ struct MallorySessionData {
   std::string _AMclientId; // transparent in this attack
   std::vector<uint8_t> _AMiv;
   // Client (Mallory) - Server channel
+  std::string _MSsessionId;
   std::unique_ptr<Client> _MSfakeClient;
 };
 

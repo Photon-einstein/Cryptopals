@@ -8,7 +8,10 @@
 #include "./../include/MessageExtractionFacility.hpp"
 
 /* constructor / destructor */
-MalloryServer::MalloryServer(const bool debugFlag) : _debugFlag{debugFlag} {
+MalloryServer::MalloryServer(const bool debugFlag, const bool testFlag)
+    : _debugFlag{debugFlag}, _testFlag{testFlag} {
+  _portRealServerInUse =
+      (_testFlag) ? _portRealServerTest : _portRealServerProduction;
   boost::uuids::random_generator gen;
   _serverId += boost::uuids::to_string(gen());
 }
@@ -161,7 +164,7 @@ void MalloryServer::keyExchangeRoute() {
           std::tuple<bool, std::string> serverResponse =
               _diffieHellmanMap[sessionId]
                   ->_MSfakeClient->diffieHellmanKeyExchange(
-                      _portRealServerProduction);
+                      _portRealServerInUse);
           // extract info from response of server to fake client
           if (std::get<0>(serverResponse) == false) {
             throw std::runtime_error(
@@ -206,6 +209,8 @@ void MalloryServer::keyExchangeRoute() {
               {"ciphertext", encryptedConfirmationHex},
               {"iv", MessageExtractionFacility::toHexString(
                          _diffieHellmanMap[sessionId]->_AMiv)}};
+          // save session id with real server to future use
+          _diffieHellmanMap[sessionId]->_MSsessionId = sessionIdExtracted;
         } catch (const nlohmann::json::exception &e) {
           crow::json::wvalue err;
           err["message"] =
@@ -241,17 +246,15 @@ void MalloryServer::getSessionsDataEndpoint() {
           for (const auto &entry : _diffieHellmanMap) {
             const auto &sessionId = entry.first;
             const auto &sessionData = entry.second;
-            std::string sessionIdStr = boost::uuids::to_string(sessionId);
-            res[sessionIdStr] = {
-                {"sessionId (Alice to Mallory)", sessionIdStr},
-                {"clientId (Alice to Mallory)", sessionData->_AMclientId},
-                {"clientNonce (Alice to Mallory)",
-                 sessionData->_AMclientNonceHex},
-                {"serverNonce (Alice to Mallory)",
-                 sessionData->_AMserverNonceHex},
-                {"derivedKey (Alice to Mallory)",
-                 sessionData->_AMderivedKeyHex},
-                {"iv (Alice to Mallory)",
+            const std::string realSessionId =
+                _diffieHellmanMap[sessionId]->_MSsessionId;
+            res[realSessionId] = {
+                {"sessionId", realSessionId},
+                {"clientId", sessionData->_AMclientId},
+                {"clientNonce", sessionData->_AMclientNonceHex},
+                {"serverNonce", sessionData->_AMserverNonceHex},
+                {"derivedKey", sessionData->_AMderivedKeyHex},
+                {"iv",
                  MessageExtractionFacility::toHexString(sessionData->_AMiv)}};
           }
           return crow::response(200, res);

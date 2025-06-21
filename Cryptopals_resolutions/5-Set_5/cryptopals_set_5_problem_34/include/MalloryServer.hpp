@@ -17,7 +17,7 @@
 class MalloryServer {
 public:
   /* constructor / destructor */
-  explicit MalloryServer(const bool debugFlag);
+  explicit MalloryServer(const bool debugFlag, const bool testFlag);
   ~MalloryServer();
 
   /**
@@ -126,7 +126,10 @@ private:
   const int _portProduction{18080};
   const int _portTest{18081};
   const int _portRealServerProduction{18082};
+  const int _portRealServerTest{18083};
+  int _portRealServerInUse;
 
+  const bool _testFlag;
   std::thread _serverThread;
   const bool _debugFlag;
   const std::size_t _ivLength{AES_BLOCK_SIZE}; // bytes
