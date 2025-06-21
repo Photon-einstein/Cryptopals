@@ -30,7 +30,7 @@ find . -type f -name "CMakeLists.txt" ! -path "*/build/*" ! -path "*/external/*"
     if [ -d "$src_dir" ] && [[ "$src_dir" != *"/external"* ]]; then
         echo "🚀 Running Clang-Tidy in $src_dir"
         for file in "$src_dir"/*.cpp; do
-            [ -f "$file" ] && clang-tidy "$file" -- -I"$src_dir"
+            [ -f "$file" ] && clang-tidy "$file" -- -I"$src_dir" -std=c++20
         done
     fi
 
@@ -38,7 +38,7 @@ find . -type f -name "CMakeLists.txt" ! -path "*/build/*" ! -path "*/external/*"
     if [ -d "$dir/tests" ] && [[ "$dir" != *"/external"* ]]; then
         echo "🚀 Running Clang-Tidy in $dir/tests"
         for file in "$dir/tests"/*.cpp; do
-            [ -f "$file" ] && clang-tidy "$file" -- -I"$dir/tests"
+            [ -f "$file" ] && clang-tidy "$file" -- -I"$dir/tests" -std=c++20
         done
     fi
 

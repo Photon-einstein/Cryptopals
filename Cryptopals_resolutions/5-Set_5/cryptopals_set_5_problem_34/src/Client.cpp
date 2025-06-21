@@ -162,6 +162,23 @@ bool Client::confirmSessionId(const std::string &sessionId) {
 }
 /******************************************************************************/
 /**
+ * @brief This method sets the port test to a new one.
+ *
+ * This method sets the port test to a new one, used only for test purposes.
+ *
+ * @throw runtime_error if the portTest is not a valid one.
+ */
+void Client::setTestPort(const int portServerTest) {
+  if (portServerTest < 1024 || portServerTest > 49151) {
+    throw std::runtime_error(
+        "Client log | setTestPort(): "
+        "invalid port test number given, must be in range [1024, 49151]");
+  }
+  _portServerTest = portServerTest;
+}
+/******************************************************************************/
+
+/**
  * @brief This method return the client ID.
  *
  * This method return the client ID of a given client.

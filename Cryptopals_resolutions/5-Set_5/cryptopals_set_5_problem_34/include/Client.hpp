@@ -47,6 +47,15 @@ public:
   bool confirmSessionId(const std::string &sessionId);
 
   /**
+   * @brief This method sets the port test to a new one.
+   *
+   * This method sets the port test to a new one, used only for test purposes.
+   *
+   * @throw runtime_error if the portTest is not a valid one.
+   */
+  void setTestPort(const int portServerTest);
+
+  /**
    * @brief This method return the client ID.
    *
    * This method return the client ID of a given client.
@@ -142,7 +151,7 @@ private:
   std::map<std::string, std::unique_ptr<SessionData>> _diffieHellmanMap;
 
   const int _portServerProduction{18080};
-  const int _portServerTest{18081};
+  int _portServerTest{18081};
 
   const std::string _clientId{};
   const std::size_t _nonceSize{16}; // bytes

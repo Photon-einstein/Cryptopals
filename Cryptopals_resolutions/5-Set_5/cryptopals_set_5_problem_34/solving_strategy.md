@@ -36,12 +36,24 @@
             http://localhost:18082/sessionsData
             ```
 
-4. Understand the changes necessary to the Mallory Server to enable the Man in the Middle Attack (in progress)
+4. Understand the changes necessary to the Mallory Server to enable the Man in the Middle Attack (Done)
         - Client ID on the Alice side can be kept constant and transparent in this attack.
         - Nonces on the Mallory side should be independently created to guarantee security on both ends of the communication.
         - Different sessions IDs can be used in the MIM attack, but the confirmation message should keep the real session from the server.
         - Adapt sessions data structure on the Mallory side to reflect this symmetry.
 
-        Alice ---> Mallory ----> Server -----> Mallory ------> Alice
+5. Implement the MITM attack (Done)
+        Alice → Mallory → Server → Mallory → Alice
 
-        Alice ---> Mallory (already done via regular server code)
+        Alice → Mallory (already done via regular server code)
+
+        Mallory → Server (already done via regular client code)
+
+        Server → Mallory (already done via regular client code)
+
+        Mallory → Alice (Done, forwarded session id, confirmation message of real server, changed server nonce and iv and encrypted
+                                confirmation message with private key from connection from Mallory and Alice)
+
+6. Run the static code analysis on the current code and fix problems (Done)
+
+7. Implement the tests of the MITM attack (in progress)
