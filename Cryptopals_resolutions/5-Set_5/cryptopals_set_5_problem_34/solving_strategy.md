@@ -55,5 +55,6 @@
                                 confirmation message with private key from connection from Mallory and Alice)
 
 6. Run the static code analysis on the current code and fix problems (Done)
+7. Place the Diffie Hellman key exchange's tests from previous challenges working again (Done)
 
-7. Implement the tests of the MITM attack (in progress)
+8. Implement the tests of the MITM attack (in progress)

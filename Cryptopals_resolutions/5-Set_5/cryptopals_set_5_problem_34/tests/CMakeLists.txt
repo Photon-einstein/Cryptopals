@@ -44,6 +44,8 @@ set(SOURCE_FILES
     ../src/DhParametersLoader.cpp
     ../src/DiffieHellman.cpp
     ../src/EncryptionUtility.cpp
+    ../src/MalloryServer.cpp
+    ../src/MallorySessionData.cpp 
     ../src/MessageExtractionFacility.cpp
     ../src/Server.cpp
 )
@@ -53,6 +55,7 @@ set(TEST_SOURCES
     test_dhParametersLoader.cpp
     test_diffieHellman.cpp
     test_diffieHellmanProtocol.cpp
+    test_diffieHellmanProtocolMITMattack.cpp
 )
 
 # Define the test executable
