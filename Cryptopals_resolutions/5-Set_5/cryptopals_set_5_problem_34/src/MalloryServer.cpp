@@ -167,11 +167,13 @@ void MalloryServer::keyExchangeRoute() {
                       extractedPublicKeyA,
                       _diffieHellmanMap[sessionId]->_AMserverNonceHex,
                       _diffieHellmanMap[sessionId]->_AMclientNonceHex);
+
           // generate fake client
           _diffieHellmanMap[sessionId]
               ->_MSfakeClient = std::make_unique<Client>(
               _diffieHellmanMap[sessionId]->_AMclientId, _debugFlag,
-              _diffieHellmanMap[sessionId]->_AMdiffieHellman->getGroupName());
+              _diffieHellmanMap[sessionId]->_AMdiffieHellman->getGroupName(),
+              _parameterInjection);
           std::tuple<bool, std::string> serverResponse =
               _diffieHellmanMap[sessionId]
                   ->_MSfakeClient->diffieHellmanKeyExchange(
