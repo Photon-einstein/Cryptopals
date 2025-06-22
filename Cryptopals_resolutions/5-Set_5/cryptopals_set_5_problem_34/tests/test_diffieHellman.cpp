@@ -10,7 +10,8 @@ protected:
   // cppcheck-suppress unusedFunction
   void SetUp() override {
     // NOLINTNEXTLINE(clang-analyzer-optin.cplusplus.VirtualCall)
-    _dh = std::make_unique<MyCryptoLibrary::DiffieHellman>(_debugFlag);
+    _dh = std::make_unique<MyCryptoLibrary::DiffieHellman>(_debugFlag,
+                                                           _groupNameDH);
   }
 
   // cppcheck-suppress unusedFunction
@@ -24,6 +25,7 @@ protected:
   std::unique_ptr<MyCryptoLibrary::DiffieHellman> _dh;
   const std::string _confirmationMessage{"Key exchange complete"};
   const std::string _dhParametersFilename{"../input/DhParameters.json"};
+  const std::string _groupNameDH{"rfc3526-group-18"};
 };
 
 /**

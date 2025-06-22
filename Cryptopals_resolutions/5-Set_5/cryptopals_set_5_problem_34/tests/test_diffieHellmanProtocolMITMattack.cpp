@@ -15,9 +15,12 @@ protected:
     StartServerOnce();
     _fakeServer->clearDiffieHellmanSessionData();
     _server->clearDiffieHellmanSessionData();
-    _mapUsers[_clientId1] = std::make_unique<Client>(_clientId1, _debugFlag);
-    _mapUsers[_clientId2] = std::make_unique<Client>(_clientId2, _debugFlag);
-    _mapUsers[_clientId3] = std::make_unique<Client>(_clientId3, _debugFlag);
+    _mapUsers[_clientId1] =
+        std::make_unique<Client>(_clientId1, _debugFlag, _groupNameDH);
+    _mapUsers[_clientId2] =
+        std::make_unique<Client>(_clientId2, _debugFlag, _groupNameDH);
+    _mapUsers[_clientId3] =
+        std::make_unique<Client>(_clientId3, _debugFlag, _groupNameDH);
   }
 
   // cppcheck-suppress unusedFunction
@@ -36,6 +39,7 @@ protected:
   // cppcheck-suppress unusedStructMember
   const bool _debugFlag{false}, _testFlag{true};
   const std::string _clientId1{"Alice"}, _clientId2{"Bob"}, _clientId3{"John"};
+  const std::string _groupNameDH{"rfc3526-group-17"};
   std::unique_ptr<MalloryServer> _fakeServer{
       std::make_unique<MalloryServer>(_debugFlag, _testFlag)};
   std::unique_ptr<Server> _server{std::make_unique<Server>(_debugFlag)};

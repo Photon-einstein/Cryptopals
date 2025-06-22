@@ -13,9 +13,12 @@ protected:
     // NOLINTNEXTLINE(clang-analyzer-optin.cplusplus.VirtualCall)
     StartServerOnce();
     _server->clearDiffieHellmanSessionData();
-    _mapUsers[_clientId1] = std::make_unique<Client>(_clientId1, _debugFlag);
-    _mapUsers[_clientId2] = std::make_unique<Client>(_clientId2, _debugFlag);
-    _mapUsers[_clientId3] = std::make_unique<Client>(_clientId3, _debugFlag);
+    _mapUsers[_clientId1] =
+        std::make_unique<Client>(_clientId1, _debugFlag, _groupNameDH);
+    _mapUsers[_clientId2] =
+        std::make_unique<Client>(_clientId2, _debugFlag, _groupNameDH);
+    _mapUsers[_clientId3] =
+        std::make_unique<Client>(_clientId3, _debugFlag, _groupNameDH);
     // set valid test port for testing purpose
     _mapUsers[_clientId1]->setTestPort(_server->getTestPort());
     _mapUsers[_clientId2]->setTestPort(_server->getTestPort());
@@ -37,6 +40,7 @@ protected:
   // cppcheck-suppress unusedStructMember
   const bool _debugFlag{false};
   const std::string _clientId1{"Ana"}, _clientId2{"Eve"}, _clientId3{"Bob"};
+  const std::string _groupNameDH{"rfc3526-group-17"};
   std::unique_ptr<Server> _server{std::make_unique<Server>(_debugFlag)};
   std::map<std::string, std::unique_ptr<Client>> _mapUsers;
 };

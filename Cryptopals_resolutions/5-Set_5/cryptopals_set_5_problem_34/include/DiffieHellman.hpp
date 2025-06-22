@@ -15,7 +15,10 @@ namespace MyCryptoLibrary {
 class DiffieHellman {
 public:
   /* constructor / destructor*/
-  explicit DiffieHellman(const bool debugFlag);
+  explicit DiffieHellman(const bool debugFlag, const std::string &groupName);
+  explicit DiffieHellman(const bool debugFlag,
+                         const bool privateKeyDeterministic,
+                         const std::string &groupName);
   ~DiffieHellman();
 
   /* public methods */
@@ -114,6 +117,8 @@ private:
   std::vector<uint8_t> _derivedSymmetricKey;
   std::string _derivedSymmetricKeyHex = "";
   const std::string _confirmationMessage{"Key exchange complete"};
+  const bool _privateKeyDeterministic{false};
+  std::string _groupName;
 };
 
 } // namespace MyCryptoLibrary

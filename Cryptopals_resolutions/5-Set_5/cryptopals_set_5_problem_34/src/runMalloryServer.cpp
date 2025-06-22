@@ -13,9 +13,9 @@ int main(void) {
   double time;
   start = clock();
   /* work to verify */
-  const bool debugFlag{false}, testFlag{false};
+  const bool debugFlag{true}, testFlag{false}, parameterInjection{true};
   std::shared_ptr<MalloryServer> server =
-      std::make_shared<MalloryServer>(debugFlag, testFlag);
+      std::make_shared<MalloryServer>(debugFlag, testFlag, parameterInjection);
   server->runServer();
   /* end of the work */
   end = clock();

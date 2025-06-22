@@ -13,11 +13,15 @@
 #include "./../include/EncryptionUtility.hpp"
 
 /* constructor / destructor */
-Client::Client(const std::string &clientId, const bool debugFlag)
-    : _clientId{clientId}, _debugFlag{debugFlag} {
+Client::Client(const std::string &clientId, const bool debugFlag,
+               const std::string &groupNameDH)
+    : _clientId{clientId}, _debugFlag{debugFlag}, _groupNameDH{groupNameDH} {
   if (_clientId.size() == 0) {
     throw std::runtime_error("Client log | constructor(): "
                              "Client ID is null");
+  } else if (_groupNameDH.size() == 0) {
+    throw std::runtime_error("Client log | constructor(): "
+                             "Group name is null");
   }
 }
 /******************************************************************************/
@@ -49,7 +53,8 @@ Client::diffieHellmanKeyExchange(const int portServerNumber) {
   }
   std::tuple<bool, std::string> connectionTestResult;
   std::unique_ptr<MyCryptoLibrary::DiffieHellman> diffieHellman(
-      std::make_unique<MyCryptoLibrary::DiffieHellman>(_debugFlag));
+      std::make_unique<MyCryptoLibrary::DiffieHellman>(_debugFlag,
+                                                       _groupNameDH));
   std::string clientNonceHex{
       EncryptionUtility::generateCryptographicNonce(_nonceSize)};
   std::string requestBody =

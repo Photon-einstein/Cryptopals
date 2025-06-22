@@ -13,10 +13,10 @@ int main(void) {
   double time;
   start = clock();
   /* work to verify */
-  const bool debugFlag{false};
-  const std::string clientId{"Bob"};
+  const bool debugFlag{true};
+  const std::string clientId{"Bob"}, groupNameDH{"cryptopals-group-33-small"};
   std::shared_ptr<Client> client =
-      std::make_shared<Client>(clientId, debugFlag);
+      std::make_shared<Client>(clientId, debugFlag, groupNameDH);
   client->diffieHellmanKeyExchange(client->getProductionPort());
   /* end of the work */
   end = clock();

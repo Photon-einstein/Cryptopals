@@ -16,6 +16,16 @@ MalloryServer::MalloryServer(const bool debugFlag, const bool testFlag)
   _serverId += boost::uuids::to_string(gen());
 }
 /******************************************************************************/
+MalloryServer::MalloryServer(const bool debugFlag, const bool testFlag,
+                             const bool parameterInjection)
+    : _debugFlag{debugFlag}, _testFlag{testFlag},
+      _parameterInjection{parameterInjection} {
+  _portRealServerInUse =
+      (_testFlag) ? _portRealServerTest : _portRealServerProduction;
+  boost::uuids::random_generator gen;
+  _serverId += boost::uuids::to_string(gen());
+}
+/******************************************************************************/
 MalloryServer::~MalloryServer() {
   // server graceful stop
   _app.stop();
@@ -149,7 +159,7 @@ void MalloryServer::keyExchangeRoute() {
           std::lock_guard<std::mutex> lock(_diffieHellmanMapMutex);
           _diffieHellmanMap[sessionId] = std::make_unique<MallorySessionData>(
               _nonceSize, extractedNonceClient, extractedClientId, _debugFlag,
-              _ivLength);
+              _ivLength, extractedGroupName, _parameterInjection);
 
           _diffieHellmanMap[sessionId]->_AMderivedKeyHex =
               _diffieHellmanMap[sessionId]
@@ -158,9 +168,10 @@ void MalloryServer::keyExchangeRoute() {
                       _diffieHellmanMap[sessionId]->_AMserverNonceHex,
                       _diffieHellmanMap[sessionId]->_AMclientNonceHex);
           // generate fake client
-          _diffieHellmanMap[sessionId]->_MSfakeClient =
-              std::make_unique<Client>(
-                  _diffieHellmanMap[sessionId]->_AMclientId, _debugFlag);
+          _diffieHellmanMap[sessionId]
+              ->_MSfakeClient = std::make_unique<Client>(
+              _diffieHellmanMap[sessionId]->_AMclientId, _debugFlag,
+              _diffieHellmanMap[sessionId]->_AMdiffieHellman->getGroupName());
           std::tuple<bool, std::string> serverResponse =
               _diffieHellmanMap[sessionId]
                   ->_MSfakeClient->diffieHellmanKeyExchange(
