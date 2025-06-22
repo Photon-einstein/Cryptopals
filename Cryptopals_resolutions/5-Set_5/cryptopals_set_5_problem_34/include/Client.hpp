@@ -13,6 +13,10 @@ public:
   /* constructor / destructor*/
   explicit Client(const std::string &clientId, const bool debugFlag,
                   const std::string &groupNameDH);
+
+  explicit Client(const std::string &clientId, const bool debugFlag,
+                  const std::string &groupNameDH,
+                  const bool parameterInjection);
   ~Client();
 
   /* public methods */
@@ -158,6 +162,7 @@ private:
   const std::size_t _nonceSize{16}; // bytes
   const bool _debugFlag;
   const std::string _groupNameDH;
+  const bool _parameterInjection{false};
 };
 
 #endif // CLIENT_HPP
