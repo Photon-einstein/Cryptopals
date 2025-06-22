@@ -18,6 +18,8 @@ class MalloryServer {
 public:
   /* constructor / destructor */
   explicit MalloryServer(const bool debugFlag, const bool testFlag);
+  explicit MalloryServer(const bool debugFlag, const bool testFlag,
+                         const bool parameterInjection);
   ~MalloryServer();
 
   /**
@@ -134,6 +136,7 @@ private:
   const bool _debugFlag;
   const std::size_t _ivLength{AES_BLOCK_SIZE}; // bytes
   std::string _serverId{"Mallory_Server_"};
+  bool _parameterInjection{false};
 };
 
 #endif // MALLORY_SERVER_HPP

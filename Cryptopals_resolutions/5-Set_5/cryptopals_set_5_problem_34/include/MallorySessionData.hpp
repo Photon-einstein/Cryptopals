@@ -7,13 +7,22 @@
 #include "EncryptionUtility.hpp"
 
 struct MallorySessionData {
-  MallorySessionData(const std::size_t nonceSize,
-                     const std::string &clientNonceHex,
-                     const std::string &clientId, const bool debugFlag,
-                     const std::size_t ivLength);
+  explicit MallorySessionData(const std::size_t nonceSize,
+                              const std::string &clientNonceHex,
+                              const std::string &clientId, const bool debugFlag,
+                              const std::size_t ivLength,
+                              const std::string &groupNameDH);
+
+  explicit MallorySessionData(const std::size_t nonceSize,
+                              const std::string &clientNonceHex,
+                              const std::string &clientId, const bool debugFlag,
+                              const std::size_t ivLength,
+                              const std::string &groupNameDH,
+                              const bool parameterInjection);
 
   ~MallorySessionData();
 
+  bool _parameterInjection{false};
   std::unique_ptr<MyCryptoLibrary::DiffieHellman> _AMdiffieHellman;
   // Client (Alice) - Mallory channel
   std::string _AMserverNonceHex;

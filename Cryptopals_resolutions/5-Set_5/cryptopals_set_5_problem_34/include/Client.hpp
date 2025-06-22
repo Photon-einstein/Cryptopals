@@ -11,7 +11,8 @@
 class Client {
 public:
   /* constructor / destructor*/
-  explicit Client(const std::string &clientId, const bool debugFlag);
+  explicit Client(const std::string &clientId, const bool debugFlag,
+                  const std::string &groupNameDH);
   ~Client();
 
   /* public methods */
@@ -156,6 +157,7 @@ private:
   const std::string _clientId{};
   const std::size_t _nonceSize{16}; // bytes
   const bool _debugFlag;
+  const std::string _groupNameDH;
 };
 
 #endif // CLIENT_HPP

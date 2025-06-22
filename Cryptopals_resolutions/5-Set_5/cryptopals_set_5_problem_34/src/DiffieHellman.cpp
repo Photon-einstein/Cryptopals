@@ -7,15 +7,20 @@
 #include "./../include/DiffieHellman.hpp"
 
 /* constructor / destructor */
-MyCryptoLibrary::DiffieHellman::DiffieHellman(const bool debugFlag)
+MyCryptoLibrary::DiffieHellman::DiffieHellman(const bool debugFlag,
+                                              const std::string &groupName)
     : _privateKey{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
       _publicKey{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
       _sharedSecret{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
-      _debugFlag{debugFlag} {
+      _debugFlag{debugFlag}, _groupName{groupName} {
+  if (_groupName.size() == 0) {
+    throw std::runtime_error("Diffie Hellman log | constructor(): "
+                             "Group name is null");
+  }
   std::map<std::string, DhParametersLoader::DhParameters> dhParametersMap =
       DhParametersLoader::loadDhParameters(getDhParametersFilenameLocation());
-  if (dhParametersMap.find("rfc3526-group-17") != dhParametersMap.end()) {
-    _dhParameter = dhParametersMap["rfc3526-group-17"];
+  if (dhParametersMap.find(groupName) != dhParametersMap.end()) {
+    _dhParameter = dhParametersMap[groupName];
     _p = MessageExtractionFacility::hexToUniqueBIGNUM(_dhParameter._pHex);
     _g = MessageExtractionFacility::hexToUniqueBIGNUM(_dhParameter._gHex);
     if (_debugFlag) {
@@ -28,6 +33,43 @@ MyCryptoLibrary::DiffieHellman::DiffieHellman(const bool debugFlag)
     }
     generatePrivateKey();
     generatePublicKey();
+  } else {
+    throw std::runtime_error("Diffie Hellman log | constructor(): "
+                             "Group name is invalid");
+  }
+}
+/******************************************************************************/
+MyCryptoLibrary::DiffieHellman::DiffieHellman(
+    const bool debugFlag, const bool privateKeyDeterministic,
+    const std::string &groupName)
+    : _privateKey{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
+      _publicKey{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
+      _sharedSecret{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
+      _debugFlag{debugFlag}, _privateKeyDeterministic{privateKeyDeterministic},
+      _groupName{groupName} {
+  if (_groupName.size() == 0) {
+    throw std::runtime_error("Diffie Hellman log | constructor(): "
+                             "Group name is null");
+  }
+  std::map<std::string, DhParametersLoader::DhParameters> dhParametersMap =
+      DhParametersLoader::loadDhParameters(getDhParametersFilenameLocation());
+  if (dhParametersMap.find(groupName) != dhParametersMap.end()) {
+    _dhParameter = dhParametersMap[groupName];
+    _p = MessageExtractionFacility::hexToUniqueBIGNUM(_dhParameter._pHex);
+    _g = MessageExtractionFacility::hexToUniqueBIGNUM(_dhParameter._gHex);
+    if (_debugFlag) {
+      std::cout << "Diffie Hellman log | p (decimal) = "
+                << MessageExtractionFacility::BIGNUMToDec(_p.get())
+                << std::endl;
+      std::cout << "Diffie Hellman log | g (decimal) = "
+                << MessageExtractionFacility::BIGNUMToDec(_g.get())
+                << std::endl;
+    }
+    generatePrivateKey();
+    generatePublicKey();
+  } else {
+    throw std::runtime_error("Diffie Hellman log | constructor(): "
+                             "Group name is invalid");
   }
 }
 /******************************************************************************/
@@ -119,39 +161,46 @@ MyCryptoLibrary::DiffieHellman::getDhParametersFilenameLocation() const {
  * Hellman key exchange protocol.
  */
 void MyCryptoLibrary::DiffieHellman::generatePrivateKey() {
-  // The private key 'a' must be 1 < a < p-1.
-  // So, we need to generate a random number 'x' such that 0 <= x < (p-2).
-  // Then, set 'a = x + 2'. This ensures 'a' is in the range [2, p-1).
-  MessageExtractionFacility::UniqueBIGNUM rangeForRand =
-      MessageExtractionFacility::UniqueBIGNUM(BN_dup(_p.get()));
-  // Subtract: p(copy) - 2
-  if (!BN_sub_word(rangeForRand.get(), 2)) {
-    // BN_sub_word returns 0 if subtraction causes negative result or fails
-    // For large primes, this should not happen if p > 2.
-    throw std::runtime_error(
-        "Diffie Hellman log | generatePrivateKey(): BN_sub_word failed for "
-        "random range calculation.");
-  }
-  if (BN_is_zero(rangeForRand.get()) || BN_is_negative(rangeForRand.get())) {
-    throw std::invalid_argument("Diffie Hellman log | generatePrivateKey(): "
-                                "Modulus p is too small for generating a valid "
-                                "private key range (p must be > 2).");
-  }
-  // Generate random number 'x' such that 0 <= x < (p-2)
-  // BN_rand_range(rnd, range) generates 0 <= rnd < range
-  if (!BN_rand_range(_privateKey.get(), rangeForRand.get())) {
-    // BN_rand_range returns 0 on error
-    char errorBuffer[256];
-    ERR_error_string_n(ERR_get_error(), errorBuffer, sizeof(errorBuffer));
-    throw std::runtime_error("Diffie Hellman log | generatePrivateKey(): "
-                             "Failed to generate random private key: " +
-                             std::string(errorBuffer));
-  }
-  // Add 2 to 'x' to get 'a' in the range [2, p-1)
-  if (!BN_add_word(_privateKey.get(), 2)) {
-    // BN_add_word returns 0 on error
-    throw std::runtime_error("Diffie Hellman log | generatePrivateKey(): "
-                             "Failed to adjust private key to range [2, p-1).");
+  if (_privateKeyDeterministic) {
+    _privateKey = MessageExtractionFacility::UniqueBIGNUM(BN_dup(_p.get()));
+    return;
+  } else {
+    // The private key 'a' must be 1 < a < p-1.
+    // So, we need to generate a random number 'x' such that 0 <= x < (p-2).
+    // Then, set 'a = x + 2'. This ensures 'a' is in the range [2, p-1).
+    MessageExtractionFacility::UniqueBIGNUM rangeForRand =
+        MessageExtractionFacility::UniqueBIGNUM(BN_dup(_p.get()));
+    // Subtract: p(copy) - 2
+    if (!BN_sub_word(rangeForRand.get(), 2)) {
+      // BN_sub_word returns 0 if subtraction causes negative result or fails
+      // For large primes, this should not happen if p > 2.
+      throw std::runtime_error(
+          "Diffie Hellman log | generatePrivateKey(): BN_sub_word failed for "
+          "random range calculation.");
+    }
+    if (BN_is_zero(rangeForRand.get()) || BN_is_negative(rangeForRand.get())) {
+      throw std::invalid_argument(
+          "Diffie Hellman log | generatePrivateKey(): "
+          "Modulus p is too small for generating a valid "
+          "private key range (p must be > 2).");
+    }
+    // Generate random number 'x' such that 0 <= x < (p-2)
+    // BN_rand_range(rnd, range) generates 0 <= rnd < range
+    if (!BN_rand_range(_privateKey.get(), rangeForRand.get())) {
+      // BN_rand_range returns 0 on error
+      char errorBuffer[256];
+      ERR_error_string_n(ERR_get_error(), errorBuffer, sizeof(errorBuffer));
+      throw std::runtime_error("Diffie Hellman log | generatePrivateKey(): "
+                               "Failed to generate random private key: " +
+                               std::string(errorBuffer));
+    }
+    // Add 2 to 'x' to get 'a' in the range [2, p-1)
+    if (!BN_add_word(_privateKey.get(), 2)) {
+      // BN_add_word returns 0 on error
+      throw std::runtime_error(
+          "Diffie Hellman log | generatePrivateKey(): "
+          "Failed to adjust private key to range [2, p-1).");
+    }
   }
   if (_debugFlag) {
     std::cout << "\nDiffie Hellman log | Generated private key (hex): "

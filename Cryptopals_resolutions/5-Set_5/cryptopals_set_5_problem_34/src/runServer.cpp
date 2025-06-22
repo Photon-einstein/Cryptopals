@@ -13,7 +13,7 @@ int main(void) {
   double time;
   start = clock();
   /* work to verify */
-  const bool debugFlag{false};
+  const bool debugFlag{true};
   std::shared_ptr<Server> server = std::make_shared<Server>(debugFlag);
   server->runServer();
   /* end of the work */
