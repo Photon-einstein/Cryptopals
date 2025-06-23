@@ -105,7 +105,7 @@ private:
    *
    * @throws std::runtime_error if there is an error in MessageExchangeRoute.
    */
-  void MessageExchangeRoute();
+  void messageExchangeRoute();
 
   /**
    * @brief This method runs the route that gets all the current available

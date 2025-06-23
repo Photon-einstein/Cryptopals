@@ -87,6 +87,7 @@ void Server::setupRoutes() {
   rootEndpoint();
   keyExchangeRoute();
   getSessionsDataEndpoint();
+  messageExchangeRoute();
 }
 /******************************************************************************/
 /**
@@ -212,7 +213,7 @@ void Server::keyExchangeRoute() {
  *
  * @throws std::runtime_error if there is an error in MessageExchangeRoute.
  */
-void Server::MessageExchangeRoute() {
+void Server::messageExchangeRoute() {
   CROW_ROUTE(_app, "/MessageExchange")
       .methods("POST"_method)([&](const crow::request &req) {
         crow::json::wvalue res;
