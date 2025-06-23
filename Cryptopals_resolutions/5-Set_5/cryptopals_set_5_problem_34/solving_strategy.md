@@ -59,3 +59,11 @@
 8. Implement the tests of the MITM attack without parameter injection (Done)
 9. Implement parameter injection (Done)
 10. Add tests to test parameter injection as well (Done)
+11. Add the /MessageExchange route to the server endpoint (Done)
+
+12. Add the /MessageExchange route to the client endpoint (in progress)
+
+13. Add tests to the /MessageExchange route to the DH protocol (TBD)
+14. Add the /MessageExchange rout to the Mallory server endpoint (TBD)
+15. Add the tests to the normal MITM attack for the /MessageExchange route (TBD)
+16. Add the tests to the MITM attack with parameter injection for the /MessageExchange route (TBD)
