@@ -54,6 +54,8 @@ public:
    * @param clientNonceHex  The client nonce (hex).
    *
    * @return The symmetric encryption key (hex) in a string format.
+   * @throws std::runtime_error if there is an error in the derivation of
+   * the shared secret.
    */
   const std::string deriveSharedSecret(const std::string &peerPublicKeyHex,
                                        const std::string &serverNonceHex,
@@ -86,6 +88,7 @@ public:
    *
    * @return Filename where the public configurations of the Diffie Hellman key
    * exchange protocol are available.
+   * @throws std::runtime_error if the DH parameters filename is empty.
    */
   const std::string &getDhParametersFilenameLocation() const;
 
@@ -97,6 +100,9 @@ private:
    *
    * This method will generate a private key to be used at a Diffie
    * Hellman key exchange protocol.
+   *
+   * @throws std::runtime_error if there is an error in the generation of the
+   * private key.
    */
   void generatePrivateKey();
 
@@ -105,6 +111,9 @@ private:
    *
    * This method will generate a public key to be used at a Diffie
    * Hellman key exchange protocol. A = g^a mod p
+   *
+   * @throws std::runtime_error if there is an error in the generation of
+   * the public key.
    */
   void generatePublicKey();
 

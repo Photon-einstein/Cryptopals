@@ -87,6 +87,7 @@ void Server::setupRoutes() {
   rootEndpoint();
   keyExchangeRoute();
   getSessionsDataEndpoint();
+  messageExchangeRoute();
 }
 /******************************************************************************/
 /**
@@ -185,6 +186,89 @@ void Server::keyExchangeRoute() {
               {"ciphertext", encryptedConfirmationHex},
               {"iv", MessageExtractionFacility::toHexString(
                          _diffieHellmanMap[sessionId]->_iv)}};
+        } catch (const nlohmann::json::exception &e) {
+          crow::json::wvalue err;
+          err["message"] =
+              std::string("Server log | JSON parsing error: ") + e.what();
+          return crow::response(400, err);
+        } catch (const std::exception &e) {
+          crow::json::wvalue err;
+          err["message"] =
+              std::string("Server log | An unexpected error occurred: ") +
+              e.what();
+        }
+        return crow::response(201, res);
+      });
+}
+/******************************************************************************/
+/**
+ * @brief This method runs the route that performs the message exchange using
+ * symmetric encryption after the Diffie Hellman key exchange protocol has been
+ * completed.
+ *
+ * This method runs the route that performs the message exchange using
+ * symmetric encryption after the Diffie Hellman key exchange protocol has been
+ * completed. It receives messages from clients, checks the validity of the
+ * session id and if valid, sends back a confirmation response.
+ *
+ * @throws std::runtime_error if there is an error in MessageExchangeRoute.
+ */
+void Server::messageExchangeRoute() {
+  CROW_ROUTE(_app, "/MessageExchange")
+      .methods("POST"_method)([&](const crow::request &req) {
+        crow::json::wvalue res;
+        try {
+          nlohmann::json parsedJson = nlohmann::json::parse(req.body);
+          std::string extractedSessionId =
+              parsedJson.at("sessionId").get<std::string>();
+          std::string extractedIv = parsedJson.at("iv").get<std::string>();
+          std::string extractedCiphertext =
+              parsedJson.at("ciphertext").get<std::string>();
+          boost::uuids::string_generator gen;
+          boost::uuids::uuid extractedSessionIdUuidFormat =
+              gen(extractedSessionId);
+          // check if session id already exists
+          if (_diffieHellmanMap.find(extractedSessionIdUuidFormat) ==
+              _diffieHellmanMap.end()) {
+            throw std::runtime_error("Server log | MessageExchangeRoute(): "
+                                     "Session id: " +
+                                     extractedSessionId + " not valid");
+          }
+          // convert iv to bytes and store it
+          _diffieHellmanMap[extractedSessionIdUuidFormat]->_iv =
+              MessageExtractionFacility::hexToBytes(extractedIv);
+          const std::string plaintext =
+              EncryptionUtility::decryptMessageAes256CbcMode(
+                  extractedCiphertext,
+                  _diffieHellmanMap[extractedSessionIdUuidFormat]
+                      ->_diffieHellman->getSymmetricKey(),
+                  _diffieHellmanMap[extractedSessionIdUuidFormat]->_iv);
+          if (_debugFlag) {
+            std::cout
+                << "Server log | MessageExchangeRoute() - decrypted plaintext: "
+                << plaintext << std::endl;
+          }
+          // build server confirmation
+          std::string serverConfirmationMessage =
+              std::string("Hello from server id: ") + _serverId +
+              " at session id: " + extractedSessionId +
+              +"message received from client: " + plaintext + ".\n";
+          _diffieHellmanMap[extractedSessionIdUuidFormat]->_iv =
+              EncryptionUtility::generateRandomIV(_nonceSize);
+          // encrypt server confirmation message
+          std::string serverConfirmationMessageEncrypted =
+              EncryptionUtility::encryptMessageAes256CbcMode(
+                  serverConfirmationMessage,
+                  _diffieHellmanMap[extractedSessionIdUuidFormat]
+                      ->_diffieHellman->getSymmetricKey(),
+                  _diffieHellmanMap[extractedSessionIdUuidFormat]->_iv);
+          // build confirmation response
+          res["sessionId"] = extractedSessionId;
+          res["confirmation"] = {
+              {"ciphertext", serverConfirmationMessageEncrypted},
+              {"iv",
+               MessageExtractionFacility::toHexString(
+                   _diffieHellmanMap[extractedSessionIdUuidFormat]->_iv)}};
         } catch (const nlohmann::json::exception &e) {
           crow::json::wvalue err;
           err["message"] =
