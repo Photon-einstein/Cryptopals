@@ -89,6 +89,18 @@ const int MalloryServer::getProductionPort() const { return _portProduction; }
 const int MalloryServer::getTestPort() const { return _portTest; }
 /******************************************************************************/
 /**
+ * @brief This method will set the value of the parameter injection flag.
+ *
+ * This method will set the value of the parameter injection flag, to decide
+ * if a normal MITM attack is performed or one with a parameter injection
+ * instead.
+ */
+void MalloryServer::setParameterInjectionFlag(
+    const bool parameterInjectionFlag) {
+  _parameterInjection = parameterInjectionFlag;
+}
+/******************************************************************************/
+/**
  * @brief This method will start the endpoints that the server
  * provides to his clients
  *

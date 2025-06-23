@@ -64,6 +64,15 @@ public:
    */
   const int getTestPort() const;
 
+  /**
+   * @brief This method will set the value of the parameter injection flag.
+   *
+   * This method will set the value of the parameter injection flag, to decide
+   * if a normal MITM attack is performed or one with a parameter injection
+   * instead.
+   */
+  void setParameterInjectionFlag(const bool parameterInjectionFlag);
+
 private:
   /* private methods */
 
