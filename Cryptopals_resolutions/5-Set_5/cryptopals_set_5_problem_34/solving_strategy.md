@@ -56,5 +56,6 @@
 
 6. Run the static code analysis on the current code and fix problems (Done)
 7. Place the Diffie Hellman key exchange's tests from previous challenges working again (Done)
-
-8. Implement the tests of the MITM attack (in progress)
+8. Implement the tests of the MITM attack without parameter injection (Done)
+9. Implement parameter injection (Done)
+10. Add tests to test parameter injection as well (Done)

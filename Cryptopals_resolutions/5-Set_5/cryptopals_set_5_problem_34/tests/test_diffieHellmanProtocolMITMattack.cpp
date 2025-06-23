@@ -216,3 +216,164 @@ TEST_F(
   }
   EXPECT_EQ(numbersSessionsCreated, numberSessionsFound);
 }
+
+/**
+ * @test Test the correctness of MITM attack with one client with parameter
+ * injection MITM attack
+ * @brief Ensures that the MITM attack is successful with one single client
+ * attempting to set up the DH key exchange, asserting that he remains oblivious
+ * to a third party interception of the session with a fake server when a
+ * parameter injection is performed on the fake server side.
+ */
+TEST_F(
+    DiffieHellmanKeyExchangeProtocolMITMattackTest,
+    DiffieHellmanKeyExchange_WithMalloryServerRunning1UserWithParameterInjection_ShouldDeceiveClient) {
+  _fakeServer->setParameterInjectionFlag(true);
+  EXPECT_NO_THROW(_mapUsers[_clientId1]->diffieHellmanKeyExchange(
+      _mapUsers[_clientId1]->getTestPort()));
+  auto response = cpr::Get(cpr::Url{
+      "http://localhost:" + std::to_string(_fakeServer->getTestPort()) +
+      "/sessionsData"});
+  EXPECT_EQ(response.status_code, 200);
+  crow::json::rvalue jsonResponse = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponse);
+  bool sessionFound{false};
+  std::string sessionIdFound{};
+  std::string expectedClientId{_mapUsers[_clientId1]->getClientId()};
+  for (const std::string &sessionId : jsonResponse.keys()) {
+    const crow::json::rvalue &sessionData = jsonResponse[sessionId];
+    std::string clientId = sessionData["clientId"].s();
+    if (clientId == expectedClientId) {
+      sessionFound = true;
+      sessionIdFound = sessionId;
+      const std::string derivedKey{sessionData["derivedKey"].s()};
+      const std::string sessionIdReceived{sessionData["sessionId"].s()};
+      const std::string iv{sessionData["iv"].s()};
+      const std::string clientNonce{sessionData["clientNonce"].s()};
+      const std::string serverNonce{sessionData["serverNonce"].s()};
+      EXPECT_EQ(sessionIdReceived, sessionId);
+      EXPECT_TRUE(_mapUsers[_clientId1]->verifyServerSessionDataEntryEndpoint(
+          sessionIdFound, clientId, clientNonce, serverNonce, derivedKey, iv));
+      break;
+    }
+  }
+  EXPECT_TRUE(sessionFound);
+  EXPECT_TRUE(_mapUsers[_clientId1]->confirmSessionId(sessionIdFound));
+}
+
+/**
+ * @test Test the error detection of the Diffie Hellman key exchange protocol
+ * during a MITM attack with parameter injection.
+ * @brief Ensures that the Diffie Hellman key exchange protocol is able to
+ * detect errors on small changes in the data used in the protocol when a MITM
+ * attack with parameter injection has been performed as well.
+ */
+TEST_F(
+    DiffieHellmanKeyExchangeProtocolMITMattackTest,
+    DiffieHellmanKeyExchange_WithFakeServerRunning1UserSlightChangeInTheConfirmationMessageDataWithParameterInjection_ShouldReturnAnError) {
+  _fakeServer->setParameterInjectionFlag(true);
+  EXPECT_NO_THROW(_mapUsers[_clientId2]->diffieHellmanKeyExchange(
+      _mapUsers[_clientId2]->getTestPort()));
+  auto response = cpr::Get(cpr::Url{
+      "http://localhost:" + std::to_string(_fakeServer->getTestPort()) +
+      "/sessionsData"});
+  EXPECT_EQ(response.status_code, 200);
+  crow::json::rvalue jsonResponse = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponse);
+  bool sessionFound{false};
+  std::string sessionIdFound{};
+  std::string expectedClientId{_mapUsers[_clientId2]->getClientId()};
+  for (const std::string &sessionId : jsonResponse.keys()) {
+    const crow::json::rvalue &sessionData = jsonResponse[sessionId];
+    std::string clientId = sessionData["clientId"].s();
+    if (clientId == expectedClientId) {
+      sessionFound = true;
+      sessionIdFound = sessionId;
+      std::string derivedKey{sessionData["derivedKey"].s()};
+      std::string sessionIdReceived{sessionData["sessionId"].s()};
+      std::string iv{sessionData["iv"].s()};
+      std::string clientNonce{sessionData["clientNonce"].s()};
+      std::string serverNonce{sessionData["serverNonce"].s()};
+      EXPECT_EQ(sessionIdReceived, sessionId);
+      EXPECT_TRUE(_mapUsers[_clientId2]->verifyServerSessionDataEntryEndpoint(
+          sessionIdFound, clientId, clientNonce, serverNonce, derivedKey, iv));
+      sessionIdFound[0] ^= 0x01; // trigger an error
+      EXPECT_FALSE(_mapUsers[_clientId2]->verifyServerSessionDataEntryEndpoint(
+          sessionIdFound, clientId, clientNonce, serverNonce, derivedKey, iv));
+      sessionIdFound[0] ^= 0x01; // reestablish the correct data
+      clientId[0] ^= 0x01;       // trigger an error
+      EXPECT_FALSE(_mapUsers[_clientId2]->verifyServerSessionDataEntryEndpoint(
+          sessionIdFound, clientId, clientNonce, serverNonce, derivedKey, iv));
+      clientId[0] ^= 0x01;    // reestablish the correct data
+      clientNonce[0] ^= 0x01; // trigger an error
+      EXPECT_FALSE(_mapUsers[_clientId2]->verifyServerSessionDataEntryEndpoint(
+          sessionIdFound, clientId, clientNonce, serverNonce, derivedKey, iv));
+      clientNonce[0] ^= 0x01; // reestablish the correct data
+      serverNonce[0] ^= 0x01; // trigger an error
+      EXPECT_FALSE(_mapUsers[_clientId2]->verifyServerSessionDataEntryEndpoint(
+          sessionIdFound, clientId, clientNonce, serverNonce, derivedKey, iv));
+      serverNonce[0] ^= 0x01; // reestablish the correct data
+      derivedKey[0] ^= 0x01;  // trigger an error
+      EXPECT_FALSE(_mapUsers[_clientId2]->verifyServerSessionDataEntryEndpoint(
+          sessionIdFound, clientId, clientNonce, serverNonce, derivedKey, iv));
+      derivedKey[0] ^= 0x01; // reestablish the correct data
+      iv[0] ^= 0x01;         // trigger an error
+      EXPECT_FALSE(_mapUsers[_clientId2]->verifyServerSessionDataEntryEndpoint(
+          sessionIdFound, clientId, clientNonce, serverNonce, derivedKey, iv));
+      iv[0] ^= 0x01; // reestablish the correct data
+      break;
+    }
+  }
+  EXPECT_TRUE(sessionFound);
+  EXPECT_TRUE(_mapUsers[_clientId2]->confirmSessionId(sessionIdFound));
+}
+
+/**
+ * @test Test the correctness of MITM attack with parameter injection with
+ * several clients at the same time.
+ * @brief Ensures that the MITM attack with parameter injection is successful
+ * with several clients attempting to set up the DH key exchange, asserting that
+ * he remains oblivious to a third party interception of the session with a fake
+ * server.
+ */
+TEST_F(
+    DiffieHellmanKeyExchangeProtocolMITMattackTest,
+    DiffieHellmanKeyExchange_WithFakeServerRunningWithSeveralUsersWithParameterInjection_ShouldDeceiveClients) {
+  _fakeServer->setParameterInjectionFlag(true);
+  EXPECT_NO_THROW(_mapUsers[_clientId1]->diffieHellmanKeyExchange(
+      _mapUsers[_clientId1]->getTestPort()));
+  EXPECT_NO_THROW(_mapUsers[_clientId1]->diffieHellmanKeyExchange(
+      _mapUsers[_clientId1]->getTestPort()));
+  EXPECT_NO_THROW(_mapUsers[_clientId2]->diffieHellmanKeyExchange(
+      _mapUsers[_clientId2]->getTestPort()));
+  EXPECT_NO_THROW(_mapUsers[_clientId2]->diffieHellmanKeyExchange(
+      _mapUsers[_clientId2]->getTestPort()));
+  EXPECT_NO_THROW(_mapUsers[_clientId2]->diffieHellmanKeyExchange(
+      _mapUsers[_clientId2]->getTestPort()));
+  EXPECT_NO_THROW(_mapUsers[_clientId3]->diffieHellmanKeyExchange(
+      _mapUsers[_clientId3]->getTestPort()));
+  EXPECT_NO_THROW(_mapUsers[_clientId3]->diffieHellmanKeyExchange(
+      _mapUsers[_clientId3]->getTestPort()));
+  auto response = cpr::Get(cpr::Url{
+      "http://localhost:" + std::to_string(_fakeServer->getTestPort()) +
+      "/sessionsData"});
+  EXPECT_EQ(response.status_code, 200);
+  crow::json::rvalue jsonResponse = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponse);
+  int numberSessionsFound{0}, numbersSessionsCreated{7};
+  for (const std::string &sessionId : jsonResponse.keys()) {
+    const crow::json::rvalue &sessionData = jsonResponse[sessionId];
+    const std::string clientId = sessionData["clientId"].s();
+    const std::string derivedKey{sessionData["derivedKey"].s()};
+    const std::string sessionIdReceived{sessionData["sessionId"].s()};
+    const std::string iv{sessionData["iv"].s()};
+    const std::string clientNonce{sessionData["clientNonce"].s()};
+    const std::string serverNonce{sessionData["serverNonce"].s()};
+    EXPECT_EQ(sessionIdReceived, sessionId);
+    EXPECT_TRUE(_mapUsers[clientId]->verifyServerSessionDataEntryEndpoint(
+        sessionIdReceived, clientId, clientNonce, serverNonce, derivedKey, iv));
+    EXPECT_TRUE(_mapUsers[clientId]->confirmSessionId(sessionId));
+    ++numberSessionsFound;
+  }
+  EXPECT_EQ(numbersSessionsCreated, numberSessionsFound);
+}
