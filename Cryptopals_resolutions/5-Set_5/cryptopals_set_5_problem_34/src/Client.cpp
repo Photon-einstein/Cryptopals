@@ -44,10 +44,10 @@ Client::~Client() {}
  * @brief This method will perform the Diffie Hellman key exchange protocol with
  * a given server.
  *
- * @param portServerNumber The number of the server to use in this exchange.
- *
  * This method will perform the Diffie Hellman key exchange protocol with
  * a given server, in order to agree on a given symmetric encryption key.
+ *
+ * @param portServerNumber The number of the server to use in this exchange.
  *
  * @retval true Decryption and validation were successful.
  * @retval false Decryption or validation failed.
@@ -55,16 +55,17 @@ Client::~Client() {}
  *         - bool: indicating success or failure of validation.
  *         - std::string: the decrypted plaintext message. If decryption
  * fails, this may contain garbage or incomplete data.
+ *         - std::string: the created session ID
  * @throw runtime_error if portServerNumber < 1024
  */
-const std::tuple<bool, std::string>
+const std::tuple<bool, std::string, std::string>
 Client::diffieHellmanKeyExchange(const int portServerNumber) {
   if (portServerNumber < 1023) {
     throw std::runtime_error(
         "Client log | diffieHellmanKeyExchange(): "
         "Invalid port server number used, should be greater than 1023.");
   }
-  std::tuple<bool, std::string> connectionTestResult;
+  std::tuple<bool, std::string, std::string> connectionTestResult;
   std::unique_ptr<MyCryptoLibrary::DiffieHellman> diffieHellman(
       std::make_unique<MyCryptoLibrary::DiffieHellman>(
           _debugFlag, _parameterInjection, _groupNameDH));
@@ -161,8 +162,115 @@ Client::diffieHellmanKeyExchange(const int portServerNumber) {
                 << std::endl;
     }
   } catch (const std::exception &e) {
-    std::cerr << "Client log | diffieHellmanKeyExchange(): " << e.what()
-              << std::endl;
+    std::cerr << e.what() << std::endl;
+  }
+  return connectionTestResult;
+}
+/******************************************************************************/
+/**
+ * @brief This method will perform the message exchange route.
+ *
+ * This method will perform the Diffie Hellman key exchange protocol with
+ * a given server, in order to agree on a given symmetric encryption key.
+ *
+ * @param portServerNumber The number of the server to use in this exchange.
+ *
+ * @return A bool, true if successful exchange and validation, failure
+ * otherwise.
+ *
+ * @throw runtime_error if there was an error in the messageExchangeRoute.
+ */
+const bool Client::messageExchangeRoute(const int portServerNumber) {
+  bool connectionTestResult{false};
+  try {
+    if (portServerNumber < 1023) {
+      throw std::runtime_error(
+          "Client log | messageExchangeRoute(): "
+          "Invalid port server number used, should be greater than 1023.");
+    }
+    if (_diffieHellmanMap.empty()) {
+      throw std::runtime_error("Client log | messageExchangeRoute(): "
+                               "No sessions are set on the client side, not "
+                               "ready to run this route.");
+    }
+    auto firstElementIterator = _diffieHellmanMap.begin();
+    const std::string sessionId = firstElementIterator->first;
+    // rotate iv
+    _diffieHellmanMap[sessionId]->_iv =
+        EncryptionUtility::generateRandomIV(_ivLength);
+    // confirmation message
+    const std::string clientMessageSent =
+        std::string("Hello from client ID: ") + _clientId +
+        " at session ID: " + sessionId + " " +
+        EncryptionUtility::getFormattedTimestamp() + ".";
+    // calculate ciphertext
+    const std::string ciphertext =
+        EncryptionUtility::encryptMessageAes256CbcMode(
+            clientMessageSent,
+            _diffieHellmanMap[sessionId]->_diffieHellman->getSymmetricKey(),
+            _diffieHellmanMap[sessionId]->_iv);
+    // built body request
+    std::string requestBody =
+        fmt::format(R"({{
+      "messageType": "client_message_exchange",
+      "protocolVersion": "1.0",
+      "sessionId": "{}",
+      "iv": "{}",
+      "ciphertext": "{}"
+    }})",
+                    sessionId,
+                    MessageExtractionFacility::toHexString(
+                        _diffieHellmanMap[sessionId]->_iv),
+                    ciphertext);
+    cpr::Response response =
+        cpr::Post(cpr::Url{std::string("http://localhost:") +
+                           std::to_string(portServerNumber) +
+                           std::string("/messageExchange")},
+                  cpr::Header{{"Content-Type", "application/json"}},
+                  cpr::Body{requestBody});
+    if (response.status_code != 201) {
+      throw std::runtime_error("Client log | messageExchangeRoute(): "
+                               "Message exchange failed at client ID: " +
+                               _clientId);
+    }
+    if (_debugFlag) {
+      printServerResponse(response);
+    }
+    nlohmann::json parsedJson = nlohmann::json::parse(response.text);
+    const std::string extractedSessionId =
+        parsedJson.at("sessionId").get<std::string>();
+    if (extractedSessionId != sessionId) {
+      throw std::runtime_error("Client log | messageExchangeRoute(): "
+                               "Message exchange failed at client ID: " +
+                               _clientId +
+                               " session ID send and received don't match.");
+    }
+    const std::string extractedCiphertext =
+        parsedJson.at("confirmation").at("ciphertext").get<std::string>();
+    const std::string extractedIvHex =
+        parsedJson.at("confirmation").at("iv").get<std::string>();
+    // update iv
+    _diffieHellmanMap[sessionId]->_iv =
+        MessageExtractionFacility::hexToBytes(extractedIvHex);
+    // decrypt received ciphertext
+    const std::string decryptedCiphertext =
+        EncryptionUtility::decryptMessageAes256CbcMode(
+            extractedCiphertext,
+            _diffieHellmanMap[extractedSessionId]
+                ->_diffieHellman->getSymmetricKey(),
+            _diffieHellmanMap[extractedSessionId]->_iv);
+    // check return values
+    if (extractedCiphertext.ends_with(clientMessageSent)) {
+      connectionTestResult = true;
+    } else {
+      throw std::runtime_error(
+          "Client log | messageExchangeRoute(): "
+          "Message exchange failed at client ID: " +
+          _clientId +
+          " message received doesn't contain data from message sent.");
+    }
+  } catch (const std::exception &e) {
+    std::cerr << e.what() << std::endl;
   }
   return connectionTestResult;
 }
@@ -315,8 +423,9 @@ void Client::printServerResponse(const cpr::Response &response) {
  *         - bool: indicating success or failure of validation.
  *         - std::string: the decrypted plaintext message. If decryption fails,
  * this may contain garbage or incomplete data.
+ *         - std::string: the created session ID
  */
-std::tuple<bool, std::string> Client::confirmationServerResponse(
+std::tuple<bool, std::string, std::string> Client::confirmationServerResponse(
     const std::string &ciphertext, const std::vector<uint8_t> &key,
     const std::vector<uint8_t> &iv, const std::string &sessionId,
     const std::string &clientId, const std::string &clientNonce,
@@ -345,8 +454,8 @@ std::tuple<bool, std::string> Client::confirmationServerResponse(
   } catch (const std::exception &e) {
     std::cerr << "Client log | confirmationServerResponse(): " << e.what()
               << std::endl;
-    return std::make_tuple(comparisonRes, plaintext);
+    return std::make_tuple(comparisonRes, plaintext, sessionId);
   }
-  return std::make_tuple(comparisonRes, plaintext);
+  return std::make_tuple(comparisonRes, plaintext, sessionId);
 }
 /******************************************************************************/

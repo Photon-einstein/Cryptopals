@@ -211,10 +211,10 @@ void Server::keyExchangeRoute() {
  * completed. It receives messages from clients, checks the validity of the
  * session id and if valid, sends back a confirmation response.
  *
- * @throws std::runtime_error if there is an error in MessageExchangeRoute.
+ * @throws std::runtime_error if there is an error in messageExchangeRoute.
  */
 void Server::messageExchangeRoute() {
-  CROW_ROUTE(_app, "/MessageExchange")
+  CROW_ROUTE(_app, "/messageExchange")
       .methods("POST"_method)([&](const crow::request &req) {
         crow::json::wvalue res;
         try {
@@ -228,6 +228,7 @@ void Server::messageExchangeRoute() {
           boost::uuids::uuid extractedSessionIdUuidFormat =
               gen(extractedSessionId);
           // check if session id already exists
+          std::lock_guard<std::mutex> lock(_diffieHellmanMapMutex);
           if (_diffieHellmanMap.find(extractedSessionIdUuidFormat) ==
               _diffieHellmanMap.end()) {
             throw std::runtime_error("Server log | MessageExchangeRoute(): "
