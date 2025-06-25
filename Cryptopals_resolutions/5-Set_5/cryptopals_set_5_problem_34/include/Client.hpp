@@ -2,6 +2,7 @@
 #define CLIENT_HPP
 
 #include <cpr/cpr.h>
+#include <openssl/aes.h>
 
 #include "DhParametersLoader.hpp"
 #include "DiffieHellman.hpp"
@@ -25,10 +26,10 @@ public:
    * @brief This method will perform the Diffie Hellman key exchange protocol
    * with a given server.
    *
-   * @param portServerNumber The number of the server to use in this exchange.
-   *
    * This method will perform the Diffie Hellman key exchange protocol with
    * a given server, in order to agree on a given symmetric encryption key.
+   *
+   * @param portServerNumber The number of the server to use in this exchange.
    *
    * @retval true Decryption and validation were successful.
    * @retval false Decryption or validation failed.
@@ -36,10 +37,25 @@ public:
    *         - bool: indicating success or failure of validation.
    *         - std::string: the decrypted plaintext message. If decryption
    * fails, this may contain garbage or incomplete data.
+   *         - std::string: the created session ID
    * @throw runtime_error if portServerNumber < 1024
    */
-  const std::tuple<bool, std::string>
+  const std::tuple<bool, std::string, std::string>
   diffieHellmanKeyExchange(const int portServerNumber);
+
+  /**
+   * @brief This method will perform the message exchange route.
+   *
+   * This method will perform the Diffie Hellman key exchange protocol with
+   * a given server, in order to agree on a given symmetric encryption key.
+   *
+   * @param portServerNumber The number of the server to use in this exchange.
+   *
+   * @return A bool, true if successful exchange and validation, failure
+   * otherwise.
+   * @throw runtime_error if there was an error in the messageExchangeRoute.
+   */
+  const bool messageExchangeRoute(const int portServerNumber);
 
   /**
    * @brief This method will confirm if a given session id is correctly setup.
@@ -146,7 +162,7 @@ private:
    *         - std::string: the decrypted plaintext message. If decryption
    * fails, this may contain garbage or incomplete data.
    */
-  std::tuple<bool, std::string> confirmationServerResponse(
+  std::tuple<bool, std::string, std::string> confirmationServerResponse(
       const std::string &ciphertext, const std::vector<uint8_t> &key,
       const std::vector<uint8_t> &iv, const std::string &sessionId,
       const std::string &clientId, const std::string &clientNonce,
@@ -159,7 +175,8 @@ private:
   int _portServerTest{18081};
 
   const std::string _clientId{};
-  const std::size_t _nonceSize{16}; // bytes
+  const std::size_t _nonceSize{16};            // bytes
+  const std::size_t _ivLength{AES_BLOCK_SIZE}; // bytes
   const bool _debugFlag;
   const std::string _groupNameDH;
   const bool _parameterInjection{false};

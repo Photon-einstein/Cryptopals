@@ -72,6 +72,16 @@ std::string decryptMessageAes256CbcMode(const std::string &ciphertextHex,
                                         const std::vector<uint8_t> &key,
                                         const std::vector<uint8_t> &iv);
 
+/**
+ * @brief Returns a formatted timestamp with the current time.
+ *
+ * Returns a formatted timestamp with the current time, in the format
+ * "Year-month-day hour:minute:second TimeZone"
+ *
+ * @return The formatted time zone with the current time.
+ */
+std::string getFormattedTimestamp();
+
 }; // namespace EncryptionUtility
 
 #endif // ENCRYPTION_UTILITY_HPP

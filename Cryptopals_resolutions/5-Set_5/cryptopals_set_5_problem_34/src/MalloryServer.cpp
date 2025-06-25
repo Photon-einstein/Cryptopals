@@ -186,7 +186,7 @@ void MalloryServer::keyExchangeRoute() {
               _diffieHellmanMap[sessionId]->_AMclientId, _debugFlag,
               _diffieHellmanMap[sessionId]->_AMdiffieHellman->getGroupName(),
               _parameterInjection);
-          std::tuple<bool, std::string> serverResponse =
+          std::tuple<bool, std::string, std::string> serverResponse =
               _diffieHellmanMap[sessionId]
                   ->_MSfakeClient->diffieHellmanKeyExchange(
                       _portRealServerInUse);
