@@ -67,10 +67,10 @@
 16. Add the /MessageExchange route to the Mallory server endpoint (Done)
 17. Add the tests to the normal MITM attack for the /messageExchange route (Done)
 18. Add the tests to the MITM attack with parameter injection for the /MessageExchange route (Done)
+19. Run static code analysis and fix problems (Done)
 
-19. Run static code analysis and fix problems (in progress)
+20. Read entire code and fixe or enhance some bugs that might still be there (in progress)
 
-20. Read entire code and fixe or enhance some bugs that might still be there (TBD)
 21. Create uml class diagram (TBD)
 22. Create uml sequence diagram (TBD)
 23. Write article about this project (TBD)
