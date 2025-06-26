@@ -1,9 +1,6 @@
 #ifndef MESSAGE_EXTRACTION_FACILITY_HPP
 #define MESSAGE_EXTRACTION_FACILITY_HPP
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
 #include <memory>
 #include <openssl/bn.h>
 #include <openssl/err.h>
@@ -81,17 +78,6 @@ std::string BIGNUMToHex(BIGNUM *bn);
  * @throws std::runtime_error if conversion fails.
  */
 std::string BIGNUMToDec(BIGNUM *bn);
-
-/**
- * @brief This method will convert an uuid into a string equivalent.
- * This method will convert an uuid into a string equivalent, keeping
- * the same content.
- *
- * @param uuid The uuid to convert.
- *
- * @return The uuid converted into a string.
- */
-const std::string uuidToString(const boost::uuids::uuid &uuid);
 
 }; // namespace MessageExtractionFacility
 

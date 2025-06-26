@@ -141,19 +141,3 @@ std::string MessageExtractionFacility::BIGNUMToDec(BIGNUM *bn) {
   return dec_str;
 }
 /******************************************************************************/
-/**
- * @brief This method will convert an uuid into a string equivalent.
- * This method will convert an uuid into a string equivalent, keeping
- * the same content.
- *
- * @param uuid The uuid to convert.
- *
- * @return The uuid converted into a string.
- */
-const std::string
-MessageExtractionFacility::uuidToString(const boost::uuids::uuid &uuid) {
-  std::ostringstream oss;
-  oss << uuid;
-  return oss.str();
-}
-/******************************************************************************/
