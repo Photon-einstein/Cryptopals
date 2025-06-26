@@ -96,14 +96,30 @@ private:
 
   /**
    * @brief This method runs the route that performs the Diffie Hellman
-   * key exchange protocol.
+   * key exchange protocol. Man in the middle attack is performed.
    *
    * This method runs the route that performs the Diffie Hellman
-   * key exchange protocol. I receives requests and make all the calculations
+   * key exchange protocol. It receives requests and make all the calculations
    * to response to the requests, creating a symmetric key for each connection
-   * request.
+   * request, performing the man in the middle attack.
    */
   void keyExchangeRoute();
+
+  /**
+   * @brief This method runs the route that performs the message exchange using
+   * symmetric encryption after the Diffie Hellman key exchange protocol has
+   * been completed. Man in the middle attack is performed.
+   *
+   * This method runs the route that performs the message exchange using
+   * symmetric encryption after the Diffie Hellman key exchange protocol has
+   * been completed. This serves performs the man in the middle attack. Normal
+   * function from a normal server is to receive messages from clients, checks
+   * the validity of the session id and if valid, sends back a confirmation
+   * response.
+   *
+   * @throws std::runtime_error if there is an error in messageExchangeRoute.
+   */
+  void messageExchangeRoute();
 
   /**
    * @brief This method runs the route that gets all the current available

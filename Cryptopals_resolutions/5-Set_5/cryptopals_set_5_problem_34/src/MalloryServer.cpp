@@ -1,3 +1,4 @@
+#include <fmt/core.h>
 #include <nlohmann/json.hpp>
 #include <openssl/conf.h>
 #include <openssl/err.h>
@@ -112,6 +113,7 @@ void MalloryServer::setupRoutes() {
   rootEndpoint();
   keyExchangeRoute();
   getSessionsDataEndpoint();
+  messageExchangeRoute();
 }
 /******************************************************************************/
 /**
@@ -131,12 +133,12 @@ void MalloryServer::rootEndpoint() {
 /******************************************************************************/
 /**
  * @brief This method runs the route that performs the Diffie Hellman
- * key exchange protocol.
+ * key exchange protocol. Man in the middle attack is performed.
  *
  * This method runs the route that performs the Diffie Hellman
- * key exchange protocol. I receives requests and make all the calculations
+ * key exchange protocol. It receives requests and make all the calculations
  * to response to the requests, creating a symmetric key for each connection
- * request.
+ * request, performing the man in the middle attack.
  */
 void MalloryServer::keyExchangeRoute() {
   CROW_ROUTE(_app, "/keyExchange")
@@ -236,6 +238,175 @@ void MalloryServer::keyExchangeRoute() {
                          _diffieHellmanMap[sessionId]->_AMiv)}};
           // save session id with real server to future use
           _diffieHellmanMap[sessionId]->_MSsessionId = sessionIdExtracted;
+        } catch (const nlohmann::json::exception &e) {
+          crow::json::wvalue err;
+          err["message"] =
+              std::string("Mallory Server log | JSON parsing error: ") +
+              e.what();
+          return crow::response(404, err);
+        } catch (const std::exception &e) {
+          crow::json::wvalue err;
+          err["message"] =
+              std::string(
+                  "Mallory Server log | An unexpected error occurred: ") +
+              e.what();
+          return crow::response(400, err);
+        }
+        return crow::response(201, res);
+      });
+}
+/******************************************************************************/
+/**
+ * @brief This method runs the route that performs the message exchange using
+ * symmetric encryption after the Diffie Hellman key exchange protocol has been
+ * completed. Man in the middle attack is performed.
+ *
+ * This method runs the route that performs the message exchange using
+ * symmetric encryption after the Diffie Hellman key exchange protocol has been
+ * completed. This serves performs the man in the middle attack.
+ * Normal function from a normal server is to receive messages from clients,
+ * checks the validity of the session id and if valid, sends back a confirmation
+ * response.
+ *
+ * @throws std::runtime_error if there is an error in messageExchangeRoute.
+ */
+void MalloryServer::messageExchangeRoute() {
+  CROW_ROUTE(_app, "/messageExchange")
+      .methods("POST"_method)([&](const crow::request &req) {
+        crow::json::wvalue res;
+        try {
+          nlohmann::json parsedJson = nlohmann::json::parse(req.body);
+          std::string extractedSessionId =
+              parsedJson.at("sessionId").get<std::string>();
+          std::string extractedIv = parsedJson.at("iv").get<std::string>();
+          std::string extractedCiphertext =
+              parsedJson.at("ciphertext").get<std::string>();
+          boost::uuids::string_generator gen;
+          // check if session id already exists
+          std::lock_guard<std::mutex> lock(_diffieHellmanMapMutex);
+          boost::uuids::uuid sessionIdASFound;
+          bool sessionIdASFoundFlag{false};
+          // search real session id (M -> S)
+          for (const auto &pair : _diffieHellmanMap) {
+            if (pair.second->_MSsessionId == extractedSessionId) {
+              sessionIdASFoundFlag = true;
+              sessionIdASFound = pair.first;
+            }
+          }
+          if (!sessionIdASFoundFlag) {
+            throw std::runtime_error(
+                "Mallory Server log | MessageExchangeRoute(): "
+                "Session id: " +
+                extractedSessionId + " not found from Alice -> Mallory");
+          }
+          // convert iv to bytes and store it
+          _diffieHellmanMap[sessionIdASFound]->_AMiv =
+              MessageExtractionFacility::hexToBytes(extractedIv);
+          const std::string plaintext =
+              EncryptionUtility::decryptMessageAes256CbcMode(
+                  extractedCiphertext,
+                  _diffieHellmanMap[sessionIdASFound]
+                      ->_AMdiffieHellman->getSymmetricKey(),
+                  _diffieHellmanMap[sessionIdASFound]->_AMiv);
+          if (_debugFlag) {
+            std::cout << "Mallory Server log | MessageExchangeRoute() - "
+                         "decrypted plaintext: "
+                      << plaintext << std::endl;
+          }
+          // build fake client request to the real server
+          // rotate iv
+          _diffieHellmanMap[sessionIdASFound]
+              ->_MSfakeClient->getDiffieHellmanMap()[extractedSessionId]
+              ->_iv = EncryptionUtility::generateRandomIV(_ivLength);
+          // calculate ciphertext
+          const std::string ciphertextMS =
+              EncryptionUtility::encryptMessageAes256CbcMode(
+                  plaintext,
+                  _diffieHellmanMap[sessionIdASFound]
+                      ->_MSfakeClient->getDiffieHellmanMap()[extractedSessionId]
+                      ->_diffieHellman->getSymmetricKey(),
+                  _diffieHellmanMap[sessionIdASFound]
+                      ->_MSfakeClient->getDiffieHellmanMap()[extractedSessionId]
+                      ->_iv);
+          // built body request MS
+          std::string requestBodyMS = fmt::format(
+              R"({{
+            "messageType": "client_message_exchange",
+            "protocolVersion": "1.0",
+            "sessionId": "{}",
+            "iv": "{}",
+            "ciphertext": "{}"
+          }})",
+              extractedSessionId,
+              MessageExtractionFacility::toHexString(
+                  _diffieHellmanMap[sessionIdASFound]
+                      ->_MSfakeClient->getDiffieHellmanMap()[extractedSessionId]
+                      ->_iv),
+              ciphertextMS);
+          cpr::Response responseMS =
+              cpr::Post(cpr::Url{std::string("http://localhost:") +
+                                 std::to_string(_portRealServerInUse) +
+                                 std::string("/messageExchange")},
+                        cpr::Header{{"Content-Type", "application/json"}},
+                        cpr::Body{requestBodyMS});
+          if (responseMS.status_code != 201) {
+            throw std::runtime_error(
+                "Mallory Server log | messageExchange(): "
+                "Message exchange failed at fake client ID: " +
+                _diffieHellmanMap[sessionIdASFound]
+                    ->_MSfakeClient->getClientId());
+          }
+          if (_debugFlag) {
+            Client::printServerResponse(responseMS);
+          }
+          nlohmann::json parsedJsonMS = nlohmann::json::parse(responseMS.text);
+          const std::string extractedSessionIdMS =
+              parsedJsonMS.at("sessionId").get<std::string>();
+          if (extractedSessionIdMS != extractedSessionId) {
+            throw std::runtime_error(
+                "Mallory Server log | messageExchange(): "
+                "Message exchange failed at client ID: " +
+                _diffieHellmanMap[sessionIdASFound]
+                    ->_MSfakeClient->getClientId() +
+                " session ID send and received don't match.");
+          }
+          const std::string extractedCiphertextMS =
+              parsedJsonMS.at("confirmation")
+                  .at("ciphertext")
+                  .get<std::string>();
+          const std::string extractedIvHexMS =
+              parsedJsonMS.at("confirmation").at("iv").get<std::string>();
+          // update iv MS
+          _diffieHellmanMap[sessionIdASFound]
+              ->_MSfakeClient->getDiffieHellmanMap()[extractedSessionId]
+              ->_iv = MessageExtractionFacility::hexToBytes(extractedIvHexMS);
+          // decrypt received ciphertext MS
+          const std::string decryptedCiphertextMS =
+              EncryptionUtility::decryptMessageAes256CbcMode(
+                  extractedCiphertextMS,
+                  _diffieHellmanMap[sessionIdASFound]
+                      ->_MSfakeClient->getDiffieHellmanMap()[extractedSessionId]
+                      ->_diffieHellman->getSymmetricKey(),
+                  _diffieHellmanMap[sessionIdASFound]
+                      ->_MSfakeClient->getDiffieHellmanMap()[extractedSessionId]
+                      ->_iv);
+          // rotate iv AM
+          _diffieHellmanMap[sessionIdASFound]->_AMiv =
+              EncryptionUtility::generateRandomIV(_ivLength);
+          // encrypt server confirmation message
+          std::string serverConfirmationMessageEncryptedAM =
+              EncryptionUtility::encryptMessageAes256CbcMode(
+                  decryptedCiphertextMS,
+                  _diffieHellmanMap[sessionIdASFound]
+                      ->_AMdiffieHellman->getSymmetricKey(),
+                  _diffieHellmanMap[sessionIdASFound]->_AMiv);
+          std::cout << "9" << std::endl;
+          // build confirmation response
+          res["sessionId"] = extractedSessionId;
+          res["confirmation"] = {
+              {"ciphertext", serverConfirmationMessageEncryptedAM},
+              {"iv", MessageExtractionFacility::toHexString(
+                         _diffieHellmanMap[sessionIdASFound]->_AMiv)}};
         } catch (const nlohmann::json::exception &e) {
           crow::json::wvalue err;
           err["message"] =

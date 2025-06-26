@@ -13,7 +13,7 @@ int main(void) {
   double time;
   start = clock();
   /* work to verify */
-  const bool debugFlag{true}, testFlag{false}, parameterInjection{true};
+  const bool debugFlag{true}, testFlag{false}, parameterInjection{false};
   std::shared_ptr<MalloryServer> server =
       std::make_shared<MalloryServer>(debugFlag, testFlag, parameterInjection);
   server->runServer();
