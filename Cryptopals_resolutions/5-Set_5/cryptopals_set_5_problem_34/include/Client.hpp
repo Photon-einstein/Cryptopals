@@ -95,6 +95,8 @@ public:
    *
    * This method will return the production port of the server to establish a
    * connection.
+   *
+   * @return An int, the server production port.
    */
   const int getProductionPort() const;
 
@@ -103,8 +105,19 @@ public:
    *
    * This method will return the test port of the server to establish a
    * connection.
+   *
+   * @return An int, the server test port.
    */
   const int getTestPort() const;
+
+  /**
+   * @brief This method will return the Diffie Hellman map.
+   *
+   * This method will return the Diffie Hellman map of the client.
+   *
+   * @return A map, the client DH map.
+   */
+  std::map<std::string, std::unique_ptr<SessionData>> &getDiffieHellmanMap();
 
   /**
    * @brief This method verify if this entry exists on the client side.
@@ -119,9 +132,6 @@ public:
       const std::string &clientNonce, const std::string &serverNonce,
       const std::string &derivedKey, const std::string &iv) const;
 
-private:
-  /* private methods */
-
   /**
    * @brief This method will print the server response to the Diffie Hellman
    * key exchange protocol.
@@ -134,6 +144,9 @@ private:
    * of the Diffie Hellman key exchange protocol.
    */
   static void printServerResponse(const cpr::Response &response);
+
+private:
+  /* private methods */
 
   /**
    * @brief This method will perform the decryption of the ciphertext received
@@ -174,7 +187,6 @@ private:
 
   /* private fields */
   std::map<std::string, std::unique_ptr<SessionData>> _diffieHellmanMap;
-
   const int _portServerProduction{18080};
   int _portServerTest{18081};
 

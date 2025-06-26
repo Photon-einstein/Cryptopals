@@ -67,6 +67,8 @@ TEST_F(DiffieHellmanKeyExchangeProtocolMITMattackTest,
  * @brief Ensures that the MITM attack is successful with one single client
  * attempting to set up the DH key exchange, asserting that he remains oblivious
  * to a third party interception of the session with a fake server.
+ * The message exchange is tested if if can be forwarded transparently by means
+ * of a man in the middle attack.
  */
 TEST_F(
     DiffieHellmanKeyExchangeProtocolMITMattackTest,
@@ -104,6 +106,8 @@ TEST_F(
   }
   EXPECT_TRUE(sessionFound);
   EXPECT_TRUE(_mapUsers[_clientId1]->confirmSessionId(sessionIdFound));
+  EXPECT_TRUE(_mapUsers[_clientId1]->messageExchange(
+      _mapUsers[_clientId1]->getTestPort(), sessionIdFound));
 }
 
 /**

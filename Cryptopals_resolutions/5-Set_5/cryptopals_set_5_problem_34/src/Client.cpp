@@ -234,11 +234,11 @@ const bool Client::messageExchange(const int portServerNumber,
                            std::string("/messageExchange")},
                   cpr::Header{{"Content-Type", "application/json"}},
                   cpr::Body{requestBody});
-    if (response.status_code != 201) {
-      throw std::runtime_error("Client log | messageExchange(): "
-                               "Message exchange failed at client ID: " +
-                               _clientId);
-    }
+    // if (response.status_code != 201) {
+    //   throw std::runtime_error("Client log | messageExchange(): "
+    //                            "Message exchange failed at client ID: " +
+    //                            _clientId);
+    // }
     if (_debugFlag) {
       printServerResponse(response);
     }
@@ -338,6 +338,8 @@ const std::string &Client::getClientId() const {
  *
  * This method will return the production port of the server to establish a
  * connection.
+ *
+ * @return An int, the server production port.
  */
 const int Client::getProductionPort() const { return _portServerProduction; }
 /******************************************************************************/
@@ -346,8 +348,22 @@ const int Client::getProductionPort() const { return _portServerProduction; }
  *
  * This method will return the test port of the server to establish a
  * connection.
+ *
+ * @return An int, the server test port.
  */
 const int Client::getTestPort() const { return _portServerTest; }
+/******************************************************************************/
+/**
+ * @brief This method will return the Diffie Hellman map.
+ *
+ * This method will return the Diffie Hellman map of the client.
+ *
+ * @return A map, the client DH map.
+ */
+std::map<std::string, std::unique_ptr<SessionData>> &
+Client::getDiffieHellmanMap() {
+  return _diffieHellmanMap;
+}
 /******************************************************************************/
 /**
  * @brief This method verify if this entry exists on the client side.

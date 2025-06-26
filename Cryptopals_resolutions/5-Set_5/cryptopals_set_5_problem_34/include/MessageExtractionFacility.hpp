@@ -82,6 +82,17 @@ std::string BIGNUMToHex(BIGNUM *bn);
  */
 std::string BIGNUMToDec(BIGNUM *bn);
 
+/**
+ * @brief This method will convert an uuid into a string equivalent.
+ * This method will convert an uuid into a string equivalent, keeping
+ * the same content.
+ *
+ * @param uuid The uuid to convert.
+ *
+ * @return The uuid converted into a string.
+ */
+const std::string uuidToString(const boost::uuids::uuid &uuid);
+
 }; // namespace MessageExtractionFacility
 
 #endif // MESSAGE_EXTRACTION_FACILITY_HPP
