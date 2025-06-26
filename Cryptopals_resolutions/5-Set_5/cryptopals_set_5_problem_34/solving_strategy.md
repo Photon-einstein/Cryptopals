@@ -63,9 +63,9 @@
 12. Add the /MessageExchange route to the client endpoint (Done)
 13. Add tests to the /MessageExchange route to the DH protocol on the server side (Done)
 14. Refactor existing tests to include also the returned session ID on the client side, on the tuple (Done)
+15. Add tests to the normal exchange in the DH protocol for the /messageExchange route (Done)
 
-15. Add tests to the normal exchange in the DH protocol for the /messageExchange route (in progress)
+16. Add the /MessageExchange route to the Mallory server endpoint (in progress)
 
-16. Add the /MessageExchange rout to the Mallory server endpoint (TBD)
 17. Add the tests to the normal MITM attack for the /messageExchange route (TBD)
 18. Add the tests to the MITM attack with parameter injection for the /MessageExchange route (TBD)

@@ -253,7 +253,7 @@ void Server::messageExchangeRoute() {
           std::string serverConfirmationMessage =
               std::string("Hello from server id: ") + _serverId +
               " at session id: " + extractedSessionId +
-              +"message received from client: " + plaintext + ".\n";
+              +" message received from client: '" + plaintext + "'";
           _diffieHellmanMap[extractedSessionIdUuidFormat]->_iv =
               EncryptionUtility::generateRandomIV(_nonceSize);
           // encrypt server confirmation message

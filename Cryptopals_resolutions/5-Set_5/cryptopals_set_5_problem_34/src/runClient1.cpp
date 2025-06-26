@@ -17,7 +17,14 @@ int main(void) {
   const std::string clientId{"Bob"}, groupNameDH{"cryptopals-group-33-small"};
   std::shared_ptr<Client> client =
       std::make_shared<Client>(clientId, debugFlag, groupNameDH);
-  client->diffieHellmanKeyExchange(client->getProductionPort());
+  const std::tuple<bool, std::string, std::string> keyExchangeResult =
+      client->diffieHellmanKeyExchange(client->getProductionPort());
+  if (std::get<0>(keyExchangeResult) == false) {
+    throw std::runtime_error(
+        "runClient1 log | diffieHellmanKeyExchange() failed.");
+  }
+  const std::string sessionId = std::get<2>(keyExchangeResult);
+  client->messageExchange(client->getProductionPort(), sessionId);
   /* end of the work */
   end = clock();
   time = (double)(end - start) / CLOCKS_PER_SEC;

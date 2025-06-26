@@ -63,7 +63,8 @@ TEST_F(DiffieHellmanKeyExchangeProtocolTest,
 /**
  * @test Test the correctness of setup of the Diffie Hellman key exchange
  * @brief Ensures that the Diffie Hellman key exchange is completed successfully
- * with one single user attempting to set up the DH key exchange.
+ * with one single user attempting to set up the DH key exchange, and the
+ * message exchange afterwards completes without errors.
  */
 TEST_F(DiffieHellmanKeyExchangeProtocolTest,
        DiffieHellmanKeyExchange_WithServerRunning1User_ShouldMatchReference) {
@@ -100,12 +101,16 @@ TEST_F(DiffieHellmanKeyExchangeProtocolTest,
   }
   EXPECT_TRUE(sessionFound);
   EXPECT_TRUE(_mapUsers[_clientId1]->confirmSessionId(sessionIdFound));
+  EXPECT_TRUE(_mapUsers[_clientId1]->messageExchange(
+      _mapUsers[_clientId1]->getTestPort(), sessionIdFound));
 }
 
 /**
  * @test Test the error detection of the Diffie Hellman key exchange protocol.
  * @brief Ensures that the Diffie Hellman key exchange protocol is able to
- * detect errors on small changes in the data used in the protocol.
+ * detect errors on small changes in the data used in the protocol, and the
+ * message exchange afterwards detects errors with small changes in the
+ * arguments.
  */
 TEST_F(
     DiffieHellmanKeyExchangeProtocolTest,
@@ -167,13 +172,17 @@ TEST_F(
   }
   EXPECT_TRUE(sessionFound);
   EXPECT_TRUE(_mapUsers[_clientId2]->confirmSessionId(sessionIdFound));
+  sessionIdFound[0] ^= 0x01; // trigger an error
+  EXPECT_FALSE(_mapUsers[_clientId2]->messageExchange(
+      _mapUsers[_clientId2]->getTestPort(), sessionIdFound));
 }
 
 /**
  * @test Test the correctness of setup of the Diffie Hellman key exchange with
  * several users.
  * @brief Ensures that the Diffie Hellman key exchange is completed successfully
- * with several users sessions established with different clients.
+ * with several users sessions established with different clients, and the
+ * message exchange afterwards completes without errors.
  */
 TEST_F(
     DiffieHellmanKeyExchangeProtocolTest,
@@ -241,6 +250,8 @@ TEST_F(
     EXPECT_TRUE(_mapUsers[clientId]->verifyServerSessionDataEntryEndpoint(
         sessionIdReceived, clientId, clientNonce, serverNonce, derivedKey, iv));
     EXPECT_TRUE(_mapUsers[clientId]->confirmSessionId(sessionId));
+    EXPECT_TRUE(_mapUsers[clientId]->messageExchange(
+        _mapUsers[clientId]->getTestPort(), sessionIdReceived));
     ++numberSessionsFound;
   }
   EXPECT_EQ(numbersSessionsCreated, numberSessionsFound);

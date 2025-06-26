@@ -174,34 +174,40 @@ Client::diffieHellmanKeyExchange(const int portServerNumber) {
  * a given server, in order to agree on a given symmetric encryption key.
  *
  * @param portServerNumber The number of the server to use in this exchange.
+ * @param sessionId The session id to be used in this connection with the
+ * server.
  *
  * @return A bool, true if successful exchange and validation, failure
  * otherwise.
  *
- * @throw runtime_error if there was an error in the messageExchangeRoute.
+ * @throw runtime_error if there was an error in the messageExchange.
  */
-const bool Client::messageExchangeRoute(const int portServerNumber) {
+const bool Client::messageExchange(const int portServerNumber,
+                                   const std::string &sessionId) {
   bool connectionTestResult{false};
   try {
     if (portServerNumber < 1023) {
       throw std::runtime_error(
-          "Client log | messageExchangeRoute(): "
+          "Client log | messageExchange(): "
           "Invalid port server number used, should be greater than 1023.");
     }
     if (_diffieHellmanMap.empty()) {
-      throw std::runtime_error("Client log | messageExchangeRoute(): "
+      throw std::runtime_error("Client log | messageExchange(): "
                                "No sessions are set on the client side, not "
                                "ready to run this route.");
     }
-    auto firstElementIterator = _diffieHellmanMap.begin();
-    const std::string sessionId = firstElementIterator->first;
+    if (_diffieHellmanMap.find(sessionId) == _diffieHellmanMap.end()) {
+      throw std::runtime_error(
+          "Client log | messageExchange(): "
+          "The session id received as an argument is not setup.");
+    }
     // rotate iv
     _diffieHellmanMap[sessionId]->_iv =
         EncryptionUtility::generateRandomIV(_ivLength);
     // confirmation message
     const std::string clientMessageSent =
         std::string("Hello from client ID: ") + _clientId +
-        " at session ID: " + sessionId + " " +
+        " at session ID: " + sessionId + " at " +
         EncryptionUtility::getFormattedTimestamp() + ".";
     // calculate ciphertext
     const std::string ciphertext =
@@ -229,7 +235,7 @@ const bool Client::messageExchangeRoute(const int portServerNumber) {
                   cpr::Header{{"Content-Type", "application/json"}},
                   cpr::Body{requestBody});
     if (response.status_code != 201) {
-      throw std::runtime_error("Client log | messageExchangeRoute(): "
+      throw std::runtime_error("Client log | messageExchange(): "
                                "Message exchange failed at client ID: " +
                                _clientId);
     }
@@ -240,7 +246,7 @@ const bool Client::messageExchangeRoute(const int portServerNumber) {
     const std::string extractedSessionId =
         parsedJson.at("sessionId").get<std::string>();
     if (extractedSessionId != sessionId) {
-      throw std::runtime_error("Client log | messageExchangeRoute(): "
+      throw std::runtime_error("Client log | messageExchange(): "
                                "Message exchange failed at client ID: " +
                                _clientId +
                                " session ID send and received don't match.");
@@ -260,14 +266,21 @@ const bool Client::messageExchangeRoute(const int portServerNumber) {
                 ->_diffieHellman->getSymmetricKey(),
             _diffieHellmanMap[extractedSessionId]->_iv);
     // check return values
-    if (extractedCiphertext.ends_with(clientMessageSent)) {
+    if (decryptedCiphertext.find(clientMessageSent) != std::string::npos) {
       connectionTestResult = true;
+      if (_debugFlag || true) {
+        std::cout << "Client log | messageExchange(): decrypted message "
+                     "received from the server: \n'"
+                  << decryptedCiphertext << "'." << std::endl;
+      }
     } else {
       throw std::runtime_error(
-          "Client log | messageExchangeRoute(): "
+          "Client log | messageExchange(): "
           "Message exchange failed at client ID: " +
           _clientId +
-          " message received doesn't contain data from message sent.");
+          " message received doesn't contain data from message sent,"
+          " message received: " +
+          decryptedCiphertext);
     }
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
