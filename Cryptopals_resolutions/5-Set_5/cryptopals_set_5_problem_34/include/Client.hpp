@@ -50,12 +50,16 @@ public:
    * a given server, in order to agree on a given symmetric encryption key.
    *
    * @param portServerNumber The number of the server to use in this exchange.
+   * @param sessionId The session id to be used in this connection with the
+   * server.
    *
    * @return A bool, true if successful exchange and validation, failure
    * otherwise.
-   * @throw runtime_error if there was an error in the messageExchangeRoute.
+   *
+   * @throw runtime_error if there was an error in the messageExchange.
    */
-  const bool messageExchangeRoute(const int portServerNumber);
+  const bool messageExchange(const int portServerNumber,
+                             const std::string &sessionId);
 
   /**
    * @brief This method will confirm if a given session id is correctly setup.

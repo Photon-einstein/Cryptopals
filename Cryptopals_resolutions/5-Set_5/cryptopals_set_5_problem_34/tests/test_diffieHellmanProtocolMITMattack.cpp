@@ -71,8 +71,11 @@ TEST_F(DiffieHellmanKeyExchangeProtocolMITMattackTest,
 TEST_F(
     DiffieHellmanKeyExchangeProtocolMITMattackTest,
     DiffieHellmanKeyExchange_WithMalloryServerRunning1User_ShouldDeceiveClient) {
-  EXPECT_NO_THROW(_mapUsers[_clientId1]->diffieHellmanKeyExchange(
-      _mapUsers[_clientId1]->getTestPort()));
+  const std::tuple<bool, std::string, std::string> keyExchangeResult =
+      _mapUsers[_clientId1]->diffieHellmanKeyExchange(
+          _mapUsers[_clientId1]->getTestPort());
+  EXPECT_TRUE(std::get<0>(keyExchangeResult));
+  const std::string newSessionId = std::get<2>(keyExchangeResult);
   auto response = cpr::Get(cpr::Url{
       "http://localhost:" + std::to_string(_fakeServer->getTestPort()) +
       "/sessionsData"});
@@ -85,7 +88,7 @@ TEST_F(
   for (const std::string &sessionId : jsonResponse.keys()) {
     const crow::json::rvalue &sessionData = jsonResponse[sessionId];
     std::string clientId = sessionData["clientId"].s();
-    if (clientId == expectedClientId) {
+    if (clientId == expectedClientId && sessionId == newSessionId) {
       sessionFound = true;
       sessionIdFound = sessionId;
       const std::string derivedKey{sessionData["derivedKey"].s()};
@@ -113,8 +116,11 @@ TEST_F(
 TEST_F(
     DiffieHellmanKeyExchangeProtocolMITMattackTest,
     DiffieHellmanKeyExchange_WithFakeServerRunning1UserSlightChangeInTheConfirmationMessageData_ShouldReturnAnError) {
-  EXPECT_NO_THROW(_mapUsers[_clientId2]->diffieHellmanKeyExchange(
-      _mapUsers[_clientId2]->getTestPort()));
+  const std::tuple<bool, std::string, std::string> keyExchangeResult =
+      _mapUsers[_clientId2]->diffieHellmanKeyExchange(
+          _mapUsers[_clientId2]->getTestPort());
+  EXPECT_TRUE(std::get<0>(keyExchangeResult));
+  const std::string newSessionId = std::get<2>(keyExchangeResult);
   auto response = cpr::Get(cpr::Url{
       "http://localhost:" + std::to_string(_fakeServer->getTestPort()) +
       "/sessionsData"});
@@ -127,7 +133,7 @@ TEST_F(
   for (const std::string &sessionId : jsonResponse.keys()) {
     const crow::json::rvalue &sessionData = jsonResponse[sessionId];
     std::string clientId = sessionData["clientId"].s();
-    if (clientId == expectedClientId) {
+    if (clientId == expectedClientId && newSessionId == sessionId) {
       sessionFound = true;
       sessionIdFound = sessionId;
       std::string derivedKey{sessionData["derivedKey"].s()};
@@ -179,20 +185,49 @@ TEST_F(
 TEST_F(
     DiffieHellmanKeyExchangeProtocolMITMattackTest,
     DiffieHellmanKeyExchange_WithFakeServerRunningWithSeveralUsers_ShouldDeceiveClients) {
-  EXPECT_NO_THROW(_mapUsers[_clientId1]->diffieHellmanKeyExchange(
-      _mapUsers[_clientId1]->getTestPort()));
-  EXPECT_NO_THROW(_mapUsers[_clientId1]->diffieHellmanKeyExchange(
-      _mapUsers[_clientId1]->getTestPort()));
-  EXPECT_NO_THROW(_mapUsers[_clientId2]->diffieHellmanKeyExchange(
-      _mapUsers[_clientId2]->getTestPort()));
-  EXPECT_NO_THROW(_mapUsers[_clientId2]->diffieHellmanKeyExchange(
-      _mapUsers[_clientId2]->getTestPort()));
-  EXPECT_NO_THROW(_mapUsers[_clientId2]->diffieHellmanKeyExchange(
-      _mapUsers[_clientId2]->getTestPort()));
-  EXPECT_NO_THROW(_mapUsers[_clientId3]->diffieHellmanKeyExchange(
-      _mapUsers[_clientId3]->getTestPort()));
-  EXPECT_NO_THROW(_mapUsers[_clientId3]->diffieHellmanKeyExchange(
-      _mapUsers[_clientId3]->getTestPort()));
+  const std::tuple<bool, std::string, std::string> keyExchangeResult1 =
+      _mapUsers[_clientId1]->diffieHellmanKeyExchange(
+          _mapUsers[_clientId1]->getTestPort());
+  EXPECT_TRUE(std::get<0>(keyExchangeResult1));
+  std::set<std::string> sessionsIdsSet;
+  sessionsIdsSet.insert(std::get<2>(keyExchangeResult1));
+
+  const std::tuple<bool, std::string, std::string> keyExchangeResult2 =
+      _mapUsers[_clientId1]->diffieHellmanKeyExchange(
+          _mapUsers[_clientId1]->getTestPort());
+  EXPECT_TRUE(std::get<0>(keyExchangeResult2));
+  sessionsIdsSet.insert(std::get<2>(keyExchangeResult2));
+
+  const std::tuple<bool, std::string, std::string> keyExchangeResult3 =
+      _mapUsers[_clientId2]->diffieHellmanKeyExchange(
+          _mapUsers[_clientId2]->getTestPort());
+  EXPECT_TRUE(std::get<0>(keyExchangeResult3));
+  sessionsIdsSet.insert(std::get<2>(keyExchangeResult3));
+
+  const std::tuple<bool, std::string, std::string> keyExchangeResult4 =
+      _mapUsers[_clientId2]->diffieHellmanKeyExchange(
+          _mapUsers[_clientId2]->getTestPort());
+  EXPECT_TRUE(std::get<0>(keyExchangeResult4));
+  sessionsIdsSet.insert(std::get<2>(keyExchangeResult4));
+
+  const std::tuple<bool, std::string, std::string> keyExchangeResult5 =
+      _mapUsers[_clientId2]->diffieHellmanKeyExchange(
+          _mapUsers[_clientId2]->getTestPort());
+  EXPECT_TRUE(std::get<0>(keyExchangeResult5));
+  sessionsIdsSet.insert(std::get<2>(keyExchangeResult5));
+
+  const std::tuple<bool, std::string, std::string> keyExchangeResult6 =
+      _mapUsers[_clientId3]->diffieHellmanKeyExchange(
+          _mapUsers[_clientId3]->getTestPort());
+  EXPECT_TRUE(std::get<0>(keyExchangeResult6));
+  sessionsIdsSet.insert(std::get<2>(keyExchangeResult6));
+
+  const std::tuple<bool, std::string, std::string> keyExchangeResult7 =
+      _mapUsers[_clientId3]->diffieHellmanKeyExchange(
+          _mapUsers[_clientId3]->getTestPort());
+  EXPECT_TRUE(std::get<0>(keyExchangeResult7));
+  sessionsIdsSet.insert(std::get<2>(keyExchangeResult7));
+
   auto response = cpr::Get(cpr::Url{
       "http://localhost:" + std::to_string(_fakeServer->getTestPort()) +
       "/sessionsData"});
@@ -201,6 +236,7 @@ TEST_F(
   ASSERT_TRUE(jsonResponse);
   int numberSessionsFound{0}, numbersSessionsCreated{7};
   for (const std::string &sessionId : jsonResponse.keys()) {
+    EXPECT_TRUE(sessionsIdsSet.count(sessionId) == 1);
     const crow::json::rvalue &sessionData = jsonResponse[sessionId];
     const std::string clientId = sessionData["clientId"].s();
     const std::string derivedKey{sessionData["derivedKey"].s()};
@@ -229,8 +265,11 @@ TEST_F(
     DiffieHellmanKeyExchangeProtocolMITMattackTest,
     DiffieHellmanKeyExchange_WithMalloryServerRunning1UserWithParameterInjection_ShouldDeceiveClient) {
   _fakeServer->setParameterInjectionFlag(true);
-  EXPECT_NO_THROW(_mapUsers[_clientId1]->diffieHellmanKeyExchange(
-      _mapUsers[_clientId1]->getTestPort()));
+  const std::tuple<bool, std::string, std::string> keyExchangeResult =
+      _mapUsers[_clientId1]->diffieHellmanKeyExchange(
+          _mapUsers[_clientId1]->getTestPort());
+  EXPECT_TRUE(std::get<0>(keyExchangeResult));
+  const std::string newSessionId = std::get<2>(keyExchangeResult);
   auto response = cpr::Get(cpr::Url{
       "http://localhost:" + std::to_string(_fakeServer->getTestPort()) +
       "/sessionsData"});
@@ -243,7 +282,7 @@ TEST_F(
   for (const std::string &sessionId : jsonResponse.keys()) {
     const crow::json::rvalue &sessionData = jsonResponse[sessionId];
     std::string clientId = sessionData["clientId"].s();
-    if (clientId == expectedClientId) {
+    if (clientId == expectedClientId && sessionId == newSessionId) {
       sessionFound = true;
       sessionIdFound = sessionId;
       const std::string derivedKey{sessionData["derivedKey"].s()};
@@ -272,8 +311,11 @@ TEST_F(
     DiffieHellmanKeyExchangeProtocolMITMattackTest,
     DiffieHellmanKeyExchange_WithFakeServerRunning1UserSlightChangeInTheConfirmationMessageDataWithParameterInjection_ShouldReturnAnError) {
   _fakeServer->setParameterInjectionFlag(true);
-  EXPECT_NO_THROW(_mapUsers[_clientId2]->diffieHellmanKeyExchange(
-      _mapUsers[_clientId2]->getTestPort()));
+  const std::tuple<bool, std::string, std::string> keyExchangeResult =
+      _mapUsers[_clientId2]->diffieHellmanKeyExchange(
+          _mapUsers[_clientId2]->getTestPort());
+  EXPECT_TRUE(std::get<0>(keyExchangeResult));
+  const std::string newSessionId = std::get<2>(keyExchangeResult);
   auto response = cpr::Get(cpr::Url{
       "http://localhost:" + std::to_string(_fakeServer->getTestPort()) +
       "/sessionsData"});
@@ -286,7 +328,7 @@ TEST_F(
   for (const std::string &sessionId : jsonResponse.keys()) {
     const crow::json::rvalue &sessionData = jsonResponse[sessionId];
     std::string clientId = sessionData["clientId"].s();
-    if (clientId == expectedClientId) {
+    if (clientId == expectedClientId && newSessionId == sessionId) {
       sessionFound = true;
       sessionIdFound = sessionId;
       std::string derivedKey{sessionData["derivedKey"].s()};
@@ -340,20 +382,49 @@ TEST_F(
     DiffieHellmanKeyExchangeProtocolMITMattackTest,
     DiffieHellmanKeyExchange_WithFakeServerRunningWithSeveralUsersWithParameterInjection_ShouldDeceiveClients) {
   _fakeServer->setParameterInjectionFlag(true);
-  EXPECT_NO_THROW(_mapUsers[_clientId1]->diffieHellmanKeyExchange(
-      _mapUsers[_clientId1]->getTestPort()));
-  EXPECT_NO_THROW(_mapUsers[_clientId1]->diffieHellmanKeyExchange(
-      _mapUsers[_clientId1]->getTestPort()));
-  EXPECT_NO_THROW(_mapUsers[_clientId2]->diffieHellmanKeyExchange(
-      _mapUsers[_clientId2]->getTestPort()));
-  EXPECT_NO_THROW(_mapUsers[_clientId2]->diffieHellmanKeyExchange(
-      _mapUsers[_clientId2]->getTestPort()));
-  EXPECT_NO_THROW(_mapUsers[_clientId2]->diffieHellmanKeyExchange(
-      _mapUsers[_clientId2]->getTestPort()));
-  EXPECT_NO_THROW(_mapUsers[_clientId3]->diffieHellmanKeyExchange(
-      _mapUsers[_clientId3]->getTestPort()));
-  EXPECT_NO_THROW(_mapUsers[_clientId3]->diffieHellmanKeyExchange(
-      _mapUsers[_clientId3]->getTestPort()));
+  const std::tuple<bool, std::string, std::string> keyExchangeResult1 =
+      _mapUsers[_clientId1]->diffieHellmanKeyExchange(
+          _mapUsers[_clientId1]->getTestPort());
+  EXPECT_TRUE(std::get<0>(keyExchangeResult1));
+  std::set<std::string> sessionsIdsSet;
+  sessionsIdsSet.insert(std::get<2>(keyExchangeResult1));
+
+  const std::tuple<bool, std::string, std::string> keyExchangeResult2 =
+      _mapUsers[_clientId1]->diffieHellmanKeyExchange(
+          _mapUsers[_clientId1]->getTestPort());
+  EXPECT_TRUE(std::get<0>(keyExchangeResult2));
+  sessionsIdsSet.insert(std::get<2>(keyExchangeResult2));
+
+  const std::tuple<bool, std::string, std::string> keyExchangeResult3 =
+      _mapUsers[_clientId2]->diffieHellmanKeyExchange(
+          _mapUsers[_clientId2]->getTestPort());
+  EXPECT_TRUE(std::get<0>(keyExchangeResult3));
+  sessionsIdsSet.insert(std::get<2>(keyExchangeResult3));
+
+  const std::tuple<bool, std::string, std::string> keyExchangeResult4 =
+      _mapUsers[_clientId2]->diffieHellmanKeyExchange(
+          _mapUsers[_clientId2]->getTestPort());
+  EXPECT_TRUE(std::get<0>(keyExchangeResult4));
+  sessionsIdsSet.insert(std::get<2>(keyExchangeResult4));
+
+  const std::tuple<bool, std::string, std::string> keyExchangeResult5 =
+      _mapUsers[_clientId2]->diffieHellmanKeyExchange(
+          _mapUsers[_clientId2]->getTestPort());
+  EXPECT_TRUE(std::get<0>(keyExchangeResult5));
+  sessionsIdsSet.insert(std::get<2>(keyExchangeResult5));
+
+  const std::tuple<bool, std::string, std::string> keyExchangeResult6 =
+      _mapUsers[_clientId3]->diffieHellmanKeyExchange(
+          _mapUsers[_clientId3]->getTestPort());
+  EXPECT_TRUE(std::get<0>(keyExchangeResult6));
+  sessionsIdsSet.insert(std::get<2>(keyExchangeResult6));
+
+  const std::tuple<bool, std::string, std::string> keyExchangeResult7 =
+      _mapUsers[_clientId3]->diffieHellmanKeyExchange(
+          _mapUsers[_clientId3]->getTestPort());
+  EXPECT_TRUE(std::get<0>(keyExchangeResult7));
+  sessionsIdsSet.insert(std::get<2>(keyExchangeResult7));
+
   auto response = cpr::Get(cpr::Url{
       "http://localhost:" + std::to_string(_fakeServer->getTestPort()) +
       "/sessionsData"});
@@ -362,6 +433,7 @@ TEST_F(
   ASSERT_TRUE(jsonResponse);
   int numberSessionsFound{0}, numbersSessionsCreated{7};
   for (const std::string &sessionId : jsonResponse.keys()) {
+    EXPECT_TRUE(sessionsIdsSet.count(sessionId) == 1);
     const crow::json::rvalue &sessionData = jsonResponse[sessionId];
     const std::string clientId = sessionData["clientId"].s();
     const std::string derivedKey{sessionData["derivedKey"].s()};
