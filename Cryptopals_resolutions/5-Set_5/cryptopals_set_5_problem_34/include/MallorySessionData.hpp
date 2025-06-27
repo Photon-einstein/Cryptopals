@@ -22,7 +22,6 @@ struct MallorySessionData {
 
   ~MallorySessionData();
 
-  bool _parameterInjection{false};
   std::unique_ptr<MyCryptoLibrary::DiffieHellman> _AMdiffieHellman;
   // Client (Alice) - Mallory channel
   std::string _AMserverNonceHex;
@@ -33,6 +32,7 @@ struct MallorySessionData {
   // Client (Mallory) - Server channel
   std::string _MSsessionId;
   std::unique_ptr<Client> _MSfakeClient;
+  bool _parameterInjection{false};
 };
 
 #endif // MALLORY_SESSION_DATA_HPP

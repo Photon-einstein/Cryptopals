@@ -67,7 +67,7 @@ TEST_F(DiffieHellmanKeyExchangeProtocolMITMattackTest,
  * @brief Ensures that the MITM attack is successful with one single client
  * attempting to set up the DH key exchange, asserting that he remains oblivious
  * to a third party interception of the session with a fake server.
- * The message exchange is tested if if can be forwarded transparently by means
+ * The message exchange is tested if it can be forwarded transparently by means
  * of a man in the middle attack.
  */
 TEST_F(
@@ -116,6 +116,8 @@ TEST_F(
  * @brief Ensures that the Diffie Hellman key exchange protocol is able to
  * detect errors on small changes in the data used in the protocol when a MITM
  * attack has been performed as well.
+ * The message exchange is tested if it can detect a slight error in the input
+ * parameters.
  */
 TEST_F(
     DiffieHellmanKeyExchangeProtocolMITMattackTest,
@@ -171,12 +173,18 @@ TEST_F(
       iv[0] ^= 0x01;         // trigger an error
       EXPECT_FALSE(_mapUsers[_clientId2]->verifyServerSessionDataEntryEndpoint(
           sessionIdFound, clientId, clientNonce, serverNonce, derivedKey, iv));
-      iv[0] ^= 0x01; // reestablish the correct data
+      iv[0] ^= 0x01;             // reestablish the correct data
+      sessionIdFound[0] ^= 0x01; // trigger an error
+      EXPECT_FALSE(_mapUsers[_clientId2]->messageExchange(
+          _mapUsers[_clientId2]->getTestPort(), sessionIdFound));
+      sessionIdFound[0] ^= 0x01; // reestablish the correct data
       break;
     }
   }
   EXPECT_TRUE(sessionFound);
   EXPECT_TRUE(_mapUsers[_clientId2]->confirmSessionId(sessionIdFound));
+  EXPECT_TRUE(_mapUsers[_clientId2]->messageExchange(
+      _mapUsers[_clientId2]->getTestPort(), sessionIdFound));
 }
 
 /**
@@ -185,6 +193,8 @@ TEST_F(
  * @brief Ensures that the MITM attack is successful with several clients
  * attempting to set up the DH key exchange, asserting that he remains oblivious
  * to a third party interception of the session with a fake server.
+ * The message exchange is tested with several sessions, if it can be forwarded
+ * transparently by means of a man in the middle attack.
  */
 TEST_F(
     DiffieHellmanKeyExchangeProtocolMITMattackTest,
@@ -252,6 +262,8 @@ TEST_F(
     EXPECT_TRUE(_mapUsers[clientId]->verifyServerSessionDataEntryEndpoint(
         sessionIdReceived, clientId, clientNonce, serverNonce, derivedKey, iv));
     EXPECT_TRUE(_mapUsers[clientId]->confirmSessionId(sessionId));
+    EXPECT_TRUE(_mapUsers[clientId]->messageExchange(
+        _mapUsers[clientId]->getTestPort(), sessionId));
     ++numberSessionsFound;
   }
   EXPECT_EQ(numbersSessionsCreated, numberSessionsFound);
@@ -264,6 +276,8 @@ TEST_F(
  * attempting to set up the DH key exchange, asserting that he remains oblivious
  * to a third party interception of the session with a fake server when a
  * parameter injection is performed on the fake server side.
+ * The message exchange is tested if it can be forwarded transparently by means
+ * of a man in the middle attack.
  */
 TEST_F(
     DiffieHellmanKeyExchangeProtocolMITMattackTest,
@@ -302,6 +316,8 @@ TEST_F(
   }
   EXPECT_TRUE(sessionFound);
   EXPECT_TRUE(_mapUsers[_clientId1]->confirmSessionId(sessionIdFound));
+  EXPECT_TRUE(_mapUsers[_clientId1]->messageExchange(
+      _mapUsers[_clientId1]->getTestPort(), sessionIdFound));
 }
 
 /**
@@ -310,6 +326,8 @@ TEST_F(
  * @brief Ensures that the Diffie Hellman key exchange protocol is able to
  * detect errors on small changes in the data used in the protocol when a MITM
  * attack with parameter injection has been performed as well.
+ * The message exchange is tested if it can detect a slight error in the input
+ * parameters.
  */
 TEST_F(
     DiffieHellmanKeyExchangeProtocolMITMattackTest,
@@ -366,7 +384,11 @@ TEST_F(
       iv[0] ^= 0x01;         // trigger an error
       EXPECT_FALSE(_mapUsers[_clientId2]->verifyServerSessionDataEntryEndpoint(
           sessionIdFound, clientId, clientNonce, serverNonce, derivedKey, iv));
-      iv[0] ^= 0x01; // reestablish the correct data
+      iv[0] ^= 0x01;             // reestablish the correct data
+      sessionIdFound[0] ^= 0x01; // trigger an error
+      EXPECT_FALSE(_mapUsers[_clientId2]->messageExchange(
+          _mapUsers[_clientId2]->getTestPort(), sessionIdFound));
+      sessionIdFound[0] ^= 0x01; // reestablish the correct data
       break;
     }
   }
@@ -381,6 +403,8 @@ TEST_F(
  * with several clients attempting to set up the DH key exchange, asserting that
  * he remains oblivious to a third party interception of the session with a fake
  * server.
+ * The message exchange is tested with several sessions, if it can be forwarded
+ * transparently by means of a man in the middle attack.
  */
 TEST_F(
     DiffieHellmanKeyExchangeProtocolMITMattackTest,
@@ -449,6 +473,8 @@ TEST_F(
     EXPECT_TRUE(_mapUsers[clientId]->verifyServerSessionDataEntryEndpoint(
         sessionIdReceived, clientId, clientNonce, serverNonce, derivedKey, iv));
     EXPECT_TRUE(_mapUsers[clientId]->confirmSessionId(sessionId));
+    EXPECT_TRUE(_mapUsers[clientId]->messageExchange(
+        _mapUsers[clientId]->getTestPort(), sessionId));
     ++numberSessionsFound;
   }
   EXPECT_EQ(numbersSessionsCreated, numberSessionsFound);

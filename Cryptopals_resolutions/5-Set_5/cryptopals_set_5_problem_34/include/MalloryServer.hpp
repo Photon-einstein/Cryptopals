@@ -156,9 +156,9 @@ private:
   const int _portRealServerTest{18083};
   int _portRealServerInUse;
 
-  const bool _testFlag;
   std::thread _serverThread;
   const bool _debugFlag;
+  const bool _testFlag;
   const std::size_t _ivLength{AES_BLOCK_SIZE}; // bytes
   std::string _serverId{"Mallory_Server_"};
   bool _parameterInjection{false};
