@@ -69,8 +69,38 @@
 18. Add the tests to the MITM attack with parameter injection for the /MessageExchange route (Done)
 19. Run static code analysis and fix problems (Done)
 
-20. Read entire code and fixe or enhance some bugs that might still be there (in progress)
+20. Read entire code and fix some bugs that might still be there (in progress)
+    - Client.hpp (Done)
+    - Client.cpp (Done)
 
-21. Create uml class diagram (TBD)
+    - DhParametersLoader.hpp (Done)
+    - DhParametersLoader.cpp (Done)
+
+    - DiffieHellman.hpp (Done)
+    - DiffieHellman.cpp (Done)
+
+    - EncryptionUtility.hpp (Done)
+    - EncryptionUtility.cpp (Done)
+
+    - MalloryServer.hpp (Done)
+    - MalloryServer.cpp (Done)
+
+    - MallorySessionData.hpp (Done)
+    - MallorySessionData.cpp (Done)
+
+    - MessageExtractionFacility.hpp (Done)
+    - MessageExtractionFacility.cpp (Done)
+
+    - Server.hpp (Done)
+    - Server.cpp (Done)
+
+    - SessionData.hpp (Done)
+
+    - runClient1.cpp (Done)
+    - runMalloryServer.cpp (Done)
+    - runServer.cpp (Done)
+
+21. Create uml class diagram (in progress)
+
 22. Create uml sequence diagram (TBD)
 23. Write article about this project (TBD)

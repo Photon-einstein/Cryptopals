@@ -111,13 +111,13 @@ const std::string &MyCryptoLibrary::DiffieHellman::getGroupName() const {
  * This method will derive a symmetric encryption key as the derived
  * shared secret from the execution of the Diffie Hellman Key Exchange.
  *
- * @param peerPublicKeyHex The peer public key (hex)
- * @param serverNonceHex  The server nonce (hex)
- * @param clientNonceHex  The client nonce (hex)
+ * @param peerPublicKeyHex The peer public key (hex).
+ * @param serverNonceHex  The server nonce (hex).
+ * @param clientNonceHex  The client nonce (hex).
  *
  * @return The symmetric encryption key (hex) in a string format.
- * @throws std::runtime_error if there is an error in the derivation of the
- * shared secret.
+ * @throws std::runtime_error if there is an error in the derivation of
+ * the shared secret.
  */
 const std::string MyCryptoLibrary::DiffieHellman::deriveSharedSecret(
     const std::string &peerPublicKeyHex, const std::string &serverNonceHex,
@@ -230,10 +230,9 @@ const std::string MyCryptoLibrary::DiffieHellman::deriveSharedSecret(
  * @brief This method returns the symmetric key after the Diffie
  * Hellman key exchange protocol has been completed.
  *
- *
- * @return Symmetric key
+ * @return The symmetric key.
  * @throws std::runtime_error if the Diffie Hellman key exchange protocol
- * has still not complete.
+ * has failed.
  */
 const std::vector<uint8_t> &
 MyCryptoLibrary::DiffieHellman::getSymmetricKey() const {
@@ -248,10 +247,10 @@ MyCryptoLibrary::DiffieHellman::getSymmetricKey() const {
 }
 /******************************************************************************/
 /**
- * @brief This method returns the expected confirmation message of successful
+ * @brief This method returns the expected confirmation message of a successful
  * Diffie Hellman key exchange.
  *
- * @return Expected confirmation message of a successful Diffie Hellman key
+ * @return Expected confirmation message of a successful Diffie Hellman's key
  * exchange.
  * @throws std::runtime_error if the confirmation message is empty.
  */
@@ -268,8 +267,8 @@ MyCryptoLibrary::DiffieHellman::getConfirmationMessage() const {
  * @brief This method returns the location of the file where the public
  * configurations of the Diffie Hellman key exchange protocol are available.
  *
- * @return Filename where the public configurations of the Diffie Hellman key
- * exchange protocol are available.
+ * @return The filename where the public configurations of the Diffie Hellman
+ * key exchange protocol are available.
  * @throws std::runtime_error if the DH parameters filename is empty.
  */
 const std::string &
@@ -344,8 +343,8 @@ void MyCryptoLibrary::DiffieHellman::generatePrivateKey() {
  * This method will generate a public key to be used at a Diffie
  * Hellman key exchange protocol. A = g^a mod p
  *
- * @throws std::runtime_error if there is an error in the generation of the
- * public key.
+ * @throws std::runtime_error if there is an error in the generation of
+ * the public key.
  */
 void MyCryptoLibrary::DiffieHellman::generatePublicKey() {
   if (_publicKeyDeterministic) {

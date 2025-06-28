@@ -23,20 +23,20 @@ public:
   ~MalloryServer();
 
   /**
-   * @brief This method will start all the server endpoints in a multi thread
-   * environment
+   * @brief This method will start all the server's endpoints in a multithread
+   * environment.
    *
    * This method will start all the endpoints that the server provides to their
-   * clients
+   * clients.
    */
   void runServer();
 
   /**
-   * @brief This method will start all the server endpoints in a multi thread
-   * environment for a test scenario
+   * @brief This method will start all the server's endpoints in a multithread
+   * environment for a test scenario.
    *
    * This method will start all the endpoints that the server provides to their
-   * clients, for a given test
+   * clients, in a test scenario.
    */
   void runServerTest();
 
@@ -44,22 +44,22 @@ public:
    * @brief This method will clear all the sessions in memory.
    *
    * This method will clear all the sessions in memory that were created
-   * executing the Diffie Hellman key exchange protocol.
+   * after the conclusion of the Diffie Hellman key exchange protocol.
    */
   void clearDiffieHellmanSessionData();
 
   /**
-   * @brief This method will return the production port of the server.
+   * @brief This method will return the server's production port.
    *
-   * This method will return the production port of the server to establish a
+   * This method will return the server's production port to establish a
    * connection.
    */
   const int getProductionPort() const;
 
   /**
-   * @brief This method will return the test port of the server.
+   * @brief This method will return the server's test port.
    *
-   * This method will return the test port of the server to establish a
+   * This method will return the server's test port to establish a
    * connection.
    */
   const int getTestPort() const;
@@ -78,29 +78,29 @@ private:
 
   /**
    * @brief This method will start the endpoints that the server
-   * provides to his clients
+   * provides to his clients.
    *
    * This method will start the endpoints that the server
    * provides to his clients, namely the root endpoint and the signature
-   * verification endpoint
+   * verification endpoint.
    */
   void setupRoutes();
 
   /**
-   * @brief This method is the entry point for the server URL address
+   * @brief This method is the entry point for the server URL address.
    *
    * This method will serve as a confirmation that the server URL is up
-   * and running at the root path
+   * and running at the root path.
    */
   void rootEndpoint();
 
   /**
    * @brief This method runs the route that performs the Diffie Hellman
-   * key exchange protocol. Man in the middle attack is performed.
+   * key exchange protocol. The man in the middle attack is performed.
    *
    * This method runs the route that performs the Diffie Hellman
    * key exchange protocol. It receives requests and make all the calculations
-   * to response to the requests, creating a symmetric key for each connection
+   * to respond to the requests, creating a symmetric key for each connection
    * request, performing the man in the middle attack.
    */
   void keyExchangeRoute();
@@ -108,14 +108,15 @@ private:
   /**
    * @brief This method runs the route that performs the message exchange using
    * symmetric encryption after the Diffie Hellman key exchange protocol has
-   * been completed. Man in the middle attack is performed.
+   * been completed. The man in the middle attack is performed.
    *
    * This method runs the route that performs the message exchange using
    * symmetric encryption after the Diffie Hellman key exchange protocol has
-   * been completed. This serves performs the man in the middle attack. Normal
-   * function from a normal server is to receive messages from clients, checks
-   * the validity of the session id and if valid, sends back a confirmation
-   * response.
+   * been completed. This fake server performs the man in the middle attack.
+   * Normal function from a normal server is to receive messages from clients,
+   * checks the validity of the session id and if valid, sends back a
+   * confirmation response. This fake server decrypt, read and encrypt again
+   * with another session to the real server.
    *
    * @throws std::runtime_error if there is an error in messageExchangeRoute.
    */
@@ -123,21 +124,23 @@ private:
 
   /**
    * @brief This method runs the route that gets all the current available
-   * sessions created using the Diffie Hellman key exchange protocol.
+   * fake sessions created using the Diffie Hellman key exchange protocol, after
+   * the man in the middle attack is performed.
    *
    * This method runs the route that gets all the current available sessions
-   * created using the Diffie Hellman key exchange protocol. It outputs all the
-   * session data in json format.
+   * created using the Diffie Hellman key exchange protocol, after
+   * the man in the middle attack is performed.
+   * It outputs all the session data in json format.
    */
   void getSessionsDataEndpoint();
 
   /**
-   * @brief This method will generate a unique session id.
+   * @brief This method will generate an unique session's id.
    *
-   * This method will generate a unique session id for a given connection
+   * This method will generate an unique session's id for a given connection
    * request.
    *
-   * @return A unique session ID to be used.
+   * @return An unique session's ID to be used.
    */
   boost::uuids::uuid generateUniqueSessionId();
 
@@ -145,17 +148,13 @@ private:
   mutable std::mutex _diffieHellmanMapMutex;
   std::map<boost::uuids::uuid, std::unique_ptr<MallorySessionData>>
       _diffieHellmanMap;
-
   const std::size_t _nonceSize{16}; // bytes
-
   crow::SimpleApp _app;
-
   const int _portProduction{18080};
   const int _portTest{18081};
   const int _portRealServerProduction{18082};
   const int _portRealServerTest{18083};
   int _portRealServerInUse;
-
   std::thread _serverThread;
   const bool _debugFlag;
   const bool _testFlag;

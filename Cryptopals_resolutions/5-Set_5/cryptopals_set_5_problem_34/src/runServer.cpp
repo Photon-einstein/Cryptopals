@@ -13,14 +13,13 @@ int main(void) {
   double time;
   start = clock();
   /* work to verify */
-  const bool debugFlag{true};
+  const bool debugFlag{false};
   std::shared_ptr<Server> server = std::make_shared<Server>(debugFlag);
   server->runServer();
   /* end of the work */
   end = clock();
   time = (double)(end - start) / CLOCKS_PER_SEC;
-  printf("\nProgram took %f s.", time);
-  printf("\n");
+  printf("\nProgram took %f s.\n", time);
   return 0;
 }
 /******************************************************************************/

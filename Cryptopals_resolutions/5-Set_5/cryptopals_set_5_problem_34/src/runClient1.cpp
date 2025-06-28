@@ -13,8 +13,8 @@ int main(void) {
   double time;
   start = clock();
   /* work to verify */
-  const bool debugFlag{true};
-  const std::string clientId{"Bob"}, groupNameDH{"cryptopals-group-33-small"};
+  const bool debugFlag{false};
+  const std::string clientId{"Bob"}, groupNameDH{"rfc3526-group-18"};
   std::shared_ptr<Client> client =
       std::make_shared<Client>(clientId, debugFlag, groupNameDH);
   const std::tuple<bool, std::string, std::string> keyExchangeResult =
@@ -28,8 +28,7 @@ int main(void) {
   /* end of the work */
   end = clock();
   time = (double)(end - start) / CLOCKS_PER_SEC;
-  printf("\nProgram took %f s.", time);
-  printf("\n");
+  printf("\nProgram took %f s.\n", time);
   return 0;
 }
 /******************************************************************************/

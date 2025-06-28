@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "DhParametersLoader.hpp"
-#include "DiffieHellman.hpp"
 #include "MessageExtractionFacility.hpp"
 
 namespace MyCryptoLibrary {
@@ -65,18 +64,17 @@ public:
    * @brief This method returns the symmetric key after the Diffie
    * Hellman key exchange protocol has been completed.
    *
-   *
-   * @return Symmetric key
+   * @return The symmetric key.
    * @throws std::runtime_error if the Diffie Hellman key exchange protocol
-   * has still not complete.
+   * has failed.
    */
   const std::vector<uint8_t> &getSymmetricKey() const;
 
   /**
-   * @brief This method returns the expected confirmation message of successful
-   * Diffie Hellman key exchange.
+   * @brief This method returns the expected confirmation message of a
+   * successful Diffie Hellman key exchange.
    *
-   * @return Expected confirmation message of a successful Diffie Hellman key
+   * @return Expected confirmation message of a successful Diffie Hellman's key
    * exchange.
    * @throws std::runtime_error if the confirmation message is empty.
    */
@@ -86,8 +84,8 @@ public:
    * @brief This method returns the location of the file where the public
    * configurations of the Diffie Hellman key exchange protocol are available.
    *
-   * @return Filename where the public configurations of the Diffie Hellman key
-   * exchange protocol are available.
+   * @return The filename where the public configurations of the Diffie Hellman
+   * key exchange protocol are available.
    * @throws std::runtime_error if the DH parameters filename is empty.
    */
   const std::string &getDhParametersFilenameLocation() const;
