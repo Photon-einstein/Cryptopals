@@ -14,7 +14,7 @@ struct SessionData {
   std::vector<uint8_t> _iv;
   std::string _groupNameDH;
 
-  // Server constructor usage
+  // Server's constructor side
   SessionData(const std::size_t nonceSize, const std::string &clientNonceHex,
               const std::string &clientId, const bool debugFlag,
               const std::size_t ivLength, const std::string &groupNameDH)
@@ -26,7 +26,7 @@ struct SessionData {
         _iv{EncryptionUtility::generateRandomIV(ivLength)},
         _groupNameDH{groupNameDH} {};
 
-  // Client constructor usage
+  // Client's constructor side
   SessionData(std::unique_ptr<MyCryptoLibrary::DiffieHellman> diffieHellman,
               const std::string &serverNonceHex,
               const std::string &clientNonceHex, const std::vector<uint8_t> &iv)

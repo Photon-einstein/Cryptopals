@@ -22,16 +22,16 @@ struct MallorySessionData {
 
   ~MallorySessionData();
 
-  std::unique_ptr<MyCryptoLibrary::DiffieHellman> _AMdiffieHellman;
+  std::unique_ptr<MyCryptoLibrary::DiffieHellman> _diffieHellmanAM;
   // Client (Alice) - Mallory channel
-  std::string _AMserverNonceHex;
-  std::string _AMclientNonceHex;
-  std::string _AMderivedKeyHex;
-  std::string _AMclientId; // transparent in this attack
-  std::vector<uint8_t> _AMiv;
+  std::string _serverNonceHexAM;
+  std::string _clientNonceHexAM;
+  std::string _derivedKeyHexAM;
+  std::string _clientIdAM; // transparent in this attack
+  std::vector<uint8_t> _ivAM;
   // Client (Mallory) - Server channel
-  std::string _MSsessionId;
-  std::unique_ptr<Client> _MSfakeClient;
+  std::string _sessionIdMS;
+  std::unique_ptr<Client> _fakeClientMS;
   bool _parameterInjection{false};
 };
 

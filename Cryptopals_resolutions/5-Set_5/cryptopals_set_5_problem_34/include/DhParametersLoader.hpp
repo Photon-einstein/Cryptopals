@@ -18,7 +18,7 @@ struct DhParameters {
 /**
  * @brief This method extracts the content of a given file.
  *
- * This method will extract the content of a given file that contain
+ * This method will extract the content of a given file that contains
  * the public configurations of the Diffie Hellman key exchange protocol.
  *
  * @param filename The file address where the public configurations of

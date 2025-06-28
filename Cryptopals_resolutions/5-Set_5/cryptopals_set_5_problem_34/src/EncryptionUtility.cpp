@@ -35,7 +35,7 @@ EncryptionUtility::generateCryptographicNonce(const std::size_t length) {
 }
 /******************************************************************************/
 /**
- * @brief Generates a random initialization vector (IV)
+ * @brief Generates a random initialization vector (IV).
  *
  * This method generates a random initialization vector for cryptographic
  * purposes.
@@ -43,7 +43,7 @@ EncryptionUtility::generateCryptographicNonce(const std::size_t length) {
  * @param ivLength The desired length of the IV in bytes.
  *
  * @return A vector containing the IV generated.
- * @throws std::runtime_error if IV generation fails.
+ * @throws std::runtime_error if the IV generation fails.
  */
 std::vector<uint8_t> EncryptionUtility::generateRandomIV(std::size_t ivLength) {
   std::vector<uint8_t> iv(ivLength);
@@ -57,7 +57,7 @@ std::vector<uint8_t> EncryptionUtility::generateRandomIV(std::size_t ivLength) {
 /**
  * @brief Encrypts a plaintext message using AES-256-CBC mode
  *
- * Encrypts a plaintext message using AES-256-CBC mode, using openssl library.
+ * Encrypts a plaintext message using AES-256-CBC mode, using the openssl library.
  *
  * @param plaintext The text to be encrypted.
  * @param key The key to be used in the encryption process (32 bytes for
@@ -72,7 +72,6 @@ std::string
 EncryptionUtility::encryptMessageAes256CbcMode(const std::string &plaintext,
                                                const std::vector<uint8_t> &key,
                                                const std::vector<uint8_t> &iv) {
-
   if (iv.size() != AES_BLOCK_SIZE) {
     throw std::runtime_error(
         "EncryptionUtility log | encryptMessageAes256CbcMode(): "
@@ -84,13 +83,12 @@ EncryptionUtility::encryptMessageAes256CbcMode(const std::string &plaintext,
     throw std::runtime_error(
         "EncryptionUtility log | encryptMessageAes256CbcMode(): "
         "Key does not have the right size to proceed with encryption "
-        "AES-256-CBC mode, it should have " +
+        "AES-256-CBC mode, the key should have " +
         std::to_string(keyLength) + " bytes to proceed.");
   }
   EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
   std::vector<uint8_t> ciphertext(plaintext.size() + AES_BLOCK_SIZE);
   int len = 0, ciphertext_len = 0;
-
   EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr, key.data(), iv.data());
   EVP_EncryptUpdate(ctx, ciphertext.data(), &len,
                     reinterpret_cast<const unsigned char *>(plaintext.data()),
@@ -127,7 +125,6 @@ EncryptionUtility::decryptMessageAes256CbcMode(const std::string &ciphertextHex,
         "Initialization vector must be " +
         std::to_string(AES_BLOCK_SIZE) + " bytes.");
   }
-
   const int keyLength = EVP_CIPHER_key_length(EVP_aes_256_cbc());
   if (key.size() != keyLength) {
     throw std::runtime_error(

@@ -37,11 +37,11 @@ MalloryServer::~MalloryServer() {
 }
 /******************************************************************************/
 /**
- * @brief This method will start all the server endpoints in a multi thread
- * environment
+ * @brief This method will start all the server's endpoints in a multithread
+ * environment.
  *
  * This method will start all the endpoints that the server provides to their
- * clients
+ * clients.
  */
 void MalloryServer::runServer() {
   setupRoutes();
@@ -49,11 +49,11 @@ void MalloryServer::runServer() {
 }
 /******************************************************************************/
 /**
- * @brief This method will start all the server endpoints in a multi thread
- * environment for a test scenario
+ * @brief This method will start all the server's endpoints in a multithread
+ * environment for a test scenario.
  *
  * This method will start all the endpoints that the server provides to their
- * clients, for a given test
+ * clients, in a test scenario.
  */
 void MalloryServer::runServerTest() {
   _serverThread = std::thread([this]() {
@@ -65,8 +65,8 @@ void MalloryServer::runServerTest() {
 /**
  * @brief This method will clear all the sessions in memory.
  *
- * This method will clear all the sessions in memory that were created executing
- * the Diffie Hellman key exchange protocol.
+ * This method will clear all the sessions in memory that were created
+ * after the conclusion of the Diffie Hellman key exchange protocol.
  */
 void MalloryServer::clearDiffieHellmanSessionData() {
   std::lock_guard<std::mutex> lock(_diffieHellmanMapMutex);
@@ -74,17 +74,17 @@ void MalloryServer::clearDiffieHellmanSessionData() {
 }
 /******************************************************************************/
 /**
- * @brief This method will return the production port of the server.
+ * @brief This method will return the server's production port.
  *
- * This method will return the production port of the server to establish a
+ * This method will return the server's production port to establish a
  * connection.
  */
 const int MalloryServer::getProductionPort() const { return _portProduction; }
 /******************************************************************************/
 /**
- * @brief This method will return the test port of the server.
+ * @brief This method will return the server's test port.
  *
- * This method will return the test port of the server to establish a
+ * This method will return the server's test port to establish a
  * connection.
  */
 const int MalloryServer::getTestPort() const { return _portTest; }
@@ -103,11 +103,11 @@ void MalloryServer::setParameterInjectionFlag(
 /******************************************************************************/
 /**
  * @brief This method will start the endpoints that the server
- * provides to his clients
+ * provides to his clients.
  *
  * This method will start the endpoints that the server
  * provides to his clients, namely the root endpoint and the signature
- * verification endpoint
+ * verification endpoint.
  */
 void MalloryServer::setupRoutes() {
   rootEndpoint();
@@ -117,10 +117,10 @@ void MalloryServer::setupRoutes() {
 }
 /******************************************************************************/
 /**
- * @brief This method is the entry point for the server URL address
+ * @brief This method is the entry point for the server URL address.
  *
  * This method will serve as a confirmation that the server URL is up
- * and running at the root path
+ * and running at the root path.
  */
 void MalloryServer::rootEndpoint() {
   CROW_ROUTE(_app, "/").methods("GET"_method)([&]() {
@@ -133,11 +133,11 @@ void MalloryServer::rootEndpoint() {
 /******************************************************************************/
 /**
  * @brief This method runs the route that performs the Diffie Hellman
- * key exchange protocol. Man in the middle attack is performed.
+ * key exchange protocol. The man in the middle attack is performed.
  *
  * This method runs the route that performs the Diffie Hellman
  * key exchange protocol. It receives requests and make all the calculations
- * to response to the requests, creating a symmetric key for each connection
+ * to respond to the requests, creating a symmetric key for each connection
  * request, performing the man in the middle attack.
  */
 void MalloryServer::keyExchangeRoute() {
@@ -175,22 +175,22 @@ void MalloryServer::keyExchangeRoute() {
               _nonceSize, extractedNonceClient, extractedClientId, _debugFlag,
               _ivLength, extractedGroupName, _parameterInjection);
 
-          _diffieHellmanMap[sessionId]->_AMderivedKeyHex =
+          _diffieHellmanMap[sessionId]->_derivedKeyHexAM =
               _diffieHellmanMap[sessionId]
-                  ->_AMdiffieHellman->deriveSharedSecret(
+                  ->_diffieHellmanAM->deriveSharedSecret(
                       extractedPublicKeyA,
-                      _diffieHellmanMap[sessionId]->_AMserverNonceHex,
-                      _diffieHellmanMap[sessionId]->_AMclientNonceHex);
+                      _diffieHellmanMap[sessionId]->_serverNonceHexAM,
+                      _diffieHellmanMap[sessionId]->_clientNonceHexAM);
 
           // generate fake client
           _diffieHellmanMap[sessionId]
-              ->_MSfakeClient = std::make_unique<Client>(
-              _diffieHellmanMap[sessionId]->_AMclientId, _debugFlag,
-              _diffieHellmanMap[sessionId]->_AMdiffieHellman->getGroupName(),
+              ->_fakeClientMS = std::make_unique<Client>(
+              _diffieHellmanMap[sessionId]->_clientIdAM, _debugFlag,
+              _diffieHellmanMap[sessionId]->_diffieHellmanAM->getGroupName(),
               _parameterInjection);
           std::tuple<bool, std::string, std::string> serverResponse =
               _diffieHellmanMap[sessionId]
-                  ->_MSfakeClient->diffieHellmanKeyExchange(
+                  ->_fakeClientMS->diffieHellmanKeyExchange(
                       _portRealServerInUse);
           // extract info from response of server to fake client
           if (std::get<0>(serverResponse) == false) {
@@ -216,28 +216,28 @@ void MalloryServer::keyExchangeRoute() {
           res["diffieHellman"] = {
               {"groupName", extractedGroupName},
               {"publicKeyB",
-               _diffieHellmanMap[sessionId]->_AMdiffieHellman->getPublicKey()}};
-          res["nonce"] = _diffieHellmanMap[sessionId]->_AMserverNonceHex;
+               _diffieHellmanMap[sessionId]->_diffieHellmanAM->getPublicKey()}};
+          res["nonce"] = _diffieHellmanMap[sessionId]->_serverNonceHexAM;
           // confirmation payload
           nlohmann::json confirmationPayload = {
               {"sessionId", sessionIdExtracted},
               {"clientId", extractedClientId},
-              {"clientNonce", _diffieHellmanMap[sessionId]->_AMclientNonceHex},
-              {"serverNonce", _diffieHellmanMap[sessionId]->_AMserverNonceHex},
+              {"clientNonce", _diffieHellmanMap[sessionId]->_clientNonceHexAM},
+              {"serverNonce", _diffieHellmanMap[sessionId]->_serverNonceHexAM},
               {"message", messageExtracted}};
           const std::string confirmationString = confirmationPayload.dump();
           std::string encryptedConfirmationHex =
               EncryptionUtility::encryptMessageAes256CbcMode(
                   confirmationString,
                   _diffieHellmanMap[sessionId]
-                      ->_AMdiffieHellman->getSymmetricKey(),
-                  _diffieHellmanMap[sessionId]->_AMiv);
+                      ->_diffieHellmanAM->getSymmetricKey(),
+                  _diffieHellmanMap[sessionId]->_ivAM);
           res["confirmation"] = {
               {"ciphertext", encryptedConfirmationHex},
               {"iv", MessageExtractionFacility::toHexString(
-                         _diffieHellmanMap[sessionId]->_AMiv)}};
+                         _diffieHellmanMap[sessionId]->_ivAM)}};
           // save session id with real server to future use
-          _diffieHellmanMap[sessionId]->_MSsessionId = sessionIdExtracted;
+          _diffieHellmanMap[sessionId]->_sessionIdMS = sessionIdExtracted;
         } catch (const nlohmann::json::exception &e) {
           crow::json::wvalue err;
           err["message"] =
@@ -258,15 +258,16 @@ void MalloryServer::keyExchangeRoute() {
 /******************************************************************************/
 /**
  * @brief This method runs the route that performs the message exchange using
- * symmetric encryption after the Diffie Hellman key exchange protocol has been
- * completed. Man in the middle attack is performed.
+ * symmetric encryption after the Diffie Hellman key exchange protocol has
+ * been completed. The man in the middle attack is performed.
  *
  * This method runs the route that performs the message exchange using
- * symmetric encryption after the Diffie Hellman key exchange protocol has been
- * completed. This serves performs the man in the middle attack.
+ * symmetric encryption after the Diffie Hellman key exchange protocol has
+ * been completed. This fake server performs the man in the middle attack. 
  * Normal function from a normal server is to receive messages from clients,
  * checks the validity of the session id and if valid, sends back a confirmation
- * response.
+ * response. This fake server decrypt, read and encrypt again with another session
+ * to the real server.
  *
  * @throws std::runtime_error if there is an error in messageExchangeRoute.
  */
@@ -288,7 +289,7 @@ void MalloryServer::messageExchangeRoute() {
           bool sessionIdASFoundFlag{false};
           // search real session id (M -> S)
           for (const auto &pair : _diffieHellmanMap) {
-            if (pair.second->_MSsessionId == extractedSessionId) {
+            if (pair.second->_sessionIdMS == extractedSessionId) {
               sessionIdASFoundFlag = true;
               sessionIdASFound = pair.first;
             }
@@ -300,14 +301,14 @@ void MalloryServer::messageExchangeRoute() {
                 extractedSessionId + " not found from Alice -> Mallory");
           }
           // convert iv to bytes and store it
-          _diffieHellmanMap[sessionIdASFound]->_AMiv =
+          _diffieHellmanMap[sessionIdASFound]->_ivAM =
               MessageExtractionFacility::hexToBytes(extractedIv);
           const std::string plaintext =
               EncryptionUtility::decryptMessageAes256CbcMode(
                   extractedCiphertext,
                   _diffieHellmanMap[sessionIdASFound]
-                      ->_AMdiffieHellman->getSymmetricKey(),
-                  _diffieHellmanMap[sessionIdASFound]->_AMiv);
+                      ->_diffieHellmanAM->getSymmetricKey(),
+                  _diffieHellmanMap[sessionIdASFound]->_ivAM);
           if (_debugFlag) {
             std::cout << "Mallory Server log | MessageExchangeRoute() - "
                          "decrypted plaintext: "
@@ -316,17 +317,17 @@ void MalloryServer::messageExchangeRoute() {
           // build fake client request to the real server
           // rotate iv
           _diffieHellmanMap[sessionIdASFound]
-              ->_MSfakeClient->getDiffieHellmanMap()[extractedSessionId]
+              ->_fakeClientMS->getDiffieHellmanMap()[extractedSessionId]
               ->_iv = EncryptionUtility::generateRandomIV(_ivLength);
           // calculate ciphertext
           const std::string ciphertextMS =
               EncryptionUtility::encryptMessageAes256CbcMode(
                   plaintext,
                   _diffieHellmanMap[sessionIdASFound]
-                      ->_MSfakeClient->getDiffieHellmanMap()[extractedSessionId]
+                      ->_fakeClientMS->getDiffieHellmanMap()[extractedSessionId]
                       ->_diffieHellman->getSymmetricKey(),
                   _diffieHellmanMap[sessionIdASFound]
-                      ->_MSfakeClient->getDiffieHellmanMap()[extractedSessionId]
+                      ->_fakeClientMS->getDiffieHellmanMap()[extractedSessionId]
                       ->_iv);
           // built body request MS
           std::string requestBodyMS = fmt::format(
@@ -340,7 +341,7 @@ void MalloryServer::messageExchangeRoute() {
               extractedSessionId,
               MessageExtractionFacility::toHexString(
                   _diffieHellmanMap[sessionIdASFound]
-                      ->_MSfakeClient->getDiffieHellmanMap()[extractedSessionId]
+                      ->_fakeClientMS->getDiffieHellmanMap()[extractedSessionId]
                       ->_iv),
               ciphertextMS);
           cpr::Response responseMS =
@@ -354,7 +355,7 @@ void MalloryServer::messageExchangeRoute() {
                 "Mallory Server log | messageExchange(): "
                 "Message exchange failed at fake client ID: " +
                 _diffieHellmanMap[sessionIdASFound]
-                    ->_MSfakeClient->getClientId());
+                    ->_fakeClientMS->getClientId());
           }
           if (_debugFlag) {
             Client::printServerResponse(responseMS);
@@ -367,7 +368,7 @@ void MalloryServer::messageExchangeRoute() {
                 "Mallory Server log | messageExchange(): "
                 "Message exchange failed at client ID: " +
                 _diffieHellmanMap[sessionIdASFound]
-                    ->_MSfakeClient->getClientId() +
+                    ->_fakeClientMS->getClientId() +
                 " session ID send and received don't match.");
           }
           const std::string extractedCiphertextMS =
@@ -378,35 +379,34 @@ void MalloryServer::messageExchangeRoute() {
               parsedJsonMS.at("confirmation").at("iv").get<std::string>();
           // update iv MS
           _diffieHellmanMap[sessionIdASFound]
-              ->_MSfakeClient->getDiffieHellmanMap()[extractedSessionId]
+              ->_fakeClientMS->getDiffieHellmanMap()[extractedSessionId]
               ->_iv = MessageExtractionFacility::hexToBytes(extractedIvHexMS);
           // decrypt received ciphertext MS
           const std::string decryptedCiphertextMS =
               EncryptionUtility::decryptMessageAes256CbcMode(
                   extractedCiphertextMS,
                   _diffieHellmanMap[sessionIdASFound]
-                      ->_MSfakeClient->getDiffieHellmanMap()[extractedSessionId]
+                      ->_fakeClientMS->getDiffieHellmanMap()[extractedSessionId]
                       ->_diffieHellman->getSymmetricKey(),
                   _diffieHellmanMap[sessionIdASFound]
-                      ->_MSfakeClient->getDiffieHellmanMap()[extractedSessionId]
+                      ->_fakeClientMS->getDiffieHellmanMap()[extractedSessionId]
                       ->_iv);
           // rotate iv AM
-          _diffieHellmanMap[sessionIdASFound]->_AMiv =
+          _diffieHellmanMap[sessionIdASFound]->_ivAM =
               EncryptionUtility::generateRandomIV(_ivLength);
-          // encrypt server confirmation message
+          // encrypt server's confirmation message
           std::string serverConfirmationMessageEncryptedAM =
               EncryptionUtility::encryptMessageAes256CbcMode(
                   decryptedCiphertextMS,
                   _diffieHellmanMap[sessionIdASFound]
-                      ->_AMdiffieHellman->getSymmetricKey(),
-                  _diffieHellmanMap[sessionIdASFound]->_AMiv);
-          std::cout << "9" << std::endl;
+                      ->_diffieHellmanAM->getSymmetricKey(),
+                  _diffieHellmanMap[sessionIdASFound]->_ivAM);
           // build confirmation response
           res["sessionId"] = extractedSessionId;
           res["confirmation"] = {
               {"ciphertext", serverConfirmationMessageEncryptedAM},
               {"iv", MessageExtractionFacility::toHexString(
-                         _diffieHellmanMap[sessionIdASFound]->_AMiv)}};
+                         _diffieHellmanMap[sessionIdASFound]->_ivAM)}};
         } catch (const nlohmann::json::exception &e) {
           crow::json::wvalue err;
           err["message"] =
@@ -427,11 +427,13 @@ void MalloryServer::messageExchangeRoute() {
 /******************************************************************************/
 /**
  * @brief This method runs the route that gets all the current available
- * sessions created using the Diffie Hellman key exchange protocol.
+ * fake sessions created using the Diffie Hellman key exchange protocol, after 
+ * the man in the middle attack is performed.
  *
  * This method runs the route that gets all the current available sessions
- * created using the Diffie Hellman key exchange protocol. It outputs all the
- * session data in json format.
+ * created using the Diffie Hellman key exchange protocol, after 
+ * the man in the middle attack is performed. 
+ * It outputs all the session data in json format.
  */
 void MalloryServer::getSessionsDataEndpoint() {
   CROW_ROUTE(_app, "/sessionsData")
@@ -443,15 +445,15 @@ void MalloryServer::getSessionsDataEndpoint() {
             const auto &sessionId = entry.first;
             const auto &sessionData = entry.second;
             const std::string realSessionId =
-                _diffieHellmanMap[sessionId]->_MSsessionId;
+                _diffieHellmanMap[sessionId]->_sessionIdMS;
             res[realSessionId] = {
                 {"sessionId", realSessionId},
-                {"clientId", sessionData->_AMclientId},
-                {"clientNonce", sessionData->_AMclientNonceHex},
-                {"serverNonce", sessionData->_AMserverNonceHex},
-                {"derivedKey", sessionData->_AMderivedKeyHex},
+                {"clientId", sessionData->_clientIdAM},
+                {"clientNonce", sessionData->_clientNonceHexAM},
+                {"serverNonce", sessionData->_serverNonceHexAM},
+                {"derivedKey", sessionData->_derivedKeyHexAM},
                 {"iv",
-                 MessageExtractionFacility::toHexString(sessionData->_AMiv)}};
+                 MessageExtractionFacility::toHexString(sessionData->_ivAM)}};
           }
           return crow::response(200, res);
         } catch (const std::exception &e) {
@@ -463,12 +465,12 @@ void MalloryServer::getSessionsDataEndpoint() {
 }
 /******************************************************************************/
 /**
- * @brief This method will generate a unique session id.
+ * @brief This method will generate an unique session's id.
  *
- * This method will generate a unique session id for a given connection
+ * This method will generate an unique session's id for a given connection
  * request.
  *
- * @return A unique session ID to be used.
+ * @return An unique session's ID to be used.
  */
 boost::uuids::uuid MalloryServer::generateUniqueSessionId() {
   bool uniqueSessionId{false};
