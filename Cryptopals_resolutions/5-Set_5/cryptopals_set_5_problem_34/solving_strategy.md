@@ -83,7 +83,7 @@
     - EncryptionUtility.cpp (Done)
 
     - MalloryServer.hpp (Done)
-    - MalloryServer.cpp (Done
+    - MalloryServer.cpp (Done)
 
     - MallorySessionData.hpp (Done)
     - MallorySessionData.cpp (Done)

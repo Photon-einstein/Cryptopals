@@ -71,8 +71,8 @@ public:
   const std::vector<uint8_t> &getSymmetricKey() const;
 
   /**
-   * @brief This method returns the expected confirmation message of a successful
-   * Diffie Hellman key exchange.
+   * @brief This method returns the expected confirmation message of a
+   * successful Diffie Hellman key exchange.
    *
    * @return Expected confirmation message of a successful Diffie Hellman's key
    * exchange.
@@ -84,8 +84,8 @@ public:
    * @brief This method returns the location of the file where the public
    * configurations of the Diffie Hellman key exchange protocol are available.
    *
-   * @return The filename where the public configurations of the Diffie Hellman key
-   * exchange protocol are available.
+   * @return The filename where the public configurations of the Diffie Hellman
+   * key exchange protocol are available.
    * @throws std::runtime_error if the DH parameters filename is empty.
    */
   const std::string &getDhParametersFilenameLocation() const;
@@ -118,7 +118,8 @@ private:
   /* private members */
   const std::string _dhParametersFilename{"../input/DhParameters.json"};
   DhParametersLoader::DhParameters _dhParameter;
-  MessageExtractionFacility::UniqueBIGNUM _p, _g, _privateKey, _publicKey, _sharedSecret;
+  MessageExtractionFacility::UniqueBIGNUM _p, _g, _privateKey, _publicKey,
+      _sharedSecret;
   bool _debugFlag;
   std::vector<uint8_t> _derivedSymmetricKey;
   std::string _derivedSymmetricKeyHex = "";

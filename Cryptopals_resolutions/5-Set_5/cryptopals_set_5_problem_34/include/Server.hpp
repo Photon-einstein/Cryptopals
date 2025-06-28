@@ -111,8 +111,8 @@ private:
    * sessions created using the Diffie Hellman's key exchange protocol.
    *
    * This method runs the route that gets all the current available sessions
-   * created using the Diffie Hellman's key exchange protocol. It outputs all the
-   * session data in json format.
+   * created using the Diffie Hellman's key exchange protocol. It outputs all
+   * the session data in json format.
    */
   void getSessionsDataEndpoint();
 

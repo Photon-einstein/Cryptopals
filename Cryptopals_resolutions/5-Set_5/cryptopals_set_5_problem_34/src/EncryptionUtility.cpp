@@ -57,7 +57,8 @@ std::vector<uint8_t> EncryptionUtility::generateRandomIV(std::size_t ivLength) {
 /**
  * @brief Encrypts a plaintext message using AES-256-CBC mode
  *
- * Encrypts a plaintext message using AES-256-CBC mode, using the openssl library.
+ * Encrypts a plaintext message using AES-256-CBC mode, using the openssl
+ * library.
  *
  * @param plaintext The text to be encrypted.
  * @param key The key to be used in the encryption process (32 bytes for

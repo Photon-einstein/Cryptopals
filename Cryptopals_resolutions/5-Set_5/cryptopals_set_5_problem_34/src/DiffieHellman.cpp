@@ -267,8 +267,8 @@ MyCryptoLibrary::DiffieHellman::getConfirmationMessage() const {
  * @brief This method returns the location of the file where the public
  * configurations of the Diffie Hellman key exchange protocol are available.
  *
- * @return The filename where the public configurations of the Diffie Hellman key
- * exchange protocol are available.
+ * @return The filename where the public configurations of the Diffie Hellman
+ * key exchange protocol are available.
  * @throws std::runtime_error if the DH parameters filename is empty.
  */
 const std::string &

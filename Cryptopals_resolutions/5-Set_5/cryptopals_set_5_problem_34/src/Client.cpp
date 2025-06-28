@@ -164,15 +164,17 @@ Client::diffieHellmanKeyExchange(const int portServerNumber) {
   return connectionTestResult;
 }
 /******************************************************************************/
- /**
+/**
  * @brief This method will perform the message exchange route.
  *
  * This method will perform a secure message exchange a with a given server
- * after the Diffie Hellman key exchange protocol has been successfully executed 
+ * after the Diffie Hellman key exchange protocol has been successfully executed
  * and a valid session created.
  *
- * @param portServerNumber The number of the server to use in this message exchange.
- * @param sessionId The session id to be used in this connection with the server.
+ * @param portServerNumber The number of the server to use in this message
+ * exchange.
+ * @param sessionId The session id to be used in this connection with the
+ * server.
  *
  * @return A bool, true if the exchange and validation was successful, failure
  * otherwise.
@@ -295,7 +297,7 @@ bool Client::confirmSessionId(const std::string &sessionId) {
 /**
  * @brief This method sets the server's test port to a new one.
  *
- * This method sets the server's test port to a new one, used only for 
+ * This method sets the server's test port to a new one, used only for
  * test purposes.
  *
  * @throw runtime_error if the portServerTest is not a valid one.
@@ -359,10 +361,11 @@ Client::getDiffieHellmanMap() {
 }
 /******************************************************************************/
 /**
- * @brief This method does the verification if this entry exists on the client side.
+ * @brief This method does the verification if this entry exists on the client
+ * side.
  *
- * This method verify if this entry exists on the client side. 
- * These method's arguments are one entry from the endpoint of the server 
+ * This method verify if this entry exists on the client side.
+ * These method's arguments are one entry from the endpoint of the server
  * named GET '/sessionsData'.
  *
  * @return Bool value, true if there is a match, false otherwise.
@@ -388,7 +391,8 @@ const bool Client::verifyServerSessionDataEntryEndpoint(
  * key exchange protocol.
  *
  * This method will print the server response to the Diffie Hellman key exchange
- * protocol. The response is a json text, and it will be printed in a structured way.
+ * protocol. The response is a json text, and it will be printed in a structured
+ * way.
  *
  * @param response The response sent by the server during the execution
  * of the Diffie Hellman key exchange protocol.

@@ -112,11 +112,11 @@ private:
    *
    * This method runs the route that performs the message exchange using
    * symmetric encryption after the Diffie Hellman key exchange protocol has
-   * been completed. This fake server performs the man in the middle attack. 
+   * been completed. This fake server performs the man in the middle attack.
    * Normal function from a normal server is to receive messages from clients,
-   * checks the validity of the session id and if valid, sends back a confirmation
-   * response. This fake server decrypt, read and encrypt again with another session
-   * to the real server.
+   * checks the validity of the session id and if valid, sends back a
+   * confirmation response. This fake server decrypt, read and encrypt again
+   * with another session to the real server.
    *
    * @throws std::runtime_error if there is an error in messageExchangeRoute.
    */
@@ -124,12 +124,12 @@ private:
 
   /**
    * @brief This method runs the route that gets all the current available
-   * fake sessions created using the Diffie Hellman key exchange protocol, after 
+   * fake sessions created using the Diffie Hellman key exchange protocol, after
    * the man in the middle attack is performed.
    *
    * This method runs the route that gets all the current available sessions
-   * created using the Diffie Hellman key exchange protocol, after 
-   * the man in the middle attack is performed. 
+   * created using the Diffie Hellman key exchange protocol, after
+   * the man in the middle attack is performed.
    * It outputs all the session data in json format.
    */
   void getSessionsDataEndpoint();
@@ -146,7 +146,8 @@ private:
 
   /* private fields */
   mutable std::mutex _diffieHellmanMapMutex;
-  std::map<boost::uuids::uuid, std::unique_ptr<MallorySessionData>> _diffieHellmanMap;
+  std::map<boost::uuids::uuid, std::unique_ptr<MallorySessionData>>
+      _diffieHellmanMap;
   const std::size_t _nonceSize{16}; // bytes
   crow::SimpleApp _app;
   const int _portProduction{18080};
