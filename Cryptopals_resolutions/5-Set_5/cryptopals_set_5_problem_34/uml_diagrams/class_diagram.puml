@@ -1,262 +1,205 @@
-@startuml
-scale 0.75
-
-box "Client Environment" #LightYellow
-    participant "main (runClient1)" as Main
-    participant "Client (Bob)" as Client
-    participant "Client:DiffieHellman" as ClientDH
-    participant "Client:DHParamsLoader" as ClientDHLoader
-    participant "Client:MessageExtractionFacility" as ClientMEF
-    participant "Client:EncryptionUtility" as ClientEU
-end box
-
-box "Attacker Environment" #LightCoral
-    participant "Mallory" as Mallory
-    participant "Mallory:DiffieHellman (to Client)" as MalloryDHClient
-    participant "Mallory:DiffieHellman (to Server)" as MalloryDHServer
-    participant "Mallory:DHParamsLoader" as MalloryDHLoader
-    participant "Mallory:MessageExtractionFacility" as MalloryMEF
-    participant "Mallory:EncryptionUtility" as MalloryEU
-end box
-
-box "Server Environment" #LightBlue
-    participant "Server (API)" as ServerAPI
-    participant "Server:DiffieHellman" as ServerDH
-    participant "Server:DHParamsLoader" as ServerDHLoader
-    participant "Server:MessageExtractionFacility" as ServerMEF
-    participant "Server:EncryptionUtility" as ServerEU
-end box
-
-activate Main
-
-Main -> Client : Create Client("Bob", debugFlag)
-activate Client
-
-Client -> ClientDH : Create DiffieHellman(debugFlag)
-activate ClientDH
-    ClientDH -> ClientDHLoader : loadDhParameters(getDhParametersFilenameLocation())
-    ClientDHLoader --> ClientDH : Returns DHParameters map
-    ClientDH -> ClientDH : generatePrivateKey()
-    ClientDH -> ClientDH : generatePublicKey()
-    ClientDH -> ClientMEF : BIGNUMToHex(_publicKey.get())
-    ClientMEF --> ClientDH : Public Key A (hex)
-deactivate ClientDH
-ClientDH --> Client : Client:DiffieHellman instance ready
-
-Main -> Client : diffieHellmanKeyExchange(productionPort)
-activate Client
-    Client -> ClientEU : generateCryptographicNonce(nonceSize)
-    ClientEU --> Client : clientNonceHex
-
-    note left
-        Client constructs JSON "client_hello"
-        with clientId, clientNonce,
-        groupName, publicKeyA
-    end note
-
-    Client -> Mallory : HTTP POST /keyExchange (ClientHello JSON)
-    activate Mallory
-
-        note right
-            Mallory intercepts ClientHello.
-            She extracts publicKeyA and clientNonce.
-        end note
-
-        Mallory -> MalloryDHClient : Create DiffieHellman(debugFlag)
-        activate MalloryDHClient
-            MalloryDHClient -> MalloryDHLoader : loadDhParameters()
-            MalloryDHLoader --> MalloryDHClient : Returns DHParameters map
-            MalloryDHClient -> MalloryDHClient : generatePrivateKey()
-            note right
-                Mallory generates private key 'm_a'
-            end note
-            MalloryDHClient -> MalloryDHClient : generatePublicKey()
-            note right
-                Mallory computes public key M_A = (g^m_a) % p
-            end note
-            MalloryDHClient -> MalloryMEF : BIGNUMToHex(_publicKey.get())
-            MalloryMEF --> MalloryDHClient : Public Key M_A (hex)
-        deactivate MalloryDHClient
-        MalloryDHClient --> Mallory : Mallory:DiffieHellman instance (to Client) ready
-
-        Mallory -> MalloryEU : generateCryptographicNonce(nonceSize)
-        MalloryEU --> Mallory : malloryNonceToClient (hex)
-
-        note left
-            Mallory constructs her own ClientHello to Server
-            with MalloryId, malloryNonceToClient,
-            groupName, publicKeyM_A (Mallory's public key for Server)
-        end note
-
-        Mallory -> ServerAPI : HTTP POST /keyExchange (Mallory's ClientHello JSON)
-        activate ServerAPI
-
-            ServerAPI -> ServerAPI : Parse ClientHello JSON (from Mallory)
-            note right
-                Server extracts MalloryId (thinks it's client ID),
-                malloryNonceToClient (thinks it's client nonce),
-                publicKeyM_A (thinks it's client publicKeyA).
-            end note
-
-            ServerAPI -> ServerEU : generateCryptographicNonce(nonceSize)
-            ServerEU --> ServerAPI : serverNonceHex
-
-            ServerAPI -> ServerDH : Create DiffieHellman(debugFlag)
-            activate ServerDH
-                ServerDH -> ServerDHLoader : loadDhParameters()
-                ServerDHLoader --> ServerDH : Returns DHParameters map
-                ServerDH -> ServerDH : generatePrivateKey()
-                note right
-                    Server generates private key 'b'
-                end note
-                ServerDH -> ServerDH : generatePublicKey()
-                note right
-                    Server computes B = (g^b) % p
-                end note
-                ServerDH -> ServerMEF : BIGNUMToHex(_publicKey.get())
-                ServerMEF --> ServerDH : Public Key B (hex)
-            deactivate ServerDH
-            ServerDH --> ServerAPI : Server:DiffieHellman instance ready
+"@startuml MITM_attack_class_diagram"
 
 
-            ServerAPI -> ServerDH : deriveSharedSecret(publicKeyM_A, serverNonceHex, malloryNonceToClient)
-            activate ServerDH
-                note right
-                    Server computes shared secret s'_M_S = (publicKeyM_A ^ privateKeyB) % p
-                    This is the shared secret between Mallory and Server.
-                end note
-                ServerDH --> ServerAPI : _derivedSymmetricKeyHex_MS
-            deactivate ServerDH
+class Server {
+    - _diffieHellmanMapMutex : std::mutex
+    - _diffieHellmanMap : std::map<boost::uuids::uuid, std::unique_ptr<SessionData>>
+    - _nonceSize : std::size_t
+    - _app : crow::SimpleApp
+    - _portProduction : int
+    - _portTest : int
+    - _serverThread : std::thread
+    - _debugFlag : bool
+    - _ivLength : std::size_t
+    - _serverId : std::string
+    
+    + Server(debugFlag : bool) {explicit}
+    + ~Server()
+    + runServer() : void
+    + runServerTest() : void
+    + clearDiffieHellmanSessionData() : void
+    + getProductionPort() : int
+    + getTestPort() : int
+    - setupRoutes() : void
+    - rootEndpoint() : void
+    - keyExchangeRoute() : void
+    - messageExchangeRoute() : void
+    - getSessionsDataEndpoint() : void
+    - generateUniqueSessionId() : boost::uuids::uuid
+}
 
-            ServerAPI -> ServerEU : encryptMessageAes256CbcMode(confirmationMsg, _derivedSymmetricKeyHex_MS, generatedIv)
-            ServerEU --> ServerAPI : ciphertext_MS, ivHex_MS
+note "Exposes API Endpoints:\n- **POST /keyExchange** (Diffie-Hellman Key Exchange)\n- **GET /sessionsData** (Retrieve Session Data)\n- **GET /messageExchange** (Performs a secure message exchange with a client after the DH key exchange protocol as been completed)" as ServerEndpointsNote
+Server .. ServerEndpointsNote
 
-            note left
-                Server constructs JSON response (ServerHello)
-                with sessionId, serverNonce, publicKeyB,
-                encrypted confirmation (ciphertext_MS, ivHex_MS)
-                Server believes it's sending to "Bob" (Mallory)
-            end note
+class MalloryServer {
+    - _diffieHellmanMapMutex : std::mutex
+    - _diffieHellmanMap : std::map<boost::uuids::uuid, std::unique_ptr<MallorySessionData>>
+    - _nonceSize : std::size_t
+    - _app : crow::SimpleApp
+    - _portProduction : int
+    - _portTest : int
+    - _portRealServerProduction : int
+    - _portRealServerTest : int
+    - _portRealServerInUse : int
+    - _serverThread : std::thread
+    - _debugFlag : bool
+    - _testFlag : bool
+    - _ivLength : std::size_t
+    - _serverId : std::string
+    - _parameterInjection : bool
+    
+    + MalloryServer(debugFlag : bool, testFlag : bool) {explicit}
+    + MalloryServer(debugFlag : bool, testFlag : bool, parameterInjection : bool) {explicit}
+    + ~MalloryServer()
+    + runServer() : void
+    + runServerTest() : void
+    + clearDiffieHellmanSessionData() : void
+    + getProductionPort() : int
+    + getTestPort() : int
+    + setParameterInjectionFlag(parameterInjectionFlag : bool) : void
+    - setupRoutes() : void
+    - rootEndpoint() : void
+    - keyExchangeRoute() : void
+    - messageExchangeRoute() : void
+    - getSessionsDataEndpoint() : void
+    - generateUniqueSessionId() : boost::uuids::uuid
+}
 
-        ServerAPI --> Mallory : HTTP 201 OK (ServerHello JSON)
-        deactivate ServerAPI
+note "Exposes **fake** API Endpoints:\n- **POST /keyExchange** (Diffie-Hellman Key Exchange)\n- **GET /sessionsData** (Retrieve Session Data)\n- **GET /messageExchange** (Performs a secure message exchange with a client after the DH key exchange protocol as been completed)" as MalloryServerEndpointsNote
+MalloryServer .. MalloryServerEndpointsNote
 
-        note right
-            Mallory intercepts ServerHello.
-            She extracts sessionId, serverNonce, publicKeyB, ciphertext_MS, ivHex_MS.
-        end note
+class Client {
+    - _diffieHellmanMap : std::map<std::string, std::unique_ptr<SessionData>>
+    - _portServerProduction : int
+    - _portServerTest : int 
+    - _clientId : std::string
+    - _nonceSize : std::size_t
+    - _debugFlag : bool
 
-        Mallory -> MalloryDHServer : Create DiffieHellman(debugFlag)
-        activate MalloryDHServer
-            MalloryDHServer -> MalloryDHLoader : loadDhParameters()
-            MalloryDHLoader --> MalloryDHServer : Returns DHParameters map
-            MalloryDHServer -> MalloryDHServer : generatePrivateKey()
-            note right
-                Mallory generates private key 'm_b'
-            end note
-            MalloryDHServer -> MalloryDHServer : generatePublicKey()
-            note right
-                Mallory computes public key M_B = (g^m_b) % p
-            end note
-            MalloryDHServer -> MalloryMEF : BIGNUMToHex(_publicKey.get())
-            MalloryMEF --> MalloryDHServer : Public Key M_B (hex)
-        deactivate MalloryDHServer
-        MalloryDHServer --> Mallory : Mallory:DiffieHellman instance (to Server) ready
+    + Client(clientId : std::string, debugFlag : bool) {explicit}
+    + ~Client()
+    + diffieHellmanKeyExchange(portServerNumber : int) : void
+    + confirmSessionId(sessionId : std::string) : bool
+    + getClientId() : std::string {const}
+    + getProductionPort() : int {const}
+    + getTestPort() : int {const}
+    + verifyServerSessionDataEntryEndpoint(sessionId : std::string, clientId : std::string, clientNonce : std::string, serverNonce : std::string, derivedKey : std::string, iv : std::string) : bool {const}
+    - printServerResponse(response : cpr::Response) : void {static}
+    - confirmationServerResponse(ciphertext : std::string, key : std::vector<uint8_t>, iv : std::vector<uint8_t>, sessionId : std::string, clientId : std::string, clientNonce : std::string, serverNonce : std::string, message : std::string) :  std::tuple<bool, std::string>
+}
 
-        Mallory -> MalloryDHServer : deriveSharedSecret(publicKeyB, malloryNonceToClient, serverNonceHex)
-        activate MalloryDHServer
-            note right
-                Mallory computes shared secret s_M_S = (publicKeyB ^ privateKeyM_B) % p
-                This is the same secret as _derivedSymmetricKeyHex_MS on the Server side.
-            end note
-            MalloryDHServer --> Mallory : _derivedSymmetricKeyHex_MS
-        deactivate MalloryDHServer
+class SessionData <<struct>> {
+    - _diffieHellman : std::unique_ptr<MyCryptoLibrary::DiffieHellman>
+    - _serverNonceHex : std::string
+    - _clientNonceHex : std::string
+    - _derivedKeyHex : std::string
+    - _clientId : std::string
+    - _iv : std::vector<uint8_t>
+    - _groupNameDH : std::string
 
-        Mallory -> MalloryEU : decryptMessageAes256CbcMode(ciphertext_MS, _derivedSymmetricKeyHex_MS, iv_MS)
-        activate MalloryEU
-        MalloryEU --> Mallory : decryptedPlaintext_MS
-        deactivate MalloryEU
-        note right
-            Mallory now has the decrypted confirmation message from the Server.
-            She can read it, modify it if desired.
-        end note
+    + SessionData(nonceSize : std::size_t, clientNonceHex : std::string, clientId : std::string, debugFlag : bool, ivLength : std::size_t, groupNameDH : std::string)
+    + SessionData(diffieHellman : std::unique_ptr<MyCryptoLibrary::DiffieHellman>, serverNonceHex : std::string, clientNonceHex : std::string, iv : std::vector<uint8_t>)
+}
 
-        Mallory -> MalloryDHClient : deriveSharedSecret(publicKeyA, clientNonceHex, malloryNonceToClient)
-        activate MalloryDHClient
-            note right
-                Mallory computes shared secret s_A_M = (publicKeyA ^ privateKeyM_A) % p
-                This is the shared secret between Alice and Mallory.
-            end note
-            MalloryDHClient --> Mallory : _derivedSymmetricKeyHex_AM
-        deactivate MalloryDHClient
+class MallorySessionData <<struct>> {
+    - _diffieHellmanAM : std::unique_ptr<MyCryptoLibrary::DiffieHellman>
+    - _serverNonceHexAM : std::string
+    - _clientNonceHexAM : std::string
+    - _derivedKeyHexAM : std::string
+    - _clientIdAM : std::string
+    - _ivAM : std::vector<uint8_t>
+    - _sessionIdMS : std::string
+    - _fakeClientMS : std::unique_ptr<Client>
+    - _parameterInjection : bool
 
-        Mallory -> MalloryEU : encryptMessageAes256CbcMode(decryptedPlaintext_MS_possibly_modified, _derivedSymmetricKeyHex_AM, newGeneratedIv_AM)
-        activate MalloryEU
-        MalloryEU --> Mallory : ciphertext_AM, ivHex_AM
-        deactivate MalloryEU
+    + MallorySessionData(nonceSize : std::size_t, clientNonceHex : std::string, clientId : std::string, debugFlag : bool, ivLength : std::size_t, groupNameDH : std::string)
+    + MallorySessionData(nonceSize : std::size_t, clientNonceHex : std::string, clientId : std::string, debugFlag : bool, ivLength : std::size_t, groupNameDH : std::string, parameterInjection : bool)
+}
 
-        note left
-            Mallory constructs her own ServerHello to Client
-            with original sessionId, serverNonce (Mallory's), publicKeyM_B,
-            encrypted confirmation (ciphertext_AM, ivHex_AM)
-            Mallory sends her own public key (M_B) to the client,
-            making Alice believe M_B is Bob's public key.
-            Mallory uses the server's nonce she intercepted,
-            or generates a new one, depending on the scenario.
-            For simplicity here, let's say she forwards the original serverNonce.
-            (Or rather, the one she sent to the server as 'clientNonce' for her own session)
-        end note
+namespace MyCryptoLibrary {
+    class DiffieHellman {
+        - _dhParametersFilename : std::string
+        - _dhParameter : DhParametersLoader::DhParameters
+        - _p : MessageExtractionFacility::UniqueBIGNUM
+        - _g : MessageExtractionFacility::UniqueBIGNUM
+        - _privateKey : MessageExtractionFacility::UniqueBIGNUM
+        - _publicKey : MessageExtractionFacility::UniqueBIGNUM
+        - _sharedSecret : MessageExtractionFacility::UniqueBIGNUM
+        - _debugFlag : bool
+        - _derivedSymmetricKey : std::vector<uint8_t>
+        - _derivedSymmetricKeyHex : std::string
+        - _confirmationMessage : std::string
+        - _publicKeyDeterministic : bool
+        - _groupName : std::string
 
-    Mallory --> Client : HTTP 201 OK (Mallory's ServerHello JSON)
-    deactivate Mallory
+        + DiffieHellman(debugFlag : bool, groupName : std::string) {explicit}
+        + DiffieHellman(debugFlag : bool, publicKeyDeterministic : bool, groupName : std::string) {explicit}
+        + ~DiffieHellman() 
+        + getPublicKey() : std::string {const}
+        + getGroupName() : std::string {const}
+        + deriveSharedSecret(peerPublicKeyHex : std::string, serverNonceHex : std::string, clientNonceHex : std::string) : std::string
+        + getSymmetricKey() : std::vector<uint8_t> {const}
+        + getConfirmationMessage() : std::string {const}
+        + getDhParametersFilenameLocation() : std::string {const}
+        - generatePrivateKey() : void
+        - generatePublicKey() : void
+    }
+}
 
-    Client -> Client : Parse ServerHello JSON response (from Mallory)
-    note right
-        Client extracts sessionId, serverNonce (Mallory's),
-        groupName, publicKeyB (Mallory's M_B), ciphertext_AM, ivHex_AM
-    end note
+namespace MessageExtractionFacility {
+  class UniqueBIGNUM <<typedef>> {
+    - BIGNUM* (with custom deleter)
+  }
 
-    Client -> ClientMEF : hexToBytes(ivHex_AM)
-    ClientMEF --> Client : iv (vector<uint8_t>)
+  class ConversionUtility {
+    + hexToBytes(hexStr: std::string) : std::vector<unsigned char> {const}
+    + toHexString(data: std::vector<unsigned char>) : std::string {const}
+    + hexToUniqueBIGNUM(hexNumber: std::string) : UniqueBIGNUM {const}
+    + BIGNUMToHex(bn: BIGNUM*) : std::string {const}
+    + BIGNUMToDec(bn: BIGNUM*) : std::string {const}
+  }
+}
 
-    Client -> Client : Store SessionData in _diffieHellmanMap
-    Client -> ClientDH : deriveSharedSecret(publicKeyB, serverNonceHex, clientNonceHex)
-    activate ClientDH
-        note right
-            Client computes shared secret s = (publicKeyM_B ^ privateKeyA) % p
-            This is the shared secret between Client (Alice) and Mallory.
-        end note
-        ClientDH --> Client : _derivedSymmetricKeyHex (Alice-Mallory key)
-    deactivate ClientDH
+namespace MyCryptoLibrary {
+  class EncryptionUtility {
+    + generateCryptographicNonce(length : std::size_t) : std::string {const}
+    + generateRandomIV(ivLength : std::size_t) : std::vector<uint8_t>
+    + encryptMessageAes256CbcMode(plaintext : std::string, key : std::vector<uint8_t>, iv : std::vector<uint8_t>) : std::string
+    + decryptMessageAes256CbcMode(ciphertextHex : std::string, key : std::vector<uint8_t>, iv : std::vector<uint8_t>) : std::string
+    + getFormattedTimestamp() : std::string
+  }
 
-    Client -> Client : confirmationServerResponse(...)
-    activate Client
-        Client -> ClientEU : decryptMessageAes256CbcMode(ciphertext_AM, _derivedSymmetricKeyHex, iv)
-        activate ClientEU
-        ClientEU --> Client : decryptedPlaintext (from Mallory)
-        deactivate ClientEU
+}
 
-        Client -> Client : Parse decryptedPlaintext (JSON)
-        note right
-            Client compares extracted fields.
-            Since Mallory forwarded a valid (possibly modified)
-            confirmation, this validation will likely pass,
-            making Alice believe she successfully communicated with Bob.
-        end note
-    Client --> Client : (bool validationResult, string decryptedMessage)
-    deactivate Client
+namespace DhParametersLoader {
+    class DhParameters <<struct>> {
+        + _groupName : std::string
+        + _pHex : std::string
+        + _gHex : std::string
+        + _description : std::string
+        + _notes : std::string
+    }
+    class Loader {
+        {static} + loadDhParameters(filename : std::string) : std::map<std::string, DhParameters>
+    }
+}
 
-    alt validationResult == true
-        Client -> Main : Logs "Diffie Hellman key exchange succeed" and decrypted message
-        note right
-            Client is unaware it succeeded with Mallory, not Bob.
-        end note
-    else validationResult == false
-        Client -> Main : Logs "Diffie Hellman key exchange failed"
-    end
-deactivate Client
 
-Main -> Main : Program ends
-deactivate Main
+MyCryptoLibrary.DiffieHellman --> DhParametersLoader : uses
+MyCryptoLibrary.DiffieHellman --> MessageExtractionFacility : uses
+
+Server --> MyCryptoLibrary.EncryptionUtility : uses
+MalloryServer --> MyCryptoLibrary.EncryptionUtility : uses
+Client --> MyCryptoLibrary.EncryptionUtility : uses
+
+Server --> SessionData : uses
+MalloryServer --> MallorySessionData : uses
+Client --> SessionData : uses
+
+Client --> MalloryServer : "<<uses HTTP requests>>"
+MalloryServer --> Server : "<<uses HTTP requests>>"
+
+SessionData --> MyCryptoLibrary.DiffieHellman : "has a"
+MallorySessionData --> MyCryptoLibrary.DiffieHellman : "has a"
 
 @enduml

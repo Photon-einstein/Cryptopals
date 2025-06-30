@@ -100,7 +100,15 @@
     - runMalloryServer.cpp (Done)
     - runServer.cpp (Done)
 
-21. Create uml class diagram (in progress)
+21. Create uml class diagram (Done)
+    - Server (Done)
+    - DhParametersLoader (Done)
+    - DiffieHellman (Done)
+    - EncryptionUtility (Done)
+    - MalloryServer (Done)
+    - MallorySessionData (Done)
+    - MessageExtractionFacility (Done)
+    - SessionData (Done)
 
-22. Create uml sequence diagram (TBD)
+22. Create uml sequence diagram (in progress)
 23. Write article about this project (TBD)
