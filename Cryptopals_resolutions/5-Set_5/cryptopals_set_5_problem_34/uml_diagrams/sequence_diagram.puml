@@ -1,4 +1,4 @@
-@startuml
+"@startuml MITM_attack_sequence_diagram"
 scale 0.75
 
 box "Client Environment" #LightYellow
@@ -129,7 +129,7 @@ activate Client
             deactivate ServerDH
 
             ServerAPI -> ServerEU : encryptMessageAes256CbcMode(confirmationMsg, _derivedSymmetricKeyHex_MS, generatedIv)
-            ServerEU --> ServerAPI : ciphertext_MS, ivHex_MS
+            ServerEU --> ServerAPI : ciphertext_MS
 
             note left
                 Server constructs JSON response (ServerHello)
@@ -174,7 +174,7 @@ activate Client
 
         Mallory -> MalloryEU : decryptMessageAes256CbcMode(ciphertext_MS, _derivedSymmetricKeyHex_MS, iv_MS)
         activate MalloryEU
-        MalloryEU --> Mallory : decryptedPlaintext_MS
+            MalloryEU --> Mallory : decryptedPlaintext_MS
         deactivate MalloryEU
         note right
             Mallory now has the decrypted confirmation message from the Server.
@@ -192,13 +192,13 @@ activate Client
 
         Mallory -> MalloryEU : encryptMessageAes256CbcMode(decryptedPlaintext_MS_possibly_modified, _derivedSymmetricKeyHex_AM, newGeneratedIv_AM)
         activate MalloryEU
-        MalloryEU --> Mallory : ciphertext_AM, ivHex_AM
+            MalloryEU --> Mallory : ciphertext_AM
         deactivate MalloryEU
 
         note left
             Mallory constructs her own ServerHello to Client
             with original sessionId, serverNonce (Mallory's), publicKeyM_B,
-            encrypted confirmation (ciphertext_AM, ivHex_AM)
+            encrypted confirmation (ciphertext_AM)
             Mallory sends her own public key (M_B) to the client,
             making Alice believe M_B is Bob's public key.
             Mallory uses the server's nonce she intercepted,
@@ -254,6 +254,88 @@ activate Client
     else validationResult == false
         Client -> Main : Logs "Diffie Hellman key exchange failed"
     end
+
+deactivate Client
+
+    Main -> Client : messageExchange(int portServerNumber, std::string &sessionId)
+
+activate Client
+    Client -> ClientEU : generateRandomIV(_ivLength)
+        activate ClientEU
+            ClientEU --> Client : newIVrotated
+        deactivate ClientEU
+
+    Client -> ClientEU : getFormattedTimestamp()
+        activate ClientEU
+            ClientEU --> Client : newTimeStamp
+        deactivate ClientEU
+
+    Client -> Client : built message sent with clientId, sessionId, newTimeStamp
+
+    Client -> ClientEU : encryptMessageAes256CbcMode(newPlaintext, _derivedSymmetricKeyHex_AM, newIVrotated)
+        activate ClientEU
+            ClientEU --> Client : ciphertext_AM
+        deactivate ClientEU
+
+    Client -> Client: built "client_message_exchange" message
+    note left
+        Client constructs JSON "client_message_exchange"
+        with sessionId, newIVrotated and ciphertext
+    end note
+
+    Client -> Mallory : HTTP POST /messageExchange (client_message_exchange JSON)
+    activate Mallory
+        Mallory -> Mallory: Parse request body
+        Mallory -> Mallory: extract session id as extractedSessionId
+        Mallory -> Mallory: extract iv as extractIv
+        Mallory -> Mallory: extract ciphertext as extractedCiphertext
+
+        Mallory -> Mallory: check if session id already exists, and store the value at the bool variable sessionIdASFoundFlag
+        alt sessionIdASFoundFlag == false
+            Mallory -> Mallory: Throws an exception
+        end
+        
+        Mallory -> MalloryEU: hexToBytes(extractedIv)
+            activate MalloryEU
+                MalloryEU --> Mallory : ivAM
+            deactivate MalloryEU
+        Mallory -> Mallory: store new iv in bytes for that session id
+
+        Mallory -> MalloryEU: decryptMessageAes256CbcMode(extractedCiphertext, symmetricKey, ivAM)
+            activate MalloryEU
+                MalloryEU --> Mallory : plaintext
+            deactivate MalloryEU
+        
+        note left
+            Mallory build fake client request to the real server
+        end note
+        Mallory -> MalloryEU: generateRandomIV(_ivLength)
+            activate MalloryEU
+                MalloryEU --> Mallory : ivMS
+            deactivate MalloryEU
+        Mallory -> Mallory: store new iv in bytes for that session id for Mallory -> Server leg
+
+        Mallory -> MalloryEU: encryptMessageAes256CbcMode(plaintext, symmetricKey, ivMS)
+            activate MalloryEU
+                MalloryEU --> Mallory : ciphertextMS
+            deactivate MalloryEU
+        
+        note left
+            Mallory build body request for the real server
+        end note
+
+        Mallory -> Mallory: built fake "client_message_exchange" message
+        note left
+            Mallory fake Client constructs JSON "client_message_exchange"
+            with sessionId, ivMS and ciphertext
+        end note
+        
+
+
+    deactivate Mallory
+
+
+
 deactivate Client
 
 Main -> Main : Program ends
