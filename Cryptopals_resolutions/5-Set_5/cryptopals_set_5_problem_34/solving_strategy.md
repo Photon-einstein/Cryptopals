@@ -111,4 +111,8 @@
     - SessionData (Done)
 
 22. Create uml sequence diagram (in progress)
+    - To generate the sequence diagram in svc format, run this command at the 'uml_diagrams' folder:
+    
+    java -jar /home/tiago-sousa/.vscode/extensions/jebbs.plantuml-2.18.1/plantuml.jar -tsvg sequence_diagram.puml
+    
 23. Write article about this project (TBD)
