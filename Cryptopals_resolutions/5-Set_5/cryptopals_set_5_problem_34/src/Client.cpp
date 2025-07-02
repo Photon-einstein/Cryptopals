@@ -236,6 +236,11 @@ const bool Client::messageExchange(const int portServerNumber,
     if (_debugFlag) {
       printServerResponse(response);
     }
+    if (response.status_code != 201) {
+      throw std::runtime_error("Client log | messageExchange(): "
+                               "Message exchange failed at client ID: " +
+                               _clientId);
+    }
     nlohmann::json parsedJson = nlohmann::json::parse(response.text);
     const std::string extractedSessionId =
         parsedJson.at("sessionId").get<std::string>();
