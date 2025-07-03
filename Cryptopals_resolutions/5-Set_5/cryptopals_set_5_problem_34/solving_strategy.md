@@ -3,8 +3,8 @@
     Port of Mallory 18080 (production)
     Port of Mallory 18081 (test)
 
-    Port of Server  18082 (production)
-    Port of Server  18083 (test)
+    Port of Server 18082 (production)
+    Port of Server 18083 (test)
 
 3. Add Mallory server code as a copy of the real server, adapting the port numbers (Done)
     3.1.1. Test root endpoint of Mallory server (Done)
@@ -100,7 +100,7 @@
     - runMalloryServer.cpp (Done)
     - runServer.cpp (Done)
 
-21. Create uml class diagram (Done)
+21. Create UML class diagram (Done)
     - Server (Done)
     - DhParametersLoader (Done)
     - DiffieHellman (Done)
@@ -110,9 +110,16 @@
     - MessageExtractionFacility (Done)
     - SessionData (Done)
 
-22. Create uml sequence diagram (in progress)
-    - To generate the sequence diagram in svc format, run this command at the 'uml_diagrams' folder:
+22. Create UML sequence diagram (Done)
+
+    - To generate the sequence diagram in .svg format, run this command at the 'uml_diagrams' folder:
     
+    ```bash
     java -jar /home/tiago-sousa/.vscode/extensions/jebbs.plantuml-2.18.1/plantuml.jar -tsvg sequence_diagram.puml
-    
-23. Write article about this project (TBD)
+    ```
+
+23. Double check all the content from the UML sequence diagram (in progress)
+
+Status: Review of sequence_diagram.puml at line 209
+
+24. Write article about this project (TBD)

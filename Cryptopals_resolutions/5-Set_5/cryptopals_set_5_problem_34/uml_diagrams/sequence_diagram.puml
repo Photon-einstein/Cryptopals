@@ -12,11 +12,13 @@ end box
 
 box "Attacker Environment" #LightCoral
     participant "Mallory" as Mallory
+    participant "Mallory:MallorySessionData" as MallorySessionData
     participant "Mallory:DiffieHellman (to Client)" as MalloryDHClient
     participant "Mallory:DiffieHellman (to Server)" as MalloryDHServer
     participant "Mallory:DHParamsLoader" as MalloryDHLoader
     participant "Mallory:MessageExtractionFacility" as MalloryMEF
     participant "Mallory:EncryptionUtility" as MalloryEU
+    participant "Mallory:Client (to Server)" as MalloryFakeClient
 end box
 
 box "Server Environment" #LightBlue
@@ -29,25 +31,42 @@ end box
 
 activate Main
 
-Main -> Client : Create Client("Bob", debugFlag)
+Main -> Client : Create Client("Bob", debugFlag, groupNameDH)
 activate Client
-
-Client -> ClientDH : Create DiffieHellman(debugFlag)
-activate ClientDH
-    ClientDH -> ClientDHLoader : loadDhParameters(getDhParametersFilenameLocation())
-    ClientDHLoader --> ClientDH : Returns DHParameters map
-    ClientDH -> ClientDH : generatePrivateKey()
-    ClientDH -> ClientDH : generatePublicKey()
-    ClientDH -> ClientMEF : BIGNUMToHex(_publicKey.get())
-    ClientMEF --> ClientDH : Public Key A (hex)
-deactivate ClientDH
-ClientDH --> Client : Client:DiffieHellman instance ready
+    Client --> Main : new Client
+deactivate Client
 
 Main -> Client : diffieHellmanKeyExchange(productionPort)
 activate Client
-    Client -> ClientEU : generateCryptographicNonce(nonceSize)
-    ClientEU --> Client : clientNonceHex
+    Client -> ClientDH : Create DiffieHellman(_debugFlag, _parameterInjection, _groupNameDH)
+    activate ClientDH
+        ClientDH -> ClientDHLoader : loadDhParameters(getDhParametersFilenameLocation())
+        activate ClientDHLoader
+            ClientDHLoader --> ClientDH : Returns DHParameters map
+        deactivate ClientDHLoader
+        
+        ClientDH -> ClientDH : generatePrivateKey()
+        activate ClientDH
+        deactivate
 
+
+        ClientDH -> ClientDH : generatePublicKey()
+        activate ClientDH
+            ClientDH -> ClientMEF : BIGNUMToHex(_publicKey.get())
+            activate ClientMEF
+                ClientMEF --> ClientDH : Public Key A (hex)
+            deactivate ClientMEF
+        deactivate ClientDH
+
+        ClientDH --> Client : Client:DiffieHellman instance ready
+    deactivate ClientDH
+
+    Client -> ClientEU : generateCryptographicNonce(nonceSize)
+    activate ClientEU
+        ClientEU --> Client : clientNonceHex
+    deactivate ClientEU
+
+    Client -> Client: built "keyExchange" message
     note left
         Client constructs JSON "client_hello"
         with clientId, clientNonce,
@@ -57,94 +76,195 @@ activate Client
     Client -> Mallory : HTTP POST /keyExchange (ClientHello JSON)
     activate Mallory
 
+        Mallory -> Mallory: extract client's session id as extractedClientId
+        Mallory -> Mallory: extract client's nonce as extractedNonceClient
+        Mallory -> Mallory: extract client's group name as extractedGroupName
+        Mallory -> Mallory: extract client's public key as extractedPublicKeyA
         note right
             Mallory intercepts ClientHello.
-            She extracts publicKeyA and clientNonce.
+            He extracts client Id, client's Nonce, group name and public Key.
         end note
 
-        Mallory -> MalloryDHClient : Create DiffieHellman(debugFlag)
-        activate MalloryDHClient
-            MalloryDHClient -> MalloryDHLoader : loadDhParameters()
-            MalloryDHLoader --> MalloryDHClient : Returns DHParameters map
-            MalloryDHClient -> MalloryDHClient : generatePrivateKey()
-            note right
-                Mallory generates private key 'm_a'
-            end note
-            MalloryDHClient -> MalloryDHClient : generatePublicKey()
-            note right
-                Mallory computes public key M_A = (g^m_a) % p
-            end note
-            MalloryDHClient -> MalloryMEF : BIGNUMToHex(_publicKey.get())
-            MalloryMEF --> MalloryDHClient : Public Key M_A (hex)
-        deactivate MalloryDHClient
-        MalloryDHClient --> Mallory : Mallory:DiffieHellman instance (to Client) ready
+        Mallory -> MalloryMEF : hexToUniqueBIGNUM(extractedPublicKeyA)
+        activate MalloryMEF
+            MalloryMEF --> Mallory : peerPublicKey in UniqueBIGNUM format
+        deactivate MalloryMEF
 
-        Mallory -> MalloryEU : generateCryptographicNonce(nonceSize)
-        MalloryEU --> Mallory : malloryNonceToClient (hex)
+        Mallory -> Mallory : generateUniqueSessionId()
+        activate Mallory
+            Mallory --> Mallory: sessionId
+        deactivate Mallory
+
+        Mallory -> MallorySessionData : Create MallorySessionData(_nonceSize, extractedNonceClient, extractedClientId, _debugFlag, _ivLength, extractedGroupName, _parameterInjection)
+        activate MallorySessionData
+            MallorySessionData -> MalloryDHClient : Create DiffieHellman(debugFlag, parameterInjection, groupNameDH)
+            activate MalloryDHClient
+                MalloryDHClient -> MalloryDHLoader : loadDhParameters()
+                activate MalloryDHLoader
+                    MalloryDHLoader --> MalloryDHClient : Returns DHParameters map
+                deactivate MalloryDHLoader
+                MalloryDHClient -> MalloryDHClient : generatePrivateKey()
+                activate MalloryDHClient
+                    note right
+                        Mallory generates private key 'm_a'
+                    end note
+                deactivate MalloryDHClient
+                MalloryDHClient -> MalloryDHClient : generatePublicKey()
+                activate MalloryDHClient
+                    note right
+                        Mallory computes public key M_A = (g^m_a) % p
+                    end note
+                deactivate MalloryDHClient
+                MalloryDHClient -> MalloryMEF : BIGNUMToHex(_publicKey.get())
+                activate MalloryMEF
+                    MalloryMEF --> MalloryDHClient : Public Key M_A (hex)
+                deactivate MalloryMEF
+                MalloryDHClient --> MallorySessionData : DiffieHellman instance (to Client) ready
+            deactivate MalloryDHClient
+
+            Mallory -> MalloryEU: generateCryptographicNonce(nonceSize))
+            activate MalloryEU
+                MalloryEU --> Mallory: result stored in _serverNonceHexAM
+            deactivate MalloryEU
+
+            Mallory -> MalloryEU: generateRandomIV(ivLength)
+            activate MalloryEU
+                MalloryEU --> Mallory: result stored in _ivAM
+            deactivate MalloryEU
+
+            MallorySessionData --> Mallory : returns mallorySessionData, stored in the map _diffieHellmanMap[sessionId]
+        deactivate MallorySessionData
+
+        
+        Mallory -> MalloryDHClient : deriveSharedSecret(extractedPublicKeyA, _diffieHellmanMap[sessionId]->_serverNonceHexAM, _diffieHellmanMap[sessionId]->_clientNonceHexAM)
+        activate MalloryDHClient
+            MalloryDHClient -> MalloryDHClient : _sharedSecret = (peerPublicKey ^ _privateKey) % _p
+            
+            MalloryDHClient -> MalloryMEF : hexToBytes(serverNonceHex)
+            activate MalloryMEF
+               MalloryMEF --> MalloryDHClient : serverNonceBytes
+            deactivate MalloryMEF
+            
+            MalloryDHClient -> MalloryMEF : hexToBytes(clientNonceHex)
+            activate MalloryMEF
+               MalloryMEF --> MalloryDHClient : clientNonceBytes
+            deactivate MalloryMEF
+            MalloryDHClient -> MalloryDHClient : dataToHash = shared_secret_raw_bytes || clientNonceBytes || serverNonceBytes
+            MalloryDHClient -> MalloryDHClient : _derivedSymmetricKey = SHA256(dataToHash)
+            MalloryDHClient -> MalloryMEF : toHexString(_derivedSymmetricKey)
+            activate MalloryMEF
+                MalloryMEF --> MalloryDHClient : result stored in _derivedSymmetricKeyHex
+            deactivate MalloryMEF
+            MalloryDHClient --> Mallory: result stored in _derivedSymmetricKey
+        deactivate MalloryDHClient
+
+        Mallory -> MalloryFakeClient : generate fake client: Client(_diffieHellmanMap[sessionId]->_clientIdAM, _debugFlag, groupName, _parameterInjection)
+        activate MalloryFakeClient
+            MalloryFakeClient --> Mallory : new client
+        deactivate MalloryFakeClient
 
         note left
             Mallory constructs her own ClientHello to Server
-            with MalloryId, malloryNonceToClient,
-            groupName, publicKeyM_A (Mallory's public key for Server)
+            with Client's Id, malloryNonceToServer,
+            groupName, publicKeyM_S (Mallory's public key for Server)
         end note
 
-        Mallory -> ServerAPI : HTTP POST /keyExchange (Mallory's ClientHello JSON)
-        activate ServerAPI
+        Mallory -> MalloryFakeClient: diffieHellmanKeyExchange(const int portServerNumber)
+        activate MalloryFakeClient
 
-            ServerAPI -> ServerAPI : Parse ClientHello JSON (from Mallory)
-            note right
-                Server extracts MalloryId (thinks it's client ID),
-                malloryNonceToClient (thinks it's client nonce),
-                publicKeyM_A (thinks it's client publicKeyA).
-            end note
+            MalloryFakeClient -> MalloryDHServer : Create DiffieHellman(_debugFlag, _parameterInjection, _groupNameDH)
+            activate MalloryDHServer
+                MalloryDHServer -> MalloryDHLoader : loadDhParameters(getDhParametersFilenameLocation())
+                activate MalloryDHLoader
+                    MalloryDHLoader --> MalloryDHServer : Returns DHParameters map
+                deactivate MalloryDHLoader
+                
+                MalloryDHServer -> MalloryDHServer : generatePrivateKey()
+                activate MalloryDHServer
+                deactivate
 
-            ServerAPI -> ServerEU : generateCryptographicNonce(nonceSize)
-            ServerEU --> ServerAPI : serverNonceHex
+                MalloryDHServer -> MalloryDHServer : generatePublicKey()
+                activate MalloryDHServer
+                    MalloryDHServer -> MalloryMEF : BIGNUMToHex(_publicKey.get())
+                    activate MalloryMEF
+                        MalloryMEF --> MalloryDHServer : Public Key M_S (hex)
+                    deactivate MalloryMEF
+                deactivate MalloryDHServer
 
-            ServerAPI -> ServerDH : Create DiffieHellman(debugFlag)
-            activate ServerDH
-                ServerDH -> ServerDHLoader : loadDhParameters()
-                ServerDHLoader --> ServerDH : Returns DHParameters map
-                ServerDH -> ServerDH : generatePrivateKey()
-                note right
-                    Server generates private key 'b'
-                end note
-                ServerDH -> ServerDH : generatePublicKey()
-                note right
-                    Server computes B = (g^b) % p
-                end note
-                ServerDH -> ServerMEF : BIGNUMToHex(_publicKey.get())
-                ServerMEF --> ServerDH : Public Key B (hex)
-            deactivate ServerDH
-            ServerDH --> ServerAPI : Server:DiffieHellman instance ready
+                MalloryDHServer --> MalloryFakeClient : Client:DiffieHellman instance ready
+            deactivate MalloryDHServer
 
+            MalloryFakeClient -> MalloryEU : generateCryptographicNonce(nonceSize)
+            activate MalloryEU
+                MalloryEU --> MalloryFakeClient : fakeClientNonceHex
+            deactivate MalloryEU
 
-            ServerAPI -> ServerDH : deriveSharedSecret(publicKeyM_A, serverNonceHex, malloryNonceToClient)
-            activate ServerDH
-                note right
-                    Server computes shared secret s'_M_S = (publicKeyM_A ^ privateKeyB) % p
-                    This is the shared secret between Mallory and Server.
-                end note
-                ServerDH --> ServerAPI : _derivedSymmetricKeyHex_MS
-            deactivate ServerDH
-
-            ServerAPI -> ServerEU : encryptMessageAes256CbcMode(confirmationMsg, _derivedSymmetricKeyHex_MS, generatedIv)
-            ServerEU --> ServerAPI : ciphertext_MS
-
+            MalloryFakeClient -> MalloryFakeClient: built "keyExchange" message
             note left
-                Server constructs JSON response (ServerHello)
-                with sessionId, serverNonce, publicKeyB,
-                encrypted confirmation (ciphertext_MS, ivHex_MS)
-                Server believes it's sending to "Bob" (Mallory)
+                Fake client constructs JSON "client_hello"
+                with real clientId, fakeClientNonce,
+                groupName, publicKeyM_S
             end note
 
-            ServerAPI --> Mallory : HTTP 201 OK (ServerHello JSON)
-        deactivate ServerAPI
+            MalloryFakeClient -> ServerAPI : HTTP POST /keyExchange (Mallory's ClientHello JSON)
+            activate ServerAPI
 
-        note right
-            Mallory intercepts ServerHello.
-            She extracts sessionId, serverNonce, publicKeyB, ciphertext_MS, ivHex_MS.
-        end note
+                ServerAPI -> ServerAPI : Parse ClientHello JSON (from Mallory)
+                note right
+                    Server extracts MalloryId (thinks it's client ID),
+                    malloryNonceToServer (thinks it's client nonce),
+                    publicKeyM_S (thinks it's client publicKeyA).
+                end note
+
+                ServerAPI -> ServerEU : generateCryptographicNonce(nonceSize)
+                ServerEU --> ServerAPI : serverNonceHex
+
+                ServerAPI -> ServerDH : Create DiffieHellman(debugFlag)
+                activate ServerDH
+                    ServerDH -> ServerDHLoader : loadDhParameters()
+                    ServerDHLoader --> ServerDH : Returns DHParameters map
+                    ServerDH -> ServerDH : generatePrivateKey()
+                    note right
+                        Server generates private key 'b'
+                    end note
+                    ServerDH -> ServerDH : generatePublicKey()
+                    note right
+                        Server computes B = (g^b) % p
+                    end note
+                    ServerDH -> ServerMEF : BIGNUMToHex(_publicKey.get())
+                    ServerMEF --> ServerDH : Public Key B (hex)
+                deactivate ServerDH
+                ServerDH --> ServerAPI : Server:DiffieHellman instance ready
+
+
+                ServerAPI -> ServerDH : deriveSharedSecret(publicKeyM_A, serverNonceHex, malloryNonceToClient)
+                activate ServerDH
+                    note right
+                        Server computes shared secret s'_M_S = (publicKeyM_A ^ privateKeyB) % p
+                        This is the shared secret between Mallory and Server.
+                    end note
+                    ServerDH --> ServerAPI : _derivedSymmetricKeyHex_MS
+                deactivate ServerDH
+
+                ServerAPI -> ServerEU : encryptMessageAes256CbcMode(confirmationMsg, _derivedSymmetricKeyHex_MS, generatedIv)
+                ServerEU --> ServerAPI : ciphertext_MS
+
+                note left
+                    Server constructs JSON response (ServerHello)
+                    with sessionId, serverNonce, publicKeyB,
+                    encrypted confirmation (ciphertext_MS, ivHex_MS)
+                    Server believes it's sending to "Bob" (Mallory)
+                end note
+
+                ServerAPI --> MalloryFakeClient : HTTP 201 OK (ServerHello JSON)
+            deactivate ServerAPI
+
+            note right
+                Mallory's fake client intercepts ServerHello.
+                He extracts sessionId, serverNonce, publicKeyB, ciphertext_MS, ivHex_MS.
+            end note
+
+        deactivate MalloryFakeClient
 
         Mallory -> MalloryDHServer : Create DiffieHellman(debugFlag)
         activate MalloryDHServer
