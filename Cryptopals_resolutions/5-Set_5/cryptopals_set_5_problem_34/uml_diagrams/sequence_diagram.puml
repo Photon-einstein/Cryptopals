@@ -4,6 +4,7 @@ scale 0.5
 box "Client Environment" #LightYellow
     participant "main (runClient1)" as Main
     participant "Client (Bob)" as Client
+    participant "Client:SessionData" as ClientSessionData
     participant "Client:DiffieHellman" as ClientDH
     participant "Client:DHParamsLoader" as ClientDHLoader
     participant "Client:MessageExtractionFacility" as ClientMEF
@@ -23,6 +24,7 @@ end box
 
 box "Server Environment" #LightBlue
     participant "Server (API)" as ServerAPI
+    participant "Server:SessionData" as ServerSessionData
     participant "Server:DiffieHellman" as ServerDH
     participant "Server:DHParamsLoader" as ServerDHLoader
     participant "Server:MessageExtractionFacility" as ServerMEF
@@ -49,7 +51,6 @@ activate Client
         activate ClientDH
         deactivate
 
-
         ClientDH -> ClientDH : generatePublicKey()
         activate ClientDH
             ClientDH -> ClientMEF : BIGNUMToHex(_publicKey.get())
@@ -66,7 +67,7 @@ activate Client
         ClientEU --> Client : clientNonceHex
     deactivate ClientEU
 
-    Client -> Client: built "keyExchange" message
+    Client -> Client : built "keyExchange" message
     note left
         Client constructs JSON "client_hello"
         with clientId, clientNonce,
@@ -76,13 +77,13 @@ activate Client
     Client -> Mallory : HTTP POST /keyExchange (ClientHello JSON)
     activate Mallory
 
-        Mallory -> Mallory: extract client's session id as extractedClientId
-        Mallory -> Mallory: extract client's nonce as extractedNonceClient
-        Mallory -> Mallory: extract client's group name as extractedGroupName
-        Mallory -> Mallory: extract client's public key as extractedPublicKeyA
+        Mallory -> Mallory : extract client's session id as extractedClientId
+        Mallory -> Mallory : extract client's nonce as extractedNonceClient
+        Mallory -> Mallory : extract client's group name as extractedGroupName
+        Mallory -> Mallory : extract client's public key as extractedPublicKeyA
         note right
             Mallory intercepts ClientHello.
-            He extracts client Id, client's Nonce, group name and public Key.
+            He extracts client's Id, client's Nonce, group name and public Key.
         end note
 
         Mallory -> MalloryMEF : hexToUniqueBIGNUM(extractedPublicKeyA)
@@ -92,7 +93,7 @@ activate Client
 
         Mallory -> Mallory : generateUniqueSessionId()
         activate Mallory
-            Mallory --> Mallory: sessionId
+            Mallory --> Mallory : sessionId
         deactivate Mallory
 
         Mallory -> MallorySessionData : Create MallorySessionData(_nonceSize, extractedNonceClient, extractedClientId, _debugFlag, _ivLength, extractedGroupName, _parameterInjection)
@@ -106,35 +107,34 @@ activate Client
                 MalloryDHClient -> MalloryDHClient : generatePrivateKey()
                 activate MalloryDHClient
                     note right
-                        Mallory generates private key 'm_a'
+                        Mallory generates private key 'm_s'
                     end note
                 deactivate MalloryDHClient
                 MalloryDHClient -> MalloryDHClient : generatePublicKey()
                 activate MalloryDHClient
                     note right
-                        Mallory computes public key M_A = (g^m_a) % p
+                        Mallory computes public key M_S = (g^m_) % p
                     end note
                 deactivate MalloryDHClient
                 MalloryDHClient -> MalloryMEF : BIGNUMToHex(_publicKey.get())
                 activate MalloryMEF
-                    MalloryMEF --> MalloryDHClient : Public Key M_A (hex)
+                    MalloryMEF --> MalloryDHClient : Public Key M_S (hex)
                 deactivate MalloryMEF
                 MalloryDHClient --> MallorySessionData : DiffieHellman instance (to Client) ready
             deactivate MalloryDHClient
 
-            Mallory -> MalloryEU: generateCryptographicNonce(nonceSize))
+            MallorySessionData -> MalloryEU : generateCryptographicNonce(nonceSize))
             activate MalloryEU
-                MalloryEU --> Mallory: result stored in _serverNonceHexAM
+                MalloryEU --> MallorySessionData : result stored in _serverNonceHexAM
             deactivate MalloryEU
 
-            Mallory -> MalloryEU: generateRandomIV(ivLength)
+            MallorySessionData -> MalloryEU : generateRandomIV(ivLength)
             activate MalloryEU
-                MalloryEU --> Mallory: result stored in _ivAM
+                MalloryEU --> MallorySessionData : result stored in _ivAM
             deactivate MalloryEU
 
             MallorySessionData --> Mallory : returns mallorySessionData, stored in the map _diffieHellmanMap[sessionId]
         deactivate MallorySessionData
-
         
         Mallory -> MalloryDHClient : deriveSharedSecret(extractedPublicKeyA, _diffieHellmanMap[sessionId]->_serverNonceHexAM, _diffieHellmanMap[sessionId]->_clientNonceHexAM)
         activate MalloryDHClient
@@ -149,7 +149,7 @@ activate Client
             activate MalloryMEF
                MalloryMEF --> MalloryDHClient : clientNonceBytes
             deactivate MalloryMEF
-            MalloryDHClient -> MalloryDHClient : dataToHash = shared_secret_raw_bytes || clientNonceBytes || serverNonceBytes
+            MalloryDHClient -> MalloryDHClient : dataToHash = sharedSecretRawBytes || clientNonceBytes || serverNonceBytes
             MalloryDHClient -> MalloryDHClient : _derivedSymmetricKey = SHA256(dataToHash)
             MalloryDHClient -> MalloryMEF : toHexString(_derivedSymmetricKey)
             activate MalloryMEF
@@ -158,9 +158,9 @@ activate Client
             MalloryDHClient --> Mallory: result stored in _derivedSymmetricKey
         deactivate MalloryDHClient
 
-        Mallory -> MalloryFakeClient : generate fake client: Client(_diffieHellmanMap[sessionId]->_clientIdAM, _debugFlag, groupName, _parameterInjection)
+        Mallory -> MalloryFakeClient : generate fake Client(_diffieHellmanMap[sessionId]->_clientIdAM, _debugFlag, groupName, _parameterInjection)
         activate MalloryFakeClient
-            MalloryFakeClient --> Mallory : new client
+            MalloryFakeClient --> Mallory : new client, to act as a fake one to the real server
         deactivate MalloryFakeClient
 
         note left
@@ -169,7 +169,7 @@ activate Client
             groupName, publicKeyM_S (Mallory's public key for Server)
         end note
 
-        Mallory -> MalloryFakeClient: diffieHellmanKeyExchange(const int portServerNumber)
+        Mallory -> MalloryFakeClient : diffieHellmanKeyExchange(const int portServerNumber)
         activate MalloryFakeClient
 
             MalloryFakeClient -> MalloryDHServer : Create DiffieHellman(_debugFlag, _parameterInjection, _groupNameDH)
@@ -199,7 +199,7 @@ activate Client
                 MalloryEU --> MalloryFakeClient : fakeClientNonceHex
             deactivate MalloryEU
 
-            MalloryFakeClient -> MalloryFakeClient: built "keyExchange" message
+            MalloryFakeClient -> MalloryFakeClient : built "keyExchange" message
             note left
                 Fake client constructs JSON "client_hello"
                 with real clientId, fakeClientNonce,
@@ -210,50 +210,96 @@ activate Client
             activate ServerAPI
 
                 ServerAPI -> ServerAPI : Parse ClientHello JSON (from Mallory)
+                ServerAPI -> ServerAPI : extract fake client's session id as extractedClientId
+                ServerAPI -> ServerAPI : extract fake client's nonce as extractedNonceClient
+                ServerAPI -> ServerAPI : extract fake client's group name as extractedGroupName
+                ServerAPI -> ServerAPI : extract fake client's public key as extractedPublicKeyA
+
                 note right
-                    Server extracts MalloryId (thinks it's client ID),
+                    Server extracts clients id, (Alice's Id),
                     malloryNonceToServer (thinks it's client nonce),
                     publicKeyM_S (thinks it's client publicKeyA).
                 end note
 
-                ServerAPI -> ServerEU : generateCryptographicNonce(nonceSize)
-                ServerEU --> ServerAPI : serverNonceHex
+                ServerAPI -> ServerMEF : BIGNUMToHex(extractedPublicKeyA)
+                activate ServerMEF
+                    ServerMEF --> ServerAPI : peerPublicKey (hex)
+                deactivate ServerMEF
 
-                ServerAPI -> ServerDH : Create DiffieHellman(debugFlag)
+                ServerAPI -> ServerAPI : generateUniqueSessionId()
+                activate ServerAPI
+                    ServerAPI --> ServerAPI : sessionId
+                deactivate ServerAPI
+
+                ServerAPI -> ServerSessionData : Create ServerSessionData(_nonceSize, extractedNonceClient, extractedClientId, _debugFlag, _ivLength, extractedGroupName)
+                activate ServerSessionData
+                    ServerSessionData -> ServerDH : Create DiffieHellman(debugFlag, groupNameDH)
+                    activate ServerDH
+                        ServerDH -> ServerDHLoader : loadDhParameters()
+                        activate ServerDHLoader
+                            ServerDHLoader --> ServerDH : Returns DHParameters map
+                        deactivate ServerDHLoader
+                        ServerDH -> ServerDH : generatePrivateKey()
+                        activate ServerDH
+                            note right
+                                Server generates private key 'm_a'
+                            end note
+                        deactivate ServerDH
+                        ServerDH -> ServerDH : generatePublicKey()
+                        activate ServerDH
+                            note right
+                                Server computes public key M_A = (g^m_a) % p
+                            end note
+                        deactivate ServerDH
+                        ServerDH -> ServerMEF : BIGNUMToHex(_publicKey.get())
+                        activate ServerMEF
+                            ServerMEF --> ServerDH : Public Key M_A (hex)
+                        deactivate ServerMEF
+                        ServerDH --> ServerSessionData : DiffieHellman instance (to Client) ready
+                    deactivate ServerDH
+
+                    ServerSessionData -> ServerEU : generateCryptographicNonce(nonceSize))
+                    activate ServerEU
+                        ServerEU --> ServerSessionData : result stored in _serverNonceHex
+                    deactivate ServerEU
+
+                    ServerSessionData -> ServerEU : generateRandomIV(ivLength)
+                    activate ServerEU
+                        ServerEU --> ServerSessionData : result stored in _iv
+                    deactivate ServerEU
+
+                    ServerSessionData --> ServerAPI : returns SessionData, stored in the map _diffieHellmanMap[sessionId]
+                deactivate ServerSessionData
+
+                ServerAPI -> ServerDH : deriveSharedSecret(extractedPublicKeyA, _serverNonceHex, _clientNonceHex)
                 activate ServerDH
-                    ServerDH -> ServerDHLoader : loadDhParameters()
-                    ServerDHLoader --> ServerDH : Returns DHParameters map
-                    ServerDH -> ServerDH : generatePrivateKey()
                     note right
-                        Server generates private key 'b'
-                    end note
-                    ServerDH -> ServerDH : generatePublicKey()
-                    note right
-                        Server computes B = (g^b) % p
-                    end note
-                    ServerDH -> ServerMEF : BIGNUMToHex(_publicKey.get())
-                    ServerMEF --> ServerDH : Public Key B (hex)
-                deactivate ServerDH
-                ServerDH --> ServerAPI : Server:DiffieHellman instance ready
-
-
-                ServerAPI -> ServerDH : deriveSharedSecret(publicKeyM_A, serverNonceHex, malloryNonceToClient)
-                activate ServerDH
-                    note right
-                        Server computes shared secret s'_M_S = (publicKeyM_A ^ privateKeyB) % p
+                        Server computes shared secret M_S = (publicKeyM_A ^ privateKeyB) % p
                         This is the shared secret between Mallory and Server.
                     end note
-                    ServerDH --> ServerAPI : _derivedSymmetricKeyHex_MS
+                    ServerDH --> ServerAPI : _derivedSymmetricKeyHex
                 deactivate ServerDH
 
-                ServerAPI -> ServerEU : encryptMessageAes256CbcMode(confirmationMsg, _derivedSymmetricKeyHex_MS, generatedIv)
-                ServerEU --> ServerAPI : ciphertext_MS
+                ServerAPI -> ServerDH : getConfirmationMessage()
+                activate ServerDH
+                    ServerDH --> ServerAPI : returns server's confirmation message as message
+                deactivate ServerDH
+
+                ServerAPI -> ServerAPI : build confirmation payload
+                activate ServerAPI
+                    ServerAPI --> ServerAPI : confirmation payload build with fields: message, sessionId, clientId, clientNonce, serverNonce
+                deactivate ServerAPI
+
+                ServerAPI -> ServerEU : encryptMessageAes256CbcMode(confirmationMsg, _derivedSymmetricKey, _iv)
+                activate ServerEU
+                    ServerEU --> ServerAPI : ciphertext
+                deactivate ServerEU
 
                 note left
                     Server constructs JSON response (ServerHello)
                     with sessionId, serverNonce, publicKeyB,
                     encrypted confirmation (ciphertext_MS, ivHex_MS)
-                    Server believes it's sending to "Bob" (Mallory)
+                    Server believes it's sending to Alice instead of Mallory
                 end note
 
                 ServerAPI --> MalloryFakeClient : HTTP 201 OK (ServerHello JSON)
@@ -264,67 +310,34 @@ activate Client
                 He extracts sessionId, serverNonce, publicKeyB, ciphertext_MS, ivHex_MS.
             end note
 
+            MalloryFakeClient --> Mallory : returns server's response decrypted
         deactivate MalloryFakeClient
 
-        Mallory -> MalloryDHServer : Create DiffieHellman(debugFlag)
-        activate MalloryDHServer
-            MalloryDHServer -> MalloryDHLoader : loadDhParameters()
-            MalloryDHLoader --> MalloryDHServer : Returns DHParameters map
-            MalloryDHServer -> MalloryDHServer : generatePrivateKey()
-            note right
-                Mallory generates private key 'm_b'
-            end note
-            MalloryDHServer -> MalloryDHServer : generatePublicKey()
-            note right
-                Mallory computes public key M_B = (g^m_b) % p
-            end note
-            MalloryDHServer -> MalloryMEF : BIGNUMToHex(_publicKey.get())
-            MalloryMEF --> MalloryDHServer : Public Key M_B (hex)
-        deactivate MalloryDHServer
-        MalloryDHServer --> Mallory : Mallory:DiffieHellman instance (to Server) ready
+        Mallory -> Mallory : Parse ServerHello JSON (from real server)
+        Mallory -> Mallory : extracts server's session id as sessionIdExtracted
+        Mallory -> Mallory : extracts client's id as clientIdExtracted
+        Mallory -> Mallory : extracts client's nonce as extractedNonceClient
+        Mallory -> Mallory : extracts server's nonce as serverNonceExtracted
+        Mallory -> Mallory : extracts server's message as messageExtracted
 
-        Mallory -> MalloryDHServer : deriveSharedSecret(publicKeyB, malloryNonceToClient, serverNonceHex)
-        activate MalloryDHServer
-            note right
-                Mallory computes shared secret s_M_S = (publicKeyB ^ privateKeyM_B) % p
-                This is the same secret as _derivedSymmetricKeyHex_MS on the Server side.
-            end note
-            MalloryDHServer --> Mallory : _derivedSymmetricKeyHex_MS
-        deactivate MalloryDHServer
-
-        Mallory -> MalloryEU : decryptMessageAes256CbcMode(ciphertext_MS, _derivedSymmetricKeyHex_MS, iv_MS)
-        activate MalloryEU
-            MalloryEU --> Mallory : decryptedPlaintext_MS
-        deactivate MalloryEU
+        Mallory -> Mallory : confirmationString is built with the fields: sessionId, clientId, clientNonce, serverNonce and messageExtracted
         note right
-            Mallory now has the decrypted confirmation message from the Server.
-            She can read it, modify it if desired.
+            Mallory in this example just scoops the data exchanged between the real
+            server and the client, it does not tamper the message, just changes the
+            nonce's and iv's to ensure total control over each leg of the channel.
         end note
-
-        Mallory -> MalloryDHClient : deriveSharedSecret(publicKeyA, clientNonceHex, malloryNonceToClient)
-        activate MalloryDHClient
-            note right
-                Mallory computes shared secret s_A_M = (publicKeyA ^ privateKeyM_A) % p
-                This is the shared secret between Alice and Mallory.
-            end note
-            MalloryDHClient --> Mallory : _derivedSymmetricKeyHex_AM
-        deactivate MalloryDHClient
-
-        Mallory -> MalloryEU : encryptMessageAes256CbcMode(decryptedPlaintext_MS_possibly_modified, _derivedSymmetricKeyHex_AM, newGeneratedIv_AM)
+        Mallory -> MalloryEU : encryptMessageAes256CbcMode(confirmationString, _derivedSymmetricKey_AM, _ivAM)
         activate MalloryEU
             MalloryEU --> Mallory : ciphertext_AM
         deactivate MalloryEU
 
         note left
             Mallory constructs her own ServerHello to Client
-            with original sessionId, serverNonce (Mallory's), publicKeyM_B,
-            encrypted confirmation (ciphertext_AM)
-            Mallory sends her own public key (M_B) to the client,
-            making Alice believe M_B is Bob's public key.
-            Mallory uses the server's nonce she intercepted,
-            or generates a new one, depending on the scenario.
-            For simplicity here, let's say she forwards the original serverNonce.
-            (Or rather, the one she sent to the server as 'clientNonce' for her own session)
+            with original sessionId, serverNonce_AM (Mallory's), publicKeyM_A,
+            encrypted confirmation (ciphertext_AM) and initialization vector _ivAM.
+            Mallory sends her own public key (M_A) to the client,
+            making Alice believe M_A is Bob's public key.
+            Mallory uses his own nonce he generated for this leg of the attack.
         end note
 
         Mallory --> Client : HTTP 201 OK (Mallory's ServerHello JSON)
@@ -333,36 +346,63 @@ activate Client
     Client -> Client : Parse ServerHello JSON response (from Mallory)
     note right
         Client extracts sessionId, serverNonce (Mallory's),
-        groupName, publicKeyB (Mallory's M_B), ciphertext_AM, ivHex_AM
+        groupName, publicKeyB (Mallory's M_A), ciphertext_AM, ivHex_AM
     end note
 
-    Client -> ClientMEF : hexToBytes(ivHex_AM)
-    ClientMEF --> Client : iv (vector<uint8_t>)
+    Client -> Client : Parse ServerHello JSON (from fake server)
+    Client -> Client : extracts server's session id as sessionId
+    Client -> Client : extracts server's nonce as extractedNonceServer
+    Client -> Client : extracts group name as extractedGroupName
+    Client -> Client : extracts fake server's public key as extractedPublicKeyB
+    Client -> Client : extracts fake server's ciphertext as ciphertext
+    Client -> Client : extracts fake server's iv as iv
+
+    Client -> ClientSessionData : Create SessionData(diffieHellman, extractedNonceServer, clientNonceHex, extractedClientId, iv)
+    activate ClientSessionData
+        ClientSessionData --> Client : returns SessionData, stored in the map _diffieHellmanMap[sessionId]
+    deactivate ClientSessionData
 
     Client -> Client : Store SessionData in _diffieHellmanMap
-    Client -> ClientDH : deriveSharedSecret(publicKeyB, serverNonceHex, clientNonceHex)
+    Client -> ClientDH : deriveSharedSecret(extractedPublicKeyB, serverNonceHex, clientNonceHex)
     activate ClientDH
         note right
             Client computes shared secret s = (publicKeyM_B ^ privateKeyA) % p
             This is the shared secret between Client (Alice) and Mallory.
         end note
-        ClientDH --> Client : _derivedSymmetricKeyHex (Alice-Mallory key)
+        ClientDH --> Client : _derivedSymmetricKeyHex (Alice-Mallory shared key)
     deactivate ClientDH
 
-    Client -> Client : confirmationServerResponse(...)
+    Client -> ClientMEF : hexToBytes(_diffieHellmanMap[sessionId]->_derivedKeyHex)
+    activate ClientMEF
+        ClientMEF --> Client : returns derivedKey
+    deactivate ClientMEF
+
+    Client -> ClientDH : getConfirmationMessage()
+    activate ClientDH
+        ClientDH --> Client : returns client's confirmation message as confirmationMessage
+    deactivate ClientDH
+
+    Client -> Client : confirmationServerResponse(ciphertext, derivedKey, iv, sessionId, clientId, _clientNonceHex, _serverNonceHex, confirmationMessage)
     activate Client
-        Client -> ClientEU : decryptMessageAes256CbcMode(ciphertext_AM, _derivedSymmetricKeyHex, iv)
+        Client -> ClientEU : decryptMessageAes256CbcMode(ciphertext, derivedKey, iv)
         activate ClientEU
-        ClientEU --> Client : decryptedPlaintext (from Mallory)
+            ClientEU --> Client : decryptedPlaintext (from Mallory)
         deactivate ClientEU
 
         Client -> Client : Parse decryptedPlaintext (JSON)
         note right
             Client compares extracted fields.
-            Since Mallory forwarded a valid (possibly modified)
-            confirmation, this validation will likely pass,
-            making Alice believe she successfully communicated with Bob.
+            Since Mallory forwarded a valid confirmation, this validation
+            will likely pass, making Alice believe she successfully 
+            communicated with Bob.
         end note
+        Client -> Client : extracts session's id from resulting plaintext
+        Client -> Client : extracts client's id from resulting plaintext
+        Client -> Client : extracts clientNonce from resulting plaintext
+        Client -> Client : extracts serverNonce from resulting plaintext
+        Client -> Client : extracts message from resulting plaintext
+        Client -> Client : compares the extracted fields with the ones in its memory, updating validationResult accordingly
+
         Client --> Client : (bool validationResult, string decryptedMessage)
     deactivate Client
 
@@ -392,9 +432,9 @@ activate Client
 
     Client -> Client : built message sent with clientId, sessionId, newTimeStamp as clientMessageSent
 
-    Client -> ClientEU : encryptMessageAes256CbcMode(newPlaintext, _derivedSymmetricKeyHex_AM, newIVrotated)
+    Client -> ClientEU : encryptMessageAes256CbcMode(newPlaintext, _derivedSymmetricKey, _iv)
     activate ClientEU
-        ClientEU --> Client : ciphertext_AM
+        ClientEU --> Client : ciphertext
     deactivate ClientEU
 
     Client -> Client: built "client_message_exchange" message
@@ -405,23 +445,23 @@ activate Client
 
     Client -> Mallory : HTTP POST /messageExchange (client_message_exchange JSON)
     activate Mallory
-        Mallory -> Mallory: Parse request body
-        Mallory -> Mallory: extract session id as extractedSessionId
-        Mallory -> Mallory: extract iv as extractIv
-        Mallory -> Mallory: extract ciphertext as extractedCiphertext
+        Mallory -> Mallory : Parse request body
+        Mallory -> Mallory : extract session id as extractedSessionId
+        Mallory -> Mallory : extract iv as extractIv
+        Mallory -> Mallory : extract ciphertext as extractedCiphertext
 
-        Mallory -> Mallory: check if session id already exists, and store the value at the bool variable sessionIdASFoundFlag
+        Mallory -> Mallory : check if session id already exists, and store the value at the bool variable sessionIdASFoundFlag
         alt sessionIdASFoundFlag == false
-            Mallory -> Mallory: Throws an exception
+            Mallory -> Mallory : Throws an exception
         end
         
-        Mallory -> MalloryEU: hexToBytes(extractedIv)
+        Mallory -> MalloryEU : hexToBytes(extractedIv)
         activate MalloryEU
-            MalloryEU --> Mallory : ivAM
+            MalloryEU --> Mallory : iv as ivAM
         deactivate MalloryEU
-        Mallory -> Mallory: store new iv in bytes for that session id
+        Mallory -> Mallory : store new iv in bytes for that session id
 
-        Mallory -> MalloryEU: decryptMessageAes256CbcMode(extractedCiphertext, symmetricKey, ivAM)
+        Mallory -> MalloryEU : decryptMessageAes256CbcMode(extractedCiphertext, symmetricKey, ivAM)
         activate MalloryEU
             MalloryEU --> Mallory : plaintext
         deactivate MalloryEU
@@ -429,13 +469,13 @@ activate Client
         note left
             Mallory build fake client request to the real server
         end note
-        Mallory -> MalloryEU: generateRandomIV(_ivLength)
+        Mallory -> MalloryEU : generateRandomIV(_ivLength)
         activate MalloryEU
-            MalloryEU --> Mallory : ivMS
+            MalloryEU --> Mallory : iv as ivMS
         deactivate MalloryEU
-        Mallory -> Mallory: store new iv in bytes for that session id for Mallory -> Server leg
+        Mallory -> Mallory : store new iv in bytes for that session id for Mallory -> Server leg
 
-        Mallory -> MalloryEU: encryptMessageAes256CbcMode(plaintext, symmetricKey, ivMS)
+        Mallory -> MalloryEU : encryptMessageAes256CbcMode(plaintext, symmetricKey, ivMS)
         activate MalloryEU
             MalloryEU --> Mallory : ciphertextMS
         deactivate MalloryEU
@@ -444,7 +484,7 @@ activate Client
             Mallory build body request for the real server
         end note
 
-        Mallory -> Mallory: built fake "client_message_exchange" message
+        Mallory -> Mallory : built fake "client_message_exchange" message
         note left
             Mallory fake Client constructs JSON "client_message_exchange"
             with sessionId, ivMS and ciphertext
@@ -453,48 +493,48 @@ activate Client
         Mallory -> ServerAPI : HTTP POST /messageExchange (fake client_message_exchange JSON)
         
         activate ServerAPI
-            ServerAPI -> ServerAPI: Parse request body
-            ServerAPI -> ServerAPI: extract session id as extractedSessionIdUuidFormat
-            ServerAPI -> ServerAPI: extract iv as extractIv
-            ServerAPI -> ServerAPI: extract ciphertext as extractedCiphertext
+            ServerAPI -> ServerAPI : Parse request body
+            ServerAPI -> ServerAPI : extract session id as extractedSessionIdUuidFormat
+            ServerAPI -> ServerAPI : extract iv as extractIv
+            ServerAPI -> ServerAPI : extract ciphertext as extractedCiphertext
 
-            ServerAPI -> ServerAPI: check if session id already exists, and store the value at the bool variable sessionIdASFoundFlag
+            ServerAPI -> ServerAPI : check if session id already exists, and store the value at the bool variable sessionIdASFoundFlag
             alt extractedSessionIdUuidFormat does not exist
-                ServerAPI -> ServerAPI: Throws an exception
+                ServerAPI -> ServerAPI : Throws an exception
             end 
 
-            ServerAPI -> ServerEU: hexToBytes(extractedIv)
+            ServerAPI -> ServerEU : hexToBytes(extractedIv)
             activate ServerEU
                 ServerEU --> ServerAPI : iv
             deactivate ServerEU
-            ServerAPI -> ServerAPI: store new iv in bytes for that session id
+            ServerAPI -> ServerAPI : store new iv in bytes for that session id
 
-            ServerAPI -> ServerEU: decryptMessageAes256CbcMode(extractedCiphertext, symmetricKey, iv)
+            ServerAPI -> ServerEU : decryptMessageAes256CbcMode(extractedCiphertext, symmetricKey, iv)
             activate ServerEU
                 ServerEU --> ServerAPI : plaintext
             deactivate ServerEU
 
             ServerAPI -> ServerAPI : build server's confirmation with server id, extracted session id, plaintext
             
-            ServerAPI -> ServerEU: generateRandomIV(_ivLength)
+            ServerAPI -> ServerEU : generateRandomIV(_ivLength)
             activate ServerEU
                 ServerEU --> ServerAPI : iv
             deactivate ServerEU
     
-            ServerAPI -> ServerAPI: store new iv in bytes for that session id
+            ServerAPI -> ServerAPI : store new iv in bytes for that session id
             
-            ServerAPI -> ServerEU: encryptMessageAes256CbcMode(plaintext, symmetricKey, iv)
-            activate ServerAPI
+            ServerAPI -> ServerEU : encryptMessageAes256CbcMode(plaintext, symmetricKey, iv)
+            activate ServerEU
                 ServerEU --> ServerAPI : ciphertext
             deactivate ServerEU
                   
-            ServerAPI -> ServerAPI: built server confirmation message with server id, extractedSessionId and plaintext
+            ServerAPI -> ServerAPI : built server confirmation message with server id, extractedSessionId and plaintext
 
             note left
                 Server builds body response for the request of the fake client
             end note
 
-            ServerAPI -> ServerAPI: built "client_message_exchange" response message
+            ServerAPI -> ServerAPI : built "client_message_exchange" response message
             note left
                 Server constructs JSON "client_message_exchange" response 
                 with extractedSessionId, iv and ciphertext
@@ -509,9 +549,9 @@ activate Client
             Mallory -> Mallory: Throws an exception
         end
 
-        Mallory -> Mallory: extract session id as extractedSessionIdMS
-        Mallory -> Mallory: extract iv as extractedIvHexMS
-        Mallory -> Mallory: extract ciphertext as extractedCiphertextMS
+        Mallory -> Mallory : extract session id as extractedSessionIdMS
+        Mallory -> Mallory : extract iv as extractedIvHexMS
+        Mallory -> Mallory : extract ciphertext as extractedCiphertextMS
 
         Mallory -> MalloryEU : hexToBytes(extractedIvHexMS)
         activate MalloryEU
@@ -519,7 +559,7 @@ activate Client
         deactivate MalloryEU
         Mallory -> Mallory : store extractedIvMS
 
-        Mallory -> MalloryEU: decryptMessageAes256CbcMode(extractedCiphertextMS, symmetricKey, extractedIvMS)
+        Mallory -> MalloryEU : decryptMessageAes256CbcMode(extractedCiphertextMS, symmetricKey, extractedIvMS)
         activate MalloryEU
             MalloryEU --> Mallory : plaintext
         deactivate MalloryEU
@@ -528,24 +568,24 @@ activate Client
             Mallory build client's request response instead of the real server
         end note
         
-        Mallory -> MalloryEU: generateRandomIV(_ivLength)
+        Mallory -> MalloryEU : generateRandomIV(_ivLength)
         activate MalloryEU
             MalloryEU --> Mallory : ivAM
         deactivate MalloryEU
-        Mallory -> Mallory: store new iv in bytes for that session id for Alice -> Mallory leg
+        Mallory -> Mallory : store new iv in bytes for that session id for Alice -> Mallory leg
 
-        Mallory -> MalloryEU: encryptMessageAes256CbcMode(plaintext, symmetricKey, ivAM)
+        Mallory -> MalloryEU : encryptMessageAes256CbcMode(plaintext, symmetricKey, ivAM)
         activate MalloryEU
             MalloryEU --> Mallory : ciphertextAM
         deactivate MalloryEU
 
-        Mallory -> Mallory: built fake server confirmation message with server id, extractedSessionIdMS and plaintext
+        Mallory -> Mallory : built fake server confirmation message with server id, extractedSessionIdMS and plaintext
 
         note left
             Server builds body response for the request of the fake client
         end note
 
-        Mallory -> Mallory: built fake "client_message_exchange" response message
+        Mallory -> Mallory : built fake "client_message_exchange" response message
         note left
             Fake server constructs JSON "client_message_exchange" response 
             with extractedSessionIdMS, ivAM and ciphertextAM
@@ -556,7 +596,7 @@ activate Client
 
     Client -> Client: Parse request body
     alt request.status_code != 201
-        Client -> Client: Throws an exception
+        Client -> Client : Throws an exception
     end
 
     Client -> Client: extract session id as extractedSessionId
@@ -569,16 +609,16 @@ activate Client
     deactivate ClientEU
     Client -> Client : store extractedIv
 
-    Client -> ClientEU: decryptMessageAes256CbcMode(extractedCiphertext, symmetricKey, extractedIv)
+    Client -> ClientEU : decryptMessageAes256CbcMode(extractedCiphertext, symmetricKey, extractedIv)
     activate ClientEU
         ClientEU --> Client : decryptedCiphertext
     deactivate ClientEU
 
     alt decryptedCiphertext.find(clientMessageSent) == true
-        Note right of Client: Connection Test Result: Success (true)
+        Note right of Client : Connection Test Result : Success (true)
     else
-        Note right of Client: Connection Test Result: Failure (false)
-        Client -> Client: Throws an exception
+        Note right of Client : Connection Test Result : Failure (false)
+        Client -> Client : Throws an exception
     end
 
     Client --> Main : connectionTestResult
