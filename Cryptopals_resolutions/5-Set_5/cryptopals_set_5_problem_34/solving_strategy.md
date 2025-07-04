@@ -118,8 +118,6 @@
     java -jar /home/tiago-sousa/.vscode/extensions/jebbs.plantuml-2.18.1/plantuml.jar -tsvg sequence_diagram.puml
     ```
 
-23. Double check all the content from the UML sequence diagram (in progress)
+23. Double check all the content from the UML sequence diagram (Done)
 
-Status: Review of sequence_diagram.puml at line 209
-
-24. Write article about this project (TBD)
+24. Write article about this project (in progress)
