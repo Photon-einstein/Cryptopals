@@ -14,12 +14,12 @@ end box
 box "Attacker Environment" #LightCoral
     participant "Mallory" as Mallory
     participant "Mallory:MallorySessionData" as MallorySessionData
+    participant "Mallory:Client (to Server)" as MalloryFakeClient
     participant "Mallory:DiffieHellman (to Client)" as MalloryDHClient
     participant "Mallory:DiffieHellman (to Server)" as MalloryDHServer
     participant "Mallory:DHParamsLoader" as MalloryDHLoader
     participant "Mallory:MessageExtractionFacility" as MalloryMEF
     participant "Mallory:EncryptionUtility" as MalloryEU
-    participant "Mallory:Client (to Server)" as MalloryFakeClient
 end box
 
 box "Server Environment" #LightBlue
