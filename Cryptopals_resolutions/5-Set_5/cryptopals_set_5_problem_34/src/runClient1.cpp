@@ -24,10 +24,10 @@ int main(void) {
         "runClient1 log | diffieHellmanKeyExchange() failed.");
   }
   const std::string sessionId = std::get<2>(keyExchangeResult);
-  bool messageExchangeResult = client->messageExchange(client->getProductionPort(), sessionId);
+  bool messageExchangeResult =
+      client->messageExchange(client->getProductionPort(), sessionId);
   if (messageExchangeResult == false) {
-    throw std::runtime_error(
-        "runClient1 log | messageExchange() failed.");
+    throw std::runtime_error("runClient1 log | messageExchange() failed.");
   }
   /* end of the work */
   end = clock();
