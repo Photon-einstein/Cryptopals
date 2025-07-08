@@ -28,7 +28,7 @@ class Server {
     - generateUniqueSessionId() : boost::uuids::uuid
 }
 
-note "Exposes API Endpoints:\n- **POST /keyExchange** (Diffie-Hellman Key Exchange)\n- **GET /sessionsData** (Retrieve Session Data)\n- **GET /messageExchange** (Performs a secure message exchange with a client after the DH key exchange protocol as been completed)" as ServerEndpointsNote
+note "Exposes API Endpoints:\n- **POST /keyExchange** (Diffie-Hellman Key Exchange)\n- **GET /sessionsData** (Retrieve Session Data)\n- **GET /messageExchange** (Performs a secure message exchange with a client after the DH key exchange protocol has been completed)" as ServerEndpointsNote
 Server .. ServerEndpointsNote
 
 class MalloryServer {

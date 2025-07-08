@@ -119,5 +119,11 @@
     ```
 
 23. Double check all the content from the UML sequence diagram (Done)
-
 24. Write article about this project (in progress)
+        URL link: https://www.linkedin.com/article/edit/7347185167901364224/
+        
+        24.1. What is and how it works the man in the middle attack in the context of the Diffie Hellman key exchange protocol (Done)
+        24.2. What is and how it works the parameter injection in the context of the Diffie Hellman key exchange protocol (Done)
+        24.3. What was the structure used in this prove of concept, and the results obtained (Done)
+        24.4. A quick demo of the attack taken place (in progress)
+        24.5. A mitigation action to prevent this attack and why it works (TBD)
