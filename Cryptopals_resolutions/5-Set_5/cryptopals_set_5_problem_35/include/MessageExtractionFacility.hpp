@@ -1,9 +1,6 @@
 #ifndef MESSAGE_EXTRACTION_FACILITY_HPP
 #define MESSAGE_EXTRACTION_FACILITY_HPP
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_generators.hpp>
-#include <boost/uuid/uuid_io.hpp>
 #include <memory>
 #include <openssl/bn.h>
 #include <openssl/err.h>
@@ -33,7 +30,7 @@ std::vector<unsigned char> hexToBytes(const std::string &hexStr);
  * @brief This method converts a vector of bytes into a string in hex format.
  *
  * This method will convert a vector of bytes into a string of hexadecimal
- * characters, padded with zero.
+ * characters, padded with zero's.
  *
  * @param data The vector with bytes to be converted.
  *

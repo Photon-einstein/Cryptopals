@@ -1,4 +1,4 @@
-"@startuml DH_protocol_with_injected_g_parameters_class_diagram"
+"@startuml MITM_with_injected_g_parameters_attack_class_diagram"
 
 
 class Server {
@@ -11,6 +11,7 @@ class Server {
     - _serverThread : std::thread
     - _debugFlag : bool
     - _ivLength : std::size_t
+    - _serverId : std::string
     
     + Server(debugFlag : bool) {explicit}
     + ~Server()
@@ -22,12 +23,50 @@ class Server {
     - setupRoutes() : void
     - rootEndpoint() : void
     - keyExchangeRoute() : void
+    - messageExchangeRoute() : void
     - getSessionsDataEndpoint() : void
     - generateUniqueSessionId() : boost::uuids::uuid
 }
 
-note "Exposes API Endpoints:\n- **POST /keyExchange** (Diffie-Hellman Key Exchange)\n- **GET /sessionsData** (Retrieve Session Data)" as ServerEndpointsNote
+note "Exposes API Endpoints:\n- **POST /keyExchange** (Diffie-Hellman Key Exchange)\n- **GET /sessionsData** (Retrieve Session Data)\n- **GET /messageExchange** (Performs a secure message exchange with a client after the DH key exchange protocol has been completed)" as ServerEndpointsNote
 Server .. ServerEndpointsNote
+
+class MalloryServer {
+    - _diffieHellmanMapMutex : std::mutex
+    - _diffieHellmanMap : std::map<boost::uuids::uuid, std::unique_ptr<MallorySessionData>>
+    - _nonceSize : std::size_t
+    - _app : crow::SimpleApp
+    - _portProduction : int
+    - _portTest : int
+    - _portRealServerProduction : int
+    - _portRealServerTest : int
+    - _portRealServerInUse : int
+    - _serverThread : std::thread
+    - _debugFlag : bool
+    - _testFlag : bool
+    - _ivLength : std::size_t
+    - _serverId : std::string
+    - _parameterInjection : bool
+    
+    + MalloryServer(debugFlag : bool, testFlag : bool) {explicit}
+    + MalloryServer(debugFlag : bool, testFlag : bool, parameterInjection : bool) {explicit}
+    + ~MalloryServer()
+    + runServer() : void
+    + runServerTest() : void
+    + clearDiffieHellmanSessionData() : void
+    + getProductionPort() : int
+    + getTestPort() : int
+    + setParameterInjectionFlag(parameterInjectionFlag : bool) : void
+    - setupRoutes() : void
+    - rootEndpoint() : void
+    - keyExchangeRoute() : void
+    - messageExchangeRoute() : void
+    - getSessionsDataEndpoint() : void
+    - generateUniqueSessionId() : boost::uuids::uuid
+}
+
+note "Exposes **fake** API Endpoints:\n- **POST /keyExchange** (Diffie-Hellman Key Exchange)\n- **GET /sessionsData** (Retrieve Session Data)\n- **GET /messageExchange** (Performs a secure message exchange with a client after the DH key exchange protocol as been completed)" as MalloryServerEndpointsNote
+MalloryServer .. MalloryServerEndpointsNote
 
 class Client {
     - _diffieHellmanMap : std::map<std::string, std::unique_ptr<SessionData>>
@@ -56,9 +95,25 @@ class SessionData <<struct>> {
     - _derivedKeyHex : std::string
     - _clientId : std::string
     - _iv : std::vector<uint8_t>
+    - _groupNameDH : std::string
 
-    + SessionData(nonceSize : std::size_t, clientNonceHex : std::string, clientId : std::string, debugFlag : bool, ivLength : std::size_t)
+    + SessionData(nonceSize : std::size_t, clientNonceHex : std::string, clientId : std::string, debugFlag : bool, ivLength : std::size_t, groupNameDH : std::string)
     + SessionData(diffieHellman : std::unique_ptr<MyCryptoLibrary::DiffieHellman>, serverNonceHex : std::string, clientNonceHex : std::string, iv : std::vector<uint8_t>)
+}
+
+class MallorySessionData <<struct>> {
+    - _diffieHellmanAM : std::unique_ptr<MyCryptoLibrary::DiffieHellman>
+    - _serverNonceHexAM : std::string
+    - _clientNonceHexAM : std::string
+    - _derivedKeyHexAM : std::string
+    - _clientIdAM : std::string
+    - _ivAM : std::vector<uint8_t>
+    - _sessionIdMS : std::string
+    - _fakeClientMS : std::unique_ptr<Client>
+    - _parameterInjection : bool
+
+    + MallorySessionData(nonceSize : std::size_t, clientNonceHex : std::string, clientId : std::string, debugFlag : bool, ivLength : std::size_t, groupNameDH : std::string)
+    + MallorySessionData(nonceSize : std::size_t, clientNonceHex : std::string, clientId : std::string, debugFlag : bool, ivLength : std::size_t, groupNameDH : std::string, parameterInjection : bool)
 }
 
 namespace MyCryptoLibrary {
@@ -74,8 +129,11 @@ namespace MyCryptoLibrary {
         - _derivedSymmetricKey : std::vector<uint8_t>
         - _derivedSymmetricKeyHex : std::string
         - _confirmationMessage : std::string
+        - _publicKeyDeterministic : bool
+        - _groupName : std::string
 
-        + DiffieHellman(debugFlag : bool) {explicit}
+        + DiffieHellman(debugFlag : bool, groupName : std::string) {explicit}
+        + DiffieHellman(debugFlag : bool, publicKeyDeterministic : bool, groupName : std::string) {explicit}
         + ~DiffieHellman() 
         + getPublicKey() : std::string {const}
         + getGroupName() : std::string {const}
@@ -102,6 +160,17 @@ namespace MessageExtractionFacility {
   }
 }
 
+namespace MyCryptoLibrary {
+  class EncryptionUtility {
+    + generateCryptographicNonce(length : std::size_t) : std::string {const}
+    + generateRandomIV(ivLength : std::size_t) : std::vector<uint8_t>
+    + encryptMessageAes256CbcMode(plaintext : std::string, key : std::vector<uint8_t>, iv : std::vector<uint8_t>) : std::string
+    + decryptMessageAes256CbcMode(ciphertextHex : std::string, key : std::vector<uint8_t>, iv : std::vector<uint8_t>) : std::string
+    + getFormattedTimestamp() : std::string
+  }
+
+}
+
 namespace DhParametersLoader {
     class DhParameters <<struct>> {
         + _groupName : std::string
@@ -119,11 +188,18 @@ namespace DhParametersLoader {
 MyCryptoLibrary.DiffieHellman --> DhParametersLoader : uses
 MyCryptoLibrary.DiffieHellman --> MessageExtractionFacility : uses
 
+Server --> MyCryptoLibrary.EncryptionUtility : uses
+MalloryServer --> MyCryptoLibrary.EncryptionUtility : uses
+Client --> MyCryptoLibrary.EncryptionUtility : uses
+
 Server --> SessionData : uses
+MalloryServer --> MallorySessionData : uses
 Client --> SessionData : uses
 
-Client --> Server : "<<uses HTTP requests>>"
+Client --> MalloryServer : "<<uses HTTP requests>>"
+MalloryServer --> Server : "<<uses HTTP requests>>"
 
 SessionData --> MyCryptoLibrary.DiffieHellman : "has a"
+MallorySessionData --> MyCryptoLibrary.DiffieHellman : "has a"
 
 @enduml

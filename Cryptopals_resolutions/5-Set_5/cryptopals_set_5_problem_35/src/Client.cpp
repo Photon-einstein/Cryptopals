@@ -7,40 +7,66 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <openssl/rand.h>
+#include <string_view>
 
 #include "./../include/Client.hpp"
 #include "./../include/EncryptionUtility.hpp"
 
 /* constructor / destructor */
-Client::Client(const std::string &clientId, const bool debugFlag)
-    : _clientId{clientId}, _debugFlag{debugFlag} {
+Client::Client(const std::string &clientId, const bool debugFlag,
+               const std::string &groupNameDH)
+    : _clientId{clientId}, _debugFlag{debugFlag}, _groupNameDH{groupNameDH} {
   if (_clientId.size() == 0) {
     throw std::runtime_error("Client log | constructor(): "
                              "Client ID is null");
+  } else if (_groupNameDH.size() == 0) {
+    throw std::runtime_error("Client log | constructor(): "
+                             "Group name is null");
+  }
+}
+/******************************************************************************/
+Client::Client(const std::string &clientId, const bool debugFlag,
+               const std::string &groupNameDH, const bool parameterInjection)
+    : _clientId{clientId}, _debugFlag{debugFlag}, _groupNameDH{groupNameDH},
+      _parameterInjection{parameterInjection} {
+  if (_clientId.size() == 0) {
+    throw std::runtime_error("Client log | constructor(): "
+                             "Client ID is null");
+  } else if (_groupNameDH.size() == 0) {
+    throw std::runtime_error("Client log | constructor(): "
+                             "Group name is null");
   }
 }
 /******************************************************************************/
 Client::~Client() {}
 /******************************************************************************/
 /**
- * @brief This method will perform the Diffie Hellman key exchange protocol with
- * a given server.
- *
- * @param portServerNumber The number of the server to use in this exchange.
+ * @brief This method will perform the Diffie Hellman key exchange protocol
+ * with a given server.
  *
  * This method will perform the Diffie Hellman key exchange protocol with
  * a given server, in order to agree on a given symmetric encryption key.
  *
+ * @param portServerNumber The number of the server to use in this exchange.
+ *
+ * @return A tuple containing:
+ *         - bool: indicating success or failure of validation.
+ *         - std::string: the decrypted plaintext message. If decryption
+ * fails, this may contain garbage or incomplete data.
+ *         - std::string: the created session ID
  * @throw runtime_error if portServerNumber < 1024
  */
-void Client::diffieHellmanKeyExchange(const int portServerNumber) {
+const std::tuple<bool, std::string, std::string>
+Client::diffieHellmanKeyExchange(const int portServerNumber) {
   if (portServerNumber < 1023) {
     throw std::runtime_error(
         "Client log | diffieHellmanKeyExchange(): "
         "Invalid port server number used, should be greater than 1023.");
   }
+  std::tuple<bool, std::string, std::string> connectionTestResult;
   std::unique_ptr<MyCryptoLibrary::DiffieHellman> diffieHellman(
-      std::make_unique<MyCryptoLibrary::DiffieHellman>(_debugFlag));
+      std::make_unique<MyCryptoLibrary::DiffieHellman>(
+          _debugFlag, _parameterInjection, _groupNameDH));
   std::string clientNonceHex{
       EncryptionUtility::generateCryptographicNonce(_nonceSize)};
   std::string requestBody =
@@ -99,16 +125,14 @@ void Client::diffieHellmanKeyExchange(const int portServerNumber) {
             extractedPublicKeyB, _diffieHellmanMap[sessionId]->_serverNonceHex,
             _diffieHellmanMap[sessionId]->_clientNonceHex);
     // confirmation of the data received
-    std::tuple<bool, std::string> connectionTestResult =
-        confirmationServerResponse(
-            ciphertext,
-            MessageExtractionFacility::hexToBytes(
-                _diffieHellmanMap[sessionId]->_derivedKeyHex),
-            _diffieHellmanMap[sessionId]->_iv, sessionId, getClientId(),
-            _diffieHellmanMap[sessionId]->_clientNonceHex,
-            _diffieHellmanMap[sessionId]->_serverNonceHex,
-            _diffieHellmanMap[sessionId]
-                ->_diffieHellman->getConfirmationMessage());
+    connectionTestResult = confirmationServerResponse(
+        ciphertext,
+        MessageExtractionFacility::hexToBytes(
+            _diffieHellmanMap[sessionId]->_derivedKeyHex),
+        _diffieHellmanMap[sessionId]->_iv, sessionId, getClientId(),
+        _diffieHellmanMap[sessionId]->_clientNonceHex,
+        _diffieHellmanMap[sessionId]->_serverNonceHex,
+        _diffieHellmanMap[sessionId]->_diffieHellman->getConfirmationMessage());
     if (std::get<0>(connectionTestResult) == false) {
       throw std::runtime_error("Client log | diffieHellmanKeyExchange(): "
                                "Diffie Hellman key exchange failed");
@@ -135,13 +159,136 @@ void Client::diffieHellmanKeyExchange(const int portServerNumber) {
                 << std::endl;
     }
   } catch (const std::exception &e) {
-    std::cerr << "Client log | diffieHellmanKeyExchange(): " << e.what()
-              << std::endl;
+    std::cerr << e.what() << std::endl;
   }
+  return connectionTestResult;
 }
 /******************************************************************************/
 /**
- * @brief This method will confirm if a given session id is correctly setup
+ * @brief This method will perform the message exchange route.
+ *
+ * This method will perform a secure message exchange a with a given server
+ * after the Diffie Hellman key exchange protocol has been successfully executed
+ * and a valid session created.
+ *
+ * @param portServerNumber The number of the server to use in this message
+ * exchange.
+ * @param sessionId The session id to be used in this connection with the
+ * server.
+ *
+ * @return A bool, true if the exchange and validation was successful, failure
+ * otherwise.
+ *
+ * @throw runtime_error if there was an error in the messageExchange.
+ */
+const bool Client::messageExchange(const int portServerNumber,
+                                   const std::string &sessionId) {
+  bool connectionTestResult{false};
+  try {
+    if (portServerNumber < 1023) {
+      throw std::runtime_error(
+          "Client log | messageExchange(): "
+          "Invalid port server number used, should be greater than 1023.");
+    }
+    if (_diffieHellmanMap.empty()) {
+      throw std::runtime_error("Client log | messageExchange(): "
+                               "No sessions are set on the client side, not "
+                               "ready to run this route.");
+    }
+    if (_diffieHellmanMap.find(sessionId) == _diffieHellmanMap.end()) {
+      throw std::runtime_error(
+          "Client log | messageExchange(): "
+          "The session id received as an argument is not setup.");
+    }
+    // rotate iv
+    _diffieHellmanMap[sessionId]->_iv =
+        EncryptionUtility::generateRandomIV(_ivLength);
+    // confirmation message
+    const std::string clientMessageSent =
+        std::string("Hello from client ID: ") + _clientId +
+        " at session ID: " + sessionId + " at " +
+        EncryptionUtility::getFormattedTimestamp() + ".";
+    // calculate ciphertext
+    const std::string ciphertext =
+        EncryptionUtility::encryptMessageAes256CbcMode(
+            clientMessageSent,
+            _diffieHellmanMap[sessionId]->_diffieHellman->getSymmetricKey(),
+            _diffieHellmanMap[sessionId]->_iv);
+    // built body request
+    std::string requestBody =
+        fmt::format(R"({{
+      "messageType": "client_message_exchange",
+      "protocolVersion": "1.0",
+      "sessionId": "{}",
+      "iv": "{}",
+      "ciphertext": "{}"
+    }})",
+                    sessionId,
+                    MessageExtractionFacility::toHexString(
+                        _diffieHellmanMap[sessionId]->_iv),
+                    ciphertext);
+    cpr::Response response =
+        cpr::Post(cpr::Url{std::string("http://localhost:") +
+                           std::to_string(portServerNumber) +
+                           std::string("/messageExchange")},
+                  cpr::Header{{"Content-Type", "application/json"}},
+                  cpr::Body{requestBody});
+    if (_debugFlag) {
+      printServerResponse(response);
+    }
+    if (response.status_code != 201) {
+      throw std::runtime_error("Client log | messageExchange(): "
+                               "Message exchange failed at client ID: " +
+                               _clientId);
+    }
+    nlohmann::json parsedJson = nlohmann::json::parse(response.text);
+    const std::string extractedSessionId =
+        parsedJson.at("sessionId").get<std::string>();
+    if (extractedSessionId != sessionId) {
+      throw std::runtime_error("Client log | messageExchange(): "
+                               "Message exchange failed at client ID: " +
+                               _clientId +
+                               " session ID send and received don't match.");
+    }
+    const std::string extractedCiphertext =
+        parsedJson.at("confirmation").at("ciphertext").get<std::string>();
+    const std::string extractedIvHex =
+        parsedJson.at("confirmation").at("iv").get<std::string>();
+    // update iv
+    _diffieHellmanMap[sessionId]->_iv =
+        MessageExtractionFacility::hexToBytes(extractedIvHex);
+    // decrypt received ciphertext
+    const std::string decryptedCiphertext =
+        EncryptionUtility::decryptMessageAes256CbcMode(
+            extractedCiphertext,
+            _diffieHellmanMap[extractedSessionId]
+                ->_diffieHellman->getSymmetricKey(),
+            _diffieHellmanMap[extractedSessionId]->_iv);
+    // check return values
+    if (decryptedCiphertext.find(clientMessageSent) != std::string::npos) {
+      connectionTestResult = true;
+      if (_debugFlag) {
+        std::cout << "Client log | messageExchange(): decrypted message "
+                     "received from the server: \n'"
+                  << decryptedCiphertext << "'." << std::endl;
+      }
+    } else {
+      throw std::runtime_error(
+          "Client log | messageExchange(): "
+          "Message exchange failed at client ID: " +
+          _clientId +
+          " message received doesn't contain data from message sent,"
+          " message received: " +
+          decryptedCiphertext);
+    }
+  } catch (const std::exception &e) {
+    std::cerr << e.what() << std::endl;
+  }
+  return connectionTestResult;
+}
+/******************************************************************************/
+/**
+ * @brief This method will confirm if a given session id is correctly setup.
  *
  * This method will confirm if a given session id is correctly setup on the
  * client side.
@@ -153,9 +300,27 @@ bool Client::confirmSessionId(const std::string &sessionId) {
 }
 /******************************************************************************/
 /**
- * @brief This method return the client ID.
+ * @brief This method sets the server's test port to a new one.
  *
- * This method return the client ID of a given client.
+ * This method sets the server's test port to a new one, used only for
+ * test purposes.
+ *
+ * @throw runtime_error if the portServerTest is not a valid one.
+ */
+void Client::setTestPort(const int portServerTest) {
+  if (portServerTest < 1024 || portServerTest > 49151) {
+    throw std::runtime_error(
+        "Client log | setTestPort(): "
+        "invalid port test number given, must be in range [1024, 49151]");
+  }
+  _portServerTest = portServerTest;
+}
+/******************************************************************************/
+
+/**
+ * @brief This method returns the client ID.
+ *
+ * This method returns the client ID of a given client.
  *
  * @return A string, the client ID.
  * @throw runtime_error if the client ID is null.
@@ -169,26 +334,44 @@ const std::string &Client::getClientId() const {
 }
 /******************************************************************************/
 /**
- * @brief This method will return the production port of the server.
+ * @brief This method will return the server's production port.
  *
- * This method will return the production port of the server to establish a
+ * This method will return the server's production port to establish a
  * connection.
+ *
+ * @return An int, the server's production port.
  */
 const int Client::getProductionPort() const { return _portServerProduction; }
 /******************************************************************************/
 /**
- * @brief This method will return the test port of the server.
+ * @brief This method will return the server's test port.
  *
- * This method will return the test port of the server to establish a
+ * This method will return the server's test port to establish a
  * connection.
+ *
+ * @return An int, the server test port.
  */
 const int Client::getTestPort() const { return _portServerTest; }
 /******************************************************************************/
 /**
- * @brief This method verify if this entry exists on the client side.
+ * @brief This method will return the Diffie Hellman's map.
  *
- * This method verify if this entry exists on the client side. These arguments
- * are one entry from the endpoint of the server named GET '/sessionsData'.
+ * This method will return the Diffie Hellman's map of the client.
+ *
+ * @return A map, the client's DH map.
+ */
+std::map<std::string, std::unique_ptr<SessionData>> &
+Client::getDiffieHellmanMap() {
+  return _diffieHellmanMap;
+}
+/******************************************************************************/
+/**
+ * @brief This method does the verification if this entry exists on the client
+ * side.
+ *
+ * This method verify if this entry exists on the client side.
+ * These method's arguments are one entry from the endpoint of the server
+ * named GET '/sessionsData'.
  *
  * @return Bool value, true if there is a match, false otherwise.
  */
@@ -212,12 +395,12 @@ const bool Client::verifyServerSessionDataEntryEndpoint(
  * @brief This method will print the server response to the Diffie Hellman
  * key exchange protocol.
  *
- * This method will print the server response to the Diffie Hellman
- * key exchange protocol. The response is a json text, and it will be printed
- * in a structured way.
+ * This method will print the server response to the Diffie Hellman key exchange
+ * protocol. The response is a json text, and it will be printed in a structured
+ * way.
  *
- * @param response The response received by the server during the execution of
- * the Diffie Hellman key exchange protocol.
+ * @param response The response sent by the server during the execution
+ * of the Diffie Hellman key exchange protocol.
  */
 void Client::printServerResponse(const cpr::Response &response) {
   std::cout << "Status Code: " << response.status_code << "\n";
@@ -242,16 +425,16 @@ void Client::printServerResponse(const cpr::Response &response) {
 }
 /******************************************************************************/
 /**
- * @brief This method will perform the decryption of the ciphertext received by
- * the server and test it against the plaintext data received.
+ * @brief This method will perform the decryption of the ciphertext received
+ * by the server and test it against the plaintext data received.
  *
  * This method will perform the decryption of the ciphertext received by
  * the server and test it against the plaintext data received. The test passes
  * if the data matches for every fields.
  *
- * @param ciphertext The ciphertext send by the server as the challenge to check
- * if the Diffie Hellman key exchange protocol was executed successfully by the
- * client.
+ * @param ciphertext The ciphertext send by the server as the challenge to
+ * check if the Diffie Hellman key exchange protocol was executed successfully
+ * by the client.
  * @param key The symmetric key derived by the client in raw bytes, after the
  * conclusion of the Diffie Hellman key exchange protocol.
  * @param iv The initialization vector of the AES-256-CBC mode encryption
@@ -262,17 +445,15 @@ void Client::printServerResponse(const cpr::Response &response) {
  * hexadecimal format.
  * @param serverNonce The server nonce associated with this connection, in
  * hexadecimal format.
- * @param message The conclusion message expected from this protocol (e.g., "Key
- * exchange complete").
+ * @param message The conclusion message expected from this protocol starts
+ * with the expected message (e.g. "Key exchange complete").
  *
- * @retval true Decryption and validation were successful.
- * @retval false Decryption or validation failed.
  * @return A tuple containing:
  *         - bool: indicating success or failure of validation.
- *         - std::string: the decrypted plaintext message. If decryption fails,
- * this may contain garbage or incomplete data.
+ *         - std::string: the decrypted plaintext message. If decryption
+ * fails, this may contain garbage or incomplete data.
  */
-std::tuple<bool, std::string> Client::confirmationServerResponse(
+std::tuple<bool, std::string, std::string> Client::confirmationServerResponse(
     const std::string &ciphertext, const std::vector<uint8_t> &key,
     const std::vector<uint8_t> &iv, const std::string &sessionId,
     const std::string &clientId, const std::string &clientNonce,
@@ -294,14 +475,15 @@ std::tuple<bool, std::string> Client::confirmationServerResponse(
     std::string messageExtracted = parsedJson.at("message").get<std::string>();
     if (sessionId == sessionIdExtracted && clientId == clientIdExtracted &&
         clientNonce == clientNonceExtracted &&
-        serverNonce == serverNonceExtracted && message == messageExtracted) {
+        serverNonce == serverNonceExtracted &&
+        messageExtracted.starts_with(message)) {
       comparisonRes = true;
     }
   } catch (const std::exception &e) {
     std::cerr << "Client log | confirmationServerResponse(): " << e.what()
               << std::endl;
-    return std::make_tuple(comparisonRes, plaintext);
+    return std::make_tuple(comparisonRes, plaintext, sessionId);
   }
-  return std::make_tuple(comparisonRes, plaintext);
+  return std::make_tuple(comparisonRes, plaintext, sessionId);
 }
 /******************************************************************************/

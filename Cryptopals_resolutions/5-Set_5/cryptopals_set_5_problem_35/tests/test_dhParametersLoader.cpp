@@ -13,7 +13,7 @@ protected:
   void SetUp() override {
     // NOLINTNEXTLINE(clang-analyzer-optin.cplusplus.VirtualCall)
     _diffieHellman = std::make_unique<MyCryptoLibrary::DiffieHellman>(
-        _dhDebugFlag); // Shared setup
+        _dhDebugFlag, _groupNameDH); // Shared setup
   }
 
   // cppcheck-suppress unusedFunction
@@ -26,6 +26,7 @@ protected:
   std::map<std::string, DhParametersLoader::DhParameters> _dhParametersMap;
   std::unique_ptr<MyCryptoLibrary::DiffieHellman> _diffieHellman;
   const bool _dhDebugFlag{false};
+  const std::string _groupNameDH{"rfc3526-group-17"};
 };
 
 /**

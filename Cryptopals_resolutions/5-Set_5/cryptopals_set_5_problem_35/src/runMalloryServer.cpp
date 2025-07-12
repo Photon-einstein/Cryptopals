@@ -5,16 +5,17 @@
 #include <time.h>
 #include <vector>
 
+#include "./../include/MalloryServer.hpp"
 #include "./../include/MessageExtractionFacility.hpp"
-#include "./../include/Server.hpp"
 
 int main(void) {
   clock_t start, end;
   double time;
   start = clock();
   /* work to verify */
-  const bool debugFlag{false};
-  std::shared_ptr<Server> server = std::make_shared<Server>(debugFlag);
+  const bool debugFlag{false}, testFlag{false}, parameterInjection{false};
+  std::shared_ptr<MalloryServer> server =
+      std::make_shared<MalloryServer>(debugFlag, testFlag, parameterInjection);
   server->runServer();
   /* end of the work */
   end = clock();

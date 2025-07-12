@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(cryptopals_tests_set_4_problem_35)
+project(cryptopals_tests_set_4_problem_34)
 
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 20)
@@ -44,6 +44,8 @@ set(SOURCE_FILES
     ../src/DhParametersLoader.cpp
     ../src/DiffieHellman.cpp
     ../src/EncryptionUtility.cpp
+    ../src/MalloryServer.cpp
+    ../src/MallorySessionData.cpp 
     ../src/MessageExtractionFacility.cpp
     ../src/Server.cpp
 )
@@ -53,6 +55,7 @@ set(TEST_SOURCES
     test_dhParametersLoader.cpp
     test_diffieHellman.cpp
     test_diffieHellmanProtocol.cpp
+    test_diffieHellmanProtocolMITMattack.cpp
 )
 
 # Define the test executable
@@ -84,4 +87,4 @@ target_link_libraries(runTests
 
 # Enable testing
 enable_testing()
-add_test(NAME cryptopals_tests_set_4_problem_33 COMMAND runTests)
+add_test(NAME cryptopals_tests_set_4_problem_34 COMMAND runTests)

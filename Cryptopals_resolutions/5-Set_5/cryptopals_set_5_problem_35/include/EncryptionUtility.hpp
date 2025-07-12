@@ -24,7 +24,7 @@ namespace EncryptionUtility {
 const std::string generateCryptographicNonce(const std::size_t length);
 
 /**
- * @brief Generates a random initialization vector (IV)
+ * @brief Generates a random initialization vector (IV).
  *
  * This method generates a random initialization vector for cryptographic
  * purposes.
@@ -32,14 +32,15 @@ const std::string generateCryptographicNonce(const std::size_t length);
  * @param ivLength The desired length of the IV in bytes.
  *
  * @return A vector containing the IV generated.
- * @throws std::runtime_error if IV generation fails.
+ * @throws std::runtime_error if the IV generation fails.
  */
 std::vector<uint8_t> generateRandomIV(std::size_t ivLength);
 
 /**
  * @brief Encrypts a plaintext message using AES-256-CBC mode
  *
- * Encrypts a plaintext message using AES-256-CBC mode, using openssl library.
+ * Encrypts a plaintext message using AES-256-CBC mode, using the openssl
+ * library.
  *
  * @param plaintext The text to be encrypted.
  * @param key The key to be used in the encryption process (32 bytes for
@@ -71,6 +72,16 @@ std::string encryptMessageAes256CbcMode(const std::string &plaintext,
 std::string decryptMessageAes256CbcMode(const std::string &ciphertextHex,
                                         const std::vector<uint8_t> &key,
                                         const std::vector<uint8_t> &iv);
+
+/**
+ * @brief Returns a formatted timestamp with the current time.
+ *
+ * Returns a formatted timestamp with the current time, in the format
+ * "Year-month-day hour:minute:second TimeZone"
+ *
+ * @return The formatted time zone with the current time.
+ */
+std::string getFormattedTimestamp();
 
 }; // namespace EncryptionUtility
 

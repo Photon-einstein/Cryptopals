@@ -8,7 +8,10 @@
 #include "./../include/Server.hpp"
 
 /* constructor / destructor */
-Server::Server(const bool debugFlag) : _debugFlag{debugFlag} {}
+Server::Server(const bool debugFlag) : _debugFlag{debugFlag} {
+  boost::uuids::random_generator gen;
+  _serverId += boost::uuids::to_string(gen());
+}
 /******************************************************************************/
 Server::~Server() {
   // server graceful stop
@@ -20,11 +23,11 @@ Server::~Server() {
 }
 /******************************************************************************/
 /**
- * @brief This method will start all the server endpoints in a multi thread
- * environment
+ * @brief This method will start all the server's endpoint in a multi thread
+ * environment.
  *
  * This method will start all the endpoints that the server provides to their
- * clients
+ * clients.
  */
 void Server::runServer() {
   setupRoutes();
@@ -32,11 +35,11 @@ void Server::runServer() {
 }
 /******************************************************************************/
 /**
- * @brief This method will start all the server endpoints in a multi thread
- * environment for a test scenario
+ * @brief This method will start all the server's endpoints in a multi thread
+ * environment for a test scenario.
  *
  * This method will start all the endpoints that the server provides to their
- * clients, for a given test
+ * clients, for a given test.
  */
 void Server::runServerTest() {
   _serverThread = std::thread([this]() {
@@ -48,8 +51,8 @@ void Server::runServerTest() {
 /**
  * @brief This method will clear all the sessions in memory.
  *
- * This method will clear all the sessions in memory that were created executing
- * the Diffie Hellman key exchange protocol.
+ * This method will clear all the sessions in memory that were created
+ * after the execution of the Diffie Hellman key exchange protocol.
  */
 void Server::clearDiffieHellmanSessionData() {
   std::lock_guard<std::mutex> lock(_diffieHellmanMapMutex);
@@ -57,40 +60,40 @@ void Server::clearDiffieHellmanSessionData() {
 }
 /******************************************************************************/
 /**
- * @brief This method will return the production port of the server.
+ * @brief This method will return the server's production port.
  *
- * This method will return the production port of the server to establish a
+ * This method will return the server's production port to establish a
  * connection.
  */
 const int Server::getProductionPort() const { return _portProduction; }
 /******************************************************************************/
 /**
- * @brief This method will return the test port of the server.
+ * @brief This method will return the server's test port.
  *
- * This method will return the test port of the server to establish a
+ * This method will return the server's test port to establish a
  * connection.
  */
 const int Server::getTestPort() const { return _portTest; }
 /******************************************************************************/
 /**
  * @brief This method will start the endpoints that the server
- * provides to his clients
+ * provides to his clients.
  *
  * This method will start the endpoints that the server
- * provides to his clients, namely the root endpoint and the signature
- * verification endpoint
+ * provides to his clients.
  */
 void Server::setupRoutes() {
   rootEndpoint();
   keyExchangeRoute();
   getSessionsDataEndpoint();
+  messageExchangeRoute();
 }
 /******************************************************************************/
 /**
  * @brief This method is the entry point for the server URL address
  *
- * This method will serve as a confirmation that the server URL is up
- * and running at the root path
+ * This method will serve as a confirmation that the server's URL is up
+ * and running at the root path.
  */
 void Server::rootEndpoint() {
   CROW_ROUTE(_app, "/").methods("GET"_method)([&]() {
@@ -102,12 +105,12 @@ void Server::rootEndpoint() {
 }
 /******************************************************************************/
 /**
- * @brief This method runs the route that performs the Diffie Hellman
+ * @brief This method runs the route that performs the Diffie Hellman's
  * key exchange protocol.
  *
- * This method runs the route that performs the Diffie Hellman
- * key exchange protocol. I receives requests and make all the calculations
- * to response to the requests, creating a symmetric key for each connection
+ * This method runs the route that performs the Diffie Hellman's
+ * key exchange protocol. It receives requests and makes all the calculations
+ * to respond to the requests, creating a symmetric key for each connection
  * request.
  */
 void Server::keyExchangeRoute() {
@@ -143,7 +146,7 @@ void Server::keyExchangeRoute() {
           std::lock_guard<std::mutex> lock(_diffieHellmanMapMutex);
           _diffieHellmanMap[sessionId] = std::make_unique<SessionData>(
               _nonceSize, extractedNonceClient, extractedClientId, _debugFlag,
-              _ivLength);
+              _ivLength, extractedGroupName);
 
           _diffieHellmanMap[sessionId]->_derivedKeyHex =
               _diffieHellmanMap[sessionId]->_diffieHellman->deriveSharedSecret(
@@ -161,13 +164,16 @@ void Server::keyExchangeRoute() {
                _diffieHellmanMap[sessionId]->_diffieHellman->getPublicKey()}};
           res["nonce"] = _diffieHellmanMap[sessionId]->_serverNonceHex;
           // confirmation payload
+          std::string serverConfirmationMessage =
+              _diffieHellmanMap[sessionId]
+                  ->_diffieHellman->getConfirmationMessage() +
+              " with " + _serverId;
           nlohmann::json confirmationPayload = {
               {"sessionId", boost::uuids::to_string(sessionId)},
               {"clientId", extractedClientId},
               {"clientNonce", extractedNonceClient},
               {"serverNonce", _diffieHellmanMap[sessionId]->_serverNonceHex},
-              {"message", _diffieHellmanMap[sessionId]
-                              ->_diffieHellman->getConfirmationMessage()}};
+              {"message", serverConfirmationMessage}};
           const std::string confirmationString = confirmationPayload.dump();
           std::string encryptedConfirmationHex =
               EncryptionUtility::encryptMessageAes256CbcMode(
@@ -195,11 +201,95 @@ void Server::keyExchangeRoute() {
 }
 /******************************************************************************/
 /**
+ * @brief This method runs the route that performs the message exchange using
+ * symmetric encryption after the Diffie Hellman's key exchange protocol has
+ * been completed.
+ *
+ * This method runs the route that performs the message exchange using
+ * symmetric encryption after the Diffie Hellman's key exchange protocol has
+ * been completed. It receives messages from clients, checks the validity of
+ * the session id and if valid, sends back a confirmation response.
+ *
+ * @throws std::runtime_error if there is an error in MessageExchangeRoute.
+ */
+void Server::messageExchangeRoute() {
+  CROW_ROUTE(_app, "/messageExchange")
+      .methods("POST"_method)([&](const crow::request &req) {
+        crow::json::wvalue res;
+        try {
+          nlohmann::json parsedJson = nlohmann::json::parse(req.body);
+          std::string extractedSessionId =
+              parsedJson.at("sessionId").get<std::string>();
+          std::string extractedIv = parsedJson.at("iv").get<std::string>();
+          std::string extractedCiphertext =
+              parsedJson.at("ciphertext").get<std::string>();
+          boost::uuids::string_generator gen;
+          boost::uuids::uuid extractedSessionIdUuidFormat =
+              gen(extractedSessionId);
+          // check if session id already exists
+          std::lock_guard<std::mutex> lock(_diffieHellmanMapMutex);
+          if (_diffieHellmanMap.find(extractedSessionIdUuidFormat) ==
+              _diffieHellmanMap.end()) {
+            throw std::runtime_error("Server log | MessageExchangeRoute(): "
+                                     "Session id: " +
+                                     extractedSessionId + " not valid");
+          }
+          // convert iv to bytes and store it
+          _diffieHellmanMap[extractedSessionIdUuidFormat]->_iv =
+              MessageExtractionFacility::hexToBytes(extractedIv);
+          const std::string plaintext =
+              EncryptionUtility::decryptMessageAes256CbcMode(
+                  extractedCiphertext,
+                  _diffieHellmanMap[extractedSessionIdUuidFormat]
+                      ->_diffieHellman->getSymmetricKey(),
+                  _diffieHellmanMap[extractedSessionIdUuidFormat]->_iv);
+          if (_debugFlag) {
+            std::cout
+                << "Server log | MessageExchangeRoute() - decrypted plaintext: "
+                << plaintext << std::endl;
+          }
+          // build server's confirmation
+          std::string serverConfirmationMessage =
+              std::string("Hello from server id: ") + _serverId +
+              " at session id: " + extractedSessionId +
+              +" message received from client: '" + plaintext + "'";
+          _diffieHellmanMap[extractedSessionIdUuidFormat]->_iv =
+              EncryptionUtility::generateRandomIV(_nonceSize);
+          // encrypt server's confirmation message
+          std::string serverConfirmationMessageEncrypted =
+              EncryptionUtility::encryptMessageAes256CbcMode(
+                  serverConfirmationMessage,
+                  _diffieHellmanMap[extractedSessionIdUuidFormat]
+                      ->_diffieHellman->getSymmetricKey(),
+                  _diffieHellmanMap[extractedSessionIdUuidFormat]->_iv);
+          // build confirmation response
+          res["sessionId"] = extractedSessionId;
+          res["confirmation"] = {
+              {"ciphertext", serverConfirmationMessageEncrypted},
+              {"iv",
+               MessageExtractionFacility::toHexString(
+                   _diffieHellmanMap[extractedSessionIdUuidFormat]->_iv)}};
+        } catch (const nlohmann::json::exception &e) {
+          crow::json::wvalue err;
+          err["message"] =
+              std::string("Server log | JSON parsing error: ") + e.what();
+          return crow::response(400, err);
+        } catch (const std::exception &e) {
+          crow::json::wvalue err;
+          err["message"] =
+              std::string("Server log | An unexpected error occurred: ") +
+              e.what();
+        }
+        return crow::response(201, res);
+      });
+}
+/******************************************************************************/
+/**
  * @brief This method runs the route that gets all the current available
- * sessions created using the Diffie Hellman key exchange protocol.
+ * sessions created using the Diffie Hellman's key exchange protocol.
  *
  * This method runs the route that gets all the current available sessions
- * created using the Diffie Hellman key exchange protocol. It outputs all the
+ * created using the Diffie Hellman's key exchange protocol. It outputs all the
  * session data in json format.
  */
 void Server::getSessionsDataEndpoint() {
@@ -230,12 +320,12 @@ void Server::getSessionsDataEndpoint() {
 }
 /******************************************************************************/
 /**
- * @brief This method will generate a unique session id.
+ * @brief This method will generate an unique session's id.
  *
- * This method will generate a unique session id for a given connection
+ * This method will generate an unique session's id for a given connection
  * request.
  *
- * @return A unique session ID to be used.
+ * @return An unique session's ID to be used.
  */
 boost::uuids::uuid Server::generateUniqueSessionId() {
   bool uniqueSessionId{false};
