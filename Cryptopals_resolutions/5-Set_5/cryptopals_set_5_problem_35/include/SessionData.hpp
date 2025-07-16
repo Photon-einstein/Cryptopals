@@ -17,7 +17,7 @@ struct SessionData {
   // Server's constructor side
   SessionData(const std::size_t nonceSize, const std::string &clientNonceHex,
               const std::string &clientId, const bool debugFlag,
-              const std::size_t ivLength, const std::string &groupNameDH)
+              const std::size_t ivLength, const std::string &groupNameDH = "")
       : _diffieHellman(std::make_unique<MyCryptoLibrary::DiffieHellman>(
             debugFlag, groupNameDH)),
         _serverNonceHex(

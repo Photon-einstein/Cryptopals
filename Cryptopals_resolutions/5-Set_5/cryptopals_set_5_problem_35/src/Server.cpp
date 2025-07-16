@@ -123,8 +123,10 @@ void Server::keyExchangeRoute() {
               parsedJson.at("clientId").get<std::string>();
           std::string extractedNonceClient =
               parsedJson.at("nonce").get<std::string>();
-          std::string extractedGroupName =
-              parsedJson.at("diffieHellman").at("groupName").get<std::string>();
+          std::string extractedPrimeP =
+              parsedJson.at("diffieHellman").at("p").get<std::string>();
+          std::string extractedGeneratorG =
+              parsedJson.at("diffieHellman").at("g").get<std::string>();
           std::string extractedPublicKeyA = parsedJson.at("diffieHellman")
                                                 .at("publicKeyA")
                                                 .get<std::string>();
@@ -135,7 +137,8 @@ void Server::keyExchangeRoute() {
             std::cout << "\tClient ID: " << extractedClientId << std::endl;
             std::cout << "\tClient nonce: " << extractedNonceClient
                       << std::endl;
-            std::cout << "\tGroup Name: " << extractedGroupName << std::endl;
+            std::cout << "\tPrime p: " << extractedPrimeP << std::endl;
+            std::cout << "\tGenerator g: " << extractedGeneratorG << std::endl;
             std::cout << "\tPublic Key A: " << extractedPublicKeyA << std::endl;
             std::cout << "----------------------" << std::endl;
           }
@@ -146,7 +149,7 @@ void Server::keyExchangeRoute() {
           std::lock_guard<std::mutex> lock(_diffieHellmanMapMutex);
           _diffieHellmanMap[sessionId] = std::make_unique<SessionData>(
               _nonceSize, extractedNonceClient, extractedClientId, _debugFlag,
-              _ivLength, extractedGroupName);
+              _ivLength);
 
           _diffieHellmanMap[sessionId]->_derivedKeyHex =
               _diffieHellmanMap[sessionId]->_diffieHellman->deriveSharedSecret(
@@ -158,8 +161,9 @@ void Server::keyExchangeRoute() {
                                ->_diffieHellman->getConfirmationMessage();
           res["sessionId"] = boost::uuids::to_string(sessionId);
           res["diffieHellman"] = {
-              {"groupName",
-               _diffieHellmanMap[sessionId]->_diffieHellman->getGroupName()},
+              {"p", _diffieHellmanMap[sessionId]->_diffieHellman->getPrimeP()},
+              {"g",
+               _diffieHellmanMap[sessionId]->_diffieHellman->getGeneratorG()},
               {"publicKeyB",
                _diffieHellmanMap[sessionId]->_diffieHellman->getPublicKey()}};
           res["nonce"] = _diffieHellmanMap[sessionId]->_serverNonceHex;

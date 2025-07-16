@@ -38,6 +38,23 @@ Client::Client(const std::string &clientId, const bool debugFlag,
   }
 }
 /******************************************************************************/
+Client::Client(const std::string &clientId, const bool debugFlag,
+               const std::string &p, const std::string &g,
+               const bool parameterInjection)
+    : _clientId{clientId}, _debugFlag{debugFlag},
+      _parameterInjection{parameterInjection} {
+  if (_clientId.size() == 0) {
+    throw std::runtime_error("Client log | constructor(): "
+                             "Client ID is null");
+  } else if (p.size() == 0) {
+    throw std::runtime_error("Client log | constructor(): "
+                             "Prime p is null");
+  } else if (g.size() == 0) {
+    throw std::runtime_error("Client log | constructor(): "
+                             "Generator g is null");
+  }
+}
+/******************************************************************************/
 Client::~Client() {}
 /******************************************************************************/
 /**
@@ -69,19 +86,20 @@ Client::diffieHellmanKeyExchange(const int portServerNumber) {
           _debugFlag, _parameterInjection, _groupNameDH));
   std::string clientNonceHex{
       EncryptionUtility::generateCryptographicNonce(_nonceSize)};
-  std::string requestBody =
-      fmt::format(R"({{
+  std::string requestBody = fmt::format(
+      R"({{
     "messageType": "client_hello",
     "protocolVersion": "1.0",
     "clientId": "{}",
     "nonce": "{}",
     "diffieHellman": {{
-        "groupName": "{}",
+        "p": "{}",
+        "g": "{}",
         "publicKeyA": "{}"
     }}
 }})",
-                  getClientId(), clientNonceHex, diffieHellman->getGroupName(),
-                  diffieHellman->getPublicKey());
+      getClientId(), clientNonceHex, diffieHellman->getPrimeP(),
+      diffieHellman->getGeneratorG(), diffieHellman->getPublicKey());
   cpr::Response response = cpr::Post(
       cpr::Url{std::string("http://localhost:") +
                std::to_string(portServerNumber) + std::string("/keyExchange")},
@@ -99,8 +117,10 @@ Client::diffieHellmanKeyExchange(const int portServerNumber) {
     std::string sessionId = parsedJson.at("sessionId").get<std::string>();
     std::string extractedNonceServer =
         parsedJson.at("nonce").get<std::string>();
-    std::string extractedGroupName =
-        parsedJson.at("diffieHellman").at("groupName").get<std::string>();
+    std::string extractedPrimeP =
+        parsedJson.at("diffieHellman").at("p").get<std::string>();
+    std::string extractedGeneratorG =
+        parsedJson.at("diffieHellman").at("g").get<std::string>();
     std::string extractedPublicKeyB =
         parsedJson.at("diffieHellman").at("publicKeyB").get<std::string>();
     std::string ciphertext =
@@ -112,7 +132,8 @@ Client::diffieHellmanKeyExchange(const int portServerNumber) {
       std::cout << "\n--- Client log | Extracted Data ---" << std::endl;
       std::cout << "\tSession id: " << sessionId << std::endl;
       std::cout << "\tNonce: " << extractedNonceServer << std::endl;
-      std::cout << "\tGroup Name: " << extractedGroupName << std::endl;
+      std::cout << "\tPrime p: " << extractedPrimeP << std::endl;
+      std::cout << "\tGenerator g: " << extractedGeneratorG << std::endl;
       std::cout << "\tPublic Key B: " << extractedPublicKeyB << std::endl;
       std::cout << "\tCiphertext: " << ciphertext << std::endl;
       std::cout << "\tIV(hex): " << ivHex << std::endl;

@@ -20,15 +20,13 @@ MallorySessionData::MallorySessionData(const std::size_t nonceSize,
       _clientNonceHexAM{clientNonceHex}, _clientIdAM{clientId},
       _ivAM{EncryptionUtility::generateRandomIV(ivLength)} {};
 /******************************************************************************/
-MallorySessionData::MallorySessionData(const std::size_t nonceSize,
-                                       const std::string &clientNonceHex,
-                                       const std::string &clientId,
-                                       const bool debugFlag,
-                                       const std::size_t ivLength,
-                                       const std::string &groupNameDH,
-                                       const bool parameterInjection)
+MallorySessionData::MallorySessionData(
+    const std::size_t nonceSize, const std::string &clientNonceHex,
+    const std::string &clientId, const bool debugFlag,
+    const std::size_t ivLength, const std::string &p, const std::string &g,
+    const bool parameterInjection)
     : _diffieHellmanAM(std::make_unique<MyCryptoLibrary::DiffieHellman>(
-          debugFlag, parameterInjection, groupNameDH)),
+          debugFlag, parameterInjection, p, g)),
       _serverNonceHexAM(
           EncryptionUtility::generateCryptographicNonce(nonceSize)),
       _clientNonceHexAM{clientNonceHex}, _clientIdAM{clientId},
