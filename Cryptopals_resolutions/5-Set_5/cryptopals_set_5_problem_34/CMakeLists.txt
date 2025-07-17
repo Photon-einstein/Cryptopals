@@ -16,14 +16,14 @@ include(FetchContent)
 FetchContent_Declare(
   fmt
   GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-  GIT_TAG 10.2.1
+  GIT_TAG 11.2.0
 )
 
 # Fetch CPR
 FetchContent_Declare(
   cpr
   GIT_REPOSITORY https://github.com/libcpr/cpr.git
-  GIT_TAG 1.11.2
+  GIT_TAG 1.12.0
 )
 FetchContent_MakeAvailable(fmt cpr)
 

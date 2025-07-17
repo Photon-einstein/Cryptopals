@@ -10,14 +10,8 @@ struct MallorySessionData {
   explicit MallorySessionData(const std::size_t nonceSize,
                               const std::string &clientNonceHex,
                               const std::string &clientId, const bool debugFlag,
-                              const std::size_t ivLength,
-                              const std::string &groupNameDH);
-
-  explicit MallorySessionData(const std::size_t nonceSize,
-                              const std::string &clientNonceHex,
-                              const std::string &clientId, const bool debugFlag,
-                              const std::size_t ivLength,
-                              const std::string &groupNameDH,
+                              const std::size_t ivLength, const std::string &p,
+                              const std::string &g,
                               const bool parameterInjection);
 
   ~MallorySessionData();

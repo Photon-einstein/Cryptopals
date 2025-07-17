@@ -150,8 +150,10 @@ void MalloryServer::keyExchangeRoute() {
               parsedJson.at("clientId").get<std::string>();
           std::string extractedNonceClient =
               parsedJson.at("nonce").get<std::string>();
-          std::string extractedGroupName =
-              parsedJson.at("diffieHellman").at("groupName").get<std::string>();
+          std::string extractedPrimeP =
+              parsedJson.at("diffieHellman").at("p").get<std::string>();
+          std::string extractedGeneratorG =
+              parsedJson.at("diffieHellman").at("g").get<std::string>();
           std::string extractedPublicKeyA = parsedJson.at("diffieHellman")
                                                 .at("publicKeyA")
                                                 .get<std::string>();
@@ -162,31 +164,31 @@ void MalloryServer::keyExchangeRoute() {
             std::cout << "\tClient ID: " << extractedClientId << std::endl;
             std::cout << "\tClient nonce: " << extractedNonceClient
                       << std::endl;
-            std::cout << "\tGroup Name: " << extractedGroupName << std::endl;
+            std::cout << "\tPrime p: " << extractedPrimeP << std::endl;
+            std::cout << "\tGenerator g: " << extractedGeneratorG << std::endl;
             std::cout << "\tPublic Key A: " << extractedPublicKeyA << std::endl;
             std::cout << "----------------------" << std::endl;
           }
           MessageExtractionFacility::UniqueBIGNUM peerPublicKey =
               MessageExtractionFacility::hexToUniqueBIGNUM(extractedPublicKeyA);
           boost::uuids::uuid sessionId = generateUniqueSessionId();
-
           std::lock_guard<std::mutex> lock(_diffieHellmanMapMutex);
           _diffieHellmanMap[sessionId] = std::make_unique<MallorySessionData>(
               _nonceSize, extractedNonceClient, extractedClientId, _debugFlag,
-              _ivLength, extractedGroupName, _parameterInjection);
-
+              _ivLength, extractedPrimeP, extractedGeneratorG,
+              _parameterInjection);
           _diffieHellmanMap[sessionId]->_derivedKeyHexAM =
               _diffieHellmanMap[sessionId]
                   ->_diffieHellmanAM->deriveSharedSecret(
                       extractedPublicKeyA,
                       _diffieHellmanMap[sessionId]->_serverNonceHexAM,
                       _diffieHellmanMap[sessionId]->_clientNonceHexAM);
-
           // generate fake client
           _diffieHellmanMap[sessionId]
               ->_fakeClientMS = std::make_unique<Client>(
               _diffieHellmanMap[sessionId]->_clientIdAM, _debugFlag,
-              _diffieHellmanMap[sessionId]->_diffieHellmanAM->getGroupName(),
+              _diffieHellmanMap[sessionId]->_diffieHellmanAM->getPrimeP(),
+              _diffieHellmanMap[sessionId]->_diffieHellmanAM->getGeneratorG(),
               _parameterInjection);
           std::tuple<bool, std::string, std::string> serverResponse =
               _diffieHellmanMap[sessionId]
@@ -214,7 +216,10 @@ void MalloryServer::keyExchangeRoute() {
           res["message"] = messageExtracted;
           res["sessionId"] = sessionIdExtracted;
           res["diffieHellman"] = {
-              {"groupName", extractedGroupName},
+              {"p",
+               _diffieHellmanMap[sessionId]->_diffieHellmanAM->getPrimeP()},
+              {"g",
+               _diffieHellmanMap[sessionId]->_diffieHellmanAM->getGeneratorG()},
               {"publicKeyB",
                _diffieHellmanMap[sessionId]->_diffieHellmanAM->getPublicKey()}};
           res["nonce"] = _diffieHellmanMap[sessionId]->_serverNonceHexAM;

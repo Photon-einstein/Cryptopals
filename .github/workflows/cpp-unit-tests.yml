@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Update git submodules
         run: |
           git submodule update --init --recursive
@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y cmake g++ libgtest-dev libssl-dev nlohmann-json3-dev valgrind libboost-all-dev libasio-dev libfmt-dev
+          sudo apt install -y cmake g++ libgtest-dev libssl-dev nlohmann-json3-dev valgrind libboost-all-dev libasio-dev libfmt-dev libpsl-dev meson
 
       - name: Clone and build Crow
         run: |
@@ -50,10 +50,17 @@ jobs:
                 
                 # Set CMake to Debug mode
                 cmake -DCMAKE_BUILD_TYPE=Debug ..
-                
                 make
+                
                 # Run tests with Valgrind for memory error checking and check for leaks or errors
                 valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./runTests 2>&1 | tee valgrind_output.log
+                TEST_EXIT_CODE=${PIPESTATUS[0]}  # Capture ./runTests exit code
+
+                if [ $TEST_EXIT_CODE -ne 0 ]; then
+                  echo "Unit tests failed!"
+                  exit 1
+                fi
+                
                 if grep -q "ERROR SUMMARY: 0 errors from 0 contexts" valgrind_output.log; then
                   echo "No memory leaks or errors detected."
                 else
@@ -66,4 +73,3 @@ jobs:
               fi
             done
           done
-          

@@ -40,6 +40,34 @@ MyCryptoLibrary::DiffieHellman::DiffieHellman(const bool debugFlag,
 }
 /******************************************************************************/
 MyCryptoLibrary::DiffieHellman::DiffieHellman(const bool debugFlag,
+                                              const std::string &p,
+                                              const std::string &g)
+    : _privateKey{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
+      _publicKey{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
+      _sharedSecret{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
+      _debugFlag{debugFlag} {
+  if (p.size() == 0) {
+    throw std::runtime_error("Diffie Hellman log | constructor(): "
+                             "Prime p is null");
+  } else if (g.size() == 0) {
+    throw std::runtime_error("Diffie Hellman log | constructor(): "
+                             "Generator g is null");
+  }
+  std::map<std::string, DhParametersLoader::DhParameters> dhParametersMap =
+      DhParametersLoader::loadDhParameters(getDhParametersFilenameLocation());
+  _p = MessageExtractionFacility::hexToUniqueBIGNUM(p);
+  _g = MessageExtractionFacility::hexToUniqueBIGNUM(g);
+  if (_debugFlag) {
+    std::cout << "Diffie Hellman log | p (decimal) = "
+              << MessageExtractionFacility::BIGNUMToDec(_p.get()) << std::endl;
+    std::cout << "Diffie Hellman log | g (decimal) = "
+              << MessageExtractionFacility::BIGNUMToDec(_g.get()) << std::endl;
+  }
+  generatePrivateKey();
+  generatePublicKey();
+}
+/******************************************************************************/
+MyCryptoLibrary::DiffieHellman::DiffieHellman(const bool debugFlag,
                                               const bool publicKeyDeterministic,
                                               const std::string &groupName)
     : _privateKey{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
@@ -77,6 +105,39 @@ MyCryptoLibrary::DiffieHellman::DiffieHellman(const bool debugFlag,
     throw std::runtime_error("Diffie Hellman log | constructor(): "
                              "Group name is invalid");
   }
+}
+/******************************************************************************/
+MyCryptoLibrary::DiffieHellman::DiffieHellman(const bool debugFlag,
+                                              const bool publicKeyDeterministic,
+                                              const std::string &p,
+                                              const std::string &g)
+    : _privateKey{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
+      _publicKey{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
+      _sharedSecret{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
+      _debugFlag{debugFlag}, _publicKeyDeterministic{publicKeyDeterministic} {
+  if (p.empty()) {
+    throw std::runtime_error("Diffie Hellman log | constructor(): "
+                             "Prime p is null");
+  } else if (g.empty()) {
+    throw std::runtime_error("Diffie Hellman log | constructor(): "
+                             "Generator g is null");
+  }
+  std::map<std::string, DhParametersLoader::DhParameters> dhParametersMap =
+      DhParametersLoader::loadDhParameters(getDhParametersFilenameLocation());
+  _p = MessageExtractionFacility::hexToUniqueBIGNUM(p);
+  _g = MessageExtractionFacility::hexToUniqueBIGNUM(g);
+  if (_debugFlag) {
+    std::cout << "Diffie Hellman log | p (decimal) = "
+              << MessageExtractionFacility::BIGNUMToDec(_p.get()) << std::endl;
+    std::cout << "Diffie Hellman log | g (decimal) = "
+              << MessageExtractionFacility::BIGNUMToDec(_g.get()) << std::endl;
+    std::cout << "Diffie Hellman log | p (hex) = "
+              << MessageExtractionFacility::BIGNUMToHex(_p.get()) << std::endl;
+    std::cout << "Diffie Hellman log | g (hex) = "
+              << MessageExtractionFacility::BIGNUMToHex(_g.get()) << std::endl;
+  }
+  generatePrivateKey();
+  generatePublicKey();
 }
 /******************************************************************************/
 MyCryptoLibrary::DiffieHellman::~DiffieHellman() {}
@@ -280,6 +341,36 @@ MyCryptoLibrary::DiffieHellman::getDhParametersFilenameLocation() const {
   }
   return _dhParametersFilename;
 }
+
+/**
+ * @brief This method returns the prime p used in the Diffie Hellman key
+ * exchange protocol.
+ *
+ * @return The prime p, in hexadecimal format.
+ * @throws std::runtime_error if the prime p is not set.
+ */
+const std::string MyCryptoLibrary::DiffieHellman::getPrimeP() const {
+  if (!_p) {
+    throw std::runtime_error("Diffie Hellman log | getPrimeP(): "
+                             "prime p is not set.");
+  }
+  return MessageExtractionFacility::BIGNUMToHex(_p.get());
+}
+/******************************************************************************/
+/**
+ * @brief This method returns the generator g used in the Diffie Hellman key
+ * exchange protocol.
+ *
+ * @return The generator g, in hexadecimal format.
+ * @throws std::runtime_error if the generator g is not set.
+ */
+const std::string MyCryptoLibrary::DiffieHellman::getGeneratorG() const {
+  if (!_g) {
+    throw std::runtime_error("Diffie Hellman log | getGeneratorG(): "
+                             "generator g is not set.");
+  }
+  return MessageExtractionFacility::BIGNUMToHex(_g.get());
+};
 /******************************************************************************/
 /**
  * @brief This method will generate a private key.

@@ -15,9 +15,17 @@ class DiffieHellman {
 public:
   /* constructor / destructor*/
   explicit DiffieHellman(const bool debugFlag, const std::string &groupName);
+
+  explicit DiffieHellman(const bool debugFlag, const std::string &p,
+                         const std::string &g);
+
   explicit DiffieHellman(const bool debugFlag,
                          const bool publicKeyDeterministic,
                          const std::string &groupName);
+
+  explicit DiffieHellman(const bool debugFlag,
+                         const bool publicKeyDeterministic,
+                         const std::string &p, const std::string &g);
   ~DiffieHellman();
 
   /* public methods */
@@ -89,6 +97,24 @@ public:
    * @throws std::runtime_error if the DH parameters filename is empty.
    */
   const std::string &getDhParametersFilenameLocation() const;
+
+  /**
+   * @brief This method returns the prime p used in the Diffie Hellman key
+   * exchange protocol.
+   *
+   * @return The prime p, in hexadecimal format.
+   * @throws std::runtime_error if the prime p is not set.
+   */
+  const std::string getPrimeP() const;
+
+  /**
+   * @brief This method returns the generator g used in the Diffie Hellman key
+   * exchange protocol.
+   *
+   * @return The generator g, in hexadecimal format.
+   * @throws std::runtime_error if the prime g is not set.
+   */
+  const std::string getGeneratorG() const;
 
 private:
   /* private methods */
