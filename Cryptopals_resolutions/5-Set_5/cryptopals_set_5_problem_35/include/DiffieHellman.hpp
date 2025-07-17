@@ -105,7 +105,7 @@ public:
    * @return The prime p, in hexadecimal format.
    * @throws std::runtime_error if the prime p is not set.
    */
-  const std::string &getPrimeP() const;
+  const std::string getPrimeP() const;
 
   /**
    * @brief This method returns the generator g used in the Diffie Hellman key
@@ -114,7 +114,7 @@ public:
    * @return The generator g, in hexadecimal format.
    * @throws std::runtime_error if the prime g is not set.
    */
-  const std::string &getGeneratorG() const;
+  const std::string getGeneratorG() const;
 
 private:
   /* private methods */

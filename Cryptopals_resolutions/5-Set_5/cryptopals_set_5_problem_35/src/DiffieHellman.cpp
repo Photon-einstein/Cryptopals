@@ -349,12 +349,12 @@ MyCryptoLibrary::DiffieHellman::getDhParametersFilenameLocation() const {
  * @return The prime p, in hexadecimal format.
  * @throws std::runtime_error if the prime p is not set.
  */
-const std::string &MyCryptoLibrary::DiffieHellman::getPrimeP() const {
+const std::string MyCryptoLibrary::DiffieHellman::getPrimeP() const {
   if (!_p) {
     throw std::runtime_error("Diffie Hellman log | getPrimeP(): "
                              "prime p is not set.");
   }
-  return MessageExtractionFacility::BIGNUMToHex(_p);
+  return MessageExtractionFacility::BIGNUMToHex(_p.get());
 }
 /******************************************************************************/
 /**
@@ -364,12 +364,12 @@ const std::string &MyCryptoLibrary::DiffieHellman::getPrimeP() const {
  * @return The generator g, in hexadecimal format.
  * @throws std::runtime_error if the generator g is not set.
  */
-const std::string &MyCryptoLibrary::DiffieHellman::getGeneratorG() const {
+const std::string MyCryptoLibrary::DiffieHellman::getGeneratorG() const {
   if (!_g) {
     throw std::runtime_error("Diffie Hellman log | getGeneratorG(): "
                              "generator g is not set.");
   }
-  return MessageExtractionFacility::BIGNUMToHex(_g);
+  return MessageExtractionFacility::BIGNUMToHex(_g.get());
 };
 /******************************************************************************/
 /**

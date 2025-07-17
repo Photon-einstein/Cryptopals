@@ -221,10 +221,10 @@ void MalloryServer::keyExchangeRoute() {
           res["diffieHellman"] = {
               {"p",
                _diffieHellmanMap[sessionId]->_diffieHellmanAM->getPrimeP()},
-              {"g", _diffieHellmanMap[sessionId]
-                        ->_diffieHellmanAM->getGeneratorG()} {
-                  "publicKeyB", _diffieHellmanMap[sessionId]
-                                    ->_diffieHellmanAM->getPublicKey()}};
+              {"g",
+               _diffieHellmanMap[sessionId]->_diffieHellmanAM->getGeneratorG()},
+              {"publicKeyB",
+               _diffieHellmanMap[sessionId]->_diffieHellmanAM->getPublicKey()}};
           res["nonce"] = _diffieHellmanMap[sessionId]->_serverNonceHexAM;
           // confirmation payload
           nlohmann::json confirmationPayload = {
