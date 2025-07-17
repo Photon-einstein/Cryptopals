@@ -104,7 +104,8 @@
     8.2. Add a new DiffieHellman constructor without group name field and with p and g hardcoded instead (Done)
 
 9.  Rerun build of source code, should compile (Done)
-
 10. Rerun the existing tests, all should pass (Done)
 
-11. Implement the swapping values, make it adjustable (in progress)
+11. Fix the broking tests in the GitHub actions (in progress)
+
+12. Implement the swapping values, make it adjustable (in progress)

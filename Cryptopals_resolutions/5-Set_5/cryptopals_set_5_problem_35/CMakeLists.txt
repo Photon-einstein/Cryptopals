@@ -6,6 +6,7 @@ project(cryptopals_set_4_problem_35)
 
 # Find the OpenSSL package
 find_package(OpenSSL REQUIRED)
+find_package(Boost REQUIRED)
 
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 20)
@@ -46,7 +47,6 @@ add_executable(runMalloryServer
 )
 
 # Manually link Boost UUID
-find_package(Boost REQUIRED)  # Find Boost core
 include_directories(${Boost_INCLUDE_DIRS})
 
 target_link_libraries(runMalloryServer
@@ -64,7 +64,6 @@ add_executable(runServer
 )
 
 # Manually link Boost UUID
-find_package(Boost REQUIRED)  # Find Boost core
 include_directories(${Boost_INCLUDE_DIRS})
 
 target_link_libraries(runServer
