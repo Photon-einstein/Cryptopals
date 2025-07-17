@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Update git submodules
         run: |
           git submodule update --init --recursive
@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y cmake g++ libgtest-dev libssl-dev nlohmann-json3-dev valgrind libboost-all-dev libasio-dev libfmt-dev
+          sudo apt install -y cmake g++ libgtest-dev libssl-dev nlohmann-json3-dev valgrind libboost-all-dev libasio-dev libfmt-dev libpsl-dev meson
 
       - name: Clone and build Crow
         run: |
@@ -66,4 +66,3 @@ jobs:
               fi
             done
           done
-          
