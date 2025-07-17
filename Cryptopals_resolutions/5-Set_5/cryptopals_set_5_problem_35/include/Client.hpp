@@ -200,7 +200,7 @@ private:
   const std::size_t _nonceSize{16};            // bytes
   const std::size_t _ivLength{AES_BLOCK_SIZE}; // bytes
   const bool _debugFlag;
-  const std::string _groupNameDH;
+  const std::string _groupNameDH = "";
   const std::string _pHex;
   const std::string _gHex;
   const bool _parameterInjection{false};

@@ -115,10 +115,10 @@ MyCryptoLibrary::DiffieHellman::DiffieHellman(const bool debugFlag,
       _publicKey{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
       _sharedSecret{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
       _debugFlag{debugFlag}, _publicKeyDeterministic{publicKeyDeterministic} {
-  if (p.size() == 0) {
+  if (p.empty()) {
     throw std::runtime_error("Diffie Hellman log | constructor(): "
                              "Prime p is null");
-  } else if (g.size() == 0) {
+  } else if (g.empty()) {
     throw std::runtime_error("Diffie Hellman log | constructor(): "
                              "Generator g is null");
   }

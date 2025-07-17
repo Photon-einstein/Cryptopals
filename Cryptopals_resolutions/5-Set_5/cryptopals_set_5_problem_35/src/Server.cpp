@@ -145,18 +145,15 @@ void Server::keyExchangeRoute() {
           MessageExtractionFacility::UniqueBIGNUM peerPublicKey =
               MessageExtractionFacility::hexToUniqueBIGNUM(extractedPublicKeyA);
           boost::uuids::uuid sessionId = generateUniqueSessionId();
-
           std::lock_guard<std::mutex> lock(_diffieHellmanMapMutex);
           _diffieHellmanMap[sessionId] = std::make_unique<SessionData>(
               _nonceSize, extractedNonceClient, extractedClientId, _debugFlag,
-              _ivLength);
-
+              _ivLength, extractedPrimeP, extractedGeneratorG);
           _diffieHellmanMap[sessionId]->_derivedKeyHex =
               _diffieHellmanMap[sessionId]->_diffieHellman->deriveSharedSecret(
                   extractedPublicKeyA,
                   _diffieHellmanMap[sessionId]->_serverNonceHex,
                   _diffieHellmanMap[sessionId]->_clientNonceHex);
-
           res["message"] = _diffieHellmanMap[sessionId]
                                ->_diffieHellman->getConfirmationMessage();
           res["sessionId"] = boost::uuids::to_string(sessionId);
@@ -168,6 +165,7 @@ void Server::keyExchangeRoute() {
                _diffieHellmanMap[sessionId]->_diffieHellman->getPublicKey()}};
           res["nonce"] = _diffieHellmanMap[sessionId]->_serverNonceHex;
           // confirmation payload
+          std::cout << "Server step 4" << std::endl;
           std::string serverConfirmationMessage =
               _diffieHellmanMap[sessionId]
                   ->_diffieHellman->getConfirmationMessage() +
@@ -193,12 +191,13 @@ void Server::keyExchangeRoute() {
           crow::json::wvalue err;
           err["message"] =
               std::string("Server log | JSON parsing error: ") + e.what();
-          return crow::response(400, err);
+          return crow::response(404, err);
         } catch (const std::exception &e) {
           crow::json::wvalue err;
           err["message"] =
               std::string("Server log | An unexpected error occurred: ") +
               e.what();
+          return crow::response(400, err);
         }
         return crow::response(201, res);
       });

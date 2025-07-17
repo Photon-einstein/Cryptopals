@@ -41,7 +41,7 @@ Client::Client(const std::string &clientId, const bool debugFlag,
 Client::Client(const std::string &clientId, const bool debugFlag,
                const std::string &p, const std::string &g,
                const bool parameterInjection)
-    : _clientId{clientId}, _debugFlag{debugFlag},
+    : _clientId{clientId}, _debugFlag{debugFlag}, _pHex{p}, _gHex{g},
       _parameterInjection{parameterInjection} {
   if (_clientId.size() == 0) {
     throw std::runtime_error("Client log | constructor(): "
@@ -81,9 +81,16 @@ Client::diffieHellmanKeyExchange(const int portServerNumber) {
         "Invalid port server number used, should be greater than 1023.");
   }
   std::tuple<bool, std::string, std::string> connectionTestResult;
-  std::unique_ptr<MyCryptoLibrary::DiffieHellman> diffieHellman(
-      std::make_unique<MyCryptoLibrary::DiffieHellman>(
-          _debugFlag, _parameterInjection, _groupNameDH));
+  std::unique_ptr<MyCryptoLibrary::DiffieHellman> diffieHellman;
+  if (!_groupNameDH.empty()) {
+    diffieHellman = std::make_unique<MyCryptoLibrary::DiffieHellman>(
+        _debugFlag, _parameterInjection, _groupNameDH);
+  } else {
+    std::cout << "Fake client: second constructor with p and g called for DH."
+              << std::endl;
+    diffieHellman = std::make_unique<MyCryptoLibrary::DiffieHellman>(
+        _debugFlag, _parameterInjection, _pHex, _gHex);
+  }
   std::string clientNonceHex{
       EncryptionUtility::generateCryptographicNonce(_nonceSize)};
   std::string requestBody = fmt::format(

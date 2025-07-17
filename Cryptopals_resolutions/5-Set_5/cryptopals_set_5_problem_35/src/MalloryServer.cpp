@@ -172,20 +172,17 @@ void MalloryServer::keyExchangeRoute() {
           MessageExtractionFacility::UniqueBIGNUM peerPublicKey =
               MessageExtractionFacility::hexToUniqueBIGNUM(extractedPublicKeyA);
           boost::uuids::uuid sessionId = generateUniqueSessionId();
-
           std::lock_guard<std::mutex> lock(_diffieHellmanMapMutex);
           _diffieHellmanMap[sessionId] = std::make_unique<MallorySessionData>(
               _nonceSize, extractedNonceClient, extractedClientId, _debugFlag,
               _ivLength, extractedPrimeP, extractedGeneratorG,
               _parameterInjection);
-
           _diffieHellmanMap[sessionId]->_derivedKeyHexAM =
               _diffieHellmanMap[sessionId]
                   ->_diffieHellmanAM->deriveSharedSecret(
                       extractedPublicKeyA,
                       _diffieHellmanMap[sessionId]->_serverNonceHexAM,
                       _diffieHellmanMap[sessionId]->_clientNonceHexAM);
-
           // generate fake client
           _diffieHellmanMap[sessionId]
               ->_fakeClientMS = std::make_unique<Client>(

@@ -108,5 +108,23 @@
 11. Fix the broken build (Done)
 
 12. Fix the broken tests (in progress)
+    Tests to be fixed:
+
+    12.1. DiffieHellmanKeyExchangeProtocolTest. DiffieHellmanKeyExchange_WithServerRunning1User_ShouldMatchReference (in progress)
+
+    12.2. DiffieHellmanKeyExchangeProtocolTest.DiffieHellmanKeyExchange_WithServerRunning1UserSlightChangeInTheConfirmationMessageData_ShouldReturnAnError (Done)
+    12.3. DiffieHellmanKeyExchangeProtocolTest.DiffieHellmanKeyExchange_WithServerRunningWithSeveralUsers_ShouldMatchReference (Done)
+
+    12.4. DiffieHellmanKeyExchangeProtocolMITMattackTest.DiffieHellmanKeyExchange_WithMalloryServerRunning1User_ShouldDeceiveClient (Done)
+
+    12.5. DiffieHellmanKeyExchangeProtocolMITMattackTest.DiffieHellmanKeyExchange_WithFakeServerRunning1UserSlightChangeInTheConfirmationMessageData_ShouldReturnAnError (Done)
+
+    12.6. DiffieHellmanKeyExchangeProtocolMITMattackTest.DiffieHellmanKeyExchange_WithFakeServerRunningWithSeveralUsers_ShouldDeceiveClients (Done)
+
+    12.7. DiffieHellmanKeyExchangeProtocolMITMattackTest.DiffieHellmanKeyExchange_WithMalloryServerRunning1UserWithParameterInjection_ShouldDeceiveClient (Done)
+
+    12.8. DiffieHellmanKeyExchangeProtocolMITMattackTest.DiffieHellmanKeyExchange_WithFakeServerRunning1UserSlightChangeInTheConfirmationMessageDataWithParameterInjection_ShouldReturnAnError (Done)
+
+    12.9. DiffieHellmanKeyExchangeProtocolMITMattackTest.DiffieHellmanKeyExchange_WithFakeServerRunningWithSeveralUsersWithParameterInjection_ShouldDeceiveClients (Done)
 
 13. Implement the swapping values, make it adjustable (in progress)
