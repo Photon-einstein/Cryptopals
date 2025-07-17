@@ -101,7 +101,7 @@
     name in the json message.
 
     8.1. Add a new client constructor without group name field (Done)
-    8.2. Add a new DiffieHellman constructor without group name field and with p and g hardcoded instead (Done)
+    8.2. Add a new DiffieHellman constructor without group name field and with p and g hard coded instead (Done)
 
 9.  Rerun build of source code, should compile (Done)
 10. Rerun the existing tests, all should pass (Done)
