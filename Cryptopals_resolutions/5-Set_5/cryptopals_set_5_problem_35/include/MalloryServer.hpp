@@ -12,6 +12,7 @@
 #include "DiffieHellman.hpp"
 #include "EncryptionUtility.hpp"
 #include "MallorySessionData.hpp"
+#include "MessageExtractionFacility.hpp"
 #include "SessionData.hpp"
 
 enum class gReplacementAttackStrategy : uint8_t {
@@ -24,7 +25,9 @@ enum class gReplacementAttackStrategy : uint8_t {
 class MalloryServer {
 public:
   /* constructor / destructor */
-  explicit MalloryServer(const bool debugFlag, const bool testFlag);
+  MalloryServer(const bool debugFlag, const bool testFlag,
+                const gReplacementAttackStrategy gReplacementAttackStrategy =
+                    gReplacementAttackStrategy::NoReplacementAttack);
 
   ~MalloryServer();
 
@@ -156,6 +159,26 @@ private:
    */
   boost::uuids::uuid generateUniqueSessionId();
 
+  /**
+   * @brief This method will generate a new g parameter according to the attack
+   * strategy.
+   *
+   * This method will generate a new g parameter according to the attack
+   * strategy,
+   *
+   * @param originalG The current value of g in this DH ke exchange protocol
+   * session in hexadecimal format.
+   * @param p The current value of p in this DH ke exchange protocol session in
+   * hexadecimal format.
+   * @param gReplacementAttackStrategy The current strategy beeing applied in
+   * this attack.
+   *
+   * @return A new g value accordingly to the attack strategy.
+   */
+  const std::string getGParameterByAttackStrategy(
+      const std::string &originalGHex, const std::string &pHex,
+      const gReplacementAttackStrategy &gReplacementAttackStrategy);
+
   /* private fields */
   mutable std::mutex _diffieHellmanMapMutex;
   std::map<boost::uuids::uuid, std::unique_ptr<MallorySessionData>>
@@ -172,6 +195,7 @@ private:
   const bool _testFlag;
   const std::size_t _ivLength{AES_BLOCK_SIZE}; // bytes
   std::string _serverId{"Mallory_Server_"};
+  gReplacementAttackStrategy _gReplacementAttackStrategy;
 };
 
 #endif // MALLORY_SERVER_HPP
