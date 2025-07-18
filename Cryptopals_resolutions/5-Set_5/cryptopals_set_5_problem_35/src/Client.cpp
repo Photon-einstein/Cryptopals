@@ -26,23 +26,8 @@ Client::Client(const std::string &clientId, const bool debugFlag,
 }
 /******************************************************************************/
 Client::Client(const std::string &clientId, const bool debugFlag,
-               const std::string &groupNameDH, const bool parameterInjection)
-    : _clientId{clientId}, _debugFlag{debugFlag}, _groupNameDH{groupNameDH},
-      _parameterInjection{parameterInjection} {
-  if (_clientId.size() == 0) {
-    throw std::runtime_error("Client log | constructor(): "
-                             "Client ID is null");
-  } else if (_groupNameDH.size() == 0) {
-    throw std::runtime_error("Client log | constructor(): "
-                             "Group name is null");
-  }
-}
-/******************************************************************************/
-Client::Client(const std::string &clientId, const bool debugFlag,
-               const std::string &p, const std::string &g,
-               const bool parameterInjection)
-    : _clientId{clientId}, _debugFlag{debugFlag}, _pHex{p}, _gHex{g},
-      _parameterInjection{parameterInjection} {
+               const std::string &p, const std::string &g)
+    : _clientId{clientId}, _debugFlag{debugFlag}, _pHex{p}, _gHex{g} {
   if (_clientId.size() == 0) {
     throw std::runtime_error("Client log | constructor(): "
                              "Client ID is null");
@@ -84,12 +69,12 @@ Client::diffieHellmanKeyExchange(const int portServerNumber) {
   std::unique_ptr<MyCryptoLibrary::DiffieHellman> diffieHellman;
   if (!_groupNameDH.empty()) {
     diffieHellman = std::make_unique<MyCryptoLibrary::DiffieHellman>(
-        _debugFlag, _parameterInjection, _groupNameDH);
+        _debugFlag, _groupNameDH);
   } else {
     std::cout << "Fake client: second constructor with p and g called for DH."
               << std::endl;
     diffieHellman = std::make_unique<MyCryptoLibrary::DiffieHellman>(
-        _debugFlag, _parameterInjection, _pHex, _gHex);
+        _debugFlag, _pHex, _gHex);
   }
   std::string clientNonceHex{
       EncryptionUtility::generateCryptographicNonce(_nonceSize)};

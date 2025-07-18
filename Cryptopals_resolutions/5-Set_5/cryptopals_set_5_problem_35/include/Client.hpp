@@ -16,12 +16,7 @@ public:
                   const std::string &groupNameDH);
 
   explicit Client(const std::string &clientId, const bool debugFlag,
-                  const std::string &groupNameDH,
-                  const bool parameterInjection);
-
-  explicit Client(const std::string &clientId, const bool debugFlag,
-                  const std::string &p, const std::string &g,
-                  const bool parameterInjection);
+                  const std::string &p, const std::string &g);
 
   ~Client();
 
@@ -203,7 +198,6 @@ private:
   const std::string _groupNameDH = "";
   const std::string _pHex;
   const std::string _gHex;
-  const bool _parameterInjection{false};
 };
 
 #endif // CLIENT_HPP

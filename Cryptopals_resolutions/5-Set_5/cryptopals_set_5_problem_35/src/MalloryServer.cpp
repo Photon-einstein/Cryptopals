@@ -17,16 +17,6 @@ MalloryServer::MalloryServer(const bool debugFlag, const bool testFlag)
   _serverId += boost::uuids::to_string(gen());
 }
 /******************************************************************************/
-MalloryServer::MalloryServer(const bool debugFlag, const bool testFlag,
-                             const bool parameterInjection)
-    : _debugFlag{debugFlag}, _testFlag{testFlag},
-      _parameterInjection{parameterInjection} {
-  _portRealServerInUse =
-      (_testFlag) ? _portRealServerTest : _portRealServerProduction;
-  boost::uuids::random_generator gen;
-  _serverId += boost::uuids::to_string(gen());
-}
-/******************************************************************************/
 MalloryServer::~MalloryServer() {
   // server graceful stop
   _app.stop();
@@ -90,17 +80,29 @@ const int MalloryServer::getProductionPort() const { return _portProduction; }
 const int MalloryServer::getTestPort() const { return _portTest; }
 /******************************************************************************/
 /**
- * @brief This method will set the value of the parameter injection flag.
+ * @brief This method will return the g replacement strategy.
  *
- * This method will set the value of the parameter injection flag, to decide
- * if a normal MITM attack is performed or one with a parameter injection
- * instead.
+ * This method will return the g replacement strategy used in this
+ * attacker, in a string format.
+ *
+ * @return The g parameter replacement strategy used by this attacker.
  */
-void MalloryServer::setParameterInjectionFlag(
-    const bool parameterInjectionFlag) {
-  _parameterInjection = parameterInjectionFlag;
+const std::string MalloryServer::gReplacementAttackStrategyToString(
+    const gReplacementAttackStrategy &strategy) {
+  switch (strategy) {
+  case gReplacementAttackStrategy::NoReplacementAttack:
+    return std::string("No replacement attack");
+  case gReplacementAttackStrategy::gEquals1:
+    return std::string("g equals 1");
+  case gReplacementAttackStrategy::gEqualsP:
+    return std::string("g equals p");
+  case gReplacementAttackStrategy::gEqualsPminus1:
+    return std::string("g equals p minus 1");
+  }
+  return std::string("Unknown attack strategy");
 }
 /******************************************************************************/
+
 /**
  * @brief This method will start the endpoints that the server
  * provides to his clients.
@@ -175,8 +177,7 @@ void MalloryServer::keyExchangeRoute() {
           std::lock_guard<std::mutex> lock(_diffieHellmanMapMutex);
           _diffieHellmanMap[sessionId] = std::make_unique<MallorySessionData>(
               _nonceSize, extractedNonceClient, extractedClientId, _debugFlag,
-              _ivLength, extractedPrimeP, extractedGeneratorG,
-              _parameterInjection);
+              _ivLength, extractedPrimeP, extractedGeneratorG);
           _diffieHellmanMap[sessionId]->_derivedKeyHexAM =
               _diffieHellmanMap[sessionId]
                   ->_diffieHellmanAM->deriveSharedSecret(
@@ -188,8 +189,7 @@ void MalloryServer::keyExchangeRoute() {
               ->_fakeClientMS = std::make_unique<Client>(
               _diffieHellmanMap[sessionId]->_clientIdAM, _debugFlag,
               _diffieHellmanMap[sessionId]->_diffieHellmanAM->getPrimeP(),
-              _diffieHellmanMap[sessionId]->_diffieHellmanAM->getGeneratorG(),
-              _parameterInjection);
+              _diffieHellmanMap[sessionId]->_diffieHellmanAM->getGeneratorG());
           std::tuple<bool, std::string, std::string> serverResponse =
               _diffieHellmanMap[sessionId]
                   ->_fakeClientMS->diffieHellmanKeyExchange(
