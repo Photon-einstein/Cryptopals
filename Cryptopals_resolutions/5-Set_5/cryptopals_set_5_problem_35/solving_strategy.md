@@ -89,7 +89,7 @@
     The server should be allowed to receive a group name, or if no group name is received, then it must receive the value of
     the 'p' and 'g' in the clear. If no values are received at all then it should be an error.
 
-8.  Add extra parameters 'p' and 'g' in the client, they should be extra to the already existing solution of the rfc3526-group-<xy> (in progress)
+8.  Add extra parameters 'p' and 'g' in the client, they should be extra to the already existing solution of the rfc3526-group-<xy> (Done)
     Requirements: it should not break the existing tests in place.
     For now these fields can be empty.
 
@@ -111,7 +111,7 @@
 14. Remove the code from the parameter injection of the last exercise (Done)
 
 15. Implement the code to perform the g parameter substitution (Done)
-    15.1. Implement the boiler code to perform the substitutions on the g parameter (in progress).
+    15.1. Implement the boiler code to perform the substitutions on the g parameter (Done).
 
     15.2. Implement the substitution of g = 1 on the first and second leg of the MitM attack (Done).
     15.3. Implement the test for the g = 1 substitution on the MitM attack (in progress).
