@@ -67,79 +67,6 @@ MyCryptoLibrary::DiffieHellman::DiffieHellman(const bool debugFlag,
   generatePublicKey();
 }
 /******************************************************************************/
-MyCryptoLibrary::DiffieHellman::DiffieHellman(const bool debugFlag,
-                                              const bool publicKeyDeterministic,
-                                              const std::string &groupName)
-    : _privateKey{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
-      _publicKey{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
-      _sharedSecret{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
-      _debugFlag{debugFlag}, _publicKeyDeterministic{publicKeyDeterministic},
-      _groupName{groupName} {
-  if (_groupName.size() == 0) {
-    throw std::runtime_error("Diffie Hellman log | constructor(): "
-                             "Group name is null");
-  }
-  std::map<std::string, DhParametersLoader::DhParameters> dhParametersMap =
-      DhParametersLoader::loadDhParameters(getDhParametersFilenameLocation());
-  if (dhParametersMap.find(groupName) != dhParametersMap.end()) {
-    _dhParameter = dhParametersMap[groupName];
-    _p = MessageExtractionFacility::hexToUniqueBIGNUM(_dhParameter._pHex);
-    _g = MessageExtractionFacility::hexToUniqueBIGNUM(_dhParameter._gHex);
-    if (_debugFlag) {
-      std::cout << "Diffie Hellman log | p (decimal) = "
-                << MessageExtractionFacility::BIGNUMToDec(_p.get())
-                << std::endl;
-      std::cout << "Diffie Hellman log | g (decimal) = "
-                << MessageExtractionFacility::BIGNUMToDec(_g.get())
-                << std::endl;
-      std::cout << "Diffie Hellman log | p (hex) = "
-                << MessageExtractionFacility::BIGNUMToHex(_p.get())
-                << std::endl;
-      std::cout << "Diffie Hellman log | g (hex) = "
-                << MessageExtractionFacility::BIGNUMToHex(_g.get())
-                << std::endl;
-    }
-    generatePrivateKey();
-    generatePublicKey();
-  } else {
-    throw std::runtime_error("Diffie Hellman log | constructor(): "
-                             "Group name is invalid");
-  }
-}
-/******************************************************************************/
-MyCryptoLibrary::DiffieHellman::DiffieHellman(const bool debugFlag,
-                                              const bool publicKeyDeterministic,
-                                              const std::string &p,
-                                              const std::string &g)
-    : _privateKey{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
-      _publicKey{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
-      _sharedSecret{MessageExtractionFacility::UniqueBIGNUM(BN_new())},
-      _debugFlag{debugFlag}, _publicKeyDeterministic{publicKeyDeterministic} {
-  if (p.empty()) {
-    throw std::runtime_error("Diffie Hellman log | constructor(): "
-                             "Prime p is null");
-  } else if (g.empty()) {
-    throw std::runtime_error("Diffie Hellman log | constructor(): "
-                             "Generator g is null");
-  }
-  std::map<std::string, DhParametersLoader::DhParameters> dhParametersMap =
-      DhParametersLoader::loadDhParameters(getDhParametersFilenameLocation());
-  _p = MessageExtractionFacility::hexToUniqueBIGNUM(p);
-  _g = MessageExtractionFacility::hexToUniqueBIGNUM(g);
-  if (_debugFlag) {
-    std::cout << "Diffie Hellman log | p (decimal) = "
-              << MessageExtractionFacility::BIGNUMToDec(_p.get()) << std::endl;
-    std::cout << "Diffie Hellman log | g (decimal) = "
-              << MessageExtractionFacility::BIGNUMToDec(_g.get()) << std::endl;
-    std::cout << "Diffie Hellman log | p (hex) = "
-              << MessageExtractionFacility::BIGNUMToHex(_p.get()) << std::endl;
-    std::cout << "Diffie Hellman log | g (hex) = "
-              << MessageExtractionFacility::BIGNUMToHex(_g.get()) << std::endl;
-  }
-  generatePrivateKey();
-  generatePublicKey();
-}
-/******************************************************************************/
 MyCryptoLibrary::DiffieHellman::~DiffieHellman() {}
 /******************************************************************************/
 /**
@@ -183,52 +110,48 @@ const std::string &MyCryptoLibrary::DiffieHellman::getGroupName() const {
 const std::string MyCryptoLibrary::DiffieHellman::deriveSharedSecret(
     const std::string &peerPublicKeyHex, const std::string &serverNonceHex,
     const std::string &clientNonceHex) {
-  if (_publicKeyDeterministic) {
-    BN_zero(_sharedSecret.get());
-  } else {
-    if (!_privateKey || BN_is_zero(_privateKey.get())) {
-      throw std::runtime_error("Diffie Hellman log | deriveSharedSecret(): "
-                               "Private key has not been generated for the "
-                               "derivation of the shared secret");
-    }
-    if (!_g || BN_is_zero(_g.get())) {
-      throw std::runtime_error("Diffie Hellman log | deriveSharedSecret(): "
-                               "Generator 'g' is not initialized for the "
-                               "derivation of the shared secret");
-    }
-    if (!_p || BN_is_zero(_p.get())) {
-      throw std::runtime_error("Diffie Hellman log | deriveSharedSecret(): "
-                               "Modulus 'p' is not initialized for the "
-                               "derivation of the shared secret");
-    }
-    MessageExtractionFacility::UniqueBIGNUM peerPublicKey =
-        MessageExtractionFacility::hexToUniqueBIGNUM(peerPublicKeyHex);
-    if (!peerPublicKey || BN_is_zero(peerPublicKey.get())) {
-      throw std::runtime_error("Diffie Hellman log | deriveSharedSecret(): "
-                               "peerPublicKey is not initialized for the "
-                               "derivation of the shared secret");
-    }
-    BN_CTX *ctx = BN_CTX_new();
-    if (!ctx) {
-      throw std::runtime_error(
-          "Diffie Hellman log | deriveSharedSecret(): Failed to create BIGNUM "
-          "context for public key calculation.");
-    }
-    // Compute _sharedSecret = (peerPublicKey ^ _privateKey) % _p
-    // BN_mod_exp(result, base, exponent, modulus, context)
-    if (!BN_mod_exp(_sharedSecret.get(), peerPublicKey.get(), _privateKey.get(),
-                    _p.get(), ctx)) {
-      // Handle error from OpenSSL
-      char errorBuffer[256];
-      ERR_error_string_n(ERR_get_error(), errorBuffer, sizeof(errorBuffer));
-      BN_CTX_free(ctx); // Free context on error
-      throw std::runtime_error("Diffie Hellman log | deriveSharedSecret(): "
-                               "Failed to calculate shared "
-                               "secret (BN_mod_exp): " +
-                               std::string(errorBuffer));
-    }
-    BN_CTX_free(ctx);
+  if (!_privateKey || BN_is_zero(_privateKey.get())) {
+    throw std::runtime_error("Diffie Hellman log | deriveSharedSecret(): "
+                             "Private key has not been generated for the "
+                             "derivation of the shared secret");
   }
+  if (!_g || BN_is_zero(_g.get())) {
+    throw std::runtime_error("Diffie Hellman log | deriveSharedSecret(): "
+                             "Generator 'g' is not initialized for the "
+                             "derivation of the shared secret");
+  }
+  if (!_p || BN_is_zero(_p.get())) {
+    throw std::runtime_error("Diffie Hellman log | deriveSharedSecret(): "
+                             "Modulus 'p' is not initialized for the "
+                             "derivation of the shared secret");
+  }
+  MessageExtractionFacility::UniqueBIGNUM peerPublicKey =
+      MessageExtractionFacility::hexToUniqueBIGNUM(peerPublicKeyHex);
+  if (!peerPublicKey || BN_is_zero(peerPublicKey.get())) {
+    throw std::runtime_error("Diffie Hellman log | deriveSharedSecret(): "
+                             "peerPublicKey is not initialized for the "
+                             "derivation of the shared secret");
+  }
+  BN_CTX *ctx = BN_CTX_new();
+  if (!ctx) {
+    throw std::runtime_error(
+        "Diffie Hellman log | deriveSharedSecret(): Failed to create BIGNUM "
+        "context for public key calculation.");
+  }
+  // Compute _sharedSecret = (peerPublicKey ^ _privateKey) % _p
+  // BN_mod_exp(result, base, exponent, modulus, context)
+  if (!BN_mod_exp(_sharedSecret.get(), peerPublicKey.get(), _privateKey.get(),
+                  _p.get(), ctx)) {
+    // Handle error from OpenSSL
+    char errorBuffer[256];
+    ERR_error_string_n(ERR_get_error(), errorBuffer, sizeof(errorBuffer));
+    BN_CTX_free(ctx); // Free context on error
+    throw std::runtime_error("Diffie Hellman log | deriveSharedSecret(): "
+                             "Failed to calculate shared "
+                             "secret (BN_mod_exp): " +
+                             std::string(errorBuffer));
+  }
+  BN_CTX_free(ctx);
   const std::string sharedSecretHex{
       MessageExtractionFacility::BIGNUMToHex(_sharedSecret.get())};
   if (_debugFlag) {
@@ -438,43 +361,38 @@ void MyCryptoLibrary::DiffieHellman::generatePrivateKey() {
  * the public key.
  */
 void MyCryptoLibrary::DiffieHellman::generatePublicKey() {
-  if (_publicKeyDeterministic) {
-    _publicKey = MessageExtractionFacility::UniqueBIGNUM(BN_dup(_p.get()));
-    std::cout << "Diffie Hellman log parameter injection." << std::endl;
-  } else {
-    if (!_privateKey || BN_is_zero(_privateKey.get())) {
-      throw std::runtime_error(
-          "Diffie Hellman log | generatePublicKey(): Private key has not been "
-          "generated. Call generatePrivateKey() first.");
-    }
-    if (!_g || BN_is_zero(_g.get())) {
-      throw std::runtime_error("Diffie Hellman log | generatePublicKey(): "
-                               "Generator 'g' is not initialized.");
-    }
-    if (!_p || BN_is_zero(_p.get())) {
-      throw std::runtime_error("Diffie Hellman log | generatePublicKey(): "
-                               "Modulus 'p' is not initialized.");
-    }
-    BN_CTX *ctx = BN_CTX_new();
-    if (!ctx) {
-      throw std::runtime_error(
-          "Diffie Hellman log | generatePublicKey(): Failed to create BIGNUM "
-          "context for public key calculation.");
-    }
-    // Compute _publicKey = (_g ^ _privateKey) % _p
-    // BN_mod_exp(result, base, exponent, modulus, context)
-    if (!BN_mod_exp(_publicKey.get(), _g.get(), _privateKey.get(), _p.get(),
-                    ctx)) {
-      // Handle error from OpenSSL
-      char errorBuffer[256];
-      ERR_error_string_n(ERR_get_error(), errorBuffer, sizeof(errorBuffer));
-      BN_CTX_free(ctx); // Free context on error
-      throw std::runtime_error("Diffie Hellman log | generatePublicKey(): "
-                               "Failed to calculate public key (BN_mod_exp): " +
-                               std::string(errorBuffer));
-    }
-    BN_CTX_free(ctx);
+  if (!_privateKey || BN_is_zero(_privateKey.get())) {
+    throw std::runtime_error(
+        "Diffie Hellman log | generatePublicKey(): Private key has not been "
+        "generated. Call generatePrivateKey() first.");
   }
+  if (!_g || BN_is_zero(_g.get())) {
+    throw std::runtime_error("Diffie Hellman log | generatePublicKey(): "
+                             "Generator 'g' is not initialized.");
+  }
+  if (!_p || BN_is_zero(_p.get())) {
+    throw std::runtime_error("Diffie Hellman log | generatePublicKey(): "
+                             "Modulus 'p' is not initialized.");
+  }
+  BN_CTX *ctx = BN_CTX_new();
+  if (!ctx) {
+    throw std::runtime_error(
+        "Diffie Hellman log | generatePublicKey(): Failed to create BIGNUM "
+        "context for public key calculation.");
+  }
+  // Compute _publicKey = (_g ^ _privateKey) % _p
+  // BN_mod_exp(result, base, exponent, modulus, context)
+  if (!BN_mod_exp(_publicKey.get(), _g.get(), _privateKey.get(), _p.get(),
+                  ctx)) {
+    // Handle error from OpenSSL
+    char errorBuffer[256];
+    ERR_error_string_n(ERR_get_error(), errorBuffer, sizeof(errorBuffer));
+    BN_CTX_free(ctx); // Free context on error
+    throw std::runtime_error("Diffie Hellman log | generatePublicKey(): "
+                             "Failed to calculate public key (BN_mod_exp): " +
+                             std::string(errorBuffer));
+  }
+  BN_CTX_free(ctx);
   if (_debugFlag) {
     std::cout << "\nDiffie Hellman log | Generated public key (hex): "
               << MessageExtractionFacility::BIGNUMToHex(_publicKey.get())

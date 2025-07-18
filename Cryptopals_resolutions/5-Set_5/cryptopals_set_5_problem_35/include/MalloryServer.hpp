@@ -14,12 +14,18 @@
 #include "MallorySessionData.hpp"
 #include "SessionData.hpp"
 
+enum class gReplacementAttackStrategy : uint8_t {
+  NoReplacementAttack, // No modification, transparent proxy
+  gEquals1,            // Replace g with 1 (forces shared secret = 1)
+  gEqualsP,            // Replace g with p (forces shared secret = 0 mod p)
+  gEqualsPminus1       // Replace g with p-1 (secret depends on parity)
+};
+
 class MalloryServer {
 public:
   /* constructor / destructor */
   explicit MalloryServer(const bool debugFlag, const bool testFlag);
-  explicit MalloryServer(const bool debugFlag, const bool testFlag,
-                         const bool parameterInjection);
+
   ~MalloryServer();
 
   /**
@@ -53,6 +59,8 @@ public:
    *
    * This method will return the server's production port to establish a
    * connection.
+   *
+   * @return The production port used by this attacker.
    */
   const int getProductionPort() const;
 
@@ -61,17 +69,21 @@ public:
    *
    * This method will return the server's test port to establish a
    * connection.
+   *
+   * @return The test port used by this attacker.
    */
   const int getTestPort() const;
 
   /**
-   * @brief This method will set the value of the parameter injection flag.
+   * @brief This method will return the g replacement strategy.
    *
-   * This method will set the value of the parameter injection flag, to decide
-   * if a normal MITM attack is performed or one with a parameter injection
-   * instead.
+   * This method will return the g replacement strategy used in this
+   * attacker, in a string format.
+   *
+   * @return The g parameter replacement strategy used by this attacker.
    */
-  void setParameterInjectionFlag(const bool parameterInjectionFlag);
+  const std::string gReplacementAttackStrategyToString(
+      const gReplacementAttackStrategy &strategy);
 
 private:
   /* private methods */
@@ -160,7 +172,6 @@ private:
   const bool _testFlag;
   const std::size_t _ivLength{AES_BLOCK_SIZE}; // bytes
   std::string _serverId{"Mallory_Server_"};
-  bool _parameterInjection{false};
 };
 
 #endif // MALLORY_SERVER_HPP

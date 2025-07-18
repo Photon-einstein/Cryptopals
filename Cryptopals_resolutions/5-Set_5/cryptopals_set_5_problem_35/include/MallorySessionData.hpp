@@ -11,8 +11,7 @@ struct MallorySessionData {
                               const std::string &clientNonceHex,
                               const std::string &clientId, const bool debugFlag,
                               const std::size_t ivLength, const std::string &p,
-                              const std::string &g,
-                              const bool parameterInjection);
+                              const std::string &g);
 
   ~MallorySessionData();
 
@@ -26,7 +25,6 @@ struct MallorySessionData {
   // Client (Mallory) - Server channel
   std::string _sessionIdMS;
   std::unique_ptr<Client> _fakeClientMS;
-  bool _parameterInjection{false};
 };
 
 #endif // MALLORY_SESSION_DATA_HPP
