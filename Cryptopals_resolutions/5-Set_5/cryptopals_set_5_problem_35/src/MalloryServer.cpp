@@ -9,8 +9,11 @@
 #include "./../include/MessageExtractionFacility.hpp"
 
 /* constructor / destructor */
-MalloryServer::MalloryServer(const bool debugFlag, const bool testFlag)
-    : _debugFlag{debugFlag}, _testFlag{testFlag} {
+MalloryServer::MalloryServer(
+    const bool debugFlag, const bool testFlag,
+    const gReplacementAttackStrategy gReplacementAttackStrategy)
+    : _debugFlag{debugFlag}, _testFlag{testFlag},
+      _gReplacementAttackStrategy{gReplacementAttackStrategy} {
   _portRealServerInUse =
       (_testFlag) ? _portRealServerTest : _portRealServerProduction;
   boost::uuids::random_generator gen;
@@ -171,13 +174,17 @@ void MalloryServer::keyExchangeRoute() {
             std::cout << "\tPublic Key A: " << extractedPublicKeyA << std::endl;
             std::cout << "----------------------" << std::endl;
           }
+          // execute the g replacement strategy in place
+          const std::string swappedGeneratorG = getGParameterByAttackStrategy(
+              extractedGeneratorG, extractedPrimeP,
+              _gReplacementAttackStrategy);
           MessageExtractionFacility::UniqueBIGNUM peerPublicKey =
               MessageExtractionFacility::hexToUniqueBIGNUM(extractedPublicKeyA);
           boost::uuids::uuid sessionId = generateUniqueSessionId();
           std::lock_guard<std::mutex> lock(_diffieHellmanMapMutex);
           _diffieHellmanMap[sessionId] = std::make_unique<MallorySessionData>(
               _nonceSize, extractedNonceClient, extractedClientId, _debugFlag,
-              _ivLength, extractedPrimeP, extractedGeneratorG);
+              _ivLength, extractedPrimeP, swappedGeneratorG);
           _diffieHellmanMap[sessionId]->_derivedKeyHexAM =
               _diffieHellmanMap[sessionId]
                   ->_diffieHellmanAM->deriveSharedSecret(
@@ -489,5 +496,64 @@ boost::uuids::uuid MalloryServer::generateUniqueSessionId() {
     }
   } while (!uniqueSessionId);
   return sessionId;
+}
+/******************************************************************************/
+/**
+ * @brief This method will generate a new g parameter according to the attack
+ * strategy.
+ *
+ * This method will generate a new g parameter according to the attack
+ * strategy,
+ *
+ * @param originalG The current value of g in this DH ke exchange protocol
+ * session in hexadecimal format.
+ * @param p The current value of p in this DH ke exchange protocol session in
+ * hexadecimal format.
+ * @param gReplacementAttackStrategy The current strategy beeing applied in this
+ * attack.
+ *
+ * @return A new g value accordingly to the attack strategy in hexadecimal
+ * format.
+ */
+const std::string MalloryServer::getGParameterByAttackStrategy(
+    const std::string &originalGHex, const std::string &pHex,
+    const gReplacementAttackStrategy &gReplacementAttackStrategy) {
+  if (originalGHex.empty()) {
+    throw std::runtime_error("g is required for G attack strategies.");
+  } else if (pHex.empty()) {
+    throw std::runtime_error("p is required for G attack strategies.");
+  }
+  MessageExtractionFacility::UniqueBIGNUM originalG =
+      MessageExtractionFacility::hexToUniqueBIGNUM(originalGHex);
+  MessageExtractionFacility::UniqueBIGNUM p =
+      MessageExtractionFacility::hexToUniqueBIGNUM(pHex);
+  MessageExtractionFacility::UniqueBIGNUM modifiedG(BN_new());
+  if (!modifiedG) {
+    throw std::bad_alloc();
+  }
+  switch (gReplacementAttackStrategy) {
+  case gReplacementAttackStrategy::NoReplacementAttack:
+    // If no attack strategy, just return a copy of the originalG
+    BN_copy(modifiedG.get(), originalG.get());
+    break;
+  case gReplacementAttackStrategy::gEquals1:
+    BN_one(modifiedG.get()); // Set g to 1
+    break;
+  case gReplacementAttackStrategy::gEqualsP:
+    BN_copy(modifiedG.get(), p.get()); // Set g to p
+    break;
+  case gReplacementAttackStrategy::gEqualsPminus1:
+    // Set g to p - 1
+    BN_copy(modifiedG.get(), p.get()); // Set g to p
+    BN_sub_word(modifiedG.get(), 1);   // Subtract 1
+    break;
+  default:
+    std::cerr << "Mallory Server log | getGParameterByAttackStrategy(): "
+                 "Unknown G attack strategy. Using original g."
+              << std::endl;
+    BN_copy(modifiedG.get(), originalG.get());
+    break;
+  }
+  return MessageExtractionFacility::BIGNUMToHex(modifiedG.get());
 }
 /******************************************************************************/

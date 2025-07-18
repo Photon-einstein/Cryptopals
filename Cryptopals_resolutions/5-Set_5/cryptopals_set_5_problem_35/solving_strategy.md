@@ -109,3 +109,13 @@
 12. Fix the broken tests (Done)
 13. Create an enum class inside the attacker class (Done)
 14. Remove the code from the parameter injection of the last exercise (Done)
+
+15. Implement the code to perform the g parameter substitution (Done)
+    15.1. Implement the boiler code to perform the substitutions on the g parameter (in progress).
+
+    15.2. Implement the substitution of g = 1 on the first and second leg of the MitM attack (Done).
+    15.3. Implement the test for the g = 1 substitution on the MitM attack (in progress).
+    15.4. Implement the substitution of g = p on the first and second leg of the MitM attack (Done).
+    15.5. Implement the test for the g = p substitution on the MitM attack (TBD).
+    15.6. Implement the substitution of g = p-1 on the first and second leg of the MitM attack (Done).
+    15.7. Implement the test for the g = p-1 substitution on the MitM attack (TBD).
