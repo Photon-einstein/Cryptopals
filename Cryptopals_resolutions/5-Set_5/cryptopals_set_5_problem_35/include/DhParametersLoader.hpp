@@ -7,6 +7,17 @@
 
 namespace DhParametersLoader {
 
+/**
+ * @brief This structure that holds all the information regarding the Diffie
+ * Hellman parameters.
+ *
+ * @param _groupName The group name regarding this DH parameter.
+ * @param _pHex The prime p regarding this DH parameter in hexadecimal format.
+ * @param _gHex The generator g regarding this DH parameter in hexadecimal
+ * format.
+ * @param _description The description of this Diffie Hellman parameter.
+ * @param _notes The notes or comments regarding this Diffie Hellman parameter.
+ */
 struct DhParameters {
   std::string _groupName;
   std::string _pHex;
@@ -25,6 +36,9 @@ struct DhParameters {
  * the Diffie Hellman key Exchange protocol are.
  *
  * @return The file content in a structured dictionary.
+ *
+ * @throw runtime_error if it was not possible to open the file or the JSON
+ * parsing failed.
  */
 std::map<std::string, DhParameters>
 loadDhParameters(const std::string &filename);

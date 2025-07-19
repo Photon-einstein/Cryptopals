@@ -12,12 +12,47 @@
 class Client {
 public:
   /* constructor / destructor*/
+
+  /**
+   * @brief This method will execute the constructor of the Client object.
+   *
+   * This method will perform the constructor of the Client object when a group
+   * name is used in its constructor.
+   *
+   * @param clientId The client id to be used by this client.
+   * @param debugFlag The boolean flag to decide if aggressive prints should be
+   * displayed into the standard output, created for troubleshooting purposes.
+   * @param groupNameDH The group name to be used in the DH key exchange
+   * protocol, to get the values of 'p' and 'g'.
+   *
+   * @throw runtime_error if clientId or groupNameDH are empty.
+   */
   explicit Client(const std::string &clientId, const bool debugFlag,
                   const std::string &groupNameDH);
 
+  /**
+   * @brief This method will perform the constructor of the Client object.
+   *
+   * This method will perform the constructor of the Client object when the DH
+   * parameters 'p' and 'g' are used.
+   *
+   * @param clientId The client id to be used by this client.
+   * @param debugFlag The boolean flag to decide if aggressive prints should be
+   * displayed into the standard output, created for troubleshooting purposes.
+   * @param p The prime number p to be used in the DH key exchange protocol.
+   * @param g The generator g to be used in the DH key exchange protocol.
+   *
+   * @throw runtime_error if clientId, p or g are empty.
+   */
   explicit Client(const std::string &clientId, const bool debugFlag,
                   const std::string &p, const std::string &g);
 
+  /**
+   * @brief This method will perform the destruction of the Client object.
+   *
+   * This method will perform the destruction of the Client object, releasing
+   * all the resources and memory used.
+   */
   ~Client();
 
   /* public methods */
@@ -67,15 +102,19 @@ public:
    * This method will confirm if a given session id is correctly setup on the
    * client side.
    *
+   * @param sessionId The session id to be confirmed.
+   *
    * @return A bool value, true if the sessionId exists, false otherwise.
    */
-  bool confirmSessionId(const std::string &sessionId);
+  bool confirmSessionId(const std::string &sessionId) const;
 
   /**
    * @brief This method sets the server's test port to a new one.
    *
    * This method sets the server's test port to a new one, used only for
    * test purposes.
+   *
+   * @param portServerTest The port number to be used in the test scenario.
    *
    * @throw runtime_error if the portServerTest is not a valid one.
    */
@@ -127,6 +166,13 @@ public:
    * This method verify if this entry exists on the client side.
    * These method's arguments are one entry from the endpoint of the server
    * named GET '/sessionsData'.
+   *
+   * @param sessionId The session id to be verified.
+   * @param clientId The client id to be verified for a given session id.
+   * @param clientNonce The client nonce to be verified for a given session id.
+   * @param serverNonce The server nonce to be verified for a given session id.
+   * @param derivedKey The derived key to be verified for a given session id.
+   * @param iv The initialization vector to be verified for a given session id.
    *
    * @return Bool value, true if there is a match, false otherwise.
    */

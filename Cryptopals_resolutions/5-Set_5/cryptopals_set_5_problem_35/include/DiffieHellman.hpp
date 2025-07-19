@@ -14,11 +14,48 @@ namespace MyCryptoLibrary {
 class DiffieHellman {
 public:
   /* constructor / destructor*/
+  /**
+   * @brief This method will execute the constructor of the DiffieHellman
+   * object.
+   *
+   * This method will execute the constructor of the DiffieHellman object when a
+   * group name is given as an input parameter.
+   *
+   * @param debugFlag The boolean flag to decide if aggressive prints should be
+   * displayed into the standard output, created for troubleshooting purposes.
+   * @param groupName The group name to be used in the DH key exchange protocol,
+   * to get the values of 'p' and 'g'.
+   *
+   * @throw runtime_error if the group name is null or invalid.
+   */
   explicit DiffieHellman(const bool debugFlag, const std::string &groupName);
 
+  /**
+   * @brief This method will execute the constructor of the DiffieHellman
+   * object.
+   *
+   * This method will execute the constructor of the DiffieHellman object when
+   * the input parameters 'p' and 'g' are given.
+   *
+   * @param debugFlag The boolean flag to decide if aggressive prints should be
+   * displayed into the standard output, created for troubleshooting purposes.
+   * @param p The prime p to be used in the Diffie Hellman key exchange
+   * protocol.
+   * @param g The generator g to be used in the Diffie Hellman key exchange
+   * protocol.
+   *
+   * @throw runtime_error if the prime p or generator g are null.
+   */
   explicit DiffieHellman(const bool debugFlag, const std::string &p,
                          const std::string &g);
 
+  /**
+   * @brief This method will perform the destruction of the DiffieHellman
+   * object.
+   *
+   * This method will perform the destruction of the DiffieHellman object,
+   * releasing all the resources and memory used.
+   */
   ~DiffieHellman();
 
   /* public methods */
