@@ -16,6 +16,9 @@
  * the Diffie Hellman key Exchange protocol are.
  *
  * @return The file content in a structured dictionary.
+ *
+ * @throw runtime_error if it was not possible to open the file or the JSON
+ * parsing failed.
  */
 std::map<std::string, DhParametersLoader::DhParameters>
 DhParametersLoader::loadDhParameters(const std::string &filename) {

@@ -15,6 +15,10 @@
 #include "MessageExtractionFacility.hpp"
 #include "SessionData.hpp"
 
+/**
+ * @brief Enum class that defines the g parameter replacement strategy used
+ * in the attack performed by the MalloryServer class.
+ */
 enum class gReplacementAttackStrategy : uint8_t {
   NoReplacementAttack, // No modification, transparent proxy
   gEquals1,            // Replace g with 1 (forces shared secret = 1)
@@ -25,10 +29,36 @@ enum class gReplacementAttackStrategy : uint8_t {
 class MalloryServer {
 public:
   /* constructor / destructor */
+
+  /**
+   * @brief This method will execute the constructor of the MalloryServer
+   * object.
+   *
+   * This method will perform the constructor of the MalloryServer object. It
+   * needs to have as input the debugFlag and testFlag and optionally the
+   * gReplacementAttackStrategy.
+   *
+   * @param debugFlag The boolean flag to decide if aggressive prints should be
+   * displayed into the standard output, created for troubleshooting purposes.
+   * @param testFlag The boolean flag to decide if the MalloryServer should use
+   * the test setup or the production setup up.
+   * @param gReplacementAttackStrategy Optional parameter that defines the g
+   * parameter replacement strategy used in the attacks performed by the
+   * MalloryServer object.
+   *
+   * @throw runtime_error if clientId or groupNameDH are empty.
+   */
   MalloryServer(const bool debugFlag, const bool testFlag,
                 const gReplacementAttackStrategy gReplacementAttackStrategy =
                     gReplacementAttackStrategy::NoReplacementAttack);
 
+  /**
+   * @brief This method will perform the destruction of the MalloryServer
+   * object.
+   *
+   * This method will perform the destruction of the MalloryServer object,
+   * releasing all the resources and memory used.
+   */
   ~MalloryServer();
 
   /**
@@ -78,15 +108,29 @@ public:
   const int getTestPort() const;
 
   /**
-   * @brief This method will return the g replacement strategy.
+   * @brief This method will return the g replacement strategy in a string
+   * format.
    *
    * This method will return the g replacement strategy used in this
    * attacker, in a string format.
    *
    * @return The g parameter replacement strategy used by this attacker.
    */
-  const std::string gReplacementAttackStrategyToString(
-      const gReplacementAttackStrategy &strategy);
+  const std::string getGReplacementAttackStrategyToString(
+      const gReplacementAttackStrategy &strategy) const;
+
+  /**
+   * @brief This method will set the g replacement strategy used by Mallory.
+   *
+   * This method will set the g replacement strategy used by Mallory in the
+   * attacks after this point in time.
+   *
+   * @param strategy The new strategy to be applied in this attack.
+   *
+   * @throws std::runtime_error if the strategy value is not a valid one.
+   */
+  void
+  setGReplacementAttackStrategy(const gReplacementAttackStrategy &strategy);
 
 private:
   /* private methods */
@@ -117,6 +161,8 @@ private:
    * key exchange protocol. It receives requests and make all the calculations
    * to respond to the requests, creating a symmetric key for each connection
    * request, performing the man in the middle attack.
+   *
+   * @throws std::runtime_error if there was an error in the keyExchangeRoute.
    */
   void keyExchangeRoute();
 
@@ -174,8 +220,10 @@ private:
    * this attack.
    *
    * @return A new g value accordingly to the attack strategy.
+   * @throws std::runtime_error if the prime pHex or the generator gHex are
+   * empty.
    */
-  const std::string getGParameterByAttackStrategy(
+  const std::string generateGParameterByAttackStrategy(
       const std::string &originalGHex, const std::string &pHex,
       const gReplacementAttackStrategy &gReplacementAttackStrategy);
 

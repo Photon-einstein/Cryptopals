@@ -8,11 +8,28 @@
 #include "./../include/Server.hpp"
 
 /* constructor / destructor */
+
+/**
+ * @brief This method will execute the constructor of the Server object.
+ *
+ * This method will execute the constructor of the Server object. It
+ * needs to have as input the debugFlag.
+ *
+ * @param debugFlag The boolean flag to decide if aggressive prints should be
+ * displayed into the standard output, created for troubleshooting purposes.
+ *
+ */
 Server::Server(const bool debugFlag) : _debugFlag{debugFlag} {
   boost::uuids::random_generator gen;
   _serverId += boost::uuids::to_string(gen());
 }
 /******************************************************************************/
+/**
+ * @brief This method will perform the destruction of the Server object.
+ *
+ * This method will perform the destruction of the Server object, releasing
+ * all the resources and memory used.
+ */
 Server::~Server() {
   // server graceful stop
   _app.stop();
@@ -112,6 +129,8 @@ void Server::rootEndpoint() {
  * key exchange protocol. It receives requests and makes all the calculations
  * to respond to the requests, creating a symmetric key for each connection
  * request.
+ *
+ * @throws std::runtime_error if there was an error in the keyExchangeRoute.
  */
 void Server::keyExchangeRoute() {
   CROW_ROUTE(_app, "/keyExchange")
