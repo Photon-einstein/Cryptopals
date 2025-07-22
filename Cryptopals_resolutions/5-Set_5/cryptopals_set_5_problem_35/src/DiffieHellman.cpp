@@ -161,7 +161,7 @@ const std::string MyCryptoLibrary::DiffieHellman::deriveSharedSecret(
   }
   MessageExtractionFacility::UniqueBIGNUM peerPublicKey =
       MessageExtractionFacility::hexToUniqueBIGNUM(peerPublicKeyHex);
-  if (!peerPublicKey || BN_is_zero(peerPublicKey.get())) {
+  if (!peerPublicKey) {
     throw std::runtime_error("Diffie Hellman log | deriveSharedSecret(): "
                              "peerPublicKey is not initialized for the "
                              "derivation of the shared secret");
@@ -330,6 +330,55 @@ const std::string MyCryptoLibrary::DiffieHellman::getGeneratorG() const {
 };
 /******************************************************************************/
 /**
+ * @brief This method will set the value of the prime p.
+ *
+ * @param pHex The prime p in hexadecimal format.
+ *
+ * @throws std::runtime_error if the prime p is empty.
+ */
+void MyCryptoLibrary::DiffieHellman::setPrimeP(const std::string &pHex) {
+  if (pHex.empty()) {
+    throw std::runtime_error("Diffie Hellman log | setPrimeP(): "
+                             "input pHex is empty.");
+  }
+  _p = MessageExtractionFacility::hexToUniqueBIGNUM(pHex);
+}
+/******************************************************************************/
+/**
+ * @brief This method will set the value of the generator g.
+ *
+ * @param gHex The generator g in hexadecimal format.
+ *
+ * @throws std::runtime_error if the generator g is empty.
+ */
+void MyCryptoLibrary::DiffieHellman::setGeneratorG(const std::string &gHex) {
+  if (gHex.empty()) {
+    throw std::runtime_error("Diffie Hellman log | setGeneratorG(): "
+                             "input gHex is empty.");
+  }
+  _g = MessageExtractionFacility::hexToUniqueBIGNUM(gHex);
+}
+/******************************************************************************/
+/**
+ * @brief This method will test if the guess of the shared secret match the
+ * the real value.
+ *
+ * This method will test if the guess of the shared secret match the
+ * the real value of the raw shared secret.
+ *
+ * @param sharedSecretRawGuessHex The guess of the raw shared secret in
+ * hexadecimal format.
+ *
+ * @return True if the values match, false otherwise.
+ */
+bool MyCryptoLibrary::DiffieHellman::testValueRawSharedSecret(
+    const std::string &sharedSecretRawGuessHex) {
+  const std::string sharedSecretRawHex =
+      MessageExtractionFacility::BIGNUMToHex(_sharedSecret.get());
+  return sharedSecretRawHex == sharedSecretRawGuessHex;
+}
+/******************************************************************************/
+/**
  * @brief This method will generate a private key.
  *
  * This method will generate a private key to be used at a Diffie
@@ -438,5 +487,38 @@ void MyCryptoLibrary::DiffieHellman::generatePublicKey() {
               << BN_num_bits(_publicKey.get()) << "\n"
               << std::endl;
   }
+}
+/******************************************************************************/
+/**
+ * @brief This method will test if the guess of the shared secret match the
+ * the real value, that is assumed to be p-1.
+ *
+ * This method will test if the guess of the shared secret match the
+ * the real value of the raw shared secret.
+ *
+ * @return True if the values match, false otherwise.
+ */
+bool MyCryptoLibrary::DiffieHellman::
+    testValueRawSharedSecretNegativeHypothesis() {
+  // The hypothesis is that the actual secret is (p-1).
+  if (!_sharedSecret || !_p) {
+    // Handle error: BIGNUMs not initialized
+    return false;
+  }
+  // 1. Create a BIGNUM for (p - 1)
+  MessageExtractionFacility::UniqueBIGNUM pMinus1Bn{
+      MessageExtractionFacility::UniqueBIGNUM(BN_new())};
+  if (!pMinus1Bn) {
+    // Handle error: allocation failed
+    return false;
+  }
+  // Subtract 1 from p
+  if (BN_sub(pMinus1Bn.get(), _p.get(), BN_value_one()) == 0) {
+    // Handle error: BN_sub failed
+    return false;
+  }
+  // 2. Compare the actual shared secret with (p - 1)
+  // BN_cmp returns 0 if equal, > 0 if first is greater, < 0 if first is smaller
+  return BN_cmp(_sharedSecret.get(), pMinus1Bn.get()) == 0;
 }
 /******************************************************************************/

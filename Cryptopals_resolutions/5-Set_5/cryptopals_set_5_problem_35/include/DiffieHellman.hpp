@@ -142,9 +142,52 @@ public:
    * exchange protocol.
    *
    * @return The generator g, in hexadecimal format.
-   * @throws std::runtime_error if the prime g is not set.
+   * @throws std::runtime_error if the generator g is not set.
    */
   const std::string getGeneratorG() const;
+
+  /**
+   * @brief This method will set the value of the prime p.
+   *
+   * @param pHex The prime p in hexadecimal format.
+   *
+   * @throws std::runtime_error if the prime p is empty.
+   */
+  void setPrimeP(const std::string &pHex);
+
+  /**
+   * @brief This method will set the value of the generator g.
+   *
+   * @param gHex The generator g in hexadecimal format.
+   *
+   * @throws std::runtime_error if the generator g is empty.
+   */
+  void setGeneratorG(const std::string &gHex);
+
+  /**
+   * @brief This method will test if the guess of the shared secret match the
+   * the real value.
+   *
+   * This method will test if the guess of the shared secret match the
+   * the real value of the raw shared secret.
+   *
+   * @param rawSharedSecretGuessHex The guess of the raw shared secret in
+   * hexadecimal format.
+   *
+   * @return True if the values match, false otherwise.
+   */
+  bool testValueRawSharedSecret(const std::string &rawSharedSecretGuessHex);
+
+  /**
+   * @brief This method will test if the guess of the shared secret match the
+   * the real value, that is assumed to be p-1.
+   *
+   * This method will test if the guess of the shared secret match the
+   * the real value of the raw shared secret.
+   *
+   * @return True if the values match, false otherwise.
+   */
+  bool testValueRawSharedSecretNegativeHypothesis();
 
 private:
   /* private methods */

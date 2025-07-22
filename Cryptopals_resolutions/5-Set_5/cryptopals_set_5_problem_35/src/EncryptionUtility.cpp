@@ -182,7 +182,7 @@ std::string EncryptionUtility::getFormattedTimestamp() {
   // std::gmtime return pointers to static internal buffers, which can be
   // overwritten by subsequent calls. For thread-safe or persistent use,
   // consider using std::localtime_r (POSIX) or std::_localtime_s (Windows) or
-  // explicitly copying the tm struct. For simple timestamping, it's usually
+  // explicitly copying the tm struct. For simple time stamping, it's usually
   // fine.
   std::tm *local_tm = std::localtime(&now_c);
 

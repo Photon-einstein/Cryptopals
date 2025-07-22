@@ -79,6 +79,16 @@ public:
    */
   const int getTestPort() const;
 
+  /**
+   * @brief This method will return the Diffie Hellman's map.
+   *
+   * This method will return the Diffie Hellman's map of the client.
+   *
+   * @return The client's DH map.
+   */
+  std::map<boost::uuids::uuid, std::unique_ptr<SessionData>> &
+  getDiffieHellmanMap();
+
 private:
   /* private methods */
 

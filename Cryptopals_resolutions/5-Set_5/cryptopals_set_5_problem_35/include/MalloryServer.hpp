@@ -132,6 +132,16 @@ public:
   void
   setGReplacementAttackStrategy(const gReplacementAttackStrategy &strategy);
 
+  /**
+   * @brief This method will return the Diffie Hellman's map.
+   *
+   * This method will return the Diffie Hellman's map of the fake server.
+   *
+   * @return The fake server's DH map.
+   */
+  std::map<boost::uuids::uuid, std::unique_ptr<MallorySessionData>> &
+  getDiffieHellmanMap();
+
 private:
   /* private methods */
 

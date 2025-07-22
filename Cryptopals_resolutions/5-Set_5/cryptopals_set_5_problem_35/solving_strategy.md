@@ -110,17 +110,19 @@
 13. Create an enum class inside the attacker class (Done)
 14. Remove the code from the parameter injection of the last exercise (Done)
 
-15. Double check in the code if all the source code comments have the right documentation regarding the parameters, the documentation of all the methods, the const flag, and the errors throw if applicable. (in progress).
+15. Double check in the code if all the source code comments have the right documentation  
+    regarding the parameters, the documentation of all the methods, the const flag, and  
+    the errors throw if applicable. (Done).
 
-    - Client.hpp/cpp (Done);
-    - DHParametersLoader.hpp/cpp (Done)
-    - DiffieHellman.hpp/cpp (Done)
-    - EncryptionUtility.hpp/cpp (Done)
-    - MalloryServer.hpp/cpp (Done)
-    - MallorySessionData.hpp/cpp (Done)
-    - MessageExtractionFacility.hpp/cpp (Done)
-    - Server.hpp/cpp (Done)
-    - SessionData.hpp (Done)
+        - Client.hpp/cpp (Done);
+        - DHParametersLoader.hpp/cpp (Done)
+        - DiffieHellman.hpp/cpp (Done)
+        - EncryptionUtility.hpp/cpp (Done)
+        - MalloryServer.hpp/cpp (Done)
+        - MallorySessionData.hpp/cpp (Done)
+        - MessageExtractionFacility.hpp/cpp (Done)
+        - Server.hpp/cpp (Done)
+        - SessionData.hpp (Done)
 
 16. Implement the code to perform the g parameter substitution (Done)
     16.1. Implement the boiler code to perform the substitutions on the g parameter (Done).
@@ -128,8 +130,9 @@
     to test all the scenarios (Done)
 
     16.3. Implement the substitution of g = 1 on the first and second leg of the MitM attack (Done).
-    16.4. Implement the test for the g = 1 substitution on the MitM attack (in progress).
+    16.4. Implement the test for the g = 1 substitution on the MitM attack (Done).
+
     16.5. Implement the substitution of g = p on the first and second leg of the MitM attack (Done).
-    16.6. Implement the test for the g = p substitution on the MitM attack (TBD).
+    16.6. Implement the test for the g = p substitution on the MitM attack (Done).
     16.7. Implement the substitution of g = p-1 on the first and second leg of the MitM attack (Done).
-    16.8. Implement the test for the g = p-1 substitution on the MitM attack (TBD).
+    16.8. Implement the test for the g = p-1 substitution on the MitM attack (Done).

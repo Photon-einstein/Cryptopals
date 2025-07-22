@@ -1,6 +1,10 @@
 #ifndef MESSAGE_EXTRACTION_FACILITY_HPP
 #define MESSAGE_EXTRACTION_FACILITY_HPP
 
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
+#include <format>
 #include <memory>
 #include <openssl/bn.h>
 #include <openssl/err.h>
@@ -53,14 +57,17 @@ UniqueBIGNUM hexToUniqueBIGNUM(const std::string &hexNumber);
 
 /**
  * @brief This method will convert a number in a BIGNUM format to
- * a hexadecimal format.
+ * a hexadecimal format, ensuring an even number of hex digits.
  *
  * This method will convert a number in a BIGNUM format to
  * a hexadecimal format, performing all the calculations necessary.
+ * It ensures the resulting hex string has an even length, padding with a
+ * leading '0' if the natural hex representation has an odd length.
  *
  * @param bn The number in a BIGNUM format.
  *
- * @return The number converted to a hexadecimal format.
+ * @return The number converted to a hexadecimal format with an even number of
+ * digits.
  * @throws std::runtime_error if conversion fails.
  */
 std::string BIGNUMToHex(BIGNUM *bn);
@@ -78,6 +85,31 @@ std::string BIGNUMToHex(BIGNUM *bn);
  * @throws std::runtime_error if conversion fails.
  */
 std::string BIGNUMToDec(BIGNUM *bn);
+
+/**
+ * @brief Converts a string representation of a UUID to a boost::uuids::uuid
+ * object.
+ *
+ * This function expects the input string to be in a standard UUID format,
+ * such as "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx" (with or without braces).
+ *
+ * @param uuidString The string representation of the UUID.
+ * @return A boost::uuids::uuid object.
+ * @throws std::runtime_error if the input string is not a valid UUID format.
+ */
+boost::uuids::uuid stringToBoostUuid(const std::string &uuidString);
+
+/**
+ * @brief Converts an integer to its hexadecimal string representation without
+ * the "0x" prefix, ensuring an even number of hexadecimal digits (padding with
+ * '0' if necessary).
+ *
+ * @param value The integer to convert.
+ * @param uppercase If true, hex digits A-F will be uppercase (e.g., "FF").
+ * If false, lowercase (e.g., "ff").
+ * @return The hexadecimal string with an even number of digits.
+ */
+std::string intToHexEvenDigits(int value, bool uppercase = true);
 
 }; // namespace MessageExtractionFacility
 
