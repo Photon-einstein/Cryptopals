@@ -93,6 +93,18 @@ const int Server::getProductionPort() const { return _portProduction; }
 const int Server::getTestPort() const { return _portTest; }
 /******************************************************************************/
 /**
+ * @brief This method will return the Diffie Hellman's map.
+ *
+ * This method will return the Diffie Hellman's map of the server.
+ *
+ * @return The client's DH map.
+ */
+std::map<boost::uuids::uuid, std::unique_ptr<SessionData>> &
+Server::getDiffieHellmanMap() {
+  return _diffieHellmanMap;
+}
+/******************************************************************************/
+/**
  * @brief This method will start the endpoints that the server
  * provides to his clients.
  *
@@ -184,7 +196,6 @@ void Server::keyExchangeRoute() {
                _diffieHellmanMap[sessionId]->_diffieHellman->getPublicKey()}};
           res["nonce"] = _diffieHellmanMap[sessionId]->_serverNonceHex;
           // confirmation payload
-          std::cout << "Server step 4" << std::endl;
           std::string serverConfirmationMessage =
               _diffieHellmanMap[sessionId]
                   ->_diffieHellman->getConfirmationMessage() +

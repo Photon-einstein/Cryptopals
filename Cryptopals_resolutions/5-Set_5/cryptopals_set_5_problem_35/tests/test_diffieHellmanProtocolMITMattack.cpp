@@ -268,3 +268,191 @@ TEST_F(
   }
   EXPECT_EQ(numbersSessionsCreated, numberSessionsFound);
 }
+
+/**
+ * @test Test the correctness of MITM attack with one client with g = 1
+ * replacement.
+ * @brief Ensures that the MITM attack is successful with one single client
+ * attempting to set up the DH key exchange, asserting that he remains oblivious
+ * to a third party interception of the session with a fake server.
+ * The message exchange is tested if it can be forwarded transparently by means
+ * of a man in the middle attack.
+ * The attacker performs a g = 1 replacement on the second leg of the
+ * attack.
+ */
+TEST_F(
+    DiffieHellmanKeyExchangeProtocolMITMattackTest,
+    DiffieHellmanKeyExchange_WithMalloryServerRunning1UserGeneratorEqualsOne_ShouldDeceiveClient) {
+  _fakeServer->setGReplacementAttackStrategy(
+      gReplacementAttackStrategy::gEquals1);
+  const std::tuple<bool, std::string, std::string> keyExchangeResult =
+      _mapUsers[_clientId1]->diffieHellmanKeyExchange(
+          _mapUsers[_clientId1]->getTestPort());
+  EXPECT_TRUE(std::get<0>(keyExchangeResult));
+  const std::string newSessionId = std::get<2>(keyExchangeResult);
+  auto response = cpr::Get(cpr::Url{
+      "http://localhost:" + std::to_string(_fakeServer->getTestPort()) +
+      "/sessionsData"});
+  EXPECT_EQ(response.status_code, 200);
+  crow::json::rvalue jsonResponse = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponse);
+  bool sessionFound{false};
+  std::string sessionIdFound{};
+  std::string expectedClientId{_mapUsers[_clientId1]->getClientId()};
+  for (const std::string &sessionId : jsonResponse.keys()) {
+    const crow::json::rvalue &sessionData = jsonResponse[sessionId];
+    std::string clientId = sessionData["clientId"].s();
+    if (clientId == expectedClientId && sessionId == newSessionId) {
+      sessionFound = true;
+      sessionIdFound = sessionId;
+      const std::string derivedKey{sessionData["derivedKey"].s()};
+      const std::string sessionIdReceived{sessionData["sessionId"].s()};
+      const std::string iv{sessionData["iv"].s()};
+      const std::string clientNonce{sessionData["clientNonce"].s()};
+      const std::string serverNonce{sessionData["serverNonce"].s()};
+      EXPECT_EQ(sessionIdReceived, sessionId);
+      EXPECT_TRUE(_mapUsers[_clientId1]->verifyServerSessionDataEntryEndpoint(
+          sessionIdFound, clientId, clientNonce, serverNonce, derivedKey, iv));
+      const boost::uuids::uuid sessionIdMS =
+          MessageExtractionFacility::stringToBoostUuid(sessionIdReceived);
+      const int expectedRawSecretValue = 1;
+      const std::string expectedRawSecretValueString =
+          MessageExtractionFacility::intToHexEvenDigits(expectedRawSecretValue);
+      EXPECT_TRUE(_server->getDiffieHellmanMap()[sessionIdMS]
+                      ->_diffieHellman->testValueRawSharedSecret(
+                          expectedRawSecretValueString));
+      break;
+    }
+  }
+  EXPECT_TRUE(sessionFound);
+  EXPECT_TRUE(_mapUsers[_clientId1]->confirmSessionId(sessionIdFound));
+  EXPECT_TRUE(_mapUsers[_clientId1]->messageExchange(
+      _mapUsers[_clientId1]->getTestPort(), sessionIdFound));
+}
+
+/**
+ * @test Test the correctness of MITM attack with one client with g = p
+ * replacement.
+ * @brief Ensures that the MITM attack is successful with one single client
+ * attempting to set up the DH key exchange, asserting that he remains oblivious
+ * to a third party interception of the session with a fake server.
+ * The message exchange is tested if it can be forwarded transparently by means
+ * of a man in the middle attack.
+ * The attacker performs a g = p replacement on the second leg of the
+ * attack.
+ */
+TEST_F(
+    DiffieHellmanKeyExchangeProtocolMITMattackTest,
+    DiffieHellmanKeyExchange_WithMalloryServerRunning1UserGeneratorEqualsP_ShouldDeceiveClient) {
+  _fakeServer->setGReplacementAttackStrategy(
+      gReplacementAttackStrategy::gEqualsP);
+  const std::tuple<bool, std::string, std::string> keyExchangeResult =
+      _mapUsers[_clientId1]->diffieHellmanKeyExchange(
+          _mapUsers[_clientId1]->getTestPort());
+  EXPECT_TRUE(std::get<0>(keyExchangeResult));
+  const std::string newSessionId = std::get<2>(keyExchangeResult);
+  auto response = cpr::Get(cpr::Url{
+      "http://localhost:" + std::to_string(_fakeServer->getTestPort()) +
+      "/sessionsData"});
+  EXPECT_EQ(response.status_code, 200);
+  crow::json::rvalue jsonResponse = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponse);
+  bool sessionFound{false};
+  std::string sessionIdFound{};
+  std::string expectedClientId{_mapUsers[_clientId1]->getClientId()};
+  for (const std::string &sessionId : jsonResponse.keys()) {
+    const crow::json::rvalue &sessionData = jsonResponse[sessionId];
+    std::string clientId = sessionData["clientId"].s();
+    if (clientId == expectedClientId && sessionId == newSessionId) {
+      sessionFound = true;
+      sessionIdFound = sessionId;
+      const std::string derivedKey{sessionData["derivedKey"].s()};
+      const std::string sessionIdReceived{sessionData["sessionId"].s()};
+      const std::string iv{sessionData["iv"].s()};
+      const std::string clientNonce{sessionData["clientNonce"].s()};
+      const std::string serverNonce{sessionData["serverNonce"].s()};
+      EXPECT_EQ(sessionIdReceived, sessionId);
+      EXPECT_TRUE(_mapUsers[_clientId1]->verifyServerSessionDataEntryEndpoint(
+          sessionIdFound, clientId, clientNonce, serverNonce, derivedKey, iv));
+      const boost::uuids::uuid sessionIdMS =
+          MessageExtractionFacility::stringToBoostUuid(sessionIdReceived);
+      const int expectedRawSecretValue = 0;
+      const std::string expectedRawSecretValueString =
+          MessageExtractionFacility::intToHexEvenDigits(expectedRawSecretValue);
+      EXPECT_TRUE(_server->getDiffieHellmanMap()[sessionIdMS]
+                      ->_diffieHellman->testValueRawSharedSecret(
+                          expectedRawSecretValueString));
+      break;
+    }
+  }
+  EXPECT_TRUE(sessionFound);
+  EXPECT_TRUE(_mapUsers[_clientId1]->confirmSessionId(sessionIdFound));
+  EXPECT_TRUE(_mapUsers[_clientId1]->messageExchange(
+      _mapUsers[_clientId1]->getTestPort(), sessionIdFound));
+}
+
+/**
+ * @test Test the correctness of MITM attack with one client with g = p-1
+ * replacement.
+ * @brief Ensures that the MITM attack is successful with one single client
+ * attempting to set up the DH key exchange, asserting that he remains oblivious
+ * to a third party interception of the session with a fake server.
+ * The message exchange is tested if it can be forwarded transparently by means
+ * of a man in the middle attack.
+ * The attacker performs a g = p-1 replacement on the second leg of the
+ * attack.
+ */
+TEST_F(
+    DiffieHellmanKeyExchangeProtocolMITMattackTest,
+    DiffieHellmanKeyExchange_WithMalloryServerRunning1UserGeneratorEqualsPMinusOne_ShouldDeceiveClient) {
+  _fakeServer->setGReplacementAttackStrategy(
+      gReplacementAttackStrategy::gEqualsPminus1);
+  const std::tuple<bool, std::string, std::string> keyExchangeResult =
+      _mapUsers[_clientId1]->diffieHellmanKeyExchange(
+          _mapUsers[_clientId1]->getTestPort());
+  EXPECT_TRUE(std::get<0>(keyExchangeResult));
+  const std::string newSessionId = std::get<2>(keyExchangeResult);
+  auto response = cpr::Get(cpr::Url{
+      "http://localhost:" + std::to_string(_fakeServer->getTestPort()) +
+      "/sessionsData"});
+  EXPECT_EQ(response.status_code, 200);
+  crow::json::rvalue jsonResponse = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponse);
+  bool sessionFound{false};
+  std::string sessionIdFound{};
+  std::string expectedClientId{_mapUsers[_clientId1]->getClientId()};
+  for (const std::string &sessionId : jsonResponse.keys()) {
+    const crow::json::rvalue &sessionData = jsonResponse[sessionId];
+    std::string clientId = sessionData["clientId"].s();
+    if (clientId == expectedClientId && sessionId == newSessionId) {
+      sessionFound = true;
+      sessionIdFound = sessionId;
+      const std::string derivedKey{sessionData["derivedKey"].s()};
+      const std::string sessionIdReceived{sessionData["sessionId"].s()};
+      const std::string iv{sessionData["iv"].s()};
+      const std::string clientNonce{sessionData["clientNonce"].s()};
+      const std::string serverNonce{sessionData["serverNonce"].s()};
+      EXPECT_EQ(sessionIdReceived, sessionId);
+      EXPECT_TRUE(_mapUsers[_clientId1]->verifyServerSessionDataEntryEndpoint(
+          sessionIdFound, clientId, clientNonce, serverNonce, derivedKey, iv));
+      const boost::uuids::uuid sessionIdMS =
+          MessageExtractionFacility::stringToBoostUuid(sessionIdReceived);
+      const int expectedRawSecretValueOption1 = 1;
+      std::string expectedRawSecretValueOption1String =
+          MessageExtractionFacility::intToHexEvenDigits(
+              expectedRawSecretValueOption1);
+      const bool expectedValue =
+          _server->getDiffieHellmanMap()[sessionIdMS]
+              ->_diffieHellman->testValueRawSharedSecret(
+                  expectedRawSecretValueOption1String) ||
+          _server->getDiffieHellmanMap()[sessionIdMS]
+              ->_diffieHellman->testValueRawSharedSecretNegativeHypothesis();
+      EXPECT_TRUE(expectedValue);
+      break;
+    }
+  }
+  EXPECT_TRUE(sessionFound);
+  EXPECT_TRUE(_mapUsers[_clientId1]->confirmSessionId(sessionIdFound));
+  EXPECT_TRUE(_mapUsers[_clientId1]->messageExchange(
+      _mapUsers[_clientId1]->getTestPort(), sessionIdFound));
+}

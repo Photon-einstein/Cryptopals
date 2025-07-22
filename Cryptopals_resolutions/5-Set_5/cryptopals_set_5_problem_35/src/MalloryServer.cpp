@@ -165,6 +165,18 @@ void MalloryServer::setGReplacementAttackStrategy(
 }
 /******************************************************************************/
 /**
+ * @brief This method will return the Diffie Hellman's map.
+ *
+ * This method will return the Diffie Hellman's map of the fake server.
+ *
+ * @return The fake server's DH map.
+ */
+std::map<boost::uuids::uuid, std::unique_ptr<MallorySessionData>> &
+MalloryServer::getDiffieHellmanMap() {
+  return _diffieHellmanMap;
+}
+/******************************************************************************/
+/**
  * @brief This method will start the endpoints that the server
  * provides to his clients.
  *
@@ -245,7 +257,7 @@ void MalloryServer::keyExchangeRoute() {
           std::lock_guard<std::mutex> lock(_diffieHellmanMapMutex);
           _diffieHellmanMap[sessionId] = std::make_unique<MallorySessionData>(
               _nonceSize, extractedNonceClient, extractedClientId, _debugFlag,
-              _ivLength, extractedPrimeP, swappedGeneratorG);
+              _ivLength, extractedPrimeP, extractedGeneratorG);
           _diffieHellmanMap[sessionId]->_derivedKeyHexAM =
               _diffieHellmanMap[sessionId]
                   ->_diffieHellmanAM->deriveSharedSecret(
@@ -253,11 +265,11 @@ void MalloryServer::keyExchangeRoute() {
                       _diffieHellmanMap[sessionId]->_serverNonceHexAM,
                       _diffieHellmanMap[sessionId]->_clientNonceHexAM);
           // generate fake client
-          _diffieHellmanMap[sessionId]
-              ->_fakeClientMS = std::make_unique<Client>(
-              _diffieHellmanMap[sessionId]->_clientIdAM, _debugFlag,
-              _diffieHellmanMap[sessionId]->_diffieHellmanAM->getPrimeP(),
-              _diffieHellmanMap[sessionId]->_diffieHellmanAM->getGeneratorG());
+          _diffieHellmanMap[sessionId]->_fakeClientMS =
+              std::make_unique<Client>(
+                  _diffieHellmanMap[sessionId]->_clientIdAM, _debugFlag,
+                  _diffieHellmanMap[sessionId]->_diffieHellmanAM->getPrimeP(),
+                  swappedGeneratorG);
           std::tuple<bool, std::string, std::string> serverResponse =
               _diffieHellmanMap[sessionId]
                   ->_fakeClientMS->diffieHellmanKeyExchange(
@@ -615,6 +627,13 @@ const std::string MalloryServer::generateGParameterByAttackStrategy(
     BN_copy(modifiedG.get(), originalG.get());
     break;
   }
-  return MessageExtractionFacility::BIGNUMToHex(modifiedG.get());
+  const std::string newGeneratorValue =
+      MessageExtractionFacility::BIGNUMToHex(modifiedG.get());
+  if (_debugFlag) {
+    std::cout << "Mallory Server log | generateGParameterByAttackStrategy(): "
+                 "gNewHex = "
+              << newGeneratorValue << "." << std::endl;
+  }
+  return newGeneratorValue;
 }
 /******************************************************************************/

@@ -106,8 +106,6 @@ Client::diffieHellmanKeyExchange(const int portServerNumber) {
     diffieHellman = std::make_unique<MyCryptoLibrary::DiffieHellman>(
         _debugFlag, _groupNameDH);
   } else {
-    std::cout << "Fake client: second constructor with p and g called for DH."
-              << std::endl;
     diffieHellman = std::make_unique<MyCryptoLibrary::DiffieHellman>(
         _debugFlag, _pHex, _gHex);
   }

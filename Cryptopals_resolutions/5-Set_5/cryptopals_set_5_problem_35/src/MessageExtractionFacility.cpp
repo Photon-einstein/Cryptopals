@@ -91,24 +91,35 @@ MessageExtractionFacility::hexToUniqueBIGNUM(const std::string &hexNumber) {
 /******************************************************************************/
 /**
  * @brief This method will convert a number in a BIGNUM format to
- * a hexadecimal format.
+ * a hexadecimal format, ensuring an even number of hex digits.
  *
  * This method will convert a number in a BIGNUM format to
  * a hexadecimal format, performing all the calculations necessary.
+ * It ensures the resulting hex string has an even length, padding with a
+ * leading '0' if the natural hex representation has an odd length.
  *
  * @param bn The number in a BIGNUM format.
  *
- * @return The number converted to a hexadecimal format.
+ * @return The number converted to a hexadecimal format with an even number of
+ * digits.
  * @throws std::runtime_error if conversion fails.
  */
 std::string MessageExtractionFacility::BIGNUMToHex(BIGNUM *bn) {
-  char *hexChars = BN_bn2hex(bn); // Allocates memory
+  // BN_bn2hex allocates memory that needs to be freed with OPENSSL_free
+  char *hexChars = BN_bn2hex(bn);
   if (!hexChars) {
     throw std::runtime_error("MessageExtractionFacility log | BIGNUMToHex(): "
                              "Failed to convert BIGNUM to hex string.");
   }
-  std::string hexStr(hexChars);
-  OPENSSL_free(hexChars); // Free memory allocated by BN_bn2hex
+  std::string hexStr(hexChars); // Convert C-string to std::string
+  OPENSSL_free(hexChars);       // Free the allocated memory
+
+  // Check if the length of the hexadecimal string is odd
+  // This happens for values like 0 ("0"), 1 ("1"), 10 ("A"), 256 ("100"), etc.
+  if (hexStr.length() % 2 != 0) {
+    // If odd, prepend a '0' to make the length even
+    hexStr = "0" + hexStr;
+  }
   return hexStr;
 }
 /******************************************************************************/
@@ -136,8 +147,64 @@ std::string MessageExtractionFacility::BIGNUMToDec(BIGNUM *bn) {
                              "Failed to convert BIGNUM to decimal string: " +
                              std::string(errBuf));
   }
-  std::string dec_str(decChars); // Copy to std::string
-  OPENSSL_free(decChars);        // Free the allocated C-style string
-  return dec_str;
+  std::string decStr(decChars); // Copy to std::string
+  OPENSSL_free(decChars);       // Free the allocated C-style string
+  return decStr;
+}
+/******************************************************************************/
+/**
+ * @brief Converts a string representation of a UUID to a boost::uuids::uuid
+ * object.
+ *
+ * This function expects the input string to be in a standard UUID format,
+ * such as "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx" (with or without braces).
+ *
+ * @param uuidString The string representation of the UUID.
+ * @return A boost::uuids::uuid object.
+ * @throws std::runtime_error if the input string is not a valid UUID format.
+ */
+boost::uuids::uuid
+MessageExtractionFacility::stringToBoostUuid(const std::string &uuidString) {
+  try {
+    boost::uuids::string_generator generator;
+    return generator(uuidString);
+  } catch (const std::runtime_error &e) {
+    throw std::runtime_error("Failed to convert string to UUID: '" +
+                             uuidString + "' - " + e.what());
+  }
+}
+/******************************************************************************/
+/**
+ * @brief Converts an integer to its hexadecimal string representation without
+ * the "0x" prefix, ensuring an even number of hexadecimal digits (padding with
+ * '0' if necessary).
+ *
+ * @param value The integer to convert.
+ * @param uppercase If true, hex digits A-F will be uppercase (e.g., "FF").
+ * If false, lowercase (e.g., "ff").
+ * @return The hexadecimal string with an even number of digits.
+ */
+std::string MessageExtractionFacility::intToHexEvenDigits(int value,
+                                                          bool uppercase) {
+  using UnsignedInt = std::make_unsigned_t<int>; // e.g., unsigned int
+  UnsignedInt uvalue = static_cast<UnsignedInt>(value);
+
+  std::string hex_str;
+  if (uppercase) {
+    hex_str = std::format("{:X}", uvalue);
+  } else {
+    hex_str = std::format("{:x}", uvalue);
+  }
+
+  if (hex_str.length() % 2 != 0) {
+    int required_width = hex_str.length() + 1;
+    if (uppercase) {
+      return std::format("{:0{}X}", uvalue, required_width);
+    } else {
+      return std::format("{:0{}x}", uvalue, required_width);
+    }
+  } else {
+    return hex_str;
+  }
 }
 /******************************************************************************/
