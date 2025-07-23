@@ -20,6 +20,7 @@ class Server {
     + clearDiffieHellmanSessionData() : void
     + getProductionPort() : int
     + getTestPort() : int
+    + getDiffieHellmanMap() : std::map<boost::uuids::uuid, std::unique_ptr<SessionData>>
     - setupRoutes() : void
     - rootEndpoint() : void
     - keyExchangeRoute() : void

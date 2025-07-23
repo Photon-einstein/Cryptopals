@@ -116,7 +116,7 @@ const int MalloryServer::getTestPort() const { return _portTest; }
  * @return The g parameter replacement strategy used by this attacker.
  */
 const std::string MalloryServer::getGReplacementAttackStrategyToString(
-    const gReplacementAttackStrategy &strategy) const {
+    const gReplacementAttackStrategy &strategy) {
   switch (strategy) {
   case gReplacementAttackStrategy::NoReplacementAttack:
     return std::string("No replacement attack");
@@ -590,7 +590,7 @@ boost::uuids::uuid MalloryServer::generateUniqueSessionId() {
  */
 const std::string MalloryServer::generateGParameterByAttackStrategy(
     const std::string &originalGHex, const std::string &pHex,
-    const gReplacementAttackStrategy &gReplacementAttackStrategy) {
+    const gReplacementAttackStrategy &gReplacementAttackStrategy) const {
   if (originalGHex.empty()) {
     throw std::runtime_error("g is required for G attack strategies.");
   } else if (pHex.empty()) {

@@ -116,8 +116,8 @@ public:
    *
    * @return The g parameter replacement strategy used by this attacker.
    */
-  const std::string getGReplacementAttackStrategyToString(
-      const gReplacementAttackStrategy &strategy) const;
+  static const std::string getGReplacementAttackStrategyToString(
+      const gReplacementAttackStrategy &strategy);
 
   /**
    * @brief This method will set the g replacement strategy used by Mallory.
@@ -235,7 +235,7 @@ private:
    */
   const std::string generateGParameterByAttackStrategy(
       const std::string &originalGHex, const std::string &pHex,
-      const gReplacementAttackStrategy &gReplacementAttackStrategy);
+      const gReplacementAttackStrategy &gReplacementAttackStrategy) const;
 
   /* private fields */
   mutable std::mutex _diffieHellmanMapMutex;
