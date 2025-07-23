@@ -81,8 +81,6 @@ MyCryptoLibrary::DiffieHellman::DiffieHellman(const bool debugFlag,
     throw std::runtime_error("Diffie Hellman log | constructor(): "
                              "Generator g is null");
   }
-  std::map<std::string, DhParametersLoader::DhParameters> dhParametersMap =
-      DhParametersLoader::loadDhParameters(getDhParametersFilenameLocation());
   _p = MessageExtractionFacility::hexToUniqueBIGNUM(p);
   _g = MessageExtractionFacility::hexToUniqueBIGNUM(g);
   if (_debugFlag) {
@@ -113,18 +111,6 @@ MyCryptoLibrary::DiffieHellman::~DiffieHellman() {}
  */
 const std::string MyCryptoLibrary::DiffieHellman::getPublicKey() const {
   return MessageExtractionFacility::BIGNUMToHex(_publicKey.get());
-}
-/******************************************************************************/
-/**
- * @brief This method will return the group name.
- *
- * This method will return the group name used at the Diffie Hellman
- * key exchange protocol.
- *
- * @return The group name in a string format.
- */
-const std::string &MyCryptoLibrary::DiffieHellman::getGroupName() const {
-  return _dhParameter._groupName;
 }
 /******************************************************************************/
 /**
@@ -328,36 +314,6 @@ const std::string MyCryptoLibrary::DiffieHellman::getGeneratorG() const {
   }
   return MessageExtractionFacility::BIGNUMToHex(_g.get());
 };
-/******************************************************************************/
-/**
- * @brief This method will set the value of the prime p.
- *
- * @param pHex The prime p in hexadecimal format.
- *
- * @throws std::runtime_error if the prime p is empty.
- */
-void MyCryptoLibrary::DiffieHellman::setPrimeP(const std::string &pHex) {
-  if (pHex.empty()) {
-    throw std::runtime_error("Diffie Hellman log | setPrimeP(): "
-                             "input pHex is empty.");
-  }
-  _p = MessageExtractionFacility::hexToUniqueBIGNUM(pHex);
-}
-/******************************************************************************/
-/**
- * @brief This method will set the value of the generator g.
- *
- * @param gHex The generator g in hexadecimal format.
- *
- * @throws std::runtime_error if the generator g is empty.
- */
-void MyCryptoLibrary::DiffieHellman::setGeneratorG(const std::string &gHex) {
-  if (gHex.empty()) {
-    throw std::runtime_error("Diffie Hellman log | setGeneratorG(): "
-                             "input gHex is empty.");
-  }
-  _g = MessageExtractionFacility::hexToUniqueBIGNUM(gHex);
-}
 /******************************************************************************/
 /**
  * @brief This method will test if the guess of the shared secret match the

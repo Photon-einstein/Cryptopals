@@ -71,16 +71,6 @@ public:
   const std::string getPublicKey() const;
 
   /**
-   * @brief This method will return the group name.
-   *
-   * This method will return the group name used at the Diffie Hellman
-   * key exchange protocol.
-   *
-   * @return The group name in a string format.
-   */
-  const std::string &getGroupName() const;
-
-  /**
    * @brief This method will derive a symmetric encryption key.
    *
    * This method will derive a symmetric encryption key as the derived
@@ -147,36 +137,18 @@ public:
   const std::string getGeneratorG() const;
 
   /**
-   * @brief This method will set the value of the prime p.
-   *
-   * @param pHex The prime p in hexadecimal format.
-   *
-   * @throws std::runtime_error if the prime p is empty.
-   */
-  void setPrimeP(const std::string &pHex);
-
-  /**
-   * @brief This method will set the value of the generator g.
-   *
-   * @param gHex The generator g in hexadecimal format.
-   *
-   * @throws std::runtime_error if the generator g is empty.
-   */
-  void setGeneratorG(const std::string &gHex);
-
-  /**
    * @brief This method will test if the guess of the shared secret match the
    * the real value.
    *
    * This method will test if the guess of the shared secret match the
    * the real value of the raw shared secret.
    *
-   * @param rawSharedSecretGuessHex The guess of the raw shared secret in
+   * @param sharedSecretRawGuessHex The guess of the raw shared secret in
    * hexadecimal format.
    *
    * @return True if the values match, false otherwise.
    */
-  bool testValueRawSharedSecret(const std::string &rawSharedSecretGuessHex);
+  bool testValueRawSharedSecret(const std::string &sharedSecretRawGuessHex);
 
   /**
    * @brief This method will test if the guess of the shared secret match the
