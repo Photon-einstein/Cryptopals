@@ -48,9 +48,10 @@ public:
    *
    * @throw runtime_error if clientId or groupNameDH are empty.
    */
-  MalloryServer(const bool debugFlag, const bool testFlag,
-                const gReplacementAttackStrategy gReplacementAttackStrategy =
-                    gReplacementAttackStrategy::NoReplacementAttack);
+  explicit MalloryServer(
+      const bool debugFlag, const bool testFlag,
+      const gReplacementAttackStrategy gReplacementAttackStrategy =
+          gReplacementAttackStrategy::NoReplacementAttack);
 
   /**
    * @brief This method will perform the destruction of the MalloryServer

@@ -139,17 +139,22 @@
 
 17. Run and fix locally the errors detected with the code static analysis (Done)
 
-18. Update the class diagram with the new code of this problem (in progress)
+18. Update the class diagram with the new code of this problem (Done)
     Class status:
 
     - Server.hpp/cpp (Done)
-    - MalloryServer.hpp/cpp (in progress)
-    - Client.hpp/cpp (TBD)
-    - SessionData.hpp (TBD)
-    - MallorySessionData.hpp/cpp (TBD)
-    - DiffieHellman.hpp/cpp (TBD)
-    - MessageExtractionFacility.hpp/cpp (TBD)
-    - EncryptionUtility.hpp/cpp (TBD)
-    - DhParametersLoader.hpp/cpp (TBD)
+    - MalloryServer.hpp/cpp (Done)
+    - Client.hpp/cpp (Done)
+    - SessionData.hpp (Done)
+    - MallorySessionData.hpp/cpp (Done)
+    - DiffieHellman.hpp/cpp (Done)
+    - MessageExtractionFacility.hpp/cpp (Done)
+    - EncryptionUtility.hpp/cpp (Done)
+    - DhParametersLoader.hpp/cpp (Done)
+
+````bash
+java -jar /home/tiago-sousa/.vscode/extensions/jebbs.plantuml-2.18.1/plantuml.jar -tsvg class_diagram.puml
+```
 
 19. Update the sequence diagram with the new code of this problem (TBD)
+````

@@ -38,7 +38,7 @@ include_directories(
     ${OPENSSL_INCLUDE_DIR}
 )
 
-# Add source files (your implementation files)
+# Add source files
 set(SOURCE_FILES
     ../src/Client.cpp
     ../src/DhParametersLoader.cpp

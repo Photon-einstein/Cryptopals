@@ -236,12 +236,11 @@ private:
   std::map<std::string, std::unique_ptr<SessionData>> _diffieHellmanMap;
   const int _portServerProduction{18080};
   int _portServerTest{18081};
-
   const std::string _clientId{};
   const std::size_t _nonceSize{16};            // bytes
   const std::size_t _ivLength{AES_BLOCK_SIZE}; // bytes
   const bool _debugFlag;
-  const std::string _groupNameDH = "";
+  const std::string _groupNameDH{};
   const std::string _pHex;
   const std::string _gHex;
 };

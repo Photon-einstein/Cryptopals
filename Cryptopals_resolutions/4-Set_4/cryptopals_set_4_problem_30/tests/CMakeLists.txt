@@ -19,7 +19,7 @@ include_directories(${GTEST_INCLUDE_DIRS})
 find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
 
-# Add source files (your implementation files)
+# Add source files
 set(SOURCE_FILES
     ../src/Attacker.cpp
     ../src/MessageDigest.cpp

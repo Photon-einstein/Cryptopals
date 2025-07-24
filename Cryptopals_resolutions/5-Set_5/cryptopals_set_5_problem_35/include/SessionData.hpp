@@ -32,13 +32,7 @@ struct SessionData {
                        const std::string &clientNonceHex,
                        const std::string &clientId, const bool debugFlag,
                        const std::size_t ivLength, const std::string &p,
-                       const std::string &g)
-      : _diffieHellman(
-            std::make_unique<MyCryptoLibrary::DiffieHellman>(debugFlag, p, g)),
-        _serverNonceHex(
-            EncryptionUtility::generateCryptographicNonce(nonceSize)),
-        _clientNonceHex{clientNonceHex}, _clientId{clientId},
-        _iv{EncryptionUtility::generateRandomIV(ivLength)} {};
+                       const std::string &g);
 
   // Client's constructor side
   /**
@@ -56,10 +50,7 @@ struct SessionData {
   explicit SessionData(
       std::unique_ptr<MyCryptoLibrary::DiffieHellman> diffieHellman,
       const std::string &serverNonceHex, const std::string &clientNonceHex,
-      const std::vector<uint8_t> &iv)
-      : _diffieHellman(std::move(diffieHellman)),
-        _serverNonceHex{serverNonceHex}, _clientNonceHex{clientNonceHex},
-        _iv{iv} {};
+      const std::vector<uint8_t> &iv);
 
   /**
    * @brief This method will perform the destruction of the SessionData
@@ -68,7 +59,7 @@ struct SessionData {
    * This method will perform the destruction of the SessionData structure,
    * releasing all the resources and memory used.
    */
-  ~SessionData(){};
+  ~SessionData();
 
   std::unique_ptr<MyCryptoLibrary::DiffieHellman> _diffieHellman;
   std::string _serverNonceHex;
