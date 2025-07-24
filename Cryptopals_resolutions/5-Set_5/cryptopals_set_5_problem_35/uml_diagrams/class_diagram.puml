@@ -1,25 +1,24 @@
 "@startuml MITM_with_injected_g_parameters_attack_class_diagram"
 
-
 class Server {
     - _diffieHellmanMapMutex : std::mutex
     - _diffieHellmanMap : std::map<boost::uuids::uuid, std::unique_ptr<SessionData>>
-    - _nonceSize : std::size_t
+    - _nonceSize : std::size_t = 16
     - _app : crow::SimpleApp
-    - _portProduction : int
-    - _portTest : int
+    - _portProduction : int = 18082
+    - _portTest : int = 18083
     - _serverThread : std::thread
     - _debugFlag : bool
-    - _ivLength : std::size_t
-    - _serverId : std::string
+    - _ivLength : std::size_t = AES_BLOCK_SIZE
+    - _serverId : std::string = "Server-Company_XYX_"
     
     + Server(debugFlag : bool) {explicit}
     + ~Server()
     + runServer() : void
     + runServerTest() : void
     + clearDiffieHellmanSessionData() : void
-    + getProductionPort() : int
-    + getTestPort() : int
+    + getProductionPort() : int {const}
+    + getTestPort() : int {const}
     + getDiffieHellmanMap() : std::map<boost::uuids::uuid, std::unique_ptr<SessionData>>
     - setupRoutes() : void
     - rootEndpoint() : void
@@ -32,38 +31,48 @@ class Server {
 note "Exposes API Endpoints:\n- **POST /keyExchange** (Diffie-Hellman Key Exchange)\n- **GET /sessionsData** (Retrieve Session Data)\n- **GET /messageExchange** (Performs a secure message exchange with a client after the DH key exchange protocol has been completed)" as ServerEndpointsNote
 Server .. ServerEndpointsNote
 
+enum gReplacementAttackStrategy {
+  NoReplacementAttack
+  gEquals1
+  gEqualsP
+  gEqualsPminus1
+}
+
 class MalloryServer {
     - _diffieHellmanMapMutex : std::mutex
     - _diffieHellmanMap : std::map<boost::uuids::uuid, std::unique_ptr<MallorySessionData>>
-    - _nonceSize : std::size_t
+    - _nonceSize : std::size_t = 16
     - _app : crow::SimpleApp
-    - _portProduction : int
-    - _portTest : int
-    - _portRealServerProduction : int
-    - _portRealServerTest : int
+    - _portProduction : int = 18080
+    - _portTest : int = 18081
+    - _portRealServerProduction : int = 18082
+    - _portRealServerTest : int = 18083
     - _portRealServerInUse : int
     - _serverThread : std::thread
     - _debugFlag : bool
     - _testFlag : bool
-    - _ivLength : std::size_t
-    - _serverId : std::string
+    - _ivLength : std::size_t = AES_BLOCK_SIZE
+    - _serverId: std::string = "Mallory_Server_"
     - _parameterInjection : bool
+    - _gReplacementAttackStrategy : gReplacementAttackStrategy
     
-    + MalloryServer(debugFlag : bool, testFlag : bool) {explicit}
-    + MalloryServer(debugFlag : bool, testFlag : bool, parameterInjection : bool) {explicit}
+    + MalloryServer(debugFlag : bool, gReplacementAttackStrategy = ReplacementAttackStrategy::NoReplacementAttack  : gReplacementAttackStrategy) {explicit}
     + ~MalloryServer()
     + runServer() : void
     + runServerTest() : void
     + clearDiffieHellmanSessionData() : void
-    + getProductionPort() : int
-    + getTestPort() : int
-    + setParameterInjectionFlag(parameterInjectionFlag : bool) : void
+    + getProductionPort() : int {const}
+    + getTestPort() : int {const}
+    + getGReplacementAttackStrategyToString(strategy : gReplacementAttackStrategy) : std::string {static}
+    + setGReplacementAttackStrategy(strategy : gReplacementAttackStrategy) : void
+    + getDiffieHellmanMap() : std::map<boost::uuids::uuid, std::unique_ptr<MallorySessionData>>
     - setupRoutes() : void
     - rootEndpoint() : void
     - keyExchangeRoute() : void
     - messageExchangeRoute() : void
     - getSessionsDataEndpoint() : void
     - generateUniqueSessionId() : boost::uuids::uuid
+    - generateGParameterByAttackStrategy(originalGHex : std::string, pHex : std::string, gReplacementAttackStrategy : gReplacementAttackStrategy) : std::string {const}
 }
 
 note "Exposes **fake** API Endpoints:\n- **POST /keyExchange** (Diffie-Hellman Key Exchange)\n- **GET /sessionsData** (Retrieve Session Data)\n- **GET /messageExchange** (Performs a secure message exchange with a client after the DH key exchange protocol as been completed)" as MalloryServerEndpointsNote
@@ -71,21 +80,29 @@ MalloryServer .. MalloryServerEndpointsNote
 
 class Client {
     - _diffieHellmanMap : std::map<std::string, std::unique_ptr<SessionData>>
-    - _portServerProduction : int
-    - _portServerTest : int 
+    - _portServerProduction : int = 18080
+    - _portServerTest : int = 18081
     - _clientId : std::string
-    - _nonceSize : std::size_t
+    - _nonceSize : std::size_t = 16
+    - _ivLength : std::size_t = AES_BLOCK_SIZE
     - _debugFlag : bool
+    - _groupNameDH : std::string
+    - _pHex : std::string
+    - _gHex : std::string
 
-    + Client(clientId : std::string, debugFlag : bool) {explicit}
+    + Client(clientId : std::string, debugFlag : bool, groupNameDH : std::string) {explicit}
+    + Client(clientId : std::string, debugFlag : bool, p : std::string, g : std::string) {explicit}
     + ~Client()
-    + diffieHellmanKeyExchange(portServerNumber : int) : void
-    + confirmSessionId(sessionId : std::string) : bool
+    + diffieHellmanKeyExchange(portServerNumber : int) : std::tuple<bool, std::string, std::string>
+    + messageExchange(portServerNumber : int, sessionId : std::string) : bool
+    + confirmSessionId(sessionId : std::string) : bool {const}
+    + setTestPort(portServerTest : int) : void
     + getClientId() : std::string {const}
     + getProductionPort() : int {const}
     + getTestPort() : int {const}
+    + getDiffieHellmanMap() : std::map<std::string, std::unique_ptr<SessionData>>
     + verifyServerSessionDataEntryEndpoint(sessionId : std::string, clientId : std::string, clientNonce : std::string, serverNonce : std::string, derivedKey : std::string, iv : std::string) : bool {const}
-    - printServerResponse(response : cpr::Response) : void {static}
+    + printServerResponse(response : cpr::Response) : void {static}
     - confirmationServerResponse(ciphertext : std::string, key : std::vector<uint8_t>, iv : std::vector<uint8_t>, sessionId : std::string, clientId : std::string, clientNonce : std::string, serverNonce : std::string, message : std::string) :  std::tuple<bool, std::string>
 }
 
@@ -98,8 +115,9 @@ class SessionData <<struct>> {
     - _iv : std::vector<uint8_t>
     - _groupNameDH : std::string
 
-    + SessionData(nonceSize : std::size_t, clientNonceHex : std::string, clientId : std::string, debugFlag : bool, ivLength : std::size_t, groupNameDH : std::string)
+    + SessionData(nonceSize : std::size_t, clientNonceHex : std::string, clientId : std::string, debugFlag : bool, ivLength : std::size_t, p : std::string, g : std::string)
     + SessionData(diffieHellman : std::unique_ptr<MyCryptoLibrary::DiffieHellman>, serverNonceHex : std::string, clientNonceHex : std::string, iv : std::vector<uint8_t>)
+    + ~SessionData()
 }
 
 class MallorySessionData <<struct>> {
@@ -111,15 +129,14 @@ class MallorySessionData <<struct>> {
     - _ivAM : std::vector<uint8_t>
     - _sessionIdMS : std::string
     - _fakeClientMS : std::unique_ptr<Client>
-    - _parameterInjection : bool
 
-    + MallorySessionData(nonceSize : std::size_t, clientNonceHex : std::string, clientId : std::string, debugFlag : bool, ivLength : std::size_t, groupNameDH : std::string)
-    + MallorySessionData(nonceSize : std::size_t, clientNonceHex : std::string, clientId : std::string, debugFlag : bool, ivLength : std::size_t, groupNameDH : std::string, parameterInjection : bool)
+    + MallorySessionData(nonceSize : std::size_t, clientNonceHex : std::string, clientId : std::string, debugFlag : bool, ivLength : std::size_t, std::size_t, p : std::string, g : std::string)
+    + ~MallorySessionData()
 }
 
 namespace MyCryptoLibrary {
     class DiffieHellman {
-        - _dhParametersFilename : std::string
+        - _dhParametersFilename : std::string = ../input/DhParameters.json"
         - _dhParameter : DhParametersLoader::DhParameters
         - _p : MessageExtractionFacility::UniqueBIGNUM
         - _g : MessageExtractionFacility::UniqueBIGNUM
@@ -129,11 +146,11 @@ namespace MyCryptoLibrary {
         - _debugFlag : bool
         - _derivedSymmetricKey : std::vector<uint8_t>
         - _derivedSymmetricKeyHex : std::string
-        - _confirmationMessage : std::string
-        - _publicKeyDeterministic : bool
+        - _confirmationMessage : std::string = "Key exchange complete"
         - _groupName : std::string
 
         + DiffieHellman(debugFlag : bool, groupName : std::string) {explicit}
+        + DiffieHellman(debugFlag : bool, p : std::string, g : std::string) {explicit}
         + DiffieHellman(debugFlag : bool, publicKeyDeterministic : bool, groupName : std::string) {explicit}
         + ~DiffieHellman() 
         + getPublicKey() : std::string {const}
@@ -142,6 +159,10 @@ namespace MyCryptoLibrary {
         + getSymmetricKey() : std::vector<uint8_t> {const}
         + getConfirmationMessage() : std::string {const}
         + getDhParametersFilenameLocation() : std::string {const}
+        + getPrimeP() : std::string
+        + getGeneratorG() : std::string
+        + testValueRawSharedSecret(sharedSecretRawGuessHex : std::string) : bool
+        + testValueRawSharedSecretNegativeHypothesis() : bool
         - generatePrivateKey() : void
         - generatePublicKey() : void
     }
@@ -158,6 +179,8 @@ namespace MessageExtractionFacility {
     + hexToUniqueBIGNUM(hexNumber: std::string) : UniqueBIGNUM {const}
     + BIGNUMToHex(bn: BIGNUM*) : std::string {const}
     + BIGNUMToDec(bn: BIGNUM*) : std::string {const}
+    + stringToBoostUuid(uuidString : std::string) : boost::uuids::uuid {const}
+    + intToHexEvenDigits(value : int, uppercase : bool = true) : std::string {const}
   }
 }
 
@@ -202,5 +225,6 @@ MalloryServer --> Server : "<<uses HTTP requests>>"
 
 SessionData --> MyCryptoLibrary.DiffieHellman : "has a"
 MallorySessionData --> MyCryptoLibrary.DiffieHellman : "has a"
+MalloryServer --> gReplacementAttackStrategy : "has a"
 
 @enduml

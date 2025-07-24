@@ -193,7 +193,7 @@ private:
       _sharedSecret;
   bool _debugFlag;
   std::vector<uint8_t> _derivedSymmetricKey;
-  std::string _derivedSymmetricKeyHex = "";
+  std::string _derivedSymmetricKeyHex{};
   const std::string _confirmationMessage{"Key exchange complete"};
   std::string _groupName;
 };
