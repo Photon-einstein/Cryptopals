@@ -156,10 +156,11 @@
 java -jar /home/tiago-sousa/.vscode/extensions/jebbs.plantuml-2.18.1/plantuml.jar -tsvg class_diagram.puml
 ```
 
-19. Update the sequence diagram with the new code of this problem (in progress)
+19. Update the sequence diagram with the new code of this problem (Done)
 
 ```bash
 java -jar /home/tiago-sousa/.vscode/extensions/jebbs.plantuml-2.18.1/plantuml.jar -tsvg sequence_diagram.puml
 ```
 
-Status: On line 237 of the sequence_diagram.puml
+20. Write article about this project (in progress)
+    20.1.
