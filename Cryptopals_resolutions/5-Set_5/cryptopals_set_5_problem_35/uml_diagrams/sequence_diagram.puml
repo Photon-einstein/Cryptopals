@@ -234,8 +234,6 @@ activate Client
                     and the swapped generator g
                 end note
 
-
-
                 ServerAPI -> ServerMEF : BIGNUMToHex(extractedPublicKeyA)
                 activate ServerMEF
                     ServerMEF --> ServerAPI : peerPublicKey (hex)
@@ -246,9 +244,9 @@ activate Client
                     ServerAPI --> ServerAPI : sessionId
                 deactivate ServerAPI
 
-                ServerAPI -> ServerSessionData : Create ServerSessionData(_nonceSize, extractedNonceClient, extractedClientId, _debugFlag, _ivLength, extractedGroupName)
+                ServerAPI -> ServerSessionData : Create ServerSessionData(_nonceSize, extractedNonceClient, extractedClientId, _debugFlag, _ivLength, extractedPrimeP, extractedGeneratorG)
                 activate ServerSessionData
-                    ServerSessionData -> ServerDH : Create DiffieHellman(debugFlag, groupNameDH)
+                    ServerSessionData -> ServerDH : Create DiffieHellman(debugFlag, p, g)
                     activate ServerDH
                         ServerDH -> ServerDHLoader : loadDhParameters()
                         activate ServerDHLoader
@@ -340,6 +338,8 @@ activate Client
             Mallory in this example just scoops the data exchanged between the real
             server and the client, it does not tamper the message, just changes the
             nonce's and iv's to ensure total control over each leg of the channel.
+            Prime p and generator G are left unchanged on this leg of the attack, 
+            so that the client doesn't notice the MitM attack activity.
         end note
         Mallory -> MalloryEU : encryptMessageAes256CbcMode(confirmationString, _derivedSymmetricKey_AM, _ivAM)
         activate MalloryEU
@@ -353,6 +353,8 @@ activate Client
             Mallory sends her own public key (M_A) to the client,
             making Alice believe M_A is Bob's public key.
             Mallory uses his own nonce he generated for this leg of the attack.
+            Prime p and generator G are left unchanged on this leg of the attack, 
+            so that the client doesn't notice the MitM attack activity.
         end note
 
         Mallory --> Client : HTTP 201 OK (Mallory's ServerHello JSON)
@@ -361,13 +363,15 @@ activate Client
     Client -> Client : Parse ServerHello JSON response (from Mallory)
     note right
         Client extracts sessionId, serverNonce (Mallory's),
-        groupName, publicKeyB (Mallory's M_A), ciphertext_AM, ivHex_AM
+        prime p, generator g, publicKeyB (Mallory's M_A), ciphertext_AM
+        and the ivHex_AM
     end note
 
     Client -> Client : Parse ServerHello JSON (from fake server)
     Client -> Client : extracts server's session id as sessionId
     Client -> Client : extracts server's nonce as extractedNonceServer
-    Client -> Client : extracts group name as extractedGroupName
+    Client -> Client : extracts prime p as extractedPrimeP
+    Client -> Client : extracts generator g as extractedGeneratorG
     Client -> Client : extracts fake server's public key as extractedPublicKeyB
     Client -> Client : extracts fake server's ciphertext as ciphertext
     Client -> Client : extracts fake server's iv as iv
