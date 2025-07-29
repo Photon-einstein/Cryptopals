@@ -30,3 +30,6 @@ coverage/
 *.gcda
 *.gcno
 *.gcov
+
+# png images, as they have low quality
+*.png
