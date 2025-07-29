@@ -169,7 +169,10 @@ java -jar /home/tiago-sousa/.vscode/extensions/jebbs.plantuml-2.18.1/plantuml.ja
     20.4. Review and re-format text (Done)
     20.5. Talk about the present code solution, and the changes that were made to the previous
     MitM attack (in progress)
-    20.6. Include and talk about the class diagram and the main changes in this present diagram (TBD)
-    20.7. Include and talk about the sequence diagram and the main changes in this present diagram (TBD)
+    20.6. Include and talk about the class diagram and the main changes in this present diagram (Done)
+    20.7. Include and talk about the sequence diagram and the main changes in this present diagram (Done)
     20.8. Include the main results for each manipulation: g = 1, g = p, g = p-1 (TBD)
+    20.9. Include a quick demo for the substitution g = p (TBD) (video and thumbnail already done)
     20.9. How to protect against this attack, and best practices (TBD)
+
+21. Replace all png's images by svg ones (TBD)
