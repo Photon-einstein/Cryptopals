@@ -162,8 +162,8 @@ java -jar /home/tiago-sousa/.vscode/extensions/jebbs.plantuml-2.18.1/plantuml.ja
 java -jar /home/tiago-sousa/.vscode/extensions/jebbs.plantuml-2.18.1/plantuml.jar -tsvg sequence_diagram.puml
 ```
 
-20. Replace all PNG's images by SVG ones (TBD)
-    20.1. Generate SVG to all current projects (in progress)
+20. Replace all PNG's images by SVG ones (Done)
+    20.1. Generate SVG to all current projects (Done)
 
     - problem 28 (Done)
     - problem 29 (Done)
@@ -185,9 +185,12 @@ java -jar /home/tiago-sousa/.vscode/extensions/jebbs.plantuml-2.18.1/plantuml.ja
     21.3. What are the possible parameter manipulations (Done)
     21.4. Review and re-format text (Done)
     21.5. Talk about the present code solution, and the changes that were made to the previous
-    MitM attack (in progress)
+    MitM attack (Done)
     21.6. Include and talk about the class diagram and the main changes in this present diagram (Done)
     21.7. Include and talk about the sequence diagram and the main changes in this present diagram (Done)
-    21.8. Include the main results for each manipulation: g = 1, g = p, g = p-1 (TBD)
-    21.9. Include a quick demo for the substitution g = p (TBD) (video and thumbnail already done)
-    21.9. How to protect against this attack, and best practices (TBD)
+    21.8. Include the main results for each manipulation: g = 1, g = p, g = p-1 (in progress)
+    - Extraction results for g = 1 (TBD)
+    - Extraction results for g = p (Done)
+    - Extraction results for g = p-1 (TBD)
+      21.9. Include a quick demo for the substitution g = p (TBD) (video and thumbnail already done)
+      21.9. How to protect against this attack, and best practices (TBD)
