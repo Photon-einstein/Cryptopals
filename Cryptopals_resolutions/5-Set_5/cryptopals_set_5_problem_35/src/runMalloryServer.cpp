@@ -15,7 +15,7 @@ int main(void) {
   /* work to verify */
   const bool debugFlag{true}, testFlag{false};
   std::shared_ptr<MalloryServer> server = std::make_shared<MalloryServer>(
-      debugFlag, testFlag, gReplacementAttackStrategy::gEqualsP);
+      debugFlag, testFlag, gReplacementAttackStrategy::gEqualsPminus1);
   server->runServer();
   /* end of the work */
   end = clock();
