@@ -1,4 +1,4 @@
-@startuml
+"@startuml Diffie_Hellman_implementation_sequence_diagram"
 
 box "Client Environment" #LightYellow
     participant "main (runClient1)" as Main

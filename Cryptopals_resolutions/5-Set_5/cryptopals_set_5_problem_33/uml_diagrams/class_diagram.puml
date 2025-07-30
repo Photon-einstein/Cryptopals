@@ -1,5 +1,4 @@
-@startuml
-
+"@startuml Diffie_Hellman_implementation_class_diagram"
 
 class Server {
     - _diffieHellmanMapMutex : std::mutex

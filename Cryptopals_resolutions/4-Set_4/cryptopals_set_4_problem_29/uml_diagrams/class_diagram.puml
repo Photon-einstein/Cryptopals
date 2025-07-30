@@ -1,4 +1,4 @@
-@startuml
+"@startuml Length_extension_attack_against_SHA-1_keyed_MAC_class_diagram"
 
 namespace MessageFormat {
     class MessageFormat <<struct>> {

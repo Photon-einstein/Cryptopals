@@ -1,4 +1,5 @@
-@startuml
+"@startuml Attack_against_HMAC-SHA1_with_an_artificial_timing_leak_sequence_diagram"
+
 actor User
 participant "Attacker" as A
 participant "Server" as S

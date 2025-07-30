@@ -1,4 +1,5 @@
-@startuml
+"@startuml SHA-1_keyed_MAC_sequence_diagram"
+
 participant Attacker
 participant Server
 participant FileSystemLibrary
