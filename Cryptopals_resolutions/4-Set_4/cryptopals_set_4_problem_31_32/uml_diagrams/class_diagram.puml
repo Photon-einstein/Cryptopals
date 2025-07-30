@@ -1,4 +1,4 @@
-@startuml
+"@startuml Attack_against_HMAC-SHA1_with_an_artificial_timing_leak_class_diagram"
 
 class Server {
     - _keyServer : std::vector<unsigned char>

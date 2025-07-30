@@ -1,4 +1,4 @@
-@startuml
+"@startuml SHA-1_keyed_MAC_class_diagram"
 
 namespace PrintFormat {
     enum Format {

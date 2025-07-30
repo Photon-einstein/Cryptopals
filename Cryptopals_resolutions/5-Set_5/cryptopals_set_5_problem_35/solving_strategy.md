@@ -162,17 +162,32 @@ java -jar /home/tiago-sousa/.vscode/extensions/jebbs.plantuml-2.18.1/plantuml.ja
 java -jar /home/tiago-sousa/.vscode/extensions/jebbs.plantuml-2.18.1/plantuml.jar -tsvg sequence_diagram.puml
 ```
 
-20. Write article about this project (in progress)
-    20.1. Introduction (Done)
-    20.2. What are the values negotiated via the RFC 3526 ? (Done)
-    20.3. What are the possible parameter manipulations (Done)
-    20.4. Review and re-format text (Done)
-    20.5. Talk about the present code solution, and the changes that were made to the previous
-    MitM attack (in progress)
-    20.6. Include and talk about the class diagram and the main changes in this present diagram (Done)
-    20.7. Include and talk about the sequence diagram and the main changes in this present diagram (Done)
-    20.8. Include the main results for each manipulation: g = 1, g = p, g = p-1 (TBD)
-    20.9. Include a quick demo for the substitution g = p (TBD) (video and thumbnail already done)
-    20.9. How to protect against this attack, and best practices (TBD)
+20. Replace all PNG's images by SVG ones (TBD)
+    20.1. Generate SVG to all current projects (in progress)
 
-21. Replace all png's images by svg ones (TBD)
+    - problem 28 (Done)
+    - problem 29 (Done)
+    - problem 30 (Done)
+    - problem 31_32 (Done)
+    - problem 33 (Done)
+
+      20.2. Generate a new link to the right SVG file (in progress)
+
+      - problem 28 (in progress)
+      - problem 29 (TBD)
+      - problem 30 (TBD)
+      - problem 31_32 (TBD)
+      - problem 33 (TBD)
+
+21. Write article about this project (in progress)
+    21.1. Introduction (Done)
+    21.2. What are the values negotiated via the RFC 3526 ? (Done)
+    21.3. What are the possible parameter manipulations (Done)
+    21.4. Review and re-format text (Done)
+    21.5. Talk about the present code solution, and the changes that were made to the previous
+    MitM attack (in progress)
+    21.6. Include and talk about the class diagram and the main changes in this present diagram (Done)
+    21.7. Include and talk about the sequence diagram and the main changes in this present diagram (Done)
+    21.8. Include the main results for each manipulation: g = 1, g = p, g = p-1 (TBD)
+    21.9. Include a quick demo for the substitution g = p (TBD) (video and thumbnail already done)
+    21.9. How to protect against this attack, and best practices (TBD)
