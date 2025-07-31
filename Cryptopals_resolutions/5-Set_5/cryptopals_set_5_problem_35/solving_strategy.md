@@ -96,9 +96,9 @@
     Clients should send 'p' and 'g' values instead of group names.
     MitM attack should be able to swap these values instead of dealing with group names.
 
-    Message from Client to Server should have 'p' and 'g' values in the json message.
+    Message from Client to Server should have 'p' and 'g' values in the JSON message.
     Response from Server to Client should have also 'p' and 'g'g values instead of the group
-    name in the json message.
+    name in the JSON message.
 
     8.1. Add a new client constructor without group name field (Done)
     8.2. Add a new DiffieHellman constructor without group name field and with p and g hard coded instead (Done)
@@ -171,13 +171,21 @@ java -jar /home/tiago-sousa/.vscode/extensions/jebbs.plantuml-2.18.1/plantuml.ja
     - problem 31_32 (Done)
     - problem 33 (Done)
 
-      20.2. Generate a new link to the right SVG file (in progress)
+      20.2. Generate a new link to the right SVG file (Done)
 
-      - problem 28 (in progress)
-      - problem 29 (TBD)
-      - problem 30 (TBD)
-      - problem 31_32 (TBD)
-      - problem 33 (TBD)
+      - problem 28 (Done)
+      - problem 29 (Done)
+      - problem 30 (Done)
+      - problem 31_32 (Done)
+      - problem 33 (Done)
+
+        20.3. Removal of .png uml diagrams from the past articles (in progress)
+
+      - problem 28 (Done)
+      - problem 29 (Done)
+      - problem 30 (Done)
+      - problem 31_32 (Done)
+      - problem 33 (Done)
 
 21. Write article about this project (in progress)
     21.1. Introduction (Done)
@@ -188,9 +196,16 @@ java -jar /home/tiago-sousa/.vscode/extensions/jebbs.plantuml-2.18.1/plantuml.ja
     MitM attack (Done)
     21.6. Include and talk about the class diagram and the main changes in this present diagram (Done)
     21.7. Include and talk about the sequence diagram and the main changes in this present diagram (Done)
-    21.8. Include the main results for each manipulation: g = 1, g = p, g = p-1 (in progress)
-    - Extraction results for g = 1 (TBD)
+    21.8. Include the main results for each manipulation: g = 1, g = p, g = p-1 (Done)
+
+    - Extraction results for g = 1 (Done)
     - Extraction results for g = p (Done)
-    - Extraction results for g = p-1 (TBD)
-      21.9. Include a quick demo for the substitution g = p (TBD) (video and thumbnail already done)
-      21.9. How to protect against this attack, and best practices (TBD)
+    - Extraction results for g = p-1 (Done)
+
+    - Talk about the results for g = 1 (Done)
+    - Talk about the results for g = p (Done)
+    - Talk about the results for g = p-1 (Done)
+
+      21.9. Include a quick demo for the substitution g = p (in progress)
+
+      21.10. How to protect against this attack, and best practices (TBD)
