@@ -206,6 +206,7 @@ java -jar /home/tiago-sousa/.vscode/extensions/jebbs.plantuml-2.18.1/plantuml.ja
     - Talk about the results for g = p (Done)
     - Talk about the results for g = p-1 (Done)
 
-      21.9. Include a quick demo for the substitution g = p (in progress)
-
-      21.10. How to protect against this attack, and best practices (TBD)
+      21.9. Include a quick demo for the substitution g = 1 (Done)
+      21.10. How to protect against this attack, and best practices (Done)
+      21.11. Review the entire project (Done)
+      21.12. Upload the article into Dev community as well (in progress)
