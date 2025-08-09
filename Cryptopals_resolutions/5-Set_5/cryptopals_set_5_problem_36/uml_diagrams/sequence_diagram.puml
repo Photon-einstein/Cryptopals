@@ -1,0 +1,247 @@
+"@startuml Diffie_Hellman_implementation_sequence_diagram"
+
+box "Client Environment" #LightYellow
+    participant "main (runClient1)" as Main
+    participant "Client (Bob)" as Client
+    participant "Client:DiffieHellman" as ClientDH
+    participant "Client:DHParamsLoader" as ClientDHLoader
+    participant "Client:MessageExtractionFacility" as ClientMEF
+    participant "Client:EncryptionUtility" as ClientEU
+end box
+
+box "Server Environment" #LightBlue
+    participant "Server (API)" as ServerAPI
+    participant "Server:DiffieHellman" as ServerDH
+    participant "Server:DHParamsLoader" as ServerDHLoader
+    participant "Server:MessageExtractionFacility" as ServerMEF
+    participant "Server:EncryptionUtility" as ServerEU
+end box
+
+activate Main
+
+Main -> Client : Create Client("Bob", debugFlag)
+activate Client
+
+Client -> ClientDH : Create DiffieHellman(debugFlag)
+activate ClientDH
+    ClientDH -> ClientDHLoader : loadDhParameters(getDhParametersFilenameLocation())
+    activate ClientDHLoader
+        note right
+            Client DHParamsLoader reads "rfc3526-group-17"
+            p and g from file
+        end note
+    ClientDHLoader --> ClientDH : Returns DHParameters map
+    deactivate ClientDHLoader
+
+    ClientDH -> ClientDH : generatePrivateKey()
+    activate ClientDH
+        note right
+            Client uses OpenSSL's BN_rand_range to get 'a'
+            Ensures 1 < a < p-1
+        end note
+        ClientDH -> ClientMEF : hexToUniqueBIGNUM(p)
+        activate ClientMEF
+        ClientMEF --> ClientDH : UniqueBIGNUM
+        deactivate ClientMEF
+    deactivate ClientDH
+
+    ClientDH -> ClientDH : generatePublicKey()
+    activate ClientDH
+        note right
+            Client computes A = (g^a) % p
+            Uses OpenSSL's BN_mod_exp
+        end note
+        ClientDH -> ClientMEF : BIGNUMToHex(_publicKey.get())
+        activate ClientMEF
+        ClientMEF --> ClientDH : Public Key A (hex)
+        deactivate ClientMEF
+    deactivate ClientDH
+ClientDH --> Client : Client:DiffieHellman instance ready
+deactivate ClientDH
+
+Main -> Client : diffieHellmanKeyExchange(productionPort)
+activate Client
+    Client -> ClientEU : generateCryptographicNonce(nonceSize)
+    activate ClientEU
+    ClientEU --> Client : clientNonceHex
+    deactivate ClientEU
+
+    note left
+        Client constructs JSON "client_hello"
+        with clientId, clientNonce,
+        groupName, publicKeyA
+    end note
+
+    Client -> ServerAPI : HTTP POST /keyExchange (ClientHello JSON)
+    activate ServerAPI
+
+        ServerAPI -> ServerAPI : Parse ClientHello JSON
+        note right
+            Server extracts clientId, clientNonce,
+            publicKeyA from client request.
+        end note
+
+        ServerAPI -> ServerEU : generateCryptographicNonce(nonceSize)
+        activate ServerEU
+        ServerEU --> ServerAPI : serverNonceHex
+        deactivate ServerEU
+
+        ServerAPI -> ServerDH : Create DiffieHellman(debugFlag)
+        activate ServerDH
+            ServerDH -> ServerDHLoader : loadDhParameters(getDhParametersFilenameLocation())
+            activate ServerDHLoader
+                note right
+                    Server DHParamsLoader reads "rfc3526-group-17"
+                    p and g from file (must match client's)
+                end note
+            ServerDHLoader --> ServerDH : Returns DHParameters map
+            deactivate ServerDHLoader
+
+            ServerDH -> ServerDH : generatePrivateKey()
+            activate ServerDH
+                note right
+                    Server uses OpenSSL's BN_rand_range to get 'b'
+                    Ensures 1 < b < p-1
+                end note
+                ServerDH -> ServerMEF : hexToUniqueBIGNUM(p)
+                activate ServerMEF
+                ServerMEF --> ServerDH : UniqueBIGNUM
+                deactivate ServerMEF
+            deactivate ServerDH
+
+            ServerDH -> ServerDH : generatePublicKey()
+            activate ServerDH
+                note right
+                    Server computes B = (g^b) % p
+                    Uses OpenSSL's BN_mod_exp
+                end note
+                ServerDH -> ServerMEF : BIGNUMToHex(_publicKey.get())
+                activate ServerMEF
+                ServerMEF --> ServerDH : Public Key B (hex)
+                deactivate ServerMEF
+            deactivate ServerDH
+        ServerDH --> ServerAPI : Server:DiffieHellman instance ready
+        deactivate ServerDH
+
+
+        ServerAPI -> ServerDH : deriveSharedSecret(publicKeyA, serverNonceHex, clientNonceHex)
+        activate ServerDH
+            note right
+                Server computes shared secret s' = (publicKeyA ^ privateKeyB) % p
+                Uses OpenSSL's BN_mod_exp
+            end note
+            ServerDH -> ServerMEF : hexToUniqueBIGNUM(publicKeyA)
+            activate ServerMEF
+            ServerMEF --> ServerDH : UniqueBIGNUM
+            deactivate ServerMEF
+
+            note right
+                Converts s' to raw bytes
+                Converts nonces to raw bytes
+                Concatenates s' || clientNonce || serverNonce
+                Hashes concatenated data with SHA256 to get symmetric key
+            end note
+            ServerDH -> ServerMEF : hexToBytes(serverNonceHex)
+            activate ServerMEF
+            ServerMEF --> ServerDH : serverNonceBytes
+            deactivate ServerMEF
+
+            ServerDH -> ServerMEF : hexToBytes(clientNonceHex)
+            activate ServerMEF
+            ServerMEF --> ServerDH : clientNonceBytes
+            deactivate ServerMEF
+
+            ServerDH -> ServerMEF : toHexString(keyMaterial)
+            activate ServerMEF
+            ServerMEF --> ServerDH : _derivedSymmetricKeyHex
+            deactivate ServerMEF
+        ServerDH --> ServerAPI : _derivedSymmetricKeyHex (symmetric key)
+        deactivate ServerDH
+
+        ServerAPI -> ServerEU : encryptMessageAes256CbcMode(confirmationMsg, symmetricKey, generatedIv)
+        activate ServerEU
+        ServerEU --> ServerAPI : ciphertext, ivHex
+        deactivate ServerEU
+
+        note left
+            Server constructs JSON response
+            with sessionId, serverNonce, publicKeyB,
+            encrypted confirmation (ciphertext, ivHex)
+        end note
+
+    ServerAPI --> Client : HTTP 201 OK (ServerHello JSON)
+    deactivate ServerAPI
+
+    Client -> Client : Parse ServerHello JSON response
+    note right
+        Client extracts sessionId, serverNonce,
+        groupName, publicKeyB, ciphertext, ivHex
+    end note
+
+    Client -> ClientMEF : hexToBytes(ivHex)
+    activate ClientMEF
+    ClientMEF --> Client : iv (vector<uint8_t>)
+    deactivate ClientMEF
+
+    Client -> Client : Store SessionData in _diffieHellmanMap
+    Client -> ClientDH : deriveSharedSecret(publicKeyB, serverNonceHex, clientNonceHex)
+    activate ClientDH
+        note right
+            Client computes shared secret s = (publicKeyB ^ privateKeyA) % p
+            Uses OpenSSL's BN_mod_exp
+        end note
+        ClientDH -> ClientMEF : hexToUniqueBIGNUM(publicKeyB)
+        activate ClientMEF
+        ClientMEF --> ClientDH : UniqueBIGNUM
+        deactivate ClientMEF
+
+        note right
+            Converts s to raw bytes
+            Converts nonces to raw bytes
+            Concatenates s || clientNonce || serverNonce
+            Hashes concatenated data with SHA256
+        end note
+        ClientDH -> ClientMEF : hexToBytes(serverNonceHex)
+        activate ClientMEF
+        ClientMEF --> ClientDH : serverNonceBytes
+        deactivate ClientMEF
+
+        ClientDH -> ClientMEF : hexToBytes(clientNonceHex)
+        activate ClientMEF
+        ClientMEF --> ClientDH : clientNonceBytes
+        deactivate ClientMEF
+
+        ClientDH -> ClientMEF : toHexString(keyMaterial)
+        activate ClientMEF
+        ClientMEF --> ClientDH : _derivedSymmetricKeyHex
+        deactivate ClientMEF
+    ClientDH --> Client : _derivedSymmetricKeyHex
+    deactivate ClientDH
+
+    Client -> Client : confirmationServerResponse(...)
+    activate Client
+        Client -> ClientEU : decryptMessageAes256CbcMode(ciphertext, derivedKey, iv)
+        activate ClientEU
+        ClientEU --> Client : decryptedPlaintext
+        deactivate ClientEU
+
+        Client -> Client : Parse decryptedPlaintext (JSON)
+        note right
+            Compares extracted fields
+            (sessionId, clientId, nonces, message)
+            with expected values.
+        end note
+    Client --> Client : (bool validationResult, string decryptedMessage)
+    deactivate Client
+
+    alt validationResult == true
+        Client -> Main : Logs "Diffie Hellman key exchange succeed" and decrypted message
+    else validationResult == false
+        Client -> Main : Logs "Diffie Hellman key exchange failed"
+    end
+deactivate Client
+
+Main -> Main : Program ends
+deactivate Main
+
+@enduml
