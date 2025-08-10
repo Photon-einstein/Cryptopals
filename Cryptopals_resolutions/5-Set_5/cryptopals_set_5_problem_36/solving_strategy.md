@@ -63,9 +63,50 @@ http://localhost:18080/<endpoint_name>
       1. Wikipedia (Done)
       2. Medium article: “What is Secure Remote Password” (Done)
       3. 1Password blog: “How We Use SRP” (Done)
-      4. RFC 2945 (in progress, topic 3)
-      5. Thomas Wu’s original SRP paper (TBD)
+      4. RFC 2945 (Done)
+      5. Thomas Wu’s original SRP paper (in progress, section 3 at Pg. 3)
       6. Formal Methods Analysis of SRP (TBD)
       7. pysrp GitHub repository (TBD)
+
+Proposed communication flow present at RFC 2945 pg.5:
+
+        Client                             Host
+       --------                           ------
+        U                           -->
+                                    <--    s, B, group_id
+        A, H(H(N) XOR H(g) | H(U) | s | A | B | K) simplified to HMAC-SHA256(K, salt) in this problem
+                                    -->
+                                    <--    H(A | M | K) simplified to  "OK" if HMAC-SHA256(K, salt) validates
+
+The values of N and g used in this protocol must be agreed upon by
+the two parties in question. They can be set in advance, or the host
+can supply them to the client. In the latter case, the host should
+send the parameters in the first message along with the salt. For
+maximum security, N should be a safe prime (i.e. a number of the form
+N = 2q + 1, where q is also prime). Also, g should be a generator
+modulo N (see [SRP] for details), which means that for any X where 0
+< X < N, there exists a value x for which g^x % N == X.
+
+RFC 5054 specifically defines SRP groups and gives them SRP Group IDs.
+These are almost identical to the MODP primes from RFC 3526 (in fact,
+many are the same numbers), but RFC 5054 formalizes their use in SRP
+and provides example parameters for NIST-sized safe primes.
+
+In RFC 5054 the SRP groups have IDs from 1 to 8.
+
+Here’s the mapping from the RFC:
+
+ID Prime Size Origin / Note
+1 1024-bit Safe prime (matches MODP Group 2 from RFC 2409, later RFC 3526)
+2 1536-bit Matches MODP Group 5
+3 2048-bit Matches MODP Group 14
+4 3072-bit Matches MODP Group 15
+5 4096-bit Matches MODP Group 16
+6 6144-bit Matches MODP Group 17
+7 8192-bit Matches MODP Group 18
+8 256-bit NIST P-256 elliptic curve parameters (for SRP-ECC variant)
+
+The ID 8 is out of scope for this problem, as it refers to the ecliptic
+curve algorithms.
 
 5.  Understand the problem statement in more detail (TBD)
