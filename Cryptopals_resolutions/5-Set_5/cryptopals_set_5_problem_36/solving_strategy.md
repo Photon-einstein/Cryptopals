@@ -64,7 +64,7 @@ http://localhost:18080/<endpoint_name>
       2. Medium article: “What is Secure Remote Password” (Done)
       3. 1Password blog: “How We Use SRP” (Done)
       4. RFC 2945 (Done)
-      5. Thomas Wu’s original SRP paper (in progress, section 3 at Pg. 3)
+      5. Thomas Wu’s original SRP paper (in progress, section 3.2.4 at Pg. 8)
       6. Formal Methods Analysis of SRP (TBD)
       7. pysrp GitHub repository (TBD)
 
