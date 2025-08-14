@@ -40,7 +40,7 @@ http://localhost:18080/<endpoint_name>
 
     **Academic & Technical Papers**
 
-    - Thomas Wu’s original SRP paper (TBD)
+    - Thomas Wu’s original SRP paper (Done)
       Authored by SRP’s creator, this paper presents the theoretical foundations, security properties, and rationale behind SRP. A must-read for understanding why SRP was designed the way it is.
       [NDSS Symposium](https://www.ndss-symposium.org/wp-content/uploads/2017/09/The-Secure-Remote-Password-Protocol.pdf?utm_source=chatgpt.com)
 
@@ -64,8 +64,8 @@ http://localhost:18080/<endpoint_name>
       2. Medium article: “What is Secure Remote Password” (Done)
       3. 1Password blog: “How We Use SRP” (Done)
       4. RFC 2945 (Done)
-      5. Thomas Wu’s original SRP paper (in progress, section 3.2.4 at Pg. 8)
-      6. Formal Methods Analysis of SRP (TBD)
+      5. Thomas Wu’s original SRP paper (Done)
+      6. Formal Methods Analysis of SRP (in progress, Pg. 3 section 2.1)
       7. pysrp GitHub repository (TBD)
 
 Proposed communication flow present at RFC 2945 pg.5:
