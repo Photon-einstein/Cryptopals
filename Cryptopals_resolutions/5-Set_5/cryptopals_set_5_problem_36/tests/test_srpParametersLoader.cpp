@@ -4,16 +4,17 @@
 #include <string>
 #include <vector>
 
-#include "../include/DhParametersLoader.hpp"
-#include "../include/DiffieHellman.hpp"
+#include "../include/SecureRemotePassword.hpp"
+#include "../include/SrpParametersLoader.hpp"
 
-class DhParametersLoaderTest : public ::testing::Test {
+class SrpParametersLoaderTest : public ::testing::Test {
 protected:
   // cppcheck-suppress unusedFunction
   void SetUp() override {
     // NOLINTNEXTLINE(clang-analyzer-optin.cplusplus.VirtualCall)
-    _diffieHellman = std::make_unique<MyCryptoLibrary::DiffieHellman>(
-        _dhDebugFlag); // Shared setup
+    _secureRemotePassword =
+        std::make_unique<MyCryptoLibrary::SecureRemotePassword>(
+            _secureRemotePasswordDebugFlag); // Shared setup
   }
 
   // cppcheck-suppress unusedFunction
@@ -23,24 +24,24 @@ protected:
   }
 
   // cppcheck-suppress unusedStructMember
-  std::map<std::string, DhParametersLoader::DhParameters> _dhParametersMap;
-  std::unique_ptr<MyCryptoLibrary::DiffieHellman> _diffieHellman;
-  const bool _dhDebugFlag{false};
+  std::map<std::string, SrpParametersLoader::SrpParameters> _srpParametersMap;
+  std::unique_ptr<MyCryptoLibrary::SecureRemotePassword> _secureRemotePassword;
+  const bool _secureRemotePasswordDebugFlag{false};
 };
 
 /**
- * @test Test the correctness of the method loadDhParameters
+ * @test Test the correctness of the method loadSrpParameters
  * @brief Ensures that the parameters retrieved, using the correct input
  * filename retrieve the correct data.
  */
-TEST_F(DhParametersLoaderTest,
-       loadDhParameters_WithCorrectFilename_ShouldMatchReference) {
-  _dhParametersMap = DhParametersLoader::loadDhParameters(
-      _diffieHellman->getDhParametersFilenameLocation());
-  ASSERT_EQ(_dhParametersMap.size(), 6);
-  ASSERT_EQ(_dhParametersMap["cryptopals-group-33-small"]._pHex, "25");
-  ASSERT_EQ(_dhParametersMap["cryptopals-group-33-small"]._gHex, "05");
-  ASSERT_EQ(_dhParametersMap["rfc3526-group-14"]._pHex,
+TEST_F(SrpParametersLoaderTest,
+       loadSrpParameters_WithCorrectFilename_ShouldMatchReference) {
+  _srpParametersMap = SrpParametersLoader::loadSrpParameters(
+      _secureRemotePassword->getSrpParametersFilenameLocation());
+  ASSERT_EQ(_srpParametersMap.size(), 6);
+  ASSERT_EQ(_srpParametersMap["cryptopals-group-33-small"]._pHex, "25");
+  ASSERT_EQ(_srpParametersMap["cryptopals-group-33-small"]._gHex, "05");
+  ASSERT_EQ(_srpParametersMap["rfc3526-group-14"]._pHex,
             "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC7402"
             "0BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1"
             "356D6D51C245E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7EDEE386B"
@@ -49,9 +50,9 @@ TEST_F(DhParametersLoaderTest,
             "96966D670C354E4ABC9804F1746C08CA18217C32905E462E36CE3BE39E772C180E"
             "86039B2783A2EC07A28FB5C55DF06F4C52C9DE2BCBF6955817183995497CEA956A"
             "E515D2261898FA051015728E5A8AACAA68FFFFFFFFFFFFFFFF");
-  ASSERT_EQ(_dhParametersMap["rfc3526-group-14"]._gHex, "02");
+  ASSERT_EQ(_srpParametersMap["rfc3526-group-14"]._gHex, "02");
   ASSERT_EQ(
-      _dhParametersMap["rfc3526-group-15"]._pHex,
+      _srpParametersMap["rfc3526-group-15"]._pHex,
       "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA6"
       "3B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245"
       "E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7EDEE386BFB5A899FA5AE9F2411"
@@ -63,9 +64,9 @@ TEST_F(DhParametersLoaderTest,
       "ABF5AE8CDB0933D71E8C94E04A25619DCEE3D2261AD2EE6BF12FFA06D98A0864D8760273"
       "3EC86A64521F2B18177B200CBBE117577A615D6C770988C0BAD946E208E24FA074E5AB31"
       "43DB5BFCE0FD108E4B82D120A93AD2CAFFFFFFFFFFFFFFFF");
-  ASSERT_EQ(_dhParametersMap["rfc3526-group-15"]._gHex, "02");
+  ASSERT_EQ(_srpParametersMap["rfc3526-group-15"]._gHex, "02");
   ASSERT_EQ(
-      _dhParametersMap["rfc3526-group-16"]._pHex,
+      _srpParametersMap["rfc3526-group-16"]._pHex,
       "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA6"
       "3B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245"
       "E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7EDEE386BFB5A899FA5AE9F2411"
@@ -81,9 +82,9 @@ TEST_F(DhParametersLoaderTest,
       "287C59474E6BC05D99B2964FA090C3A2233BA186515BE7ED1F612970CEE2D7AFB81BDD76"
       "2170481CD0069127D5B05AA993B4EA988D8FDDC186FFB7DC90A6C08F4DF435C934063199"
       "FFFFFFFFFFFFFFFF");
-  ASSERT_EQ(_dhParametersMap["rfc3526-group-16"]._gHex, "02");
+  ASSERT_EQ(_srpParametersMap["rfc3526-group-16"]._gHex, "02");
   ASSERT_EQ(
-      _dhParametersMap["rfc3526-group-17"]._pHex,
+      _srpParametersMap["rfc3526-group-17"]._pHex,
       "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA6"
       "3B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245"
       "E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7EDEE386BFB5A899FA5AE9F2411"
@@ -101,9 +102,9 @@ TEST_F(DhParametersLoaderTest,
       "36C3FAB4D27C7026C1D4DCB2602646DEC9751E763DBA37BDF8FF9406AD9E530EE5DB382F"
       "413001AEB06A53ED9027D831179727B0865A8918DA3EDBEBCF9B14ED44CE6CBACED4BB1B"
       "DB7F1447E6CC254B332051512BD7AF426FB8F401378CD2BF5983CA01C64");
-  ASSERT_EQ(_dhParametersMap["rfc3526-group-17"]._gHex, "02");
+  ASSERT_EQ(_srpParametersMap["rfc3526-group-17"]._gHex, "02");
   ASSERT_EQ(
-      _dhParametersMap["rfc3526-group-18"]._pHex,
+      _srpParametersMap["rfc3526-group-18"]._pHex,
       "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA6"
       "3B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245"
       "E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7EDEE386BFB5A899FA5AE9F2411"
@@ -123,25 +124,25 @@ TEST_F(DhParametersLoaderTest,
       "DB7F1447E6CC254B332051512BD7AF426FB8F401378CD2BF5983CA01C64B92ECF032EA15"
       "D1721D03F482D7CE6E74FEF6D55E702F46980C82B5A84031900B1C9E59E7C97FBEC7E8F3"
       "23A97A7E36CC88BE0F1D45B7FF585AC54BD407B22B4154AA");
-  ASSERT_EQ(_dhParametersMap["rfc3526-group-18"]._gHex, "02");
+  ASSERT_EQ(_srpParametersMap["rfc3526-group-18"]._gHex, "02");
 }
 
 /**
- * @test Test the correctness of the method loadDhParameters
+ * @test Test the correctness of the method loadSrpParameters
  * @brief Ensures that if a faulty input filename is provided,
- * the loadDhParameters() will throw a runtime exception error.
+ * the loadSrpParameters() will throw a runtime exception error.
  */
-TEST_F(DhParametersLoaderTest,
-       loadDhParameters_WithIncorrectFilename_ShouldMatchThrowAnException) {
+TEST_F(SrpParametersLoaderTest,
+       loadSrpParameters_WithIncorrectFilename_ShouldMatchThrowAnException) {
   std::string faultyFilename =
-      _diffieHellman->getDhParametersFilenameLocation();
+      _secureRemotePassword->getSrpParametersFilenameLocation();
   faultyFilename[0] ^= 0x01; // flip one bit
   try {
-    _dhParametersMap = DhParametersLoader::loadDhParameters(faultyFilename);
+    _srpParametersMap = SrpParametersLoader::loadSrpParameters(faultyFilename);
   } catch (const std::runtime_error &e) {
     const std::string errorMessage =
-        std::string("DhParametersLoader log | loadDhParameters(): ") +
-        std::string("Could not open DH parameters file: '") + faultyFilename +
+        std::string("SrpParametersLoader log | loadSrpParameters(): ") +
+        std::string("Could not open SRP parameters file: '") + faultyFilename +
         "'.";
     EXPECT_STREQ(e.what(), errorMessage.c_str());
   } catch (...) {
