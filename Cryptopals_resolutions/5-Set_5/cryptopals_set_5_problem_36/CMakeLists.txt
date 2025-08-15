@@ -37,8 +37,6 @@ include_directories(
 file(GLOB COMMON_SOURCES "src/*.cpp")
 list(REMOVE_ITEM COMMON_SOURCES "${CMAKE_SOURCE_DIR}/src/runServer.cpp")
 list(REMOVE_ITEM COMMON_SOURCES "${CMAKE_SOURCE_DIR}/src/runClient1.cpp")
-list(REMOVE_ITEM COMMON_SOURCES "${CMAKE_SOURCE_DIR}/src/runClient2.cpp")
-list(REMOVE_ITEM COMMON_SOURCES "${CMAKE_SOURCE_DIR}/src/runClient3.cpp")
 
 # === Server Executable ===
 add_executable(runServer
@@ -68,31 +66,5 @@ target_link_libraries(runClient1
 )
 
 set_target_properties(runClient1 PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build
-)
-
-# === Client 2 Executable ===
-add_executable(runClient2
-    src/runClient2.cpp
-    ${COMMON_SOURCES}
-)
-target_link_libraries(runClient2 
-    PRIVATE OpenSSL::Crypto cpr::cpr fmt::fmt
-)
-
-set_target_properties(runClient2 PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build
-)
-
-# === Client 3 Executable ===
-add_executable(runClient3
-    src/runClient3.cpp
-    ${COMMON_SOURCES}
-)
-target_link_libraries(runClient3 
-    PRIVATE OpenSSL::Crypto cpr::cpr fmt::fmt
-)
-
-set_target_properties(runClient3 PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build
 )

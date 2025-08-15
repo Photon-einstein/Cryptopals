@@ -40,19 +40,17 @@ include_directories(
 
 # Add source files
 set(SOURCE_FILES
-    ../src/Client.cpp
-    ../src/DhParametersLoader.cpp
-    ../src/DiffieHellman.cpp
-    ../src/EncryptionUtility.cpp
-    ../src/MessageExtractionFacility.cpp
-    ../src/Server.cpp
+  ../src/Client.cpp
+  ../src/SrpParametersLoader.cpp
+  ../src/EncryptionUtility.cpp 
+  ../src/MessageExtractionFacility.cpp
+  ../src/SecureRemotePassword.cpp
+  ../src/Server.cpp
 )
 
 # Add test source files
 set(TEST_SOURCES
-    test_dhParametersLoader.cpp
-    test_diffieHellman.cpp
-    test_diffieHellmanProtocol.cpp
+  test_srpParametersLoader.cpp
 )
 
 # Define the test executable

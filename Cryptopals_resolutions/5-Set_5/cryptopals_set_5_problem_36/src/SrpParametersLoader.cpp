@@ -4,41 +4,41 @@
 #include <nlohmann/json.hpp>
 #include <stdexcept>
 
-#include "./../include/DhParametersLoader.hpp"
+#include "./../include/SrpParametersLoader.hpp"
 
 /**
  * @brief This method extracts the content of a given file.
  *
  * This method will extract the content of a given file that contain
- * the public configurations of the Diffie Hellman key exchange protocol.
+ * the public configurations of the Secure Remote Password protocol.
  *
  * @param filename The file address where the public configurations of
- * the Diffie Hellman key Exchange protocol are.
+ * the Secure Remote Password protocol are.
  *
  * @return The file content in a structured dictionary.
  */
-std::map<std::string, DhParametersLoader::DhParameters>
-DhParametersLoader::loadDhParameters(const std::string &filename) {
+std::map<std::string, SrpParametersLoader::SrpParameters>
+SrpParametersLoader::loadSrpParameters(const std::string &filename) {
   std::ifstream file(filename);
   if (!file.is_open()) {
-    throw std::runtime_error("DhParametersLoader log | loadDhParameters(): "
-                             "Could not open DH parameters file: '" +
+    throw std::runtime_error("SrpParametersLoader log | loadSrpParameters(): "
+                             "Could not open SRP parameters file: '" +
                              filename + "'.");
   }
   nlohmann::json j;
   try {
     file >> j;
   } catch (const nlohmann::json::parse_error &e) {
-    throw std::runtime_error("DhParametersLoader log | loadDhParameters(): "
+    throw std::runtime_error("SrpParametersLoader log | loadSrpParameters(): "
                              "Failed to parse JSON file: " +
                              std::string(e.what()));
   }
-  std::map<std::string, DhParametersLoader::DhParameters> paramsMap;
+  std::map<std::string, SrpParametersLoader::SrpParameters> paramsMap;
   if (j.contains("dh_parameters") && j["dh_parameters"].is_array()) {
     for (const auto &group : j["dh_parameters"]) {
       if (group.contains("name") && group.contains("p") &&
           group.contains("g")) {
-        DhParametersLoader::DhParameters params;
+        SrpParametersLoader::SrpParameters params;
         params._groupName = group["name"].get<std::string>();
         params._pHex = group["p"].get<std::string>();
         params._gHex = group["g"].get<std::string>();
@@ -51,15 +51,15 @@ DhParametersLoader::loadDhParameters(const std::string &filename) {
         }
         paramsMap[group["name"].get<std::string>()] = params;
       } else {
-        std::cerr << "DhParametersLoader log | loadDhParameters(): "
-                     "Warning: Skipping malformed DH group entry in JSON."
+        std::cerr << "SrpParametersLoader log | loadSrpParameters(): "
+                     "Warning: Skipping malformed SRP group entry in JSON."
                   << std::endl;
       }
     }
   } else {
     throw std::runtime_error(
-        "DhParametersLoader log | loadDhParameters(): "
-        "JSON file does not contain a 'dh_parameters' array.");
+        "SrpParametersLoader log | loadSrpParameters(): "
+        "JSON file does not contain a 'srp_parameters' array.");
   }
   return paramsMap;
 }

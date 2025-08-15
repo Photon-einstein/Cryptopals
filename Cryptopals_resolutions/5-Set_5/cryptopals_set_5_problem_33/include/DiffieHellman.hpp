@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "DhParametersLoader.hpp"
-#include "DiffieHellman.hpp"
 #include "MessageExtractionFacility.hpp"
 
 namespace MyCryptoLibrary {

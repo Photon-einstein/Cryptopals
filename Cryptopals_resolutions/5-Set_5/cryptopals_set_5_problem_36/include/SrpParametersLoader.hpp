@@ -5,9 +5,9 @@
 #include <string>
 #include <vector>
 
-namespace DhParametersLoader {
+namespace SrpParametersLoader {
 
-struct DhParameters {
+struct SrpParameters {
   std::string _groupName;
   std::string _pHex;
   std::string _gHex;
@@ -19,16 +19,16 @@ struct DhParameters {
  * @brief This method extracts the content of a given file.
  *
  * This method will extract the content of a given file that contain
- * the public configurations of the Diffie Hellman key exchange protocol.
+ * the public configurations of the Secure Remote Password protocol.
  *
  * @param filename The file address where the public configurations of
- * the Diffie Hellman key Exchange protocol are.
+ * the Secure Remote Password protocol are.
  *
  * @return The file content in a structured dictionary.
  */
-std::map<std::string, DhParameters>
-loadDhParameters(const std::string &filename);
+std::map<std::string, SrpParameters>
+loadSrpParameters(const std::string &filename);
 
-}; // namespace DhParametersLoader
+}; // namespace SrpParametersLoader
 
-#endif // DH_PARAMETERS_LOADER_HPP
+#endif // SRP_PARAMETERS_LOADER_HPP

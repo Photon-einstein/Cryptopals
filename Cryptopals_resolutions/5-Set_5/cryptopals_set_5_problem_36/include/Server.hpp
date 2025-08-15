@@ -8,10 +8,8 @@
 #include <openssl/aes.h>
 #include <vector>
 
-#include "DhParametersLoader.hpp"
-#include "DiffieHellman.hpp"
 #include "EncryptionUtility.hpp"
-#include "SessionData.hpp"
+#include "SrpParametersLoader.hpp"
 
 class Server {
 public:
@@ -36,14 +34,6 @@ public:
    * clients, for a given test
    */
   void runServerTest();
-
-  /**
-   * @brief This method will clear all the sessions in memory.
-   *
-   * This method will clear all the sessions in memory that were created
-   * executing the Diffie Hellman key exchange protocol.
-   */
-  void clearDiffieHellmanSessionData();
 
   /**
    * @brief This method will return the production port of the server.
@@ -82,43 +72,7 @@ private:
    */
   void rootEndpoint();
 
-  /**
-   * @brief This method runs the route that performs the Diffie Hellman
-   * key exchange protocol.
-   *
-   * This method runs the route that performs the Diffie Hellman
-   * key exchange protocol. I receives requests and make all the calculations
-   * to response to the requests, creating a symmetric key for each connection
-   * request.
-   */
-  void keyExchangeRoute();
-
-  /**
-   * @brief This method runs the route that gets all the current available
-   * sessions created using the Diffie Hellman key exchange protocol.
-   *
-   * This method runs the route that gets all the current available sessions
-   * created using the Diffie Hellman key exchange protocol. It outputs all the
-   * session data in json format.
-   */
-  void getSessionsDataEndpoint();
-
-  /**
-   * @brief This method will generate a unique session id.
-   *
-   * This method will generate a unique session id for a given connection
-   * request.
-   *
-   * @return A unique session ID to be used.
-   */
-  boost::uuids::uuid generateUniqueSessionId();
-
   /* private fields */
-  mutable std::mutex _diffieHellmanMapMutex;
-  std::map<boost::uuids::uuid, std::unique_ptr<SessionData>> _diffieHellmanMap;
-
-  const std::size_t _nonceSize{16}; // bytes
-
   crow::SimpleApp _app;
 
   const int _portProduction{18080};
@@ -126,7 +80,6 @@ private:
 
   std::thread _serverThread;
   const bool _debugFlag;
-  const std::size_t _ivLength{AES_BLOCK_SIZE}; // bytes
 };
 
 #endif // SERVER_HPP
