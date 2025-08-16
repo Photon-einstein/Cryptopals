@@ -74,14 +74,24 @@ private:
   void rootEndpoint();
 
   /**
+   * @brief This method runs the route that performs registration of the
+   * clients.
+   *
+   * This method runs the route that performs the registration of the clients
+   * login data.
+   */
+  void registrationRoute();
+
+  /**
    * @brief This method runs the route that performs the Secure Remote Password
-   * protocol.
+   * protocol authentication.
    *
    * This method runs the route that performs the Secure Remote Password
    * protocol. It receives requests and make all the calculations to response to
-   * the requests, creating a symmetric key for each connection request.
+   * the requests, creating a symmetric key for each connection request, after
+   * performing the authentication.
    */
-  void keyExchangeRoute();
+  void authenticationRoute();
 
   /* private fields */
   crow::SimpleApp _app;

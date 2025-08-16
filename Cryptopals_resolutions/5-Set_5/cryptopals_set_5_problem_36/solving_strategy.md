@@ -148,8 +148,57 @@ http://localhost:18080/<endpoint_name>
 
 13. Add the skeleton of the SecureRemotePassword on the Server class (Done)
 
-14. Add the first leg on server side of the Secure Remote Password protocol (in progress)
+14. Study the registration information flow that needs to take place before the SRP (Done)
 
-15. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
+Registration Flow
 
-16. Add the first leg on client side of the Secure Remote Password protocol (TBD)
+```text
+Client                        Server
+  |                              |
+  |    Request SRP params (U)    |
+  |----------------------------->|
+  |                              |
+  |   Receive groupId (N, g)     |
+  |   and salt (s)               |
+  |<-----------------------------|
+  |                              |
+  | Compute:                     |
+  | x = H(s | P)                 |
+  | v = g^x mod N                |
+  |                              |
+  | Send U, v                     |
+  |----------------------------->|
+  |                              |
+  |        OK / Ack              |
+  |<-----------------------------|
+```
+
+Purpose: Server stores (U, s, v) to authenticate future logins.
+
+No password is sent, only verifier v.
+
+No session key yet.
+
+15. Add the first leg on the client side (in progress)
+
+```text
+Client                        Server
+  |                              |
+  |    Request SRP params (U)    |
+  |----------------------------->|
+```
+
+```json
+{
+  "username": "alice",
+  "requestedGroup": 7 // optional
+}
+```
+
+16. Add the skeleton of the registration process on the server side (TBD)
+
+17. Add the first leg on server side of the Secure Remote Password protocol (TBD)
+
+18. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
+
+19. Add the first leg on client side of the Secure Remote Password protocol (TBD)

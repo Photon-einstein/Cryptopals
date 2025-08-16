@@ -70,7 +70,8 @@ const int Server::getTestPort() const { return _portTest; }
  */
 void Server::setupRoutes() {
   rootEndpoint();
-  keyExchangeRoute();
+  registrationRoute();
+  authenticationRoute();
 }
 /******************************************************************************/
 /**
@@ -89,15 +90,53 @@ void Server::rootEndpoint() {
 }
 /******************************************************************************/
 /**
+ * @brief This method runs the route that performs registration of the
+ * clients.
+ *
+ * This method runs the route that performs the registration of the clients
+ * login data.
+ */
+void Server::registrationRoute() {
+  CROW_ROUTE(_app, "/registration")
+      .methods("POST"_method)([&](const crow::request &req) {
+        crow::json::wvalue res;
+        try {
+          nlohmann::json parsedJson = nlohmann::json::parse(req.body);
+          std::string extractedClientId =
+              parsedJson.at("clientId").get<std::string>();
+          if (_debugFlag) {
+            std::cout << "\n--- Server log | Extracted Data from a new client "
+                         "request registration ---"
+                      << std::endl;
+            std::cout << "\tClient ID: " << extractedClientId << std::endl;
+            std::cout << "----------------------" << std::endl;
+          }
+        } catch (const nlohmann::json::exception &e) {
+          crow::json::wvalue err;
+          err["message"] =
+              std::string("Server log | JSON parsing error: ") + e.what();
+          return crow::response(400, err);
+        } catch (const std::exception &e) {
+          crow::json::wvalue err;
+          err["message"] =
+              std::string("Server log | An unexpected error occurred: ") +
+              e.what();
+        }
+        return crow::response(201, res);
+      });
+}
+/******************************************************************************/
+/**
  * @brief This method runs the route that performs the Secure Remote Password
- * protocol.
+ * protocol authentication.
  *
  * This method runs the route that performs the Secure Remote Password protocol.
  * It receives requests and make all the calculations to response to the
- * requests, creating a symmetric key for each connection request.
+ * requests, creating a symmetric key for each connection request, after
+ * performing the authentication.
  */
-void Server::keyExchangeRoute() {
-  CROW_ROUTE(_app, "/keyExchange")
+void Server::authenticationRoute() {
+  CROW_ROUTE(_app, "/authentication")
       .methods("POST"_method)([&](const crow::request &req) {
         crow::json::wvalue res;
         try {
