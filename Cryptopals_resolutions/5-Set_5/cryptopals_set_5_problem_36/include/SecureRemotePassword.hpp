@@ -1,5 +1,5 @@
-#ifndef DIFFIE_HELLMAN_HPP
-#define DIFFIE_HELLMAN_HPP
+#ifndef SECURE_REMOTE_PASSWORD_HPP
+#define SECURE_REMOTE_PASSWORD_HPP
 
 #include <boost/uuid/uuid.hpp>
 #include <memory>

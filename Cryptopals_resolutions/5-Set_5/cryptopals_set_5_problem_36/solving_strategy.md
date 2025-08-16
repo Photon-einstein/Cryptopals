@@ -131,7 +131,12 @@ http://localhost:18080/<endpoint_name>
 8.  Run the baseline of the remaining tests, namely the test_dhParametersLoader.cpp,
     it should still work (Done)
 
-9.  Update the baseline code in accordingly to the present problem (in progress)
-    - naming of all the variables that are currently in the source code (in progress)
-    - update the parameters of the json file (TBD)
-    - update the tests of the parametersLoader (TBD)
+9.  Update the baseline code in accordingly to the present problem (Done)
+
+    - renaming all the variables that are currently in the source code, that were pointing to the DH old problem (Done)
+    - update the parameters of the json file accordingly to the recommendations present at the
+      [RFC 5054](https://datatracker.ietf.org/doc/html/rfc5054) (Done)
+
+10. Update the tests_srpParametersLoader.cpp accordingly to the new specifications (Done)
+    - update the source code of the SprParametersLoader(.cpp/.hpp) file with the data extraction (Done)
+    - update the tests of the file test_srpParametersLoader.cpp so that they start passing again (Done)
