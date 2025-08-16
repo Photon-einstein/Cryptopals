@@ -146,4 +146,10 @@ http://localhost:18080/<endpoint_name>
 
 12. Add the map from the session ID to the SecureRemotePassword on the session data (Done)
 
-13. Add the skeleton of the SecureRemotePassword on the Server class (in progress)
+13. Add the skeleton of the SecureRemotePassword on the Server class (Done)
+
+14. Add the first left on server side of the Secure Remote Password protocol (in progress)
+
+15. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
+
+16. Add the first left on client side of the Secure Remote Password protocol (TBD)

@@ -73,6 +73,16 @@ private:
    */
   void rootEndpoint();
 
+  /**
+   * @brief This method runs the route that performs the Secure Remote Password
+   * protocol.
+   *
+   * This method runs the route that performs the Secure Remote Password
+   * protocol. It receives requests and make all the calculations to response to
+   * the requests, creating a symmetric key for each connection request.
+   */
+  void keyExchangeRoute();
+
   /* private fields */
   crow::SimpleApp _app;
 
