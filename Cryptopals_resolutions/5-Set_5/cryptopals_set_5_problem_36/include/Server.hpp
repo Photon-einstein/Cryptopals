@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "EncryptionUtility.hpp"
+#include "SessionData.hpp"
 #include "SrpParametersLoader.hpp"
 
 class Server {
@@ -74,6 +75,10 @@ private:
 
   /* private fields */
   crow::SimpleApp _app;
+
+  mutable std::mutex _secureRemotePasswordMapMutex;
+  std::map<boost::uuids::uuid, std::unique_ptr<SessionData>>
+      _secureRemotePasswordMap;
 
   const int _portProduction{18080};
   const int _portTest{18081};

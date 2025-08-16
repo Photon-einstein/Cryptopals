@@ -9,7 +9,10 @@
 /* constructor / destructor */
 MyCryptoLibrary::SecureRemotePassword::SecureRemotePassword(
     const bool debugFlag)
-    : _debugFlag{debugFlag} {}
+    : _debugFlag{debugFlag} {
+  _srpParametersMap = SrpParametersLoader::loadSrpParameters(
+      getSrpParametersFilenameLocation());
+}
 /******************************************************************************/
 MyCryptoLibrary::SecureRemotePassword::~SecureRemotePassword() {}
 /******************************************************************************/
@@ -21,8 +24,7 @@ MyCryptoLibrary::SecureRemotePassword::~SecureRemotePassword() {}
  * exchange protocol are available.
  */
 const std::string &
-MyCryptoLibrary::SecureRemotePassword::getSrpParametersFilenameLocation()
-    const {
+MyCryptoLibrary::SecureRemotePassword::getSrpParametersFilenameLocation() {
   if (_srpParametersFilename.size() == 0) {
     throw std::runtime_error("Secure Remote Password log | "
                              "getSrpParametersFilenameLocation(): public DH "

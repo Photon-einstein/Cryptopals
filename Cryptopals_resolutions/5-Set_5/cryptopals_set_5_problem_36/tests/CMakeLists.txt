@@ -46,6 +46,7 @@ set(SOURCE_FILES
   ../src/MessageExtractionFacility.cpp
   ../src/SecureRemotePassword.cpp
   ../src/Server.cpp
+  ../src/SessionData.cpp
 )
 
 # Add test source files
