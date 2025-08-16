@@ -41,16 +41,58 @@ const std::string &Client::getClientId() const {
 /**
  * @brief This method will return the production port of the server.
  *
- * This method will return the production port of the server to establish a
- * connection.
+ * @return The production port of the server to establish a connection.
  */
 const int Client::getProductionPort() const { return _portServerProduction; }
 /******************************************************************************/
 /**
  * @brief This method will return the test port of the server.
  *
- * This method will return the test port of the server to establish a
- * connection.
+ * @return The test port of the server to establish a connection.
  */
 const int Client::getTestPort() const { return _portServerTest; }
+/******************************************************************************/
+/**
+ * @brief This method will perform the registration step with a given
+ * server.
+ *
+ * This method perform the registration step with a given server.
+ * It will propose a certain group ID that can be accepted or rejected
+ * by the server, in the latter case it would be overwritten during this
+ * step.
+ *
+ * @param portServerNumber The number of the server to use in this exchange.
+ * @param groupId The group ID that the client is proposing to the client.
+ *
+ * @return True if the registration succeed, false otherwise.
+ */
+const bool Client::registration(const int portServerNumber,
+                                const unsigned int groupId) {
+  bool registrationResult{true};
+  if (portServerNumber < 1023 || (portServerNumber != _portServerProduction &&
+                                  portServerNumber != _portServerTest)) {
+    throw std::runtime_error("Client log | registration(): "
+                             "Invalid port server number used.");
+  }
+  std::string requestBody = fmt::format(
+      R"({{
+        "clientId": "{}",
+        "requestedGroup": "{}"
+    }})",
+      getClientId(), groupId);
+  cpr::Response response = cpr::Post(
+      cpr::Url{std::string("http://localhost:") +
+               std::to_string(portServerNumber) + std::string("/registration")},
+      cpr::Header{{"Content-Type", "application/json"}},
+      cpr::Body{requestBody});
+  try {
+    if (response.status_code != 201) {
+      throw std::runtime_error("Client log | registration(): "
+                               "registration failed");
+    }
+  } catch (const std::exception &e) {
+    std::cerr << e.what() << std::endl;
+  }
+  return registrationResult;
+}
 /******************************************************************************/
