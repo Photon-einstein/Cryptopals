@@ -1,5 +1,5 @@
-#ifndef DH_PARAMETERS_LOADER_HPP
-#define DH_PARAMETERS_LOADER_HPP
+#ifndef SRP_PARAMETERS_LOADER_HPP
+#define SRP_PARAMETERS_LOADER_HPP
 
 #include <map>
 #include <string>
@@ -8,11 +8,11 @@
 namespace SrpParametersLoader {
 
 struct SrpParameters {
-  std::string _groupName;
+  unsigned int _groupId;
+  unsigned int _sizeBits;
   std::string _pHex;
-  std::string _gHex;
-  std::string _description;
-  std::string _notes;
+  unsigned int _g;
+  std::string _groupName;
 };
 
 /**
@@ -26,7 +26,7 @@ struct SrpParameters {
  *
  * @return The file content in a structured dictionary.
  */
-std::map<std::string, SrpParameters>
+std::map<unsigned int, SrpParameters>
 loadSrpParameters(const std::string &filename);
 
 }; // namespace SrpParametersLoader

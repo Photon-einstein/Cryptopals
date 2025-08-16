@@ -17,7 +17,7 @@
  *
  * @return The file content in a structured dictionary.
  */
-std::map<std::string, SrpParametersLoader::SrpParameters>
+std::map<unsigned int, SrpParametersLoader::SrpParameters>
 SrpParametersLoader::loadSrpParameters(const std::string &filename) {
   std::ifstream file(filename);
   if (!file.is_open()) {
@@ -33,23 +33,26 @@ SrpParametersLoader::loadSrpParameters(const std::string &filename) {
                              "Failed to parse JSON file: " +
                              std::string(e.what()));
   }
-  std::map<std::string, SrpParametersLoader::SrpParameters> paramsMap;
-  if (j.contains("dh_parameters") && j["dh_parameters"].is_array()) {
-    for (const auto &group : j["dh_parameters"]) {
-      if (group.contains("name") && group.contains("p") &&
-          group.contains("g")) {
+  std::map<unsigned int, SrpParametersLoader::SrpParameters> paramsMap;
+  if (j.contains("srpGroups") && j["srpGroups"].is_array()) {
+    for (const auto &group : j["srpGroups"]) {
+      if (group.contains("groupId") && group.contains("sizeBits") &&
+          group.contains("primeN") && group.contains("generatorG")) {
         SrpParametersLoader::SrpParameters params;
+        params._groupId = group["groupId"].get<unsigned int>();
+        params._sizeBits = group["sizeBits"].get<unsigned int>();
+        if (group["primeN"].is_array()) {
+          std::string primeConcat;
+          for (const auto &chunk : group["primeN"]) {
+            primeConcat += chunk.get<std::string>();
+          }
+          params._pHex = primeConcat;
+        } else {
+          params._pHex = group["primeN"].get<std::string>();
+        }
+        params._g = group["generatorG"].get<unsigned int>();
         params._groupName = group["name"].get<std::string>();
-        params._pHex = group["p"].get<std::string>();
-        params._gHex = group["g"].get<std::string>();
-        // Optional fields
-        if (group.contains("description")) {
-          params._description = group["description"].get<std::string>();
-        }
-        if (group.contains("notes")) {
-          params._notes = group["notes"].get<std::string>();
-        }
-        paramsMap[group["name"].get<std::string>()] = params;
+        paramsMap[group["groupId"].get<unsigned int>()] = params;
       } else {
         std::cerr << "SrpParametersLoader log | loadSrpParameters(): "
                      "Warning: Skipping malformed SRP group entry in JSON."
