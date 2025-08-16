@@ -68,7 +68,10 @@ const int Server::getTestPort() const { return _portTest; }
  * provides to his clients, namely the root endpoint and the signature
  * verification endpoint
  */
-void Server::setupRoutes() { rootEndpoint(); }
+void Server::setupRoutes() {
+  rootEndpoint();
+  keyExchangeRoute();
+}
 /******************************************************************************/
 /**
  * @brief This method is the entry point for the server URL address
@@ -83,5 +86,43 @@ void Server::rootEndpoint() {
         std::string("Server log | Root endpoint, server up and running");
     return crow::response(200, rootMessage);
   });
+}
+/******************************************************************************/
+/**
+ * @brief This method runs the route that performs the Secure Remote Password
+ * protocol.
+ *
+ * This method runs the route that performs the Secure Remote Password protocol.
+ * It receives requests and make all the calculations to response to the
+ * requests, creating a symmetric key for each connection request.
+ */
+void Server::keyExchangeRoute() {
+  CROW_ROUTE(_app, "/keyExchange")
+      .methods("POST"_method)([&](const crow::request &req) {
+        crow::json::wvalue res;
+        try {
+          nlohmann::json parsedJson = nlohmann::json::parse(req.body);
+          std::string extractedClientId =
+              parsedJson.at("clientId").get<std::string>();
+          if (_debugFlag) {
+            std::cout << "\n--- Server log | Extracted Data from a new client "
+                         "request connection ---"
+                      << std::endl;
+            std::cout << "\tClient ID: " << extractedClientId << std::endl;
+            std::cout << "----------------------" << std::endl;
+          }
+        } catch (const nlohmann::json::exception &e) {
+          crow::json::wvalue err;
+          err["message"] =
+              std::string("Server log | JSON parsing error: ") + e.what();
+          return crow::response(400, err);
+        } catch (const std::exception &e) {
+          crow::json::wvalue err;
+          err["message"] =
+              std::string("Server log | An unexpected error occurred: ") +
+              e.what();
+        }
+        return crow::response(201, res);
+      });
 }
 /******************************************************************************/

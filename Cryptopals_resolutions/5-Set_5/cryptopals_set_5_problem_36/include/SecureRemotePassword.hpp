@@ -26,7 +26,7 @@ public:
    * @return Filename where the public configurations of the Diffie Hellman key
    * exchange protocol are available.
    */
-  const std::string &getSrpParametersFilenameLocation() const;
+  const std::string &getSrpParametersFilenameLocation();
 
 private:
   /* private methods */
@@ -34,6 +34,8 @@ private:
   /* private members */
   bool _debugFlag;
   const std::string _srpParametersFilename{"../input/SrpParameters.json"};
+  std::map<unsigned int, SrpParametersLoader::SrpParameters> _srpParametersMap;
+  unsigned int _groupId;
 };
 
 } // namespace MyCryptoLibrary

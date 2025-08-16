@@ -138,5 +138,18 @@ http://localhost:18080/<endpoint_name>
       [RFC 5054](https://datatracker.ietf.org/doc/html/rfc5054) (Done)
 
 10. Update the tests_srpParametersLoader.cpp accordingly to the new specifications (Done)
+
     - update the source code of the SprParametersLoader(.cpp/.hpp) file with the data extraction (Done)
     - update the tests of the file test_srpParametersLoader.cpp so that they start passing again (Done)
+
+11. Add the SRP parameters loader into the SecureRemotePassword class constructor (Done)
+
+12. Add the map from the session ID to the SecureRemotePassword on the session data (Done)
+
+13. Add the skeleton of the SecureRemotePassword on the Server class (Done)
+
+14. Add the first leg on server side of the Secure Remote Password protocol (in progress)
+
+15. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
+
+16. Add the first leg on client side of the Secure Remote Password protocol (TBD)
