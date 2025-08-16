@@ -148,8 +148,8 @@ http://localhost:18080/<endpoint_name>
 
 13. Add the skeleton of the SecureRemotePassword on the Server class (Done)
 
-14. Add the first left on server side of the Secure Remote Password protocol (in progress)
+14. Add the first leg on server side of the Secure Remote Password protocol (in progress)
 
 15. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
 
-16. Add the first left on client side of the Secure Remote Password protocol (TBD)
+16. Add the first leg on client side of the Secure Remote Password protocol (TBD)
