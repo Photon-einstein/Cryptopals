@@ -1,9 +1,9 @@
 #ifndef SESSION_DATA_HPP
 #define SESSION_DATA_HPP
 
-#include "SrpParametersLoader.hpp"
-#include "SecureRemotePassword.hpp"
 #include "EncryptionUtility.hpp"
+#include "SecureRemotePassword.hpp"
+#include "SrpParametersLoader.hpp"
 
 struct SessionData {
 

@@ -4,7 +4,7 @@
  * @brief Server's constructor side. This method will execute the constructor
  * of the SessionData structure.
  */
-SessionData::SessionData() {};
+SessionData::SessionData(){};
 /******************************************************************************/
 /**
  * @brief This method will perform the destruction of the SessionData
