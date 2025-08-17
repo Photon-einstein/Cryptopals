@@ -9,7 +9,27 @@
 class Client {
 public:
   /* constructor / destructor*/
+
+  /**
+   * @brief This method will execute the constructor of the Client object.
+   *
+   * This method will perform the constructor of the Client object when a group
+   * name is used in its constructor.
+   *
+   * @param clientId The client id to be used by this client.
+   * @param debugFlag The boolean flag to decide if aggressive prints should be
+   * displayed into the standard output, created for troubleshooting purposes.
+   *
+   * @throw runtime_error if clientId is empty.
+   */
   explicit Client(const std::string &clientId, const bool debugFlag);
+
+  /**
+   * @brief This method will perform the destruction of the Client object.
+   *
+   * This method will perform the destruction of the Client object, releasing
+   * all the resources and memory used.
+   */
   ~Client();
 
   /* public methods */

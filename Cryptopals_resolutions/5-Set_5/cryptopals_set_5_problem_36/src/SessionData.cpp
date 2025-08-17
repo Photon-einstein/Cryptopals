@@ -1,8 +1,10 @@
 #include "./../include/SessionData.hpp"
 
 /**
- * @brief Server's constructor side. This method will execute the constructor
- * of the SessionData structure.
+ * @brief This method will execute the constructor of the SessionData structure.
+ *
+ * This method will execute the constructor of the SessionData structure. It
+ * will perform all the necessary data initializations.
  */
 SessionData::SessionData(){};
 /******************************************************************************/

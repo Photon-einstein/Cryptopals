@@ -179,7 +179,7 @@ No password is sent, only verifier v.
 
 No session key yet.
 
-15. Add the first leg on the client side (in progress)
+15. Add the first leg on the client side (Done)
 
 ```text
 Client                        Server
@@ -195,10 +195,27 @@ Client                        Server
 }
 ```
 
-16. Add the skeleton of the registration process on the server side (TBD)
+16. Add the reception of the first leg on the server side, with the data validations (Done)
 
-17. Add the first leg on server side of the Secure Remote Password protocol (TBD)
+17. Add the second leg of the registration process, on the server side, with the proper response
+    to the client (in progress)
 
-18. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
+```text
+Client                        Server
+  |                              |
+  |    (Request SRP params (U))  |
+  |(--------------------------->)|
+  |                              |
+  |   Receive groupId (N, g)     |
+  |   and salt (s)               |
+  |<-----------------------------|
+  |                              |
+```
 
-19. Add the first leg on client side of the Secure Remote Password protocol (TBD)
+18. Add the skeleton of the registration process on the server side (TBD)
+
+19. Add the first leg on server side of the Secure Remote Password protocol (TBD)
+
+20. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
+
+21. Add the first leg on client side of the Secure Remote Password protocol (TBD)

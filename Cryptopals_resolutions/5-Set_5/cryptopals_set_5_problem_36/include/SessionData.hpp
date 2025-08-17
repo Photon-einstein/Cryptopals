@@ -9,7 +9,10 @@ struct SessionData {
 
   /**
    * @brief This method will execute the constructor of the SessionData
-   * structure
+   * structure.
+   *
+   * This method will execute the constructor of the SessionData structure. It
+   * will perform all the necessary data initializations.
    */
   explicit SessionData();
 

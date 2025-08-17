@@ -14,7 +14,27 @@ namespace MyCryptoLibrary {
 class SecureRemotePassword {
 public:
   /* constructor / destructor*/
+
+  /**
+   * @brief This method will execute the constructor of the SecureRemotePassword
+   * object.
+   *
+   * This method will perform the constructor of the SecureRemotePassword object
+   * when a group name is used in its constructor.
+   *s
+   * @param debugFlag The boolean flag to decide if aggressive prints should be
+   * displayed into the standard output, created for troubleshooting purposes.
+   *
+   */
   explicit SecureRemotePassword(const bool debugFlag);
+
+  /**
+   * @brief This method will perform the destruction of the SecureRemotePassword
+   * object.
+   *
+   * This method will perform the destruction of the SecureRemotePassword
+   * object, releasing all the resources and memory used.
+   */
   ~SecureRemotePassword();
 
   /* public methods */
@@ -23,8 +43,8 @@ public:
    * @brief This method returns the location of the file where the public
    * configurations of the Secure Remote Password protocol are available.
    *
-   * @return Filename where the public configurations of the Diffie Hellman key
-   * exchange protocol are available.
+   * @return Filename where the public configurations of the Secure Remote
+   * Password protocol are available.
    */
   const std::string &getSrpParametersFilenameLocation();
 
