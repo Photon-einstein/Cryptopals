@@ -15,7 +15,27 @@
 class Server {
 public:
   /* constructor / destructor */
-  explicit Server(const bool debugFlag);
+
+  /**
+   * @brief This method will execute the constructor of the Server object.
+   *
+   * This method will execute the constructor of the Server object. It
+   * needs to have as input the debugFlag.
+   *
+   * @param debugFlag The boolean flag to decide if aggressive prints should be
+   * displayed into the standard output, created for troubleshooting purposes.
+   * @param defaultGroupId The default group id is the minimum pre-requisite
+   * regarding the security definitions of the Secure Remote Password protocol.
+   *
+   */
+  explicit Server(const bool debugFlag, const unsigned int defaultGroupId = 3);
+
+  /**
+   * @brief This method will perform the destruction of the Server object.
+   *
+   * This method will perform the destruction of the Server object, releasing
+   * all the resources and memory used.
+   */
   ~Server();
 
   /**
@@ -93,18 +113,32 @@ private:
    */
   void authenticationRoute();
 
+  /**
+   * @brief This method returns the location of the file where the public
+   * configurations of the Secure Remote Password protocol are available.
+   *
+   * @return Filename where the public configurations of the Secure Remote
+   * Password protocol are available.
+   */
+  const std::string &getSrpParametersFilenameLocation();
+
   /* private fields */
   crow::SimpleApp _app;
 
   mutable std::mutex _secureRemotePasswordMapMutex;
-  std::map<boost::uuids::uuid, std::unique_ptr<SessionData>>
-      _secureRemotePasswordMap;
+  std::map<std::string, std::unique_ptr<SessionData>> _secureRemotePasswordMap;
 
   const int _portProduction{18080};
   const int _portTest{18081};
 
   std::thread _serverThread;
   const bool _debugFlag;
+
+  const std::string _srpParametersFilename{"../input/SrpParameters.json"};
+  std::map<unsigned int, SrpParametersLoader::SrpParameters> _srpParametersMap;
+  unsigned int _defaultGroupId;
+  unsigned int _minGroupId, _maxGroupId;
+  const std::size_t _saltSize{32}; // bytes
 };
 
 #endif // SERVER_HPP

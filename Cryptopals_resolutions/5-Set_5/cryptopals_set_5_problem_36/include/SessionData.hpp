@@ -9,9 +9,18 @@ struct SessionData {
 
   /**
    * @brief This method will execute the constructor of the SessionData
-   * structure
+   * structure.
+   *
+   * This method will execute the constructor of the SessionData structure. It
+   * will perform all the necessary data initializations.
+   *
+   * @param groupId The group ID that is going to be used with this client ID
+   * session
+   * @param salt The salt that is going to be used with this client ID session.
+   * @param hash The hash algorithm that is to be used with client ID session.
    */
-  explicit SessionData();
+  explicit SessionData(const unsigned int groupId, const std::string &salt,
+                       const std::string &hash);
 
   /**
    * @brief This method will perform the destruction of the SessionData
@@ -23,6 +32,8 @@ struct SessionData {
   ~SessionData();
 
   std::unique_ptr<MyCryptoLibrary::SecureRemotePassword> _secureRemotePassword;
+  unsigned int _groupId;
+  std::string _salt, _hash;
 };
 
 #endif // SESSION_DATA_HPP

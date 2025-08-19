@@ -12,6 +12,19 @@
 #include "./../include/EncryptionUtility.hpp"
 
 /* constructor / destructor */
+
+/**
+ * @brief This method will execute the constructor of the Client object.
+ *
+ * This method will perform the constructor of the Client object when a group
+ * name is used in its constructor.
+ *
+ * @param clientId The client id to be used by this client.
+ * @param debugFlag The boolean flag to decide if aggressive prints should be
+ * displayed into the standard output, created for troubleshooting purposes.
+ *
+ * @throw runtime_error if clientId is empty.
+ */
 Client::Client(const std::string &clientId, const bool debugFlag)
     : _clientId{clientId}, _debugFlag{debugFlag} {
   if (_clientId.size() == 0) {

@@ -13,8 +13,10 @@ int main(void) {
   double time;
   start = clock();
   /* work to verify */
-  const bool debugFlag{false};
-  std::shared_ptr<Server> server = std::make_shared<Server>(debugFlag);
+  const bool debugFlag{true};
+  const unsigned int minGroupId{4};
+  std::shared_ptr<Server> server =
+      std::make_shared<Server>(debugFlag, minGroupId);
   server->runServer();
   /* end of the work */
   end = clock();

@@ -10,7 +10,8 @@
         "02FD4CBF4976EAA9AFD5138FE8376435B9FC61D2FC0EB06E3"
       ],
       "generatorG": 2,
-      "name": "SRP 1024-bit Group 1"
+      "name": "SRP 1024-bit Group 1",
+      "hash": "SHA-256"
     },
     {
       "groupId": 2,
@@ -24,7 +25,8 @@
         "442C6F315180F93499A234DCF76E3FED135F9BB"
       ],
       "generatorG": 2,
-      "name": "SRP 1536-bit Group 2"
+      "name": "SRP 1536-bit Group 2",
+      "hash": "SHA-256"
     },
     {
       "groupId": 3,
@@ -40,7 +42,8 @@
         "5E372FCD68EF20FA7111F9E4AFF73"
       ],
       "generatorG": 2,
-      "name": "SRP 2048-bit Group 3"
+      "name": "SRP 2048-bit Group 3",
+      "hash": "SHA-256"
     },
     {
       "groupId": 4,
@@ -60,7 +63,8 @@
         "FFFFFFFFF"
       ],
       "generatorG": 5,
-      "name": "SRP 3072-bit Group 4"
+      "name": "SRP 3072-bit Group 4",
+      "hash": "SHA-256"
     },
     {
       "groupId": 5,
@@ -83,7 +87,8 @@
         "988D8FDDC186FFB7DC90A6C08F4DF435C934063199FFFFFFFFFFFFFFFF"
       ],
       "generatorG": 5,
-      "name": "SRP 4096-bit Group 5"
+      "name": "SRP 4096-bit Group 5",
+      "hash": "SHA-384"
     },
     {
       "groupId": 6,
@@ -113,7 +118,8 @@
         "68043E8F663F4860EE12BF2D5B0B7474D6E694F91E6DCC4024FFFFFFFFFFFFFFFF"
       ],
       "generatorG": 5,
-      "name": "SRP 6144-bit Group 6"
+      "name": "SRP 6144-bit Group 6",
+      "hash": "SHA-512"
     },
     {
       "groupId": 7,
@@ -151,7 +157,8 @@
         "DFFFFFFFFFFFFFFFFF"
       ],
       "generatorG": 19,
-      "name": "SRP 8192-bit Group 7"
+      "name": "SRP 8192-bit Group 7",
+      "hash": "SHA-512"
     }
   ]
 }

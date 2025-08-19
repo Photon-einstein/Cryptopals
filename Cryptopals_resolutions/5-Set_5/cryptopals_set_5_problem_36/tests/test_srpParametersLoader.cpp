@@ -50,6 +50,7 @@ TEST_F(SrpParametersLoaderTest,
       "02FD4CBF4976EAA9AFD5138FE8376435B9FC61D2FC0EB06E3");
   ASSERT_EQ(_srpParametersMap[1]._g, 2);
   ASSERT_EQ(_srpParametersMap[1]._groupName, "SRP 1024-bit Group 1");
+  ASSERT_EQ(_srpParametersMap[1]._hashName, "SHA-256");
   // Group ID 2 test
   ASSERT_EQ(_srpParametersMap[2]._groupId, 2);
   ASSERT_EQ(_srpParametersMap[2]._sizeBits, 1536);
@@ -63,6 +64,7 @@ TEST_F(SrpParametersLoaderTest,
       "442C6F315180F93499A234DCF76E3FED135F9BB");
   ASSERT_EQ(_srpParametersMap[2]._g, 2);
   ASSERT_EQ(_srpParametersMap[2]._groupName, "SRP 1536-bit Group 2");
+  ASSERT_EQ(_srpParametersMap[2]._hashName, "SHA-256");
   // Group ID 3 test
   ASSERT_EQ(_srpParametersMap[3]._groupId, 3);
   ASSERT_EQ(_srpParametersMap[3]._sizeBits, 2048);
@@ -78,6 +80,7 @@ TEST_F(SrpParametersLoaderTest,
       "5E372FCD68EF20FA7111F9E4AFF73");
   ASSERT_EQ(_srpParametersMap[3]._g, 2);
   ASSERT_EQ(_srpParametersMap[3]._groupName, "SRP 2048-bit Group 3");
+  ASSERT_EQ(_srpParametersMap[3]._hashName, "SHA-256");
   // Group ID 4 test
   ASSERT_EQ(_srpParametersMap[4]._groupId, 4);
   ASSERT_EQ(_srpParametersMap[4]._sizeBits, 3072);
@@ -97,6 +100,7 @@ TEST_F(SrpParametersLoaderTest,
       "FFFFFFFFF");
   ASSERT_EQ(_srpParametersMap[4]._g, 5);
   ASSERT_EQ(_srpParametersMap[4]._groupName, "SRP 3072-bit Group 4");
+  ASSERT_EQ(_srpParametersMap[4]._hashName, "SHA-256");
   // Group ID 5 test
   ASSERT_EQ(_srpParametersMap[5]._groupId, 5);
   ASSERT_EQ(_srpParametersMap[5]._sizeBits, 4096);
@@ -119,6 +123,7 @@ TEST_F(SrpParametersLoaderTest,
       "988D8FDDC186FFB7DC90A6C08F4DF435C934063199FFFFFFFFFFFFFFFF");
   ASSERT_EQ(_srpParametersMap[5]._g, 5);
   ASSERT_EQ(_srpParametersMap[5]._groupName, "SRP 4096-bit Group 5");
+  ASSERT_EQ(_srpParametersMap[5]._hashName, "SHA-384");
   // Group ID 6 test
   ASSERT_EQ(_srpParametersMap[6]._groupId, 6);
   ASSERT_EQ(_srpParametersMap[6]._sizeBits, 6144);
@@ -148,6 +153,7 @@ TEST_F(SrpParametersLoaderTest,
       "68043E8F663F4860EE12BF2D5B0B7474D6E694F91E6DCC4024FFFFFFFFFFFFFFFF");
   ASSERT_EQ(_srpParametersMap[6]._g, 5);
   ASSERT_EQ(_srpParametersMap[6]._groupName, "SRP 6144-bit Group 6");
+  ASSERT_EQ(_srpParametersMap[6]._hashName, "SHA-512");
   // Group ID 7 test
   ASSERT_EQ(_srpParametersMap[7]._groupId, 7);
   ASSERT_EQ(_srpParametersMap[7]._sizeBits, 8192);
@@ -185,6 +191,7 @@ TEST_F(SrpParametersLoaderTest,
       "DFFFFFFFFFFFFFFFFF");
   ASSERT_EQ(_srpParametersMap[7]._g, 19);
   ASSERT_EQ(_srpParametersMap[7]._groupName, "SRP 8192-bit Group 7");
+  ASSERT_EQ(_srpParametersMap[7]._hashName, "SHA-512");
 }
 
 /**
