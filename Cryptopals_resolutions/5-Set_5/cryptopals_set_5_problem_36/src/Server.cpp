@@ -23,12 +23,11 @@
  */
 Server::Server(const bool debugFlag, const unsigned int defaultGroupId)
     : _debugFlag{debugFlag} {
-  std::map<unsigned int, SrpParametersLoader::SrpParameters> srpParametersMap =
-      SrpParametersLoader::loadSrpParameters(
-          getSrpParametersFilenameLocation());
+  _srpParametersMap = SrpParametersLoader::loadSrpParameters(
+      getSrpParametersFilenameLocation());
   const unsigned int minimumValueGroupId{3};
-  _minGroupId = srpParametersMap.begin()->first;
-  _maxGroupId = srpParametersMap.rbegin()->first;
+  _minGroupId = _srpParametersMap.begin()->first;
+  _maxGroupId = _srpParametersMap.rbegin()->first;
   _defaultGroupId =
       (defaultGroupId >= minimumValueGroupId && defaultGroupId <= _maxGroupId)
           ? defaultGroupId
@@ -157,6 +156,13 @@ void Server::registrationRoute() {
             std::cout << "\tRequested group: " << extractedGroupId << std::endl;
             std::cout << "----------------------" << std::endl;
           }
+          const std::string salt =
+              EncryptionUtility::generateCryptographicNonce(_saltSize);
+          const std::string hash =
+              _srpParametersMap[extractedGroupId]._hashName;
+          std::lock_guard<std::mutex> lock(_secureRemotePasswordMapMutex);
+          _secureRemotePasswordMap.at(extractedClientId) =
+              std::make_unique<SessionData>(extractedGroupId, salt, hash);
         } catch (const nlohmann::json::exception &e) {
           crow::json::wvalue err;
           err["message"] =

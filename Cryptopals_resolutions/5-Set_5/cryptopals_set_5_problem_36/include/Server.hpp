@@ -126,8 +126,7 @@ private:
   crow::SimpleApp _app;
 
   mutable std::mutex _secureRemotePasswordMapMutex;
-  std::map<boost::uuids::uuid, std::unique_ptr<SessionData>>
-      _secureRemotePasswordMap;
+  std::map<std::string, std::unique_ptr<SessionData>> _secureRemotePasswordMap;
 
   const int _portProduction{18080};
   const int _portTest{18081};
@@ -136,8 +135,10 @@ private:
   const bool _debugFlag;
 
   const std::string _srpParametersFilename{"../input/SrpParameters.json"};
+  std::map<unsigned int, SrpParametersLoader::SrpParameters> _srpParametersMap;
   unsigned int _defaultGroupId;
   unsigned int _minGroupId, _maxGroupId;
+  const std::size_t _saltSize{32}; // bytes
 };
 
 #endif // SERVER_HPP

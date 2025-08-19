@@ -52,6 +52,7 @@ SrpParametersLoader::loadSrpParameters(const std::string &filename) {
         }
         params._g = group["generatorG"].get<unsigned int>();
         params._groupName = group["name"].get<std::string>();
+        params._hashName = group["hash"].get<std::string>();
         paramsMap[group["groupId"].get<unsigned int>()] = params;
       } else {
         std::cerr << "SrpParametersLoader log | loadSrpParameters(): "

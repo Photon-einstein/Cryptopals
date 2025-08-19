@@ -13,6 +13,7 @@ struct SrpParameters {
   std::string _pHex;
   unsigned int _g;
   std::string _groupName;
+  std::string _hashName;
 };
 
 /**

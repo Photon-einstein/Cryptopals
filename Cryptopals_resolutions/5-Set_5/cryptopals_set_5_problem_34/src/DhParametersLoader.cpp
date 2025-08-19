@@ -40,7 +40,15 @@ DhParametersLoader::loadDhParameters(const std::string &filename) {
           group.contains("g")) {
         DhParametersLoader::DhParameters params;
         params._groupName = group["name"].get<std::string>();
-        params._pHex = group["p"].get<std::string>();
+        if (group["p"].is_array()) {
+          std::string primeConcat;
+          for (const auto &chunk : group["p"]) {
+            primeConcat += chunk.get<std::string>();
+          }
+          params._pHex = primeConcat;
+        } else {
+          params._pHex = group["p"].get<std::string>();
+        }
         params._gHex = group["g"].get<std::string>();
         // Optional fields
         if (group.contains("description")) {
