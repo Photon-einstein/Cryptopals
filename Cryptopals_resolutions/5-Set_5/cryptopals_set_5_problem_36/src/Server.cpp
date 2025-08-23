@@ -100,7 +100,7 @@ const int Server::getTestPort() const { return _portTest; }
  */
 void Server::setupRoutes() {
   rootEndpoint();
-  registrationRoute();
+  getGroupsData();
   authenticationRoute();
 }
 /******************************************************************************/
@@ -120,14 +120,14 @@ void Server::rootEndpoint() {
 }
 /******************************************************************************/
 /**
- * @brief This method runs the route that performs registration of the
- * clients.
+ * @brief This method runs the route that performs group search inside the
+ * registration step.
  *
- * This method runs the route that performs the registration of the clients
- * login data.
+ * This method runs the route that performs group search inside the
+ * registration step, returning the agreed group id and the salt.
  */
-void Server::registrationRoute() {
-  CROW_ROUTE(_app, "/registration")
+void Server::getGroupsData() {
+  CROW_ROUTE(_app, "/groups/search")
       .methods("POST"_method)([&](const crow::request &req) {
         crow::json::wvalue res;
         try {

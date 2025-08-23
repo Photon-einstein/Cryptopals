@@ -93,11 +93,12 @@ const bool Client::registration(const int portServerNumber,
         "requestedGroup": "{}"
     }})",
       getClientId(), groupId);
-  cpr::Response response = cpr::Post(
-      cpr::Url{std::string("http://localhost:") +
-               std::to_string(portServerNumber) + std::string("/registration")},
-      cpr::Header{{"Content-Type", "application/json"}},
-      cpr::Body{requestBody});
+  cpr::Response response =
+      cpr::Post(cpr::Url{std::string("http://localhost:") +
+                         std::to_string(portServerNumber) +
+                         std::string("/groups/search")},
+                cpr::Header{{"Content-Type", "application/json"}},
+                cpr::Body{requestBody});
   try {
     if (response.status_code != 201) {
       throw std::runtime_error("Client log | registration(): "

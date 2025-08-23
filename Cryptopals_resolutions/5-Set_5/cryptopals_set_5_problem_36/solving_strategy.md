@@ -202,9 +202,17 @@ Client                        Server
 18. Format the group input parameters of the past problems so that the long prime hexadecimal number doesn't
     go out of bounds, and adjust the groupParameterLoader tests (Done)
 
-19. Include the hash algorithms SHA-284 and SHA512 at the source code (in progress)
+19. Include the hash algorithms SHA-256, SHA384 and SHA512 at the source code (Done)
 
-20. Add the second leg of the registration process, on the server side, with the proper response
+20. Create tests for each SHA, to ensure that all the wrapper to OpenSSL are working properly (Done):
+    20.1. Tests for SHA256 (Done)
+    20.2. Tests for SHA284 (Done)
+    20.3. Tests for SHA512 (Done)
+
+21. Change the endpoint of the current server to a get group instead, as each endpoint can only have
+    one request & response (Done)
+
+22. Add the second leg of the registration process, on the server side, with the proper response
     to the client (in progress)
 
 ```text
