@@ -94,13 +94,13 @@ private:
   void rootEndpoint();
 
   /**
-   * @brief This method runs the route that performs registration of the
-   * clients.
+   * @brief This method runs the route that performs group search inside the
+   * registration step.
    *
-   * This method runs the route that performs the registration of the clients
-   * login data.
+   * This method runs the route that performs group search inside the
+   * registration step, returning the agreed group id and the salt.
    */
-  void registrationRoute();
+  void getGroupsData();
 
   /**
    * @brief This method runs the route that performs the Secure Remote Password

@@ -24,53 +24,34 @@ namespace EncryptionUtility {
 const std::string generateCryptographicNonce(const std::size_t length);
 
 /**
- * @brief Generates a random initialization vector (IV)
+ * @brief This method will perform the SHA256 of a given input.
  *
- * This method generates a random initialization vector for cryptographic
- * purposes.
+ * This method will perform the SHA256 of a given input.
  *
- * @param ivLength The desired length of the IV in bytes.
- *
- * @return A vector containing the IV generated.
- * @throws std::runtime_error if IV generation fails.
- */
-std::vector<uint8_t> generateRandomIV(std::size_t ivLength);
+ * @param input The input as plaintext.
+ * @return The SHA256(input) in hexadecimal format.
+ **/
+std::string sha256(const std::string &input);
 
 /**
- * @brief Encrypts a plaintext message using AES-256-CBC mode
+ * @brief This method will perform the SHA384 of a given input.
  *
- * Encrypts a plaintext message using AES-256-CBC mode, using openssl library.
+ * This method will perform the SHA384 of a given input.
  *
- * @param plaintext The text to be encrypted.
- * @param key The key to be used in the encryption process (32 bytes for
- * AES-256).
- * @param iv The initialization vector to be used in the encryption process
- * (16 bytes).
- *
- * @return The ciphertext, in a hexadecimal string format.
- * @throws std::runtime_error if IV or key size does not meet the requirements.
- */
-std::string encryptMessageAes256CbcMode(const std::string &plaintext,
-                                        const std::vector<uint8_t> &key,
-                                        const std::vector<uint8_t> &iv);
+ * @param input The input as plaintext.
+ * @return The SHA384(input) in hexadecimal format.
+ **/
+std::string sha384(const std::string &input);
 
 /**
- * @brief Decrypts a ciphertext message using AES-256-CBC mode.
+ * @brief This method will perform the SHA512 of a given input.
  *
- * Decrypts a ciphertext message using AES-256-CBC mode using the OpenSSL
- * library.
+ * This method will perform the SHA512 of a given input.
  *
- * @param ciphertextHex The ciphertext in hexadecimal string format.
- * @param key The key used in the encryption process (32 bytes for AES-256).
- * @param iv The initialization vector used in the encryption process (16
- * bytes).
- *
- * @return The decrypted plaintext as a standard string.
- * @throws std::runtime_error if IV or key size is invalid or decryption fails.
- */
-std::string decryptMessageAes256CbcMode(const std::string &ciphertextHex,
-                                        const std::vector<uint8_t> &key,
-                                        const std::vector<uint8_t> &iv);
+ * @param input The input as plaintext.
+ * @return The SHA512(input) in hexadecimal format.
+ **/
+std::string sha512(const std::string &input);
 
 }; // namespace EncryptionUtility
 

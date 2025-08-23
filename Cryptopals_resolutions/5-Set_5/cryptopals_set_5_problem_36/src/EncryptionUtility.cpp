@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <iostream>
 #include <openssl/aes.h>
+#include <openssl/evp.h>
 #include <openssl/rand.h>
 #include <sstream>
 
@@ -33,126 +34,92 @@ EncryptionUtility::generateCryptographicNonce(const std::size_t length) {
 }
 /******************************************************************************/
 /**
- * @brief Generates a random initialization vector (IV)
+ * @brief This method will perform the SHA256 of a given input.
  *
- * This method generates a random initialization vector for cryptographic
- * purposes.
+ * This method will perform the SHA256 of a given input.
  *
- * @param ivLength The desired length of the IV in bytes.
- *
- * @return A vector containing the IV generated.
- * @throws std::runtime_error if IV generation fails.
- */
-std::vector<uint8_t> EncryptionUtility::generateRandomIV(std::size_t ivLength) {
-  std::vector<uint8_t> iv(ivLength);
-  if (RAND_bytes(iv.data(), ivLength) != 1) {
-    throw std::runtime_error("EncryptionUtility log | generateRandomIV(): "
-                             "Failed to generate secure IV");
+ * @param input The input as plaintext.
+ * @return The SHA256(input) in hexadecimal format.
+ **/
+std::string EncryptionUtility::sha256(const std::string &input) {
+  EVP_MD_CTX *ctx = EVP_MD_CTX_new();
+  if (!ctx)
+    throw std::runtime_error("Failed to create EVP_MD_CTX");
+  unsigned char hash[EVP_MAX_MD_SIZE];
+  unsigned int length = 0;
+  if (EVP_DigestInit_ex(ctx, EVP_sha256(), nullptr) != 1 ||
+      EVP_DigestUpdate(ctx, input.data(), input.size()) != 1 ||
+      EVP_DigestFinal_ex(ctx, hash, &length) != 1) {
+    EVP_MD_CTX_free(ctx);
+    throw std::runtime_error("EVP digest calculation failed");
   }
-  return iv;
+  EVP_MD_CTX_free(ctx);
+  // Convert to hex string
+  std::ostringstream oss;
+  for (unsigned int i = 0; i < length; i++) {
+    oss << std::hex << std::setw(2) << std::setfill('0')
+        << static_cast<int>(hash[i]);
+  }
+  return oss.str();
 }
 /******************************************************************************/
 /**
- * @brief Encrypts a plaintext message using AES-256-CBC mode
+ * @brief This method will perform the SHA384 of a given input.
  *
- * Encrypts a plaintext message using AES-256-CBC mode, using openssl library.
+ * This method will perform the SHA384 of a given input.
  *
- * @param plaintext The text to be encrypted.
- * @param key The key to be used in the encryption process (32 bytes for
- * AES-256).
- * @param iv The initialization vector to be used in the encryption process
- * (16 bytes).
- *
- * @return The ciphertext, in a hexadecimal string format.
- * @throws std::runtime_error if IV or key size does not meet the requirements.
- */
-std::string
-EncryptionUtility::encryptMessageAes256CbcMode(const std::string &plaintext,
-                                               const std::vector<uint8_t> &key,
-                                               const std::vector<uint8_t> &iv) {
-
-  if (iv.size() != AES_BLOCK_SIZE) {
-    throw std::runtime_error(
-        "EncryptionUtility log | encryptMessageAes256CbcMode(): "
-        "Initialization vector does not has the proper size of " +
-        std::to_string(AES_BLOCK_SIZE) + " bytes to proceed.");
+ * @param input The input as plaintext.
+ * @return The SHA384(input) in hexadecimal format.
+ **/
+std::string EncryptionUtility::sha384(const std::string &input) {
+  EVP_MD_CTX *ctx = EVP_MD_CTX_new();
+  if (!ctx)
+    throw std::runtime_error("Failed to create EVP_MD_CTX");
+  unsigned char hash[EVP_MAX_MD_SIZE];
+  unsigned int length = 0;
+  if (EVP_DigestInit_ex(ctx, EVP_sha384(), nullptr) != 1 ||
+      EVP_DigestUpdate(ctx, input.data(), input.size()) != 1 ||
+      EVP_DigestFinal_ex(ctx, hash, &length) != 1) {
+    EVP_MD_CTX_free(ctx);
+    throw std::runtime_error("EVP digest calculation failed");
   }
-  const int keyLength = EVP_CIPHER_key_length(EVP_aes_256_cbc());
-  if (key.size() != keyLength) {
-    throw std::runtime_error(
-        "EncryptionUtility log | encryptMessageAes256CbcMode(): "
-        "Key does not have the right size to proceed with encryption "
-        "AES-256-CBC mode, it should have " +
-        std::to_string(keyLength) + " bytes to proceed.");
+  EVP_MD_CTX_free(ctx);
+  // Convert to hex string
+  std::ostringstream oss;
+  for (unsigned int i = 0; i < length; i++) {
+    oss << std::hex << std::setw(2) << std::setfill('0')
+        << static_cast<int>(hash[i]);
   }
-  EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
-  std::vector<uint8_t> ciphertext(plaintext.size() + AES_BLOCK_SIZE);
-  int len = 0, ciphertext_len = 0;
-
-  EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr, key.data(), iv.data());
-  EVP_EncryptUpdate(ctx, ciphertext.data(), &len,
-                    reinterpret_cast<const unsigned char *>(plaintext.data()),
-                    plaintext.size());
-  ciphertext_len = len;
-  EVP_EncryptFinal_ex(ctx, ciphertext.data() + len, &len);
-  ciphertext_len += len;
-  ciphertext.resize(ciphertext_len);
-  EVP_CIPHER_CTX_free(ctx);
-  return MessageExtractionFacility::toHexString(ciphertext);
+  return oss.str();
 }
 /******************************************************************************/
 /**
- * @brief Decrypts a ciphertext message using AES-256-CBC mode.
+ * @brief This method will perform the SHA512 of a given input.
  *
- * Decrypts a ciphertext message using AES-256-CBC mode using the OpenSSL
- * library.
+ * This method will perform the SHA512 of a given input.
  *
- * @param ciphertextHex The ciphertext in hexadecimal string format.
- * @param key The key used in the encryption process (32 bytes for AES-256).
- * @param iv The initialization vector used in the encryption process (16
- * bytes).
- *
- * @return The decrypted plaintext as a standard string.
- * @throws std::runtime_error if IV or key size is invalid or decryption fails.
- */
-std::string
-EncryptionUtility::decryptMessageAes256CbcMode(const std::string &ciphertextHex,
-                                               const std::vector<uint8_t> &key,
-                                               const std::vector<uint8_t> &iv) {
-  if (iv.size() != AES_BLOCK_SIZE) {
-    throw std::runtime_error(
-        "EncryptionUtility log | decryptMessageAes256CbcMode(): "
-        "Initialization vector must be " +
-        std::to_string(AES_BLOCK_SIZE) + " bytes.");
+ * @param input The input as plaintext.
+ * @return The SHA512(input) in hexadecimal format.
+ **/
+std::string EncryptionUtility::sha512(const std::string &input) {
+  EVP_MD_CTX *ctx = EVP_MD_CTX_new();
+  if (!ctx)
+    throw std::runtime_error("Failed to create EVP_MD_CTX");
+  unsigned char hash[EVP_MAX_MD_SIZE];
+  unsigned int length = 0;
+  if (EVP_DigestInit_ex(ctx, EVP_sha512(), nullptr) != 1 ||
+      EVP_DigestUpdate(ctx, input.data(), input.size()) != 1 ||
+      EVP_DigestFinal_ex(ctx, hash, &length) != 1) {
+    EVP_MD_CTX_free(ctx);
+    throw std::runtime_error("EVP digest calculation failed");
   }
-
-  const int keyLength = EVP_CIPHER_key_length(EVP_aes_256_cbc());
-  if (key.size() != keyLength) {
-    throw std::runtime_error(
-        "EncryptionUtility log | decryptMessageAes256CbcMode(): "
-        "Key must be " +
-        std::to_string(keyLength) + " bytes for AES-256-CBC mode");
+  EVP_MD_CTX_free(ctx);
+  // Convert to hex string
+  std::ostringstream oss;
+  for (unsigned int i = 0; i < length; i++) {
+    oss << std::hex << std::setw(2) << std::setfill('0')
+        << static_cast<int>(hash[i]);
   }
-  std::vector<uint8_t> ciphertextBytes =
-      MessageExtractionFacility::hexToBytes(ciphertextHex);
-  EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
-  std::vector<uint8_t> plaintext(ciphertextBytes.size());
-  int len = 0, plaintext_len = 0;
-  EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), nullptr, key.data(), iv.data());
-  EVP_DecryptUpdate(ctx, plaintext.data(), &len, ciphertextBytes.data(),
-                    ciphertextBytes.size());
-  plaintext_len = len;
-  int final_len = 0;
-  if (EVP_DecryptFinal_ex(ctx, plaintext.data() + len, &final_len) != 1) {
-    EVP_CIPHER_CTX_free(ctx);
-    throw std::runtime_error(
-        "EncryptionUtility log | decryptMessageAes256CbcMode(): "
-        "Decryption failed. Possibly due to wrong key, IV, or corrupted "
-        "ciphertext.");
-  }
-  plaintext_len += final_len;
-  EVP_CIPHER_CTX_free(ctx);
-  plaintext.resize(plaintext_len);
-  return std::string(plaintext.begin(), plaintext.end());
+  return oss.str();
 }
 /******************************************************************************/
