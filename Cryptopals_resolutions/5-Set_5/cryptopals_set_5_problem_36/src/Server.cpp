@@ -22,7 +22,8 @@
  *
  */
 Server::Server(const bool debugFlag, const unsigned int defaultGroupId)
-    : _debugFlag{debugFlag} {
+    : _debugFlag{debugFlag},
+      _minSaltSizesMap{EncryptionUtility::getMinSaltSizes()} {
   _srpParametersMap = SrpParametersLoader::loadSrpParameters(
       getSrpParametersFilenameLocation());
   const unsigned int minimumValueGroupId{3};
@@ -156,25 +157,35 @@ void Server::getGroupsData() {
             std::cout << "\tRequested group: " << extractedGroupId << std::endl;
             std::cout << "----------------------" << std::endl;
           }
+          const unsigned int minSaltSize = _minSaltSizesMap.at(
+              _srpParametersMap.at(extractedGroupId)._hashName);
           const std::string salt =
-              EncryptionUtility::generateCryptographicNonce(_saltSize);
+              EncryptionUtility::generateCryptographicNonce(minSaltSize);
           const std::string hash =
               _srpParametersMap[extractedGroupId]._hashName;
           std::lock_guard<std::mutex> lock(_secureRemotePasswordMapMutex);
-          _secureRemotePasswordMap.at(extractedClientId) =
+          _secureRemotePasswordMap[extractedClientId] =
               std::make_unique<SessionData>(extractedGroupId, salt, hash);
+          // reply to the client with the group ID parameters and the salt s
+          res["groupId"] = extractedGroupId;
+          res["groupName"] = _srpParametersMap[extractedGroupId]._groupName;
+          res["primeN"] = _srpParametersMap[extractedGroupId]._pHex;
+          res["generatorG"] = _srpParametersMap[extractedGroupId]._g;
+          res["sha"] = _srpParametersMap[extractedGroupId]._hashName;
+          res["salt"] = salt;
+          return crow::response(201, res);
         } catch (const nlohmann::json::exception &e) {
           crow::json::wvalue err;
           err["message"] =
               std::string("Server log | JSON parsing error: ") + e.what();
-          return crow::response(400, err);
+          return crow::response(404, err);
         } catch (const std::exception &e) {
           crow::json::wvalue err;
           err["message"] =
               std::string("Server log | An unexpected error occurred: ") +
               e.what();
+          return crow::response(400, err);
         }
-        return crow::response(201, res);
       });
 }
 /******************************************************************************/

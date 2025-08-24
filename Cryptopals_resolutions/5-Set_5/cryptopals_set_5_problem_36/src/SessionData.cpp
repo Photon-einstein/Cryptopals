@@ -15,7 +15,7 @@
  */
 SessionData::SessionData(const unsigned int groupId, const std::string &salt,
                          const std::string &hash) {
-  if (groupId <= 0 || salt.empty() || !hash.empty()) {
+  if (groupId <= 0 || salt.empty() || hash.empty()) {
     throw std::runtime_error("SessionData log | constructor(): "
                              "Invalid input parameters given.");
   }

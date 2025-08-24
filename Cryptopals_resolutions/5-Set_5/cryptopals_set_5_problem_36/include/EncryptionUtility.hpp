@@ -4,6 +4,7 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <map>
 #include <memory>
 #include <openssl/bn.h>
 #include <openssl/err.h>
@@ -52,6 +53,15 @@ std::string sha384(const std::string &input);
  * @return The SHA512(input) in hexadecimal format.
  **/
 std::string sha512(const std::string &input);
+
+/**
+ * @brief Get a map containing the minimum required salt size for various
+ * cryptographic hash functions, in bytes.
+ *
+ * @return std::map<std::string, unsigned int> A map of hash names with the
+ * minimum salt sizes, in bytes.
+ */
+const std::map<std::string, unsigned int> getMinSaltSizes();
 
 }; // namespace EncryptionUtility
 
