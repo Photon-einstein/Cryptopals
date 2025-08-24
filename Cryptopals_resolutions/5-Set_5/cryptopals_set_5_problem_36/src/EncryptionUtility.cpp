@@ -123,3 +123,31 @@ std::string EncryptionUtility::sha512(const std::string &input) {
   return oss.str();
 }
 /******************************************************************************/
+/**
+ * @brief Get a map containing the minimum required salt size for various
+ * cryptographic hash functions, in bytes.
+ *
+ * @return std::map<std::string, unsigned int> A map of hash names with the
+ * minimum salt sizes, in bytes.
+ */
+const std::map<std::string, unsigned int> EncryptionUtility::getMinSaltSizes() {
+  return {// SHA-1 (160 bits / 8 bits per byte = 20 bytes)
+          {"SHA-1", 20},
+
+          // SHA-256 (256 bits / 8 bits per byte = 32 bytes)
+          {"SHA-256", 32},
+
+          // SHA-512 (512 bits / 8 bits per byte = 64 bytes)
+          {"SHA-512", 64},
+
+          // SHA-224 (224 bits / 8 bits per byte = 28 bytes)
+          {"SHA-224", 28},
+
+          // SHA-384 (384 bits / 8 bits per byte = 48 bytes)
+          {"SHA-384", 48},
+
+          // Truncated SHA-512 variants
+          {"SHA-512/224", 28},
+          {"SHA-512/256", 32}};
+}
+/******************************************************************************/

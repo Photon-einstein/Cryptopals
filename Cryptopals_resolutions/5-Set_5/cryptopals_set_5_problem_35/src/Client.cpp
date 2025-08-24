@@ -206,6 +206,7 @@ Client::diffieHellmanKeyExchange(const int portServerNumber) {
     }
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
+    std::get<0>(connectionTestResult) = false;
   }
   return connectionTestResult;
 }
@@ -329,6 +330,7 @@ const bool Client::messageExchange(const int portServerNumber,
     }
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
+    connectionTestResult = false;
   }
   return connectionTestResult;
 }

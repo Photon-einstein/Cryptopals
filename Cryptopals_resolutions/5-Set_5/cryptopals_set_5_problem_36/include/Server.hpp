@@ -139,6 +139,8 @@ private:
   unsigned int _defaultGroupId;
   unsigned int _minGroupId, _maxGroupId;
   const std::size_t _saltSize{32}; // bytes
+
+  const std::map<std::string, unsigned int> _minSaltSizesMap;
 };
 
 #endif // SERVER_HPP

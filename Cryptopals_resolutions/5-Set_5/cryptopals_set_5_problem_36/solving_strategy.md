@@ -214,6 +214,11 @@ Client                        Server
 
 22. Add the second leg of the registration process, on the server side, with the proper response
     to the client (in progress)
+    22.1. Add the request from the client (Done)
+    22.2. Add the validation at the server side of the request (Done)
+    22.3. Add the response of the server (Done)
+    22.4. Add the reception of the message and validation of the data on the client side (Done)
+    22.5. Store the required data received on the client side (in progress)
 
 ```text
 Client                        Server
@@ -232,11 +237,14 @@ Example of the kind of response by the given server:
 ```json
 {
   "groupId": 5,
+  "groupName": "SRP 4096-bit Group 5",
   "primeN": "...hex...",
   "generatorG": 2,
-  "salt": "A1B2C3D4E5F6" // normally 16-32 bytes
+  "salt": "A1B2C3D4E5F6" // size of the salt depends on the SHA variant used
 }
 ```
+
+20. Test manually the endpoint to retrieve the group id information (TBD)
 
 21. Add the skeleton of the registration process on the server side (TBD)
 

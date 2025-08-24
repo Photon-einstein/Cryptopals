@@ -76,12 +76,42 @@ public:
                           const unsigned int groupId = 1);
 
 private:
+  /* private methods */
+
+  /**
+   * @brief This method will print the server response during the Secure Remote
+   * Password protocol.
+   *
+   * This method will print the server response to the Secure Remote
+   * Password protocol. The response is a json text, and it will be printed in a
+   * structured way.
+   *
+   * @param response The response sent by the server during the execution
+   * of the Secure Remote Password protocol.
+   */
+  void printServerResponse(const cpr::Response &response);
+
+  /**
+   * @brief This method returns the location of the file where the public
+   * configurations of the Secure Remote Password protocol are available.
+   *
+   * @return Filename where the public configurations of the Secure Remote
+   * Password protocol are available.
+   */
+  const std::string &getSrpParametersFilenameLocation();
+
   /* private fields */
+
   const int _portServerProduction{18080};
   const int _portServerTest{18081};
 
   const std::string _clientId{};
   const bool _debugFlag;
+
+  const std::string _srpParametersFilename{"../input/SrpParameters.json"};
+  std::map<unsigned int, SrpParametersLoader::SrpParameters> _srpParametersMap;
+
+  const std::map<std::string, unsigned int> _minSaltSizesMap;
 };
 
 #endif // CLIENT_HPP

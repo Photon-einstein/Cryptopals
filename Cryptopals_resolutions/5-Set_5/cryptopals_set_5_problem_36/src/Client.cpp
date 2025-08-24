@@ -26,11 +26,14 @@
  * @throw runtime_error if clientId is empty.
  */
 Client::Client(const std::string &clientId, const bool debugFlag)
-    : _clientId{clientId}, _debugFlag{debugFlag} {
+    : _clientId{clientId}, _debugFlag{debugFlag},
+      _minSaltSizesMap{EncryptionUtility::getMinSaltSizes()} {
   if (_clientId.size() == 0) {
     throw std::runtime_error("Client log | constructor(): "
                              "Client ID is null");
   }
+  _srpParametersMap = SrpParametersLoader::loadSrpParameters(
+      getSrpParametersFilenameLocation());
 }
 /******************************************************************************/
 Client::~Client() {}
@@ -99,14 +102,113 @@ const bool Client::registration(const int portServerNumber,
                          std::string("/groups/search")},
                 cpr::Header{{"Content-Type", "application/json"}},
                 cpr::Body{requestBody});
+  if (_debugFlag) {
+    printServerResponse(response);
+  }
   try {
     if (response.status_code != 201) {
       throw std::runtime_error("Client log | registration(): "
                                "registration failed");
     }
+    nlohmann::json parsedJson = nlohmann::json::parse(response.text);
+    const unsigned int extractedGroupId =
+        parsedJson.at("groupId").get<unsigned int>();
+    const std::string extractedGroupName =
+        parsedJson.at("groupName").get<std::string>();
+    const std::string extractedPrimeN =
+        parsedJson.at("primeN").get<std::string>();
+    const unsigned int extractedGeneratorG =
+        parsedJson.at("generatorG").get<unsigned int>();
+    const std::string extractedSalt = parsedJson.at("salt").get<std::string>();
+    const std::string extractedSha = parsedJson.at("sha").get<std::string>();
+    if (_debugFlag) {
+      std::cout << "\n--- Client log | /groups/search server response "
+                   "extracted data ---"
+                << std::endl;
+      std::cout << "\tGroup ID: " << extractedGroupId << std::endl;
+      std::cout << "\tGroup name: " << extractedGroupName << std::endl;
+      std::cout << "\tPrime N: " << extractedPrimeN << std::endl;
+      std::cout << "\tGenerator g: " << extractedGeneratorG << std::endl;
+      std::cout << "\tSalt: " << extractedSalt << std::endl;
+      std::cout << "\tSHA: " << extractedSha << std::endl;
+      std::cout << "----------------------" << std::endl;
+    }
+    // Client side server response validation
+    const unsigned int minSaltSize =
+        _minSaltSizesMap.at(_srpParametersMap.at(extractedGroupId)._hashName);
+    if (_srpParametersMap.find(extractedGroupId) == _srpParametersMap.end()) {
+      throw std::runtime_error("Client log | registration(): "
+                               "Group ID received not valid.");
+    } else if (_srpParametersMap.at(extractedGroupId)._pHex !=
+               extractedPrimeN) {
+      throw std::runtime_error("Client log | registration(): "
+                               "Prime N received not valid.");
+    } else if (_srpParametersMap.at(extractedGroupId)._g !=
+               extractedGeneratorG) {
+      throw std::runtime_error("Client log | registration(): "
+                               "Generator g received not valid.");
+    } else if (_srpParametersMap.at(extractedGroupId)._hashName !=
+               extractedSha) {
+      throw std::runtime_error("Client log | registration(): "
+                               "Hash name received not valid.");
+    } else if (extractedSalt.size() < minSaltSize * 2) { /* salt is in hex */
+      throw std::runtime_error("Client log | registration(): "
+                               "Minimum salt size is not met.");
+    }
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
+    registrationResult = false;
+    return registrationResult;
   }
   return registrationResult;
+}
+/******************************************************************************/
+/**
+ * @brief This method will print the server response during the Secure Remote
+ * Password protocol.
+ *
+ * This method will print the server response to the Secure Remote
+ * Password protocol. The response is a json text, and it will be printed in a
+ * structured way.
+ *
+ * @param response The response sent by the server during the execution
+ * of the Secure Remote Password protocol.
+ */
+void Client::printServerResponse(const cpr::Response &response) {
+  std::cout << "Status Code: " << response.status_code << "\n";
+  std::cout << "Headers:\n";
+  for (const auto &header : response.header) {
+    std::cout << header.first << ": " << header.second << "\n";
+  }
+  std::cout << "Body:\n";
+  if (response.text.empty()) {
+    std::cout << "[Empty Body]\n";
+  } else {
+    try {
+      nlohmann::json parsedJson = nlohmann::json::parse(response.text);
+      std::cout << parsedJson.dump(2) << "\n"; // '2' for 2-space indentation
+    } catch (const nlohmann::json::exception &e) {
+      // Not valid JSON, print as raw text
+      std::cout << response.text << "\n";
+      std::cerr << "Warning: Body is not valid JSON, printing raw. Error: "
+                << e.what() << "\n";
+    }
+  }
+}
+/******************************************************************************/
+/**
+ * @brief This method returns the location of the file where the public
+ * configurations of the Secure Remote Password protocol are available.
+ *
+ * @return Filename where the public configurations of the Secure Remote
+ * Password protocol are available.
+ */
+const std::string &Client::getSrpParametersFilenameLocation() {
+  if (_srpParametersFilename.size() == 0) {
+    throw std::runtime_error("Secure Remote Password log | "
+                             "getSrpParametersFilenameLocation(): public SRP "
+                             "parameters filename location is empty.");
+  }
+  return _srpParametersFilename;
 }
 /******************************************************************************/
