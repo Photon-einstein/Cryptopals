@@ -19,6 +19,15 @@ FetchContent_Declare(
   GIT_TAG 10.2.1
 )
 
+# Fetch GoogleTest (includes GoogleMock)
+include(FetchContent)
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG v1.17.0  # latest stable release
+)
+FetchContent_MakeAvailable(googletest)
+
 # Fetch CPR
 include(FetchContent)
 FetchContent_Declare(
@@ -54,6 +63,8 @@ set(TEST_SOURCES
   test_SHA256.cpp
   test_SHA384.cpp
   test_SHA512.cpp
+  test_SecureRemotePasswordProtocol
+  test_SessionData.cpp
   test_srpParametersLoader.cpp
 )
 
@@ -78,6 +89,8 @@ target_link_libraries(runTests
     PRIVATE ${GTEST_LIBRARIES}
     GTest::gtest
     GTest::gtest_main
+    GTest::gmock
+    GTest::gmock_main
     fmt::fmt
     cpr::cpr 
     OpenSSL::Crypto 

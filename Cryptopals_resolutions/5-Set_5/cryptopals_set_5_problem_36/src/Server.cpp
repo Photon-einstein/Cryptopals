@@ -136,7 +136,7 @@ void Server::getGroupsData() {
           std::string extractedClientId =
               parsedJson.at("clientId").get<std::string>();
           unsigned int extractedGroupId =
-              parsedJson.contains("reguestedGroup")
+              parsedJson.contains("requestedGroup")
                   ? parsedJson["requestedGroup"].get<unsigned int>()
                   : _defaultGroupId;
           // group id validation
