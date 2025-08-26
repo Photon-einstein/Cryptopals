@@ -39,6 +39,25 @@ Client::Client(const std::string &clientId, const bool debugFlag)
 Client::~Client() {}
 /******************************************************************************/
 /**
+ * @brief This method sets the server's test port to a new one.
+ *
+ * This method sets the server's test port to a new one, used only for
+ * test purposes.
+ *
+ * @param portServerTest The port number to be used in the test scenario.
+ *
+ * @throw runtime_error if the portServerTest is not a valid one.
+ */
+void Client::setTestPort(const int portServerTest) {
+  if (portServerTest < 1024 || portServerTest > 49151) {
+    throw std::runtime_error(
+        "Client log | setTestPort(): "
+        "invalid port test number given, must be in range [1024, 49151]");
+  }
+  _portServerTest = portServerTest;
+}
+/******************************************************************************/
+/**
  * @brief This method return the client ID.
  *
  * This method return the client ID of a given client.
@@ -155,12 +174,19 @@ const bool Client::registration(const int portServerNumber,
       throw std::runtime_error("Client log | registration(): "
                                "Minimum salt size is not met.");
     }
+    // Data storage
+    _sessionData = std::make_unique<SessionData>(extractedGroupId,
+                                                 extractedSalt, extractedSha);
+    if (_sessionData.get() == nullptr) {
+      throw std::runtime_error("Client log | registration(): "
+                               "_sessionData value returned is null.");
+    }
+    return registrationResult;
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
     registrationResult = false;
     return registrationResult;
   }
-  return registrationResult;
 }
 /******************************************************************************/
 /**

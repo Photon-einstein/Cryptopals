@@ -213,12 +213,12 @@ Client                        Server
     one request & response (Done)
 
 22. Add the second leg of the registration process, on the server side, with the proper response
-    to the client (in progress)
+    to the client (Done)
     22.1. Add the request from the client (Done)
     22.2. Add the validation at the server side of the request (Done)
     22.3. Add the response of the server (Done)
     22.4. Add the reception of the message and validation of the data on the client side (Done)
-    22.5. Store the required data received on the client side (in progress)
+    22.5. Store the required data received on the client side (Done)
 
 ```text
 Client                        Server
@@ -240,16 +240,108 @@ Example of the kind of response by the given server:
   "groupName": "SRP 4096-bit Group 5",
   "primeN": "...hex...",
   "generatorG": 2,
+  "sha": "SHA-256",
   "salt": "A1B2C3D4E5F6" // size of the salt depends on the SHA variant used
 }
 ```
 
-20. Test manually the endpoint to retrieve the group id information (TBD)
+23. Add tests to the SessionData structure (Done)
 
-21. Add the skeleton of the registration process on the server side (TBD)
+24. Test manually the endpoint getGroupsData endpoint at the server side (in progress)
 
-22. Add the first leg on server side of the Secure Remote Password protocol (TBD)
+    24.1. Curl with a userId and requestedGroup < default: (Done)
 
-23. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
+    ```bash
+      curl -X POST http://localhost:18080/groups/search \
+      -H "Content-Type: application/json" \
+      -d '{
+            "clientId": "client123",
+            "requestedGroup": 2
+          }' | jq
+    ```
 
-24. Add the first leg on client side of the Secure Remote Password protocol (TBD)
+    24.2. Curl with a userId and requestedGroup = default: (Done)
+
+    ```bash
+      curl -X POST http://localhost:18080/groups/search \
+      -H "Content-Type: application/json" \
+      -d '{
+            "clientId": "client123",
+            "requestedGroup": 4
+          }' | jq
+    ```
+
+    24.3. Curl with a userId and requestedGroup > default: (Done)
+
+    ```bash
+      curl -X POST http://localhost:18080/groups/search \
+      -H "Content-Type: application/json" \
+      -d '{
+            "clientId": "client123",
+            "requestedGroup": 6
+          }' | jq
+    ```
+
+    24.4. Curl with a userId and an invalid groupId: (Done)
+
+    ```bash
+      curl -X POST http://localhost:18080/groups/search \
+      -H "Content-Type: application/json" \
+      -d '{
+            "clientId": "client123",
+            "requestedGroup": -2
+          }' | jq
+    ```
+
+    24.5. Curl with only a userId: (Done)
+
+    ```bash
+      curl -X POST http://localhost:18080/groups/search \
+      -H "Content-Type: application/json" \
+      -d '{
+            "clientId": "client123"
+          }' | jq
+    ```
+
+    24.6. Curl with an empty userId: (Done)
+
+    ```bash
+      curl -X POST http://localhost:18080/groups/search \
+      -H "Content-Type: application/json" \
+      -d '{
+            "clientId": ""
+          }' | jq
+    ```
+
+    24.7. Curl with no userId field: (Done)
+
+    ```bash
+      curl -X POST http://localhost:18080/groups/search \
+      -H "Content-Type: application/json" \
+      -d '{
+          }' | jq
+    ```
+
+25. Add tests at the server side (in progress)
+
+26. Add tests at the client side (TBD)
+
+27. Add tests to the getGroupsData endpoint at the server side (TBD)
+
+    27.1. Curl with a userId and requestedGroup < default: (TBD)
+    27.2. Curl with a userId and requestedGroup = default: (TBD)
+    27.3. Curl with a userId and requestedGroup > default: (TBD)
+    27.4. Curl with a userId and an invalid groupId: (TBD)
+    27.5. Curl with only a userId: (TBD)
+    27.6. Curl with an empty userId: (TBD)
+    27.7. Curl with no userId field: (TBD)
+
+28. Add tests to the Registration method at the client side (TBD)
+
+29. Add the skeleton of the registration process on the server side (TBD)
+
+30. Add the first leg on server side of the Secure Remote Password protocol (TBD)
+
+31. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
+
+32. Add the first leg on client side of the Secure Remote Password protocol (TBD)

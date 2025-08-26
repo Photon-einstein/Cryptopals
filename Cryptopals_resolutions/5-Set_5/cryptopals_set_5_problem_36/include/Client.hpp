@@ -4,6 +4,7 @@
 #include <cpr/cpr.h>
 
 #include "MessageExtractionFacility.hpp"
+#include "SessionData.hpp"
 #include "SrpParametersLoader.hpp"
 
 class Client {
@@ -33,6 +34,18 @@ public:
   ~Client();
 
   /* public methods */
+
+  /**
+   * @brief This method sets the server's test port to a new one.
+   *
+   * This method sets the server's test port to a new one, used only for
+   * test purposes.
+   *
+   * @param portServerTest The port number to be used in the test scenario.
+   *
+   * @throw runtime_error if the portServerTest is not a valid one.
+   */
+  void setTestPort(const int portServerTest);
 
   /**
    * @brief This method return the client ID.
@@ -103,7 +116,7 @@ private:
   /* private fields */
 
   const int _portServerProduction{18080};
-  const int _portServerTest{18081};
+  int _portServerTest{18081};
 
   const std::string _clientId{};
   const bool _debugFlag;
@@ -112,6 +125,7 @@ private:
   std::map<unsigned int, SrpParametersLoader::SrpParameters> _srpParametersMap;
 
   const std::map<std::string, unsigned int> _minSaltSizesMap;
+  std::unique_ptr<SessionData> _sessionData;
 };
 
 #endif // CLIENT_HPP
