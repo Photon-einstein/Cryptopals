@@ -36,6 +36,17 @@ public:
   /* public methods */
 
   /**
+   * @brief This method sets the server's production port to a new one.
+   *
+   * This method sets the server's production port to a new one.
+   *
+   * @param portServerTest The port number to be used in production.
+   *
+   * @throw runtime_error if the portProduction is not a valid one.
+   */
+  void setProductionPort(const int portProduction);
+
+  /**
    * @brief This method sets the server's test port to a new one.
    *
    * This method sets the server's test port to a new one, used only for
@@ -72,6 +83,15 @@ public:
   const int getTestPort() const;
 
   /**
+   * @brief This method returns the location of the file where the public
+   * configurations of the Secure Remote Password protocol are available.
+   *
+   * @return Filename where the public configurations of the Secure Remote
+   * Password protocol are available.
+   */
+  const std::string &getSrpParametersFilenameLocation();
+
+  /**
    * @brief This method will perform the registration step with a given
    * server.
    *
@@ -104,18 +124,9 @@ private:
    */
   void printServerResponse(const cpr::Response &response);
 
-  /**
-   * @brief This method returns the location of the file where the public
-   * configurations of the Secure Remote Password protocol are available.
-   *
-   * @return Filename where the public configurations of the Secure Remote
-   * Password protocol are available.
-   */
-  const std::string &getSrpParametersFilenameLocation();
-
   /* private fields */
 
-  const int _portServerProduction{18080};
+  int _portServerProduction{18080};
   int _portServerTest{18081};
 
   const std::string _clientId{};

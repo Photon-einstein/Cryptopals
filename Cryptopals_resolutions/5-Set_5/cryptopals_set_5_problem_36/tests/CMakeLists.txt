@@ -60,10 +60,12 @@ set(SOURCE_FILES
 
 # Add test source files
 set(TEST_SOURCES
+  test_Client.cpp
   test_SHA256.cpp
   test_SHA384.cpp
   test_SHA512.cpp
   test_SecureRemotePasswordProtocol
+  test_Server.cpp
   test_SessionData.cpp
   test_srpParametersLoader.cpp
 )

@@ -80,6 +80,8 @@ void Server::runServerTest() {
  *
  * This method will return the production port of the server to establish a
  * connection.
+ *
+ * @return The production port of the server.
  */
 const int Server::getProductionPort() const { return _portProduction; }
 /******************************************************************************/
@@ -88,8 +90,35 @@ const int Server::getProductionPort() const { return _portProduction; }
  *
  * This method will return the test port of the server to establish a
  * connection.
+ *
+ * @return The test port of the server.
  */
 const int Server::getTestPort() const { return _portTest; }
+/******************************************************************************/
+/**
+ * @brief This method returns the location of the file where the public
+ * configurations of the Secure Remote Password protocol are available.
+ *
+ * @return Filename where the public configurations of the Secure Remote
+ * Password protocol are available.
+ */
+const std::string &Server::getSrpParametersFilenameLocation() {
+  if (_srpParametersFilename.size() == 0) {
+    throw std::runtime_error("Secure Remote Password log | "
+                             "getSrpParametersFilenameLocation(): public SRP "
+                             "parameters filename location is empty.");
+  }
+  return _srpParametersFilename;
+}
+/******************************************************************************/
+/**
+ * @brief This method returns the default group ID of SRP public parameters.
+ * This value is used when the user does not provide a group ID during the
+ * Secure remote password protocol.
+ *
+ * @return The default group ID of SRP public parameters.
+ */
+const int Server::getDefaultGroupId() { return _defaultGroupId; }
 /******************************************************************************/
 /**
  * @brief This method will start the endpoints that the server
@@ -226,21 +255,5 @@ void Server::authenticationRoute() {
         }
         return crow::response(201, res);
       });
-}
-/******************************************************************************/
-/**
- * @brief This method returns the location of the file where the public
- * configurations of the Secure Remote Password protocol are available.
- *
- * @return Filename where the public configurations of the Secure Remote
- * Password protocol are available.
- */
-const std::string &Server::getSrpParametersFilenameLocation() {
-  if (_srpParametersFilename.size() == 0) {
-    throw std::runtime_error("Secure Remote Password log | "
-                             "getSrpParametersFilenameLocation(): public SRP "
-                             "parameters filename location is empty.");
-  }
-  return _srpParametersFilename;
 }
 /******************************************************************************/

@@ -30,13 +30,31 @@ Client::Client(const std::string &clientId, const bool debugFlag)
       _minSaltSizesMap{EncryptionUtility::getMinSaltSizes()} {
   if (_clientId.size() == 0) {
     throw std::runtime_error("Client log | constructor(): "
-                             "Client ID is null");
+                             "Client ID is null.");
   }
   _srpParametersMap = SrpParametersLoader::loadSrpParameters(
       getSrpParametersFilenameLocation());
 }
 /******************************************************************************/
 Client::~Client() {}
+/******************************************************************************/
+/**
+ * @brief This method sets the server's production port to a new one.
+ *
+ * This method sets the server's production port to a new one.
+ *
+ * @param portServerTest The port number to be used in production.
+ *
+ * @throw runtime_error if the portProduction is not a valid one.
+ */
+void Client::setProductionPort(const int portServerProduction) {
+  if (portServerProduction < 1024 || portServerProduction > 49151) {
+    throw std::runtime_error("Client log | setProductionPort(): "
+                             "invalid production port number given, must be in "
+                             "range [1024, 49151].");
+  }
+  _portServerProduction = portServerProduction;
+}
 /******************************************************************************/
 /**
  * @brief This method sets the server's test port to a new one.
@@ -52,7 +70,7 @@ void Client::setTestPort(const int portServerTest) {
   if (portServerTest < 1024 || portServerTest > 49151) {
     throw std::runtime_error(
         "Client log | setTestPort(): "
-        "invalid port test number given, must be in range [1024, 49151]");
+        "invalid port test number given, must be in range [1024, 49151].");
   }
   _portServerTest = portServerTest;
 }
@@ -86,6 +104,22 @@ const int Client::getProductionPort() const { return _portServerProduction; }
  * @return The test port of the server to establish a connection.
  */
 const int Client::getTestPort() const { return _portServerTest; }
+/******************************************************************************/
+/**
+ * @brief This method returns the location of the file where the public
+ * configurations of the Secure Remote Password protocol are available.
+ *
+ * @return Filename where the public configurations of the Secure Remote
+ * Password protocol are available.
+ */
+const std::string &Client::getSrpParametersFilenameLocation() {
+  if (_srpParametersFilename.size() == 0) {
+    throw std::runtime_error("Secure Remote Password log | "
+                             "getSrpParametersFilenameLocation(): public SRP "
+                             "parameters filename location is empty.");
+  }
+  return _srpParametersFilename;
+}
 /******************************************************************************/
 /**
  * @brief This method will perform the registration step with a given
@@ -220,21 +254,5 @@ void Client::printServerResponse(const cpr::Response &response) {
                 << e.what() << "\n";
     }
   }
-}
-/******************************************************************************/
-/**
- * @brief This method returns the location of the file where the public
- * configurations of the Secure Remote Password protocol are available.
- *
- * @return Filename where the public configurations of the Secure Remote
- * Password protocol are available.
- */
-const std::string &Client::getSrpParametersFilenameLocation() {
-  if (_srpParametersFilename.size() == 0) {
-    throw std::runtime_error("Secure Remote Password log | "
-                             "getSrpParametersFilenameLocation(): public SRP "
-                             "parameters filename location is empty.");
-  }
-  return _srpParametersFilename;
 }
 /******************************************************************************/
