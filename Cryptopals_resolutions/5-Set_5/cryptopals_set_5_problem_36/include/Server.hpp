@@ -61,6 +61,8 @@ public:
    *
    * This method will return the production port of the server to establish a
    * connection.
+   *
+   * @return The production port of the server.
    */
   const int getProductionPort() const;
 
@@ -69,8 +71,28 @@ public:
    *
    * This method will return the test port of the server to establish a
    * connection.
+   *
+   * @return The test port of the server.
    */
   const int getTestPort() const;
+
+  /**
+   * @brief This method returns the location of the file where the public
+   * configurations of the Secure Remote Password protocol are available.
+   *
+   * @return Filename where the public configurations of the Secure Remote
+   * Password protocol are available.
+   */
+  const std::string &getSrpParametersFilenameLocation();
+
+  /**
+   * @brief This method returns the default group ID of SRP public parameters.
+   * This value is used when the user does not provide a group ID during the
+   * Secure remote password protocol.
+   *
+   * @return The default group ID of SRP public parameters.
+   */
+  const int getDefaultGroupId();
 
 private:
   /* private methods */
@@ -113,15 +135,6 @@ private:
    */
   void authenticationRoute();
 
-  /**
-   * @brief This method returns the location of the file where the public
-   * configurations of the Secure Remote Password protocol are available.
-   *
-   * @return Filename where the public configurations of the Secure Remote
-   * Password protocol are available.
-   */
-  const std::string &getSrpParametersFilenameLocation();
-
   /* private fields */
   crow::SimpleApp _app;
 
@@ -138,7 +151,6 @@ private:
   std::map<unsigned int, SrpParametersLoader::SrpParameters> _srpParametersMap;
   unsigned int _defaultGroupId;
   unsigned int _minGroupId, _maxGroupId;
-  const std::size_t _saltSize{32}; // bytes
 
   const std::map<std::string, unsigned int> _minSaltSizesMap;
 };

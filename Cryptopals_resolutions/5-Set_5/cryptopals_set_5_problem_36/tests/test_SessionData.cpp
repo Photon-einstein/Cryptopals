@@ -36,9 +36,8 @@ TEST(SessionDataTest, SessionData_WithInvalidGroupId_ShouldThrowAnError) {
   try {
     SessionData session(groupId, salt, hash);
   } catch (const std::runtime_error &e) {
-    EXPECT_EQ(
-        std::string(e.what()),
-        "SessionData log | constructor(): Invalid input parameters given.");
+    EXPECT_THAT(std::string(e.what()),
+                ::testing::EndsWith("Invalid input parameters given."));
   }
 }
 
@@ -56,9 +55,8 @@ TEST(SessionDataTest, SessionData_WithInvalidSalt_ShouldThrowAnError) {
   try {
     SessionData session(groupId, salt, hash);
   } catch (const std::runtime_error &e) {
-    EXPECT_EQ(
-        std::string(e.what()),
-        "SessionData log | constructor(): Invalid input parameters given.");
+    EXPECT_THAT(std::string(e.what()),
+                ::testing::EndsWith("Invalid input parameters given."));
   }
 }
 

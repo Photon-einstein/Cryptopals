@@ -247,7 +247,7 @@ Example of the kind of response by the given server:
 
 23. Add tests to the SessionData structure (Done)
 
-24. Test manually the endpoint getGroupsData endpoint at the server side (in progress)
+24. Test manually the endpoint getGroupsData endpoint at the server side (Done)
 
     24.1. Curl with a userId and requestedGroup < default: (Done)
 
@@ -282,7 +282,7 @@ Example of the kind of response by the given server:
           }' | jq
     ```
 
-    24.4. Curl with a userId and an invalid groupId: (Done)
+    24.4. Curl with a userId and an invalid groupId, lower bound: (Done)
 
     ```bash
       curl -X POST http://localhost:18080/groups/search \
@@ -293,7 +293,18 @@ Example of the kind of response by the given server:
           }' | jq
     ```
 
-    24.5. Curl with only a userId: (Done)
+    24.5. Curl with a userId and an invalid groupId, upper bound: (Done)
+
+    ```bash
+      curl -X POST http://localhost:18080/groups/search \
+      -H "Content-Type: application/json" \
+      -d '{
+            "clientId": "client123",
+            "requestedGroup": 8
+          }' | jq
+    ```
+
+    24.6. Curl with only a userId: (Done)
 
     ```bash
       curl -X POST http://localhost:18080/groups/search \
@@ -303,7 +314,7 @@ Example of the kind of response by the given server:
           }' | jq
     ```
 
-    24.6. Curl with an empty userId: (Done)
+    24.7. Curl with an empty userId: (Done)
 
     ```bash
       curl -X POST http://localhost:18080/groups/search \
@@ -313,7 +324,7 @@ Example of the kind of response by the given server:
           }' | jq
     ```
 
-    24.7. Curl with no userId field: (Done)
+    24.8. Curl with no userId field: (Done)
 
     ```bash
       curl -X POST http://localhost:18080/groups/search \
@@ -322,9 +333,9 @@ Example of the kind of response by the given server:
           }' | jq
     ```
 
-25. Add tests at the server side (in progress)
+25. Add tests at the server side (Done)
 
-26. Add tests at the client side (TBD)
+26. Add tests at the client side (Done)
 
 27. Add tests to the getGroupsData endpoint at the server side (TBD)
 
