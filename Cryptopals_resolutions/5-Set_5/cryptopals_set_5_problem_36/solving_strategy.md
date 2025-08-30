@@ -249,7 +249,16 @@ Example of the kind of response by the given server:
 
 24. Test manually the endpoint getGroupsData endpoint at the server side (Done)
 
-    24.1. Curl with a userId and requestedGroup < default: (Done)
+    24.1. Curl with only a userId: (Done)
+
+    ````bash
+      curl -X POST http://localhost:18080/groups/search \
+      -H "Content-Type: application/json" \
+      -d '{
+            "clientId": "client123"
+          }' | jq
+
+    24.2. Curl with a userId and requestedGroup < default: (Done)
 
     ```bash
       curl -X POST http://localhost:18080/groups/search \
@@ -258,9 +267,9 @@ Example of the kind of response by the given server:
             "clientId": "client123",
             "requestedGroup": 2
           }' | jq
-    ```
+    ````
 
-    24.2. Curl with a userId and requestedGroup = default: (Done)
+    24.3. Curl with a userId and requestedGroup = default: (Done)
 
     ```bash
       curl -X POST http://localhost:18080/groups/search \
@@ -271,7 +280,7 @@ Example of the kind of response by the given server:
           }' | jq
     ```
 
-    24.3. Curl with a userId and requestedGroup > default: (Done)
+    24.4. Curl with a userId and requestedGroup > default: (Done)
 
     ```bash
       curl -X POST http://localhost:18080/groups/search \
@@ -282,7 +291,7 @@ Example of the kind of response by the given server:
           }' | jq
     ```
 
-    24.4. Curl with a userId and an invalid groupId, lower bound: (Done)
+    24.5. Curl with a userId and an invalid groupId, lower bound: (Done)
 
     ```bash
       curl -X POST http://localhost:18080/groups/search \
@@ -293,7 +302,7 @@ Example of the kind of response by the given server:
           }' | jq
     ```
 
-    24.5. Curl with a userId and an invalid groupId, upper bound: (Done)
+    24.6. Curl with a userId and an invalid groupId, upper bound: (Done)
 
     ```bash
       curl -X POST http://localhost:18080/groups/search \
@@ -301,16 +310,6 @@ Example of the kind of response by the given server:
       -d '{
             "clientId": "client123",
             "requestedGroup": 8
-          }' | jq
-    ```
-
-    24.6. Curl with only a userId: (Done)
-
-    ```bash
-      curl -X POST http://localhost:18080/groups/search \
-      -H "Content-Type: application/json" \
-      -d '{
-            "clientId": "client123"
           }' | jq
     ```
 
@@ -337,19 +336,28 @@ Example of the kind of response by the given server:
 
 26. Add tests at the client side (Done)
 
-27. Add tests to the getGroupsData endpoint at the server side (TBD)
+27. Add tests to the getGroupsData endpoint at the server side (Done)
 
-    27.1. Curl with a userId and requestedGroup < default: (TBD)
-    27.2. Curl with a userId and requestedGroup = default: (TBD)
-    27.3. Curl with a userId and requestedGroup > default: (TBD)
-    27.4. Curl with a userId and an invalid groupId: (TBD)
-    27.5. Curl with only a userId: (TBD)
-    27.6. Curl with an empty userId: (TBD)
-    27.7. Curl with no userId field: (TBD)
+    ```bash
+      curl -X POST http://localhost:18080/groups/search \
+      -H "Content-Type: application/json" \
+      -d '{
+            "clientId": "<client_ID>", // string
+            "requestedGroup": <requestedGroup> // optional | unsigned int
+          }' | jq
+    ```
 
-28. Add tests to the Registration method at the client side (TBD)
+    27.1. Curl with only a userId: (Done)
+    27.2. Curl with a userId and requestedGroup < default: (Done)
+    27.3. Curl with a userId and requestedGroup = default: (Done)
+    27.4. Curl with a userId and requestedGroup > default: (Done)
+    27.5. Curl with a userId and an invalid groupId: (Done)
+    27.6. Curl with an empty userId: (Done)
+    27.7. Curl with no userId field: (Done)
 
-29. Add the skeleton of the registration process on the server side (TBD)
+28. Add tests to the Registration method at the client side (Done)
+
+29. Add the skeleton of the registration process on the server side (in progress)
 
 30. Add the first leg on server side of the Secure Remote Password protocol (TBD)
 
