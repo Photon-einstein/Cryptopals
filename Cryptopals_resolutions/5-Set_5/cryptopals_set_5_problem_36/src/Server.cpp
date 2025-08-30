@@ -30,7 +30,7 @@ Server::Server(const bool debugFlag, const unsigned int defaultGroupId)
   _minGroupId = _srpParametersMap.begin()->first;
   _maxGroupId = _srpParametersMap.rbegin()->first;
   _defaultGroupId =
-      (defaultGroupId >= minimumValueGroupId && defaultGroupId <= _maxGroupId)
+      (defaultGroupId >= _minGroupId && defaultGroupId <= _maxGroupId)
           ? defaultGroupId
           : minimumValueGroupId;
 }
@@ -118,7 +118,7 @@ const std::string &Server::getSrpParametersFilenameLocation() {
  *
  * @return The default group ID of SRP public parameters.
  */
-const int Server::getDefaultGroupId() { return _defaultGroupId; }
+const unsigned int Server::getDefaultGroupId() { return _defaultGroupId; }
 /******************************************************************************/
 /**
  * @brief This method will start the endpoints that the server
@@ -164,10 +164,14 @@ void Server::getGroupsData() {
           nlohmann::json parsedJson = nlohmann::json::parse(req.body);
           std::string extractedClientId =
               parsedJson.at("clientId").get<std::string>();
-          unsigned int extractedGroupId =
-              parsedJson.contains("requestedGroup")
-                  ? parsedJson["requestedGroup"].get<unsigned int>()
-                  : _defaultGroupId;
+          unsigned int extractedGroupId;
+          if (!parsedJson.contains("requestedGroup") ||
+              !parsedJson["requestedGroup"].is_number_unsigned()) {
+            extractedGroupId = _defaultGroupId;
+          } else {
+            extractedGroupId =
+                parsedJson.at("requestedGroup").get<unsigned int>();
+          }
           // group id validation
           extractedGroupId = (extractedGroupId >= _defaultGroupId &&
                               extractedGroupId <= _maxGroupId)
@@ -176,7 +180,7 @@ void Server::getGroupsData() {
           // cliend ID validation
           if (extractedClientId.size() == 0) {
             throw std::runtime_error("Server log | registration(): "
-                                     "Client ID is null");
+                                     "ClientId is null");
           }
           if (_debugFlag) {
             std::cout << "\n--- Server log | Extracted Data from a new client "
@@ -196,6 +200,7 @@ void Server::getGroupsData() {
           _secureRemotePasswordMap[extractedClientId] =
               std::make_unique<SessionData>(extractedGroupId, salt, hash);
           // reply to the client with the group ID parameters and the salt s
+          res["clientId"] = extractedClientId;
           res["groupId"] = extractedGroupId;
           res["groupName"] = _srpParametersMap[extractedGroupId]._groupName;
           res["primeN"] = _srpParametersMap[extractedGroupId]._pHex;

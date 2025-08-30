@@ -92,7 +92,7 @@ public:
    *
    * @return The default group ID of SRP public parameters.
    */
-  const int getDefaultGroupId();
+  const unsigned int getDefaultGroupId();
 
 private:
   /* private methods */

@@ -138,32 +138,34 @@ const std::string &Client::getSrpParametersFilenameLocation() {
 const bool Client::registration(const int portServerNumber,
                                 const unsigned int groupId) {
   bool registrationResult{true};
-  if (portServerNumber < 1023 || (portServerNumber != _portServerProduction &&
-                                  portServerNumber != _portServerTest)) {
-    throw std::runtime_error("Client log | registration(): "
-                             "Invalid port server number used.");
-  }
-  std::string requestBody = fmt::format(
-      R"({{
+  try {
+    if (portServerNumber < 1023 || (portServerNumber != _portServerProduction &&
+                                    portServerNumber != _portServerTest)) {
+      throw std::runtime_error("Client log | registration(): "
+                               "Invalid port server number used.");
+    }
+    std::string requestBody = fmt::format(
+        R"({{
         "clientId": "{}",
         "requestedGroup": "{}"
     }})",
-      getClientId(), groupId);
-  cpr::Response response =
-      cpr::Post(cpr::Url{std::string("http://localhost:") +
-                         std::to_string(portServerNumber) +
-                         std::string("/groups/search")},
-                cpr::Header{{"Content-Type", "application/json"}},
-                cpr::Body{requestBody});
-  if (_debugFlag) {
-    printServerResponse(response);
-  }
-  try {
+        getClientId(), groupId);
+    cpr::Response response =
+        cpr::Post(cpr::Url{std::string("http://localhost:") +
+                           std::to_string(portServerNumber) +
+                           std::string("/groups/search")},
+                  cpr::Header{{"Content-Type", "application/json"}},
+                  cpr::Body{requestBody});
+    if (_debugFlag) {
+      printServerResponse(response);
+    }
     if (response.status_code != 201) {
       throw std::runtime_error("Client log | registration(): "
                                "registration failed");
     }
     nlohmann::json parsedJson = nlohmann::json::parse(response.text);
+    const std::string extractedClientId =
+        parsedJson.at("clientId").get<std::string>();
     const unsigned int extractedGroupId =
         parsedJson.at("groupId").get<unsigned int>();
     const std::string extractedGroupName =
@@ -178,6 +180,7 @@ const bool Client::registration(const int portServerNumber,
       std::cout << "\n--- Client log | /groups/search server response "
                    "extracted data ---"
                 << std::endl;
+      std::cout << "\tClient ID: " << extractedClientId << std::endl;
       std::cout << "\tGroup ID: " << extractedGroupId << std::endl;
       std::cout << "\tGroup name: " << extractedGroupName << std::endl;
       std::cout << "\tPrime N: " << extractedPrimeN << std::endl;
@@ -189,7 +192,12 @@ const bool Client::registration(const int portServerNumber,
     // Client side server response validation
     const unsigned int minSaltSize =
         _minSaltSizesMap.at(_srpParametersMap.at(extractedGroupId)._hashName);
-    if (_srpParametersMap.find(extractedGroupId) == _srpParametersMap.end()) {
+    if (extractedClientId != getClientId()) {
+      throw std::runtime_error(
+          "Client log | registration(): "
+          "Client ID received does not match's client's one.");
+    } else if (_srpParametersMap.find(extractedGroupId) ==
+               _srpParametersMap.end()) {
       throw std::runtime_error("Client log | registration(): "
                                "Group ID received not valid.");
     } else if (_srpParametersMap.at(extractedGroupId)._pHex !=

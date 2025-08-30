@@ -8,7 +8,8 @@
  * @brief Test the correctness of the construction of the Client class,
  * should match the expected values.
  */
-TEST(Client, Server_WithValidInputParameters_ShouldMatchReference) {
+TEST(ClientTest,
+     ClientConstructor_WithValidInputParameters_ShouldMatchReference) {
   const std::string expectedClientId{"Bob"};
   const bool debugFlag{false};
   const unsigned int expectedServerProductionPort{18080};
@@ -29,7 +30,8 @@ TEST(Client, Server_WithValidInputParameters_ShouldMatchReference) {
  * @brief Test the correctness of the construction of the Client class, with
  * invalid input parameters given.
  */
-TEST(Client, Server_WithInvalidInputParameters_ShouldThrowAnError) {
+TEST(ClientTest,
+     ClientConstructor_WithInvalidInputParameters_ShouldThrowAnError) {
   const std::string expectedClientId{""};
   const bool debugFlag{false};
   try {
@@ -45,8 +47,9 @@ TEST(Client, Server_WithInvalidInputParameters_ShouldThrowAnError) {
  * @brief Test the correctness of {get/set}ProductionPort in the Client class,
  * with valid production port provided at the setProductionPort.
  */
-TEST(Client,
-     Server_WithValidInputParametersAtSetProductionPort_ShouldMatchReference) {
+TEST(
+    ClientTest,
+    SetProductionPort_WithValidInputParametersAtSetProductionPort_ShouldMatchReference) {
   const std::string expectedClientId{"Bob"};
   const bool debugFlag{false};
   const unsigned int expectedServerProductionPort{18085};
@@ -60,8 +63,9 @@ TEST(Client,
  * @brief Test the correctness of {get/set}ProductionPort in the Client class,
  * with invalid production port provided at the setProductionPort.
  */
-TEST(Client,
-     Server_WithInvalidInputParametersAtSetProductionPort_ShouldThrowAnError) {
+TEST(
+    ClientTest,
+    SetProductionPort_WithInvalidInputParametersAtSetProductionPort_ShouldThrowAnError) {
   const std::string expectedClientId{"Bob"};
   const bool debugFlag{false};
   const unsigned int expectedServerProductionPort{80};
@@ -80,8 +84,8 @@ TEST(Client,
  * @brief Test the correctness of {get/set}TestPort in the Client class, with
  * valid test port provided at the setTestPort.
  */
-TEST(Client,
-     Server_WithValidInputParametersAtSetTestPort_ShouldMatchReference) {
+TEST(ClientTest,
+     SetTestPort_WithValidInputParametersAtSetTestPort_ShouldMatchReference) {
   const std::string expectedClientId{"Bob"};
   const bool debugFlag{false};
   const unsigned int expectedServerTestPort{18085};
@@ -95,8 +99,8 @@ TEST(Client,
  * @brief Test the correctness of {get/set}TestPort in the Client class, with
  * invalid test port provided at the setTestPort.
  */
-TEST(Client,
-     Server_WithInvalidInputParametersAtSetTestPort_ShouldThrowAnError) {
+TEST(ClientTest,
+     SetTestPort_WithInvalidInputParametersAtSetTestPort_ShouldThrowAnError) {
   const std::string expectedClientId{"Bob"};
   const bool debugFlag{false};
   const unsigned int expectedServerTestPort{80};
