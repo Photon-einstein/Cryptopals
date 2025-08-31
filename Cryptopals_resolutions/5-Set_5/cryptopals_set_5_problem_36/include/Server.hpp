@@ -122,7 +122,7 @@ private:
    * This method runs the route that performs group search inside the
    * registration step, returning the agreed group id and the salt.
    */
-  void getGroupsData();
+  void handleRegisterInit();
 
   /**
    * @brief This method runs the route that performs the Secure Remote Password
@@ -153,6 +153,7 @@ private:
   unsigned int _minGroupId, _maxGroupId;
 
   const std::map<std::string, unsigned int> _minSaltSizesMap;
+  const std::unordered_map<std::string, EncryptionUtility::HashFn> _hashMap;
 };
 
 #endif // SERVER_HPP

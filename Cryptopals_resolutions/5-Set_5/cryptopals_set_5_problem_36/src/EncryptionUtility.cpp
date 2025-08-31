@@ -4,6 +4,7 @@
 #include <openssl/aes.h>
 #include <openssl/evp.h>
 #include <openssl/rand.h>
+#include <random>
 #include <sstream>
 
 #include "./../include/EncryptionUtility.hpp"
@@ -124,6 +125,38 @@ std::string EncryptionUtility::sha512(const std::string &input) {
 }
 /******************************************************************************/
 /**
+ * @brief Provides a lookup table mapping string names to hash functions.
+ *
+ * Keys are case-sensitive algorithm names (e.g., "SHA-256", "SHA-384",
+ * "SHA-512").
+ *
+ * Each function has the signature:
+ *     std::string(const std::string& input)
+ * where the input is in plaintext.
+ * where the output is the hexadecimal digest.
+ *
+ * Usage:
+ *     auto& hashMap = HashUtils::getHashMap();
+ *     auto digest = hashMap.at("SHA-256")("secret");
+ *
+ * Notes:
+ * - Throws std::out_of_range if an unsupported algorithm is requested.
+ * - Extend this map when adding new hash functions.
+ * - Clients should not modify the returned map.
+ *
+ * @return A hash map mapping the string name of the hash to the
+ * method implementation.
+ */
+const std::unordered_map<std::string, EncryptionUtility::HashFn> &
+EncryptionUtility::getHashMap() {
+  static const std::unordered_map<std::string, HashFn> table = {
+      {"SHA-256", EncryptionUtility::sha256},
+      {"SHA-384", EncryptionUtility::sha384},
+      {"SHA-512", EncryptionUtility::sha512}};
+  return table;
+}
+/******************************************************************************/
+/**
  * @brief Get a map containing the minimum required salt size for various
  * cryptographic hash functions, in bytes.
  *
@@ -149,5 +182,35 @@ const std::map<std::string, unsigned int> EncryptionUtility::getMinSaltSizes() {
           // Truncated SHA-512 variants
           {"SHA-512/224", 28},
           {"SHA-512/256", 32}};
+}
+/******************************************************************************/
+/**
+ * @brief This method generates a given password with a given length.
+ *
+ * This method generates a given password with a given length, the minimum
+ * acceptable size of the password is 16 bytes.
+ *
+ * @param passwordLength The asked length of the password in bytes.
+ *
+ * @return The password in a string format.
+ */
+const std::string
+EncryptionUtility::generatePassword(std::size_t passwordLength) {
+  const std::size_t minPasswordSize{16}; // bytes
+  if (passwordLength < minPasswordSize) {
+    passwordLength = minPasswordSize;
+  }
+  const std::string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                            "abcdefghijklmnopqrstuvwxyz"
+                            "0123456789"
+                            "!@#$%^&*()-_=+[]{}|;:,.<>?";
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> dis(0, chars.size() - 1);
+  std::string password;
+  for (std::size_t i = 0; i < passwordLength; ++i) {
+    password += chars[dis(gen)];
+  }
+  return password;
 }
 /******************************************************************************/

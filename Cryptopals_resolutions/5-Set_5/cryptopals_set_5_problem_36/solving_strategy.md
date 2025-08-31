@@ -166,7 +166,7 @@ Client                        Server
   | x = H(s | P)                 |
   | v = g^x mod N                |
   |                              |
-  | Send U, v                     |
+  | Send U, v                    |
   |----------------------------->|
   |                              |
   |        OK / Ack              |
@@ -247,12 +247,12 @@ Example of the kind of response by the given server:
 
 23. Add tests to the SessionData structure (Done)
 
-24. Test manually the endpoint getGroupsData endpoint at the server side (Done)
+24. Test manually the endpoint handleRegisterInit endpoint at the server side (Done)
 
     24.1. Curl with only a userId: (Done)
 
     ````bash
-      curl -X POST http://localhost:18080/groups/search \
+      curl -X POST http://localhost:18080/src/register/init \
       -H "Content-Type: application/json" \
       -d '{
             "clientId": "client123"
@@ -261,7 +261,7 @@ Example of the kind of response by the given server:
     24.2. Curl with a userId and requestedGroup < default: (Done)
 
     ```bash
-      curl -X POST http://localhost:18080/groups/search \
+      curl -X POST http://localhost:18080/src/register/init \
       -H "Content-Type: application/json" \
       -d '{
             "clientId": "client123",
@@ -272,7 +272,7 @@ Example of the kind of response by the given server:
     24.3. Curl with a userId and requestedGroup = default: (Done)
 
     ```bash
-      curl -X POST http://localhost:18080/groups/search \
+      curl -X POST http://localhost:18080/src/register/init \
       -H "Content-Type: application/json" \
       -d '{
             "clientId": "client123",
@@ -283,7 +283,7 @@ Example of the kind of response by the given server:
     24.4. Curl with a userId and requestedGroup > default: (Done)
 
     ```bash
-      curl -X POST http://localhost:18080/groups/search \
+      curl -X POST http://localhost:18080/src/register/init \
       -H "Content-Type: application/json" \
       -d '{
             "clientId": "client123",
@@ -294,7 +294,7 @@ Example of the kind of response by the given server:
     24.5. Curl with a userId and an invalid groupId, lower bound: (Done)
 
     ```bash
-      curl -X POST http://localhost:18080/groups/search \
+      curl -X POST http://localhost:18080/src/register/init \
       -H "Content-Type: application/json" \
       -d '{
             "clientId": "client123",
@@ -305,7 +305,7 @@ Example of the kind of response by the given server:
     24.6. Curl with a userId and an invalid groupId, upper bound: (Done)
 
     ```bash
-      curl -X POST http://localhost:18080/groups/search \
+      curl -X POST http://localhost:18080/src/register/init \
       -H "Content-Type: application/json" \
       -d '{
             "clientId": "client123",
@@ -316,7 +316,7 @@ Example of the kind of response by the given server:
     24.7. Curl with an empty userId: (Done)
 
     ```bash
-      curl -X POST http://localhost:18080/groups/search \
+      curl -X POST http://localhost:18080/src/register/init \
       -H "Content-Type: application/json" \
       -d '{
             "clientId": ""
@@ -326,7 +326,7 @@ Example of the kind of response by the given server:
     24.8. Curl with no userId field: (Done)
 
     ```bash
-      curl -X POST http://localhost:18080/groups/search \
+      curl -X POST http://localhost:18080/src/register/init \
       -H "Content-Type: application/json" \
       -d '{
           }' | jq
@@ -336,10 +336,10 @@ Example of the kind of response by the given server:
 
 26. Add tests at the client side (Done)
 
-27. Add tests to the getGroupsData endpoint at the server side (Done)
+27. Add tests to the handleRegisterInit endpoint at the server side (Done)
 
     ```bash
-      curl -X POST http://localhost:18080/groups/search \
+      curl -X POST http://localhost:18080/src/register/init \
       -H "Content-Type: application/json" \
       -d '{
             "clientId": "<client_ID>", // string
@@ -357,7 +357,52 @@ Example of the kind of response by the given server:
 
 28. Add tests to the Registration method at the client side (Done)
 
-29. Add the skeleton of the registration process on the server side (in progress)
+29. Extract the first leg of the registration to a shared method, and fix the tests if needed (Done)
+
+30. Add the skeleton of the registration process on the client side, the second leg,
+    with the following scope:
+
+- handleRegisterComplete() → handles /srp/register/complete (At the server side)
+
+- registrationComplete() (at the client side)
+
+Spec:
+
+```text
+Client                        Server
+  |                              |
+  |    Request SRP params (U)    |
+  |----------------------------->|
+  |                              |
+  |   Receive groupId (N, g)     |
+  |   and salt (s)               |
+  |<-----------------------------|
+TBD bellow:
+  |                              |
+  | Compute:                     |
+  | x = H(s | P)                 |
+  | v = g^x mod N                |
+  |                              |
+  | Send U, v                    |
+  |----------------------------->|
+  |                              |
+  |        OK / Ack              |
+  |<-----------------------------|
+TBD end:
+```
+
+Specifications more information:
+
+- x = H(s | P) computed as raw bytes;
+- Password using system-generated (recommended for cryptography testing)
+  Generate a random string with high entropy.
+  Use a secure PRNG (e.g., OpenSSL RAND_bytes, C++ std::random_device + std::uniform_int_distribution).
+  Include alphanumeric + special characters to maximize entropy.
+
+  30.1. Add an auxiliary method to generate a password, minimum size should be 16 bytes (Done)
+  30.2. Generate a password at the client side (Done)
+  30.3. Generate x = H(s | P) (Done)
+  30.4. Generate v = g^x mod N (in progress)
 
 30. Add the first leg on server side of the Secure Remote Password protocol (TBD)
 

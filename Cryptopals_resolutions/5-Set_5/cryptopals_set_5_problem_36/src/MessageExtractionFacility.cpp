@@ -62,6 +62,42 @@ MessageExtractionFacility::toHexString(const std::vector<unsigned char> &data) {
 }
 /******************************************************************************/
 /**
+ * This method reads the input hex string two characters at a time,
+ * converts each pair into a single byte, and builds a plaintext string.
+ *
+ * @param hexString The input string in hexadecimal format (e.g., "48656C6C6F").
+ * @return The resulting plaintext string (e.g., "Hello").
+ * @throw std::invalid_argument If the input string has an odd length or
+ * contains non-hexadecimal characters.
+ */
+std::string
+MessageExtractionFacility::hexToPlaintext(const std::string &hexString) {
+  if (hexString.length() % 2 != 0) {
+    throw std::invalid_argument(
+        "MessageExtractionFacility log | hexToPlaintext(): "
+        "Input hex string must have an even length.");
+  }
+  std::string plaintextString;
+  plaintextString.reserve(hexString.length() / 2);
+  for (std::size_t i = 0; i < hexString.length(); i += 2) {
+    std::string byteString = hexString.substr(i, 2);
+    try {
+      unsigned long byteValue = std::stoul(byteString, nullptr, 16);
+      plaintextString += static_cast<char>(byteValue);
+    } catch (const std::invalid_argument &e) {
+      throw std::invalid_argument(
+          "MessageExtractionFacility log | hexToPlaintext(): "
+          "Input string contains non-hexadecimal characters.");
+    } catch (const std::out_of_range &e) {
+      throw std::invalid_argument(
+          "MessageExtractionFacility log | hexToPlaintext(): "
+          "Input hex value is out of range.");
+    }
+  }
+  return plaintextString;
+}
+/******************************************************************************/
+/**
  * @brief This method will convert an hexadecimal number to an unique big
  * number.
  *
