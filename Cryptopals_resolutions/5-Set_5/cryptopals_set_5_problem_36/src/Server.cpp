@@ -23,7 +23,8 @@
  */
 Server::Server(const bool debugFlag, const unsigned int defaultGroupId)
     : _debugFlag{debugFlag},
-      _minSaltSizesMap{EncryptionUtility::getMinSaltSizes()} {
+      _minSaltSizesMap{EncryptionUtility::getMinSaltSizes()},
+      _hashMap{EncryptionUtility::getHashMap()} {
   _srpParametersMap = SrpParametersLoader::loadSrpParameters(
       getSrpParametersFilenameLocation());
   const unsigned int minimumValueGroupId{3};
@@ -130,7 +131,7 @@ const unsigned int Server::getDefaultGroupId() { return _defaultGroupId; }
  */
 void Server::setupRoutes() {
   rootEndpoint();
-  getGroupsData();
+  handleRegisterInit();
   authenticationRoute();
 }
 /******************************************************************************/
@@ -156,8 +157,8 @@ void Server::rootEndpoint() {
  * This method runs the route that performs group search inside the
  * registration step, returning the agreed group id and the salt.
  */
-void Server::getGroupsData() {
-  CROW_ROUTE(_app, "/groups/search")
+void Server::handleRegisterInit() {
+  CROW_ROUTE(_app, "/srp/register/init")
       .methods("POST"_method)([&](const crow::request &req) {
         crow::json::wvalue res;
         try {

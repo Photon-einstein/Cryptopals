@@ -64,8 +64,8 @@ TEST_F(SecureRemotePasswordProtocolTest,
 }
 
 /**
- * @test Test the correctness of the /groups/search endpoint of the server.
- * @brief Ensures that the /groups/search endpoint is working as expected.
+ * @test Test the correctness of the /srp/register/init endpoint of the server.
+ * @brief Ensures that the /srp/register/init endpoint is working as expected.
  * The scenario tested is the following one:
  * - only a valid user ID is provided by a given client;
  * - the request group ID is not provided, so it is expected that the server
@@ -83,7 +83,7 @@ TEST_F(
   cpr::Response response =
       cpr::Post(cpr::Url{std::string("http://localhost:") +
                          std::to_string(_server->getTestPort()) +
-                         std::string("/groups/search")},
+                         std::string("/srp/register/init")},
                 cpr::Header{{"Content-Type", "application/json"}},
                 cpr::Body{requestBody});
   EXPECT_EQ(response.status_code, 201);
@@ -109,8 +109,8 @@ TEST_F(
 }
 
 /**
- * @test Test the correctness of the /groups/search endpoint of the server.
- * @brief Ensures that the /groups/search endpoint is working as expected.
+ * @test Test the correctness of the /srp/register/init endpoint of the server.
+ * @brief Ensures that the /srp/register/init endpoint is working as expected.
  * The scenario tested is the following one:
  * - a valid user ID is provided by a given client;
  * - the request group ID provided is less than the minimum required by the
@@ -135,7 +135,7 @@ TEST_F(
   cpr::Response response =
       cpr::Post(cpr::Url{std::string("http://localhost:") +
                          std::to_string(_server->getTestPort()) +
-                         std::string("/groups/search")},
+                         std::string("/srp/register/init")},
                 cpr::Header{{"Content-Type", "application/json"}},
                 cpr::Body{requestBody});
   EXPECT_EQ(response.status_code, 201);
@@ -162,8 +162,8 @@ TEST_F(
 }
 
 /**
- * @test Test the correctness of the /groups/search endpoint of the server.
- * @brief Ensures that the /groups/search endpoint is working as expected.
+ * @test Test the correctness of the /srp/register/init endpoint of the server.
+ * @brief Ensures that the /srp/register/init endpoint is working as expected.
  * The scenario tested is the following one:
  * - a valid user ID is provided by a given client;
  * - the request group ID provided is equal to the minimum required by the
@@ -188,7 +188,7 @@ TEST_F(
   cpr::Response response =
       cpr::Post(cpr::Url{std::string("http://localhost:") +
                          std::to_string(_server->getTestPort()) +
-                         std::string("/groups/search")},
+                         std::string("/srp/register/init")},
                 cpr::Header{{"Content-Type", "application/json"}},
                 cpr::Body{requestBody});
   EXPECT_EQ(response.status_code, 201);
@@ -215,8 +215,8 @@ TEST_F(
 }
 
 /**
- * @test Test the correctness of the /groups/search endpoint of the server.
- * @brief Ensures that the /groups/search endpoint is working as expected.
+ * @test Test the correctness of the /srp/register/init endpoint of the server.
+ * @brief Ensures that the /srp/register/init endpoint is working as expected.
  * The scenario tested is the following one:
  * - a valid user ID is provided by a given client;
  * - the request group ID provided is greater then the minimum required by
@@ -241,7 +241,7 @@ TEST_F(
   cpr::Response response =
       cpr::Post(cpr::Url{std::string("http://localhost:") +
                          std::to_string(_server->getTestPort()) +
-                         std::string("/groups/search")},
+                         std::string("/srp/register/init")},
                 cpr::Header{{"Content-Type", "application/json"}},
                 cpr::Body{requestBody});
   EXPECT_EQ(response.status_code, 201);
@@ -268,8 +268,8 @@ TEST_F(
 }
 
 /**
- * @test Test the correctness of the /groups/search endpoint of the server.
- * @brief Ensures that the /groups/search endpoint is working as expected.
+ * @test Test the correctness of the /srp/register/init endpoint of the server.
+ * @brief Ensures that the /srp/register/init endpoint is working as expected.
  * The scenario tested is the following one:
  * - a valid user ID is provided by a given client;
  * - the request group ID provided is less than the minimum group id that
@@ -294,7 +294,7 @@ TEST_F(
   cpr::Response response =
       cpr::Post(cpr::Url{std::string("http://localhost:") +
                          std::to_string(_server->getTestPort()) +
-                         std::string("/groups/search")},
+                         std::string("/srp/register/init")},
                 cpr::Header{{"Content-Type", "application/json"}},
                 cpr::Body{requestBody});
   EXPECT_EQ(response.status_code, 201);
@@ -321,8 +321,8 @@ TEST_F(
 }
 
 /**
- * @test Test the correctness of the /groups/search endpoint of the server.
- * @brief Ensures that the /groups/search endpoint is working as expected.
+ * @test Test the correctness of the /srp/register/init endpoint of the server.
+ * @brief Ensures that the /srp/register/init endpoint is working as expected.
  * The scenario tested is the following one:
  * - only an invalid user ID is provided by a given client;
  * - the expected result should be a 400 error code with error message ending in
@@ -339,7 +339,7 @@ TEST_F(SecureRemotePasswordProtocolTest,
   cpr::Response response =
       cpr::Post(cpr::Url{std::string("http://localhost:") +
                          std::to_string(_server->getTestPort()) +
-                         std::string("/groups/search")},
+                         std::string("/srp/register/init")},
                 cpr::Header{{"Content-Type", "application/json"}},
                 cpr::Body{requestBody});
   EXPECT_EQ(response.status_code, 400);
@@ -350,8 +350,8 @@ TEST_F(SecureRemotePasswordProtocolTest,
 }
 
 /**
- * @test Test the correctness of the /groups/search endpoint of the server.
- * @brief Ensures that the /groups/search endpoint is working as expected.
+ * @test Test the correctness of the /srp/register/init endpoint of the server.
+ * @brief Ensures that the /srp/register/init endpoint is working as expected.
  * The scenario tested is the following one:
  * - a bad request, without any client id provided;
  * - the expected result should be a 404 error code with error message ending in
@@ -367,7 +367,7 @@ TEST_F(SecureRemotePasswordProtocolTest,
   cpr::Response response =
       cpr::Post(cpr::Url{std::string("http://localhost:") +
                          std::to_string(_server->getTestPort()) +
-                         std::string("/groups/search")},
+                         std::string("/srp/register/init")},
                 cpr::Header{{"Content-Type", "application/json"}},
                 cpr::Body{requestBody});
   EXPECT_EQ(response.status_code, 404);

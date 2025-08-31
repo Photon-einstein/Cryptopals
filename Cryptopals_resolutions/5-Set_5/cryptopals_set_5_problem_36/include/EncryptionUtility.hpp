@@ -4,6 +4,7 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <functional>
 #include <map>
 #include <memory>
 #include <openssl/bn.h>
@@ -54,6 +55,33 @@ std::string sha384(const std::string &input);
  **/
 std::string sha512(const std::string &input);
 
+using HashFn = std::function<std::string(const std::string &)>;
+
+/**
+ * @brief Provides a lookup table mapping string names to hash functions.
+ *
+ * Keys are case-sensitive algorithm names (e.g., "SHA-256", "SHA-384",
+ * "SHA-512").
+ *
+ * Each function has the signature:
+ *     std::string(const std::string& input)
+ * where the input is in plaintext.
+ * where the output is the hexadecimal digest.
+ *
+ * Usage:
+ *     auto& hashMap = HashUtils::getHashMap();
+ *     auto digest = hashMap.at("SHA-256")("secret");
+ *
+ * Notes:
+ * - Throws std::out_of_range if an unsupported algorithm is requested.
+ * - Extend this map when adding new hash functions.
+ * - Clients should not modify the returned map.
+ *
+ * @return A hash map mapping the string name of the hash to the
+ * method implementation.
+ */
+const std::unordered_map<std::string, HashFn> &getHashMap();
+
 /**
  * @brief Get a map containing the minimum required salt size for various
  * cryptographic hash functions, in bytes.
@@ -62,6 +90,18 @@ std::string sha512(const std::string &input);
  * minimum salt sizes, in bytes.
  */
 const std::map<std::string, unsigned int> getMinSaltSizes();
+
+/**
+ * @brief This method generates a given password with a given length.
+ *
+ * This method generates a given password with a given length, the minimum
+ * acceptable size of the password is 16 bytes.
+ *
+ * @param passwordLength The asked length of the password in bytes.
+ *
+ * @return The password in a string format.
+ */
+const std::string generatePassword(std::size_t passwordLength = 16);
 
 }; // namespace EncryptionUtility
 

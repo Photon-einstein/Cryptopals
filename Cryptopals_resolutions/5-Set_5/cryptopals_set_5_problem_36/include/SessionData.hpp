@@ -33,7 +33,9 @@ struct SessionData {
 
   std::unique_ptr<MyCryptoLibrary::SecureRemotePassword> _secureRemotePassword;
   unsigned int _groupId;
-  std::string _salt, _hash;
+  std::string _salt; // hexadecimal format
+  std::string _hash; // (e.g., "SHA-256", "SHA-384", "SHA-512").
+  std::string _password;
 };
 
 #endif // SESSION_DATA_HPP

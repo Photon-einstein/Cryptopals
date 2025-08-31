@@ -27,7 +27,8 @@
  */
 Client::Client(const std::string &clientId, const bool debugFlag)
     : _clientId{clientId}, _debugFlag{debugFlag},
-      _minSaltSizesMap{EncryptionUtility::getMinSaltSizes()} {
+      _minSaltSizesMap{EncryptionUtility::getMinSaltSizes()},
+      _hashMap{EncryptionUtility::getHashMap()} {
   if (_clientId.size() == 0) {
     throw std::runtime_error("Client log | constructor(): "
                              "Client ID is null.");
@@ -139,9 +140,39 @@ const bool Client::registration(const int portServerNumber,
                                 const unsigned int groupId) {
   bool registrationResult{true};
   try {
+    registrationResult = registrationInit(portServerNumber, groupId);
+    if (!registrationResult) {
+      return registrationResult;
+    }
+    return registrationComplete();
+  } catch (const std::exception &e) {
+    std::cerr << e.what() << std::endl;
+    registrationResult = false;
+    return registrationResult;
+  }
+}
+/******************************************************************************/
+/**
+ * @brief This method will perform the first step of the registration
+ * with a given server.
+ *
+ * This method perform the first step of the registration with a given
+ * server. It will propose a certain group ID that can be accepted
+ * or rejected by the server, in the latter case it would be overwritten
+ * during this step.
+ *
+ * @param portServerNumber The number of the server to use in this exchange.
+ * @param groupId The group ID that the client is proposing to the client.
+ *
+ * @return True if the registrationInit succeed, false otherwise.
+ */
+const bool Client::registrationInit(const int portServerNumber,
+                                    const unsigned int groupId) {
+  bool registrationInitResult{true};
+  try {
     if (portServerNumber < 1023 || (portServerNumber != _portServerProduction &&
                                     portServerNumber != _portServerTest)) {
-      throw std::runtime_error("Client log | registration(): "
+      throw std::runtime_error("Client log | registrationInit(): "
                                "Invalid port server number used.");
     }
     std::string requestBody = fmt::format(
@@ -153,14 +184,14 @@ const bool Client::registration(const int portServerNumber,
     cpr::Response response =
         cpr::Post(cpr::Url{std::string("http://localhost:") +
                            std::to_string(portServerNumber) +
-                           std::string("/groups/search")},
+                           std::string("/srp/register/init")},
                   cpr::Header{{"Content-Type", "application/json"}},
                   cpr::Body{requestBody});
     if (_debugFlag) {
       printServerResponse(response);
     }
     if (response.status_code != 201) {
-      throw std::runtime_error("Client log | registration(): "
+      throw std::runtime_error("Client log | registrationInit(): "
                                "registration failed");
     }
     nlohmann::json parsedJson = nlohmann::json::parse(response.text);
@@ -177,7 +208,7 @@ const bool Client::registration(const int portServerNumber,
     const std::string extractedSalt = parsedJson.at("salt").get<std::string>();
     const std::string extractedSha = parsedJson.at("sha").get<std::string>();
     if (_debugFlag) {
-      std::cout << "\n--- Client log | /groups/search server response "
+      std::cout << "\n--- Client log | /srp/register/init server response "
                    "extracted data ---"
                 << std::endl;
       std::cout << "\tClient ID: " << extractedClientId << std::endl;
@@ -194,40 +225,81 @@ const bool Client::registration(const int portServerNumber,
         _minSaltSizesMap.at(_srpParametersMap.at(extractedGroupId)._hashName);
     if (extractedClientId != getClientId()) {
       throw std::runtime_error(
-          "Client log | registration(): "
+          "Client log | registrationInit(): "
           "Client ID received does not match's client's one.");
     } else if (_srpParametersMap.find(extractedGroupId) ==
                _srpParametersMap.end()) {
-      throw std::runtime_error("Client log | registration(): "
+      throw std::runtime_error("Client log | registrationInit(): "
                                "Group ID received not valid.");
     } else if (_srpParametersMap.at(extractedGroupId)._pHex !=
                extractedPrimeN) {
-      throw std::runtime_error("Client log | registration(): "
+      throw std::runtime_error("Client log | registrationInit(): "
                                "Prime N received not valid.");
     } else if (_srpParametersMap.at(extractedGroupId)._g !=
                extractedGeneratorG) {
-      throw std::runtime_error("Client log | registration(): "
+      throw std::runtime_error("Client log | registrationInit(): "
                                "Generator g received not valid.");
     } else if (_srpParametersMap.at(extractedGroupId)._hashName !=
                extractedSha) {
-      throw std::runtime_error("Client log | registration(): "
+      throw std::runtime_error("Client log | registrationInit(): "
                                "Hash name received not valid.");
     } else if (extractedSalt.size() < minSaltSize * 2) { /* salt is in hex */
-      throw std::runtime_error("Client log | registration(): "
+      throw std::runtime_error("Client log | registrationInit(): "
                                "Minimum salt size is not met.");
     }
     // Data storage
     _sessionData = std::make_unique<SessionData>(extractedGroupId,
                                                  extractedSalt, extractedSha);
     if (_sessionData.get() == nullptr) {
-      throw std::runtime_error("Client log | registration(): "
+      throw std::runtime_error("Client log | registrationInit(): "
                                "_sessionData value returned is null.");
     }
-    return registrationResult;
+    return registrationInitResult;
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
-    registrationResult = false;
-    return registrationResult;
+    registrationInitResult = false;
+    return registrationInitResult;
+  }
+}
+/******************************************************************************/
+/**
+ * @brief This method will perform the last step of the registration
+ * with a given server.
+ *
+ * This method perform the last step of the registration step with a
+ * given server. It will perform the computation of x and v and then
+ * send to the server U and v.
+ *
+ * @return True if the registrationComplete succeed, false otherwise.
+ */
+const bool Client::registrationComplete() {
+  bool registrationCompleteResult{true};
+  try {
+    if (_sessionData.get() == nullptr) {
+      throw std::runtime_error("Client log | registrationComplete(): "
+                               "_sessionData value is null.");
+    }
+    _sessionData->_password =
+        EncryptionUtility::generatePassword(_passwordSize);
+    if (_sessionData->_password.size() < _passwordSize) {
+      throw std::runtime_error("Client log | registrationComplete(): "
+                               "generatePassword() failed.");
+    }
+    if (_debugFlag) {
+      std::cout << "Password generated: '" << _sessionData->_password << "'."
+                << std::endl;
+    }
+    const std::string xHex = calculateX(
+        _sessionData->_hash, _sessionData->_password, _sessionData->_salt);
+    if (_debugFlag) {
+      std::cout << "x(hex) = H(s | P): '" << xHex << "'." << std::endl;
+    }
+    // TBD
+    return registrationCompleteResult;
+  } catch (const std::exception &e) {
+    std::cerr << e.what() << std::endl;
+    registrationCompleteResult = false;
+    return registrationCompleteResult;
   }
 }
 /******************************************************************************/
@@ -262,5 +334,36 @@ void Client::printServerResponse(const cpr::Response &response) {
                 << e.what() << "\n";
     }
   }
+}
+/******************************************************************************/
+/**
+ * @brief This method will perform the following calculation:
+ * x = H(s | P).
+ *
+ * This method will perform the following calculation:
+ * x = H(s | P).
+ * Clarification:
+ * - H: hash algorithm;
+ * - s: salt;
+ * - P: password;
+ * - x: output of the hash;
+ *
+ * @param hash The hash algorithm used in this calculation.
+ * @param password The password used in this calculation, received in plaintext.
+ * @param salt The salt used in this calculation, received in hexadecimal format
+ *
+ * @return The result of H(s | P) in hexadecimal format.
+ */
+const std::string Client::calculateX(const std::string &hash,
+                                     const std::string &password,
+                                     const std::string &salt) {
+  if (_hashMap.find(hash) == _hashMap.end()) {
+    throw std::runtime_error("Client log | calculateX(): "
+                             "hash algorithm not recognized.");
+  }
+  const std::string saltPlaintext =
+      MessageExtractionFacility::hexToPlaintext(salt);
+  const std::string digestX = _hashMap.at(hash)(saltPlaintext + password);
+  return digestX;
 }
 /******************************************************************************/

@@ -112,17 +112,70 @@ private:
   /* private methods */
 
   /**
-   * @brief This method will print the server response during the Secure Remote
-   * Password protocol.
+   * @brief This method will perform the first step of the registration
+   * with a given server.
+   *
+   * This method perform the first step of the registration with a given
+   * server. It will propose a certain group ID that can be accepted
+   * or rejected by the server, in the latter case it would be overwritten
+   * during this step.
+   *
+   * @param portServerNumber The number of the server to use in this exchange.
+   * @param groupId The group ID that the client is proposing to the client.
+   *
+   * @return True if the registrationInit succeed, false otherwise.
+   */
+  const bool registrationInit(const int portServerNumber,
+                              const unsigned int groupId);
+
+  /**
+   * @brief This method will perform the last step of the registration
+   * with a given server.
+   *
+   * This method perform the last step of the registration step with a
+   * given server. It will perform the computation of x and v and then
+   * send to the server U and v.
+   *
+   * @return True if the registrationComplete succeed, false otherwise.
+   */
+  const bool registrationComplete();
+
+  /**
+   * @brief This method will print the server response during the Secure
+   * Remote Password protocol.
    *
    * This method will print the server response to the Secure Remote
-   * Password protocol. The response is a json text, and it will be printed in a
-   * structured way.
+   * Password protocol. The response is a json text, and it will be printed
+   * in a structured way.
    *
    * @param response The response sent by the server during the execution
    * of the Secure Remote Password protocol.
    */
   void printServerResponse(const cpr::Response &response);
+
+  /**
+   * @brief This method will perform the following calculation:
+   * x = H(s | P).
+   *
+   * This method will perform the following calculation:
+   * x = H(s | P).
+   * Clarification:
+   * - H: hash algorithm;
+   * - s: salt;
+   * - P: password;
+   * - x: output of the hash;
+   *
+   * @param hash The hash algorithm used in this calculation.
+   * @param password The password used in this calculation, received in
+   * plaintext.
+   * @param salt The salt used in this calculation, received in hexadecimal
+   * format
+   *
+   * @return The result of H(s | P) in hexadecimal format.
+   */
+  const std::string calculateX(const std::string &hash,
+                               const std::string &password,
+                               const std::string &salt);
 
   /* private fields */
 
@@ -137,6 +190,8 @@ private:
 
   const std::map<std::string, unsigned int> _minSaltSizesMap;
   std::unique_ptr<SessionData> _sessionData;
+  const unsigned int _passwordSize{20}; // bytes
+  const std::unordered_map<std::string, EncryptionUtility::HashFn> _hashMap;
 };
 
 #endif // CLIENT_HPP
