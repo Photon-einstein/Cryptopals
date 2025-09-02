@@ -96,7 +96,7 @@ TEST_F(
   EXPECT_EQ(jsonResponse["groupName"].s(),
             _srpParametersMap[extractedGroupId]._groupName);
   EXPECT_EQ(jsonResponse["primeN"].s(),
-            _srpParametersMap[extractedGroupId]._pHex);
+            _srpParametersMap[extractedGroupId]._nHex);
   EXPECT_EQ(jsonResponse["generatorG"].u(),
             _srpParametersMap[extractedGroupId]._g);
   EXPECT_EQ(jsonResponse["sha"].s(),
@@ -149,7 +149,7 @@ TEST_F(
   EXPECT_EQ(jsonResponse["groupName"].s(),
             _srpParametersMap[extractedGroupId]._groupName);
   EXPECT_EQ(jsonResponse["primeN"].s(),
-            _srpParametersMap[extractedGroupId]._pHex);
+            _srpParametersMap[extractedGroupId]._nHex);
   EXPECT_EQ(jsonResponse["generatorG"].u(),
             _srpParametersMap[extractedGroupId]._g);
   EXPECT_EQ(jsonResponse["sha"].s(),
@@ -202,7 +202,7 @@ TEST_F(
   EXPECT_EQ(jsonResponse["groupName"].s(),
             _srpParametersMap[extractedGroupId]._groupName);
   EXPECT_EQ(jsonResponse["primeN"].s(),
-            _srpParametersMap[extractedGroupId]._pHex);
+            _srpParametersMap[extractedGroupId]._nHex);
   EXPECT_EQ(jsonResponse["generatorG"].u(),
             _srpParametersMap[extractedGroupId]._g);
   EXPECT_EQ(jsonResponse["sha"].s(),
@@ -255,7 +255,7 @@ TEST_F(
   EXPECT_EQ(jsonResponse["groupName"].s(),
             _srpParametersMap[extractedGroupId]._groupName);
   EXPECT_EQ(jsonResponse["primeN"].s(),
-            _srpParametersMap[extractedGroupId]._pHex);
+            _srpParametersMap[extractedGroupId]._nHex);
   EXPECT_EQ(jsonResponse["generatorG"].u(),
             _srpParametersMap[extractedGroupId]._g);
   EXPECT_EQ(jsonResponse["sha"].s(),
@@ -308,7 +308,7 @@ TEST_F(
   EXPECT_EQ(jsonResponse["groupName"].s(),
             _srpParametersMap[extractedGroupId]._groupName);
   EXPECT_EQ(jsonResponse["primeN"].s(),
-            _srpParametersMap[extractedGroupId]._pHex);
+            _srpParametersMap[extractedGroupId]._nHex);
   EXPECT_EQ(jsonResponse["generatorG"].u(),
             _srpParametersMap[extractedGroupId]._g);
   EXPECT_EQ(jsonResponse["sha"].s(),

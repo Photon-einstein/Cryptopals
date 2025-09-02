@@ -15,6 +15,32 @@
 namespace EncryptionUtility {
 
 /**
+ * @brief BN Custom deleter
+ */
+struct BnDeleter {
+  void operator()(BIGNUM *bn) const noexcept { BN_free(bn); }
+};
+
+/**
+ * @brief BNCtx Custom deleter
+ */
+struct BnCtxDeleter {
+  void operator()(BN_CTX *ctx) const noexcept { BN_CTX_free(ctx); }
+};
+
+/**
+ * @brief OpenSSLString deleter
+ */
+struct OpenSSLStringDeleter {
+  void operator()(char *str) const noexcept { OPENSSL_free(str); }
+};
+
+// Type aliases for smart pointers
+using BnPtr = std::unique_ptr<BIGNUM, BnDeleter>;
+using BnCtxPtr = std::unique_ptr<BN_CTX, BnCtxDeleter>;
+using OsslStr = std::unique_ptr<char, OpenSSLStringDeleter>;
+
+/**
  * @brief Generates a cryptographically secure random nonce.
  *
  * @param length The desired length of the nonce in bytes (e.g., 16 for

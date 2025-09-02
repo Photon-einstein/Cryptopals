@@ -140,11 +140,16 @@ const bool Client::registration(const int portServerNumber,
                                 const unsigned int groupId) {
   bool registrationResult{true};
   try {
+    if (portServerNumber < 1023 || (portServerNumber != _portServerProduction &&
+                                    portServerNumber != _portServerTest)) {
+      throw std::runtime_error("Client log | registration(): "
+                               "Invalid port server number used.");
+    }
     registrationResult = registrationInit(portServerNumber, groupId);
     if (!registrationResult) {
       return registrationResult;
     }
-    return registrationComplete();
+    return registrationComplete(portServerNumber, _sessionData->_groupId);
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
     registrationResult = false;
@@ -162,7 +167,7 @@ const bool Client::registration(const int portServerNumber,
  * during this step.
  *
  * @param portServerNumber The number of the server to use in this exchange.
- * @param groupId The group ID that the client is proposing to the client.
+ * @param groupId The group ID of this session.
  *
  * @return True if the registrationInit succeed, false otherwise.
  */
@@ -170,11 +175,6 @@ const bool Client::registrationInit(const int portServerNumber,
                                     const unsigned int groupId) {
   bool registrationInitResult{true};
   try {
-    if (portServerNumber < 1023 || (portServerNumber != _portServerProduction &&
-                                    portServerNumber != _portServerTest)) {
-      throw std::runtime_error("Client log | registrationInit(): "
-                               "Invalid port server number used.");
-    }
     std::string requestBody = fmt::format(
         R"({{
         "clientId": "{}",
@@ -231,7 +231,7 @@ const bool Client::registrationInit(const int portServerNumber,
                _srpParametersMap.end()) {
       throw std::runtime_error("Client log | registrationInit(): "
                                "Group ID received not valid.");
-    } else if (_srpParametersMap.at(extractedGroupId)._pHex !=
+    } else if (_srpParametersMap.at(extractedGroupId)._nHex !=
                extractedPrimeN) {
       throw std::runtime_error("Client log | registrationInit(): "
                                "Prime N received not valid.");
@@ -270,9 +270,13 @@ const bool Client::registrationInit(const int portServerNumber,
  * given server. It will perform the computation of x and v and then
  * send to the server U and v.
  *
+ * @param portServerNumber The number of the server to use in this exchange.
+ * @param groupId The group ID of this session.
+ *
  * @return True if the registrationComplete succeed, false otherwise.
  */
-const bool Client::registrationComplete() {
+const bool Client::registrationComplete(const int portServerNumber,
+                                        const unsigned int groupId) {
   bool registrationCompleteResult{true};
   try {
     if (_sessionData.get() == nullptr) {
@@ -289,12 +293,30 @@ const bool Client::registrationComplete() {
       std::cout << "Password generated: '" << _sessionData->_password << "'."
                 << std::endl;
     }
+    // x calc
     const std::string xHex = calculateX(
         _sessionData->_hash, _sessionData->_password, _sessionData->_salt);
     if (_debugFlag) {
       std::cout << "x(hex) = H(s | P): '" << xHex << "'." << std::endl;
     }
-    // TBD
+    // v calc
+    std::string vHex = calculateV(xHex, _srpParametersMap.at(groupId)._nHex,
+                                  _srpParametersMap.at(groupId)._g);
+    if (_debugFlag) {
+      std::cout << "v(hex) = g^x mod N ='" << vHex << "'." << std::endl;
+    }
+    std::string requestBody = fmt::format(
+        R"({{
+        "clientId": "{}",
+        "v": "{}"
+    }})",
+        getClientId(), vHex);
+    cpr::Response response =
+        cpr::Post(cpr::Url{std::string("http://localhost:") +
+                           std::to_string(portServerNumber) +
+                           std::string("/srp/register/complete")},
+                  cpr::Header{{"Content-Type", "application/json"}},
+                  cpr::Body{requestBody});
     return registrationCompleteResult;
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
@@ -365,5 +387,54 @@ const std::string Client::calculateX(const std::string &hash,
       MessageExtractionFacility::hexToPlaintext(salt);
   const std::string digestX = _hashMap.at(hash)(saltPlaintext + password);
   return digestX;
+}
+/******************************************************************************/
+/**
+ * @brief This method will perform the calculation v = g^x mod N.
+ *
+ * @param xHex The value of x, as a hexadecimal string.
+ * @param nHex The value of the large prime N, as a hexadecimal string.
+ * @param g The value of the generator g.
+ *
+ * @return The result of v = g^x mod N, in hexadecimal format.
+ * @throw std::runtime_error If the calculation fails.
+ */
+const std::string Client::calculateV(const std::string &xHex,
+                                     const std::string &nHex, unsigned int g) {
+  // Allocate with RAII
+  EncryptionUtility::BnCtxPtr ctx(BN_CTX_new());
+  if (!ctx) {
+    throw std::runtime_error(
+        "Client log | calculateV(): Failed to allocate BN_CTX.");
+  }
+  EncryptionUtility::BnPtr gBn(BN_new());
+  EncryptionUtility::BnPtr vBn(BN_new());
+  if (!gBn || !vBn) {
+    throw std::runtime_error(
+        "Client log | calculateV(): Failed to allocate BIGNUMs.");
+  }
+  BIGNUM *xBn = nullptr;
+  BIGNUM *nBn = nullptr;
+  if (!BN_hex2bn(&xBn, xHex.c_str()) || !BN_hex2bn(&nBn, nHex.c_str())) {
+    BN_free(xBn);
+    BN_free(nBn);
+    throw std::runtime_error(
+        "Client log | calculateV(): Failed to convert hex strings to BIGNUM.");
+  }
+  // Wrap xBn and nBn now that they're allocated
+  EncryptionUtility::BnPtr xPtr(xBn);
+  EncryptionUtility::BnPtr nPtr(nBn);
+  BN_set_word(gBn.get(), g);
+  // Compute v = g^x mod N
+  if (!BN_mod_exp(vBn.get(), gBn.get(), xPtr.get(), nPtr.get(), ctx.get())) {
+    throw std::runtime_error("Client log | calculateV(): BN_mod_exp failed.");
+  }
+  // Convert result to hex string
+  EncryptionUtility::OsslStr vHex(BN_bn2hex(vBn.get()));
+  if (!vHex) {
+    throw std::runtime_error(
+        "Client log | calculateV(): Failed to convert result to hex.");
+  }
+  return std::string(vHex.get()); // safely copy to std::string
 }
 /******************************************************************************/
