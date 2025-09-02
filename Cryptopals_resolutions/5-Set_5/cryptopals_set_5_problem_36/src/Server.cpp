@@ -204,7 +204,7 @@ void Server::handleRegisterInit() {
           res["clientId"] = extractedClientId;
           res["groupId"] = extractedGroupId;
           res["groupName"] = _srpParametersMap[extractedGroupId]._groupName;
-          res["primeN"] = _srpParametersMap[extractedGroupId]._pHex;
+          res["primeN"] = _srpParametersMap[extractedGroupId]._nHex;
           res["generatorG"] = _srpParametersMap[extractedGroupId]._g;
           res["sha"] = _srpParametersMap[extractedGroupId]._hashName;
           res["salt"] = salt;

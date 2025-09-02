@@ -402,10 +402,16 @@ Specifications more information:
   30.1. Add an auxiliary method to generate a password, minimum size should be 16 bytes (Done)
   30.2. Generate a password at the client side (Done)
   30.3. Generate x = H(s | P) (Done)
-  30.4. Generate v = g^x mod N (in progress)
+  30.4. Generate v = g^x mod N (Done)
+  30.5. Add the following leg at the client: (Done)
 
-30. Add the first leg on server side of the Secure Remote Password protocol (TBD)
+  ```bash
+  | Send U, v                    |
+  |----------------------------->|
+  ```
 
-31. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
+31. Add the first leg on server side of the Secure Remote Password protocol (TBD)
 
-32. Add the first leg on client side of the Secure Remote Password protocol (TBD)
+32. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
+
+33. Add the first leg on client side of the Secure Remote Password protocol (TBD)

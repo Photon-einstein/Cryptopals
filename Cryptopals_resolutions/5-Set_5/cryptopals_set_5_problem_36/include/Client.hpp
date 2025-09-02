@@ -121,7 +121,7 @@ private:
    * during this step.
    *
    * @param portServerNumber The number of the server to use in this exchange.
-   * @param groupId The group ID that the client is proposing to the client.
+   * @param groupId The group ID of this session.
    *
    * @return True if the registrationInit succeed, false otherwise.
    */
@@ -136,9 +136,13 @@ private:
    * given server. It will perform the computation of x and v and then
    * send to the server U and v.
    *
+   * @param portServerNumber The number of the server to use in this exchange.
+   * @param groupId The group ID of this session.
+   *
    * @return True if the registrationComplete succeed, false otherwise.
    */
-  const bool registrationComplete();
+  const bool registrationComplete(const int portServerNumber,
+                                  const unsigned int groupId);
 
   /**
    * @brief This method will print the server response during the Secure
@@ -176,6 +180,19 @@ private:
   const std::string calculateX(const std::string &hash,
                                const std::string &password,
                                const std::string &salt);
+
+  /**
+   * @brief This method will perform the calculation v = g^x mod N.
+   *
+   * @param xHex The value of x, as a hexadecimal string.
+   * @param nHex The value of the large prime N, as a hexadecimal string.
+   * @param g The value of the generator g.
+   *
+   * @return The result of v = g^x mod N, in hexadecimal format.
+   * @throw std::runtime_error If the calculation fails.
+   */
+  const std::string calculateV(const std::string &xHex, const std::string &nHex,
+                               unsigned int g);
 
   /* private fields */
 

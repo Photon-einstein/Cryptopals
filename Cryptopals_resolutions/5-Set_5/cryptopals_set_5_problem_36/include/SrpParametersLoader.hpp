@@ -10,7 +10,7 @@ namespace SrpParametersLoader {
 struct SrpParameters {
   unsigned int _groupId;
   unsigned int _sizeBits;
-  std::string _pHex;
+  std::string _nHex;
   unsigned int _g;
   std::string _groupName;
   std::string _hashName;

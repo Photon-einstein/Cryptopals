@@ -46,9 +46,9 @@ SrpParametersLoader::loadSrpParameters(const std::string &filename) {
           for (const auto &chunk : group["primeN"]) {
             primeConcat += chunk.get<std::string>();
           }
-          params._pHex = primeConcat;
+          params._nHex = primeConcat;
         } else {
-          params._pHex = group["primeN"].get<std::string>();
+          params._nHex = group["primeN"].get<std::string>();
         }
         params._g = group["generatorG"].get<unsigned int>();
         params._groupName = group["name"].get<std::string>();
