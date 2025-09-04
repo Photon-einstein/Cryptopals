@@ -132,6 +132,7 @@ const unsigned int Server::getDefaultGroupId() { return _defaultGroupId; }
 void Server::setupRoutes() {
   rootEndpoint();
   handleRegisterInit();
+  handleRegisterComplete();
   authenticationRoute();
 }
 /******************************************************************************/
@@ -152,7 +153,7 @@ void Server::rootEndpoint() {
 /******************************************************************************/
 /**
  * @brief This method runs the route that performs group search inside the
- * registration step.
+ * registration step initialization.
  *
  * This method runs the route that performs group search inside the
  * registration step, returning the agreed group id and the salt.
@@ -180,7 +181,7 @@ void Server::handleRegisterInit() {
                                  : _defaultGroupId;
           // cliend ID validation
           if (extractedClientId.size() == 0) {
-            throw std::runtime_error("Server log | registration(): "
+            throw std::runtime_error("Server log | handleRegisterInit(): "
                                      "ClientId is null");
           }
           if (_debugFlag) {
@@ -208,6 +209,73 @@ void Server::handleRegisterInit() {
           res["generatorG"] = _srpParametersMap[extractedGroupId]._g;
           res["sha"] = _srpParametersMap[extractedGroupId]._hashName;
           res["salt"] = salt;
+          return crow::response(201, res);
+        } catch (const nlohmann::json::exception &e) {
+          crow::json::wvalue err;
+          err["message"] =
+              std::string("Server log | JSON parsing error: ") + e.what();
+          return crow::response(404, err);
+        } catch (const std::exception &e) {
+          crow::json::wvalue err;
+          err["message"] =
+              std::string("Server log | An unexpected error occurred: ") +
+              e.what();
+          return crow::response(400, err);
+        }
+      });
+}
+/******************************************************************************/
+/**
+ * @brief This method performs all the activities that allow the conclusion of
+ * the registration at the Secure Remote Password protocol.
+ *
+ * This method performs all the activities that allow the conclusion of
+ * the registration at the Secure Remote Password protocol, namely the
+ * validation of the parameter v and acknowledge back to the client.
+ */
+void Server::handleRegisterComplete() {
+  CROW_ROUTE(_app, "/srp/register/complete")
+      .methods("POST"_method)([&](const crow::request &req) {
+        crow::json::wvalue res;
+        try {
+          nlohmann::json parsedJson = nlohmann::json::parse(req.body);
+          std::string extractedClientId =
+              parsedJson.at("clientId").get<std::string>();
+          std::string extractedVHex = parsedJson.at("v").get<std::string>();
+          // client ID validation
+          if (extractedClientId.empty()) {
+            throw std::runtime_error("Server log | handleRegisterComplete(): "
+                                     "ClientId is null");
+          } else if (_secureRemotePasswordMap.find(extractedClientId) ==
+                     _secureRemotePasswordMap.end()) {
+            throw std::runtime_error("Server log | handleRegisterComplete(): "
+                                     "ClientId not found.");
+          } else if (_secureRemotePasswordMap[extractedClientId]
+                         ->registrationComplete) {
+            throw std::runtime_error(
+                "Server log | handleRegisterComplete(): "
+                "Registration was already complete for the client: " +
+                extractedClientId);
+          }
+          // v validation
+          if (extractedVHex.empty()) {
+            throw std::runtime_error("Server log | handleRegisterComplete(): "
+                                     "extractedVHex is null");
+          }
+          const bool vValidationResult =
+              vValidation(extractedClientId, extractedVHex);
+          if (!vValidationResult) {
+            throw std::runtime_error("Server log | handleRegisterComplete(): v "
+                                     "received is not valid for client: " +
+                                     extractedClientId);
+          }
+          // store the v parameter
+          _secureRemotePasswordMap[extractedClientId]->_vHex = extractedVHex;
+          // reply to the client with the acknowledgment of successful
+          // registration completion
+          _secureRemotePasswordMap[extractedClientId]->registrationComplete =
+              true;
+          res["message"] = "Ack";
           return crow::response(201, res);
         } catch (const nlohmann::json::exception &e) {
           crow::json::wvalue err;
@@ -261,5 +329,58 @@ void Server::authenticationRoute() {
         }
         return crow::response(201, res);
       });
+}
+/******************************************************************************/
+/**
+ * @brief This method perform the validation of the extracted v parameter
+ * at the registration step.
+ *
+ * This method perform the validation of the extracted v parameter
+ * at the registration step, it will test if v ∈ ]0, N[.
+ *
+ * @param clientId The clientId involved in this registration step.
+ * @param vHex The v parameter in hexadecimal format.
+ *
+ * @return True if the validation passes, false otherwise.
+ */
+bool Server::vValidation(const std::string &clientId, const std::string &vHex) {
+  try {
+    if (clientId.empty()) {
+      throw std::runtime_error("Server log | vValidation(): "
+                               "ClientId is null");
+    } else if (_secureRemotePasswordMap.find(clientId) ==
+               _secureRemotePasswordMap.end()) {
+      throw std::runtime_error("Server log | vValidation(): "
+                               "ClientId not found.");
+    } else if (vHex.empty()) {
+      throw std::runtime_error("Server log | vValidation(): "
+                               "vHex is null");
+    }
+    const std::string &nHex =
+        _srpParametersMap[_secureRemotePasswordMap[clientId]->_groupId]._nHex;
+    BIGNUM *vBn = nullptr;
+    BIGNUM *nBn = nullptr;
+    if (!BN_hex2bn(&vBn, vHex.c_str()) || !BN_hex2bn(&nBn, nHex.c_str())) {
+      BN_free(vBn);
+      BN_free(nBn);
+      throw std::runtime_error(
+          "Server log | handleRegisterComplete(): Failed to "
+          "convert v or N to BIGNUM.");
+    }
+    if (BN_is_zero(vBn) || BN_is_negative(vBn) || BN_cmp(vBn, nBn) >= 0) {
+      BN_free(vBn);
+      BN_free(nBn);
+      throw std::runtime_error(
+          "Server log | handleRegisterComplete(): v is not "
+          "in the valid range (0 < v < N) for client: " +
+          clientId);
+    }
+    BN_free(vBn);
+    BN_free(nBn);
+  } catch (const std::exception &e) {
+    std::cerr << e.what() << std::endl;
+    return false;
+  }
+  return true;
 }
 /******************************************************************************/
