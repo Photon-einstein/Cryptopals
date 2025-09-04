@@ -36,6 +36,8 @@ struct SessionData {
   std::string _salt; // hexadecimal format
   std::string _hash; // (e.g., "SHA-256", "SHA-384", "SHA-512").
   std::string _password;
+  std::string _vHex;                // Store the verifier v in hex format
+  bool registrationComplete{false}; // Indicates if registration is finished
 };
 
 #endif // SESSION_DATA_HPP

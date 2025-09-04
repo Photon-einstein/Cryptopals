@@ -410,8 +410,26 @@ Specifications more information:
   |----------------------------->|
   ```
 
-31. Add the first leg on server side of the Secure Remote Password protocol (TBD)
+30. Add the reception and validation of the user U and the v parameter. (Done)
 
-32. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
+- U be a new one;
+- v should be inside this space (0, N)
 
-33. Add the first leg on client side of the Secure Remote Password protocol (TBD)
+  ```bash
+  |        OK / Ack              |
+  |<-----------------------------|
+  ```
+
+31. If U and v are valid then store it inside the new session at the server side (Done)
+
+32. Perform the reception of the server response at the server side (TBD)
+
+33. Perform manual tests of the registration step (TBD).
+
+34. Add unit tests of the registration step (TBD).
+
+35. Add the first leg on server side of the Secure Remote Password protocol (TBD)
+
+36. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
+
+37. Add the first leg on client side of the Secure Remote Password protocol (TBD)

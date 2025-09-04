@@ -117,7 +117,7 @@ private:
 
   /**
    * @brief This method runs the route that performs group search inside the
-   * registration step.
+   * registration step initialization.
    *
    * This method runs the route that performs group search inside the
    * registration step, returning the agreed group id and the salt.
@@ -125,15 +125,39 @@ private:
   void handleRegisterInit();
 
   /**
-   * @brief This method runs the route that performs the Secure Remote Password
-   * protocol authentication.
+   * @brief This method performs all the activities that allow the conclusion of
+   * the registration at the Secure Remote Password protocol.
+   *
+   * This method performs all the activities that allow the conclusion of
+   * the registration at the Secure Remote Password protocol, namely the
+   * validation of the parameter v and acknowledge back to the client.
+   */
+  void handleRegisterComplete();
+
+  /**
+   * @brief This method runs the route that performs the Secure Remote
+   * Password protocol authentication.
    *
    * This method runs the route that performs the Secure Remote Password
-   * protocol. It receives requests and make all the calculations to response to
-   * the requests, creating a symmetric key for each connection request, after
-   * performing the authentication.
+   * protocol. It receives requests and make all the calculations to
+   * response to the requests, creating a symmetric key for each connection
+   * request, after performing the authentication.
    */
   void authenticationRoute();
+
+  /**
+   * @brief This method perform the validation of the extracted v parameter
+   * at the registration step.
+   *
+   * This method perform the validation of the extracted v parameter
+   * at the registration step, it will test if v ∈ ]0, N[.
+   *
+   * @param clientId The clientId involved in this registration step.
+   * @param vHex The v parameter in hexadecimal format.
+   *
+   * @return True if the validation passes, false otherwise.
+   */
+  bool vValidation(const std::string &clientId, const std::string &vHex);
 
   /* private fields */
   crow::SimpleApp _app;
