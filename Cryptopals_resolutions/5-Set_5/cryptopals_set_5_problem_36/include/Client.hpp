@@ -209,6 +209,7 @@ private:
   std::unique_ptr<SessionData> _sessionData;
   const unsigned int _passwordSize{20}; // bytes
   const std::unordered_map<std::string, EncryptionUtility::HashFn> _hashMap;
+  const std::string _serverConfirmationMessage{"Ack"};
 };
 
 #endif // CLIENT_HPP

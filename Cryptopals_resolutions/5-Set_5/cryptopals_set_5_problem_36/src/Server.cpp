@@ -77,6 +77,17 @@ void Server::runServerTest() {
 }
 /******************************************************************************/
 /**
+ * @brief This method will clear all the sessions in memory.
+ *
+ * This method will clear all the sessions in memory that were created
+ * after the execution of the Secure Remote Password protocol.
+ */
+void Server::clearSecureRemotePasswordMap() {
+  std::lock_guard<std::mutex> lock(_secureRemotePasswordMapMutex);
+  _secureRemotePasswordMap.clear();
+}
+/******************************************************************************/
+/**
  * @brief This method will return the production port of the server.
  *
  * This method will return the production port of the server to establish a
@@ -134,6 +145,7 @@ void Server::setupRoutes() {
   handleRegisterInit();
   handleRegisterComplete();
   authenticationRoute();
+  registeredUsersEndpoint();
 }
 /******************************************************************************/
 /**
@@ -275,7 +287,7 @@ void Server::handleRegisterComplete() {
           // registration completion
           _secureRemotePasswordMap[extractedClientId]->registrationComplete =
               true;
-          res["message"] = "Ack";
+          res["confirmation"] = "Ack";
           return crow::response(201, res);
         } catch (const nlohmann::json::exception &e) {
           crow::json::wvalue err;
@@ -320,12 +332,13 @@ void Server::authenticationRoute() {
           crow::json::wvalue err;
           err["message"] =
               std::string("Server log | JSON parsing error: ") + e.what();
-          return crow::response(400, err);
+          return crow::response(404, err);
         } catch (const std::exception &e) {
           crow::json::wvalue err;
           err["message"] =
               std::string("Server log | An unexpected error occurred: ") +
               e.what();
+          return crow::response(400, err);
         }
         return crow::response(201, res);
       });
@@ -382,5 +395,40 @@ bool Server::vValidation(const std::string &clientId, const std::string &vHex) {
     return false;
   }
   return true;
+}
+/******************************************************************************/
+/**
+ * @brief This method runs the route that provides the list of registered users.
+ *
+ * This method runs the route that provides the list of registered users
+ * who have completed the registration process.
+ */
+void Server::registeredUsersEndpoint() {
+  CROW_ROUTE(_app, "/srp/registered/users").methods("GET"_method)([this]() {
+    crow::json::wvalue res;
+    try {
+      std::vector<std::string> registeredUsers;
+      {
+        std::lock_guard<std::mutex> lock(_secureRemotePasswordMapMutex);
+        for (const auto &pair : _secureRemotePasswordMap) {
+          if (pair.second && pair.second->registrationComplete) {
+            registeredUsers.push_back(pair.first);
+          }
+        }
+      }
+      res["users"] = registeredUsers;
+      return crow::response(200, res);
+    } catch (const nlohmann::json::exception &e) {
+      crow::json::wvalue err;
+      err["message"] =
+          std::string("Server log | JSON parsing error: ") + e.what();
+      return crow::response(400, err);
+    } catch (const std::exception &e) {
+      crow::json::wvalue err;
+      err["message"] =
+          std::string("Server log | An unexpected error occurred: ") + e.what();
+      return crow::response(400, err);
+    }
+  });
 }
 /******************************************************************************/

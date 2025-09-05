@@ -16,6 +16,7 @@ protected:
   void SetUp() override {
     // NOLINTNEXTLINE(clang-analyzer-optin.cplusplus.VirtualCall)
     StartServerOnce();
+    _server->clearSecureRemotePasswordMap();
     _mapUsers[_clientId1] = std::make_unique<Client>(_clientId1, _debugFlag);
     _mapUsers[_clientId2] = std::make_unique<Client>(_clientId2, _debugFlag);
     _mapUsers[_clientId3] = std::make_unique<Client>(_clientId3, _debugFlag);
@@ -387,9 +388,42 @@ TEST_F(SecureRemotePasswordProtocolTest,
  */
 TEST_F(SecureRemotePasswordProtocolTest,
        Registration_WithValidPortNumberAndDefaultGroupId_ShouldReturnSuccess) {
+  auto response = cpr::Get(
+      cpr::Url{"http://localhost:" + std::to_string(_server->getTestPort()) +
+               std::string("/srp/registered/users")});
+  EXPECT_EQ(response.status_code, 200);
+  crow::json::rvalue jsonResponse = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponse);
+  // Check that the users array contains the expected username
+  bool found = false;
+  for (const auto &user : jsonResponse["users"]) {
+    if (user.s() == _clientId1) {
+      found = true;
+      break;
+    }
+  }
+  EXPECT_FALSE(found) << "Expected username '" << _clientId1
+                      << "' to not be found in registered users list in the "
+                         "beginning of the test.";
   const bool registrationReturnValue{_mapUsers[_clientId1]->registration(
       _mapUsers[_clientId1]->getTestPort())};
   EXPECT_TRUE(registrationReturnValue);
+  response = cpr::Get(
+      cpr::Url{"http://localhost:" + std::to_string(_server->getTestPort()) +
+               std::string("/srp/registered/users")});
+  EXPECT_EQ(response.status_code, 200);
+  jsonResponse = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponse);
+  // Check that the users array contains the expected username
+  found = false;
+  for (const auto &user : jsonResponse["users"]) {
+    if (user.s() == _clientId1) {
+      found = true;
+      break;
+    }
+  }
+  EXPECT_TRUE(found) << "Expected username '" << _clientId1
+                     << "' not found in registered users list.";
 }
 
 /**
@@ -403,10 +437,43 @@ TEST_F(SecureRemotePasswordProtocolTest,
 TEST_F(
     SecureRemotePasswordProtocolTest,
     Registration_WithValidPortNumberAndInvalidGroupIdLessThanMinimum_ShouldReturnSuccess) {
+  auto response = cpr::Get(
+      cpr::Url{"http://localhost:" + std::to_string(_server->getTestPort()) +
+               std::string("/srp/registered/users")});
+  EXPECT_EQ(response.status_code, 200);
+  crow::json::rvalue jsonResponse = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponse);
+  // Check that the users array contains the expected username
+  bool found = false;
+  for (const auto &user : jsonResponse["users"]) {
+    if (user.s() == _clientId1) {
+      found = true;
+      break;
+    }
+  }
+  EXPECT_FALSE(found) << "Expected username '" << _clientId1
+                      << "' to not be found in registered users list in the "
+                         "beginning of the test.";
   const unsigned int groupId{_srpParametersMap.rbegin()->first - 1};
   const bool registrationReturnValue{_mapUsers[_clientId1]->registration(
       _mapUsers[_clientId1]->getTestPort(), groupId)};
   EXPECT_TRUE(registrationReturnValue);
+  response = cpr::Get(
+      cpr::Url{"http://localhost:" + std::to_string(_server->getTestPort()) +
+               std::string("/srp/registered/users")});
+  EXPECT_EQ(response.status_code, 200);
+  jsonResponse = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponse);
+  // Check that the users array contains the expected username
+  found = false;
+  for (const auto &user : jsonResponse["users"]) {
+    if (user.s() == _clientId1) {
+      found = true;
+      break;
+    }
+  }
+  EXPECT_TRUE(found) << "Expected username '" << _clientId1
+                     << "' not found in registered users list.";
 }
 
 /**
@@ -419,10 +486,43 @@ TEST_F(
  */
 TEST_F(SecureRemotePasswordProtocolTest,
        Registration_WithValidPortNumberAndValidGroupId_ShouldReturnSuccess) {
+  auto response = cpr::Get(
+      cpr::Url{"http://localhost:" + std::to_string(_server->getTestPort()) +
+               std::string("/srp/registered/users")});
+  EXPECT_EQ(response.status_code, 200);
+  crow::json::rvalue jsonResponse = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponse);
+  // Check that the users array contains the expected username
+  bool found = false;
+  for (const auto &user : jsonResponse["users"]) {
+    if (user.s() == _clientId1) {
+      found = true;
+      break;
+    }
+  }
+  EXPECT_FALSE(found) << "Expected username '" << _clientId1
+                      << "' to not be found in registered users list in the "
+                         "beginning of the test.";
   const unsigned int groupId{_srpParametersMap.begin()->first};
   const bool registrationReturnValue{_mapUsers[_clientId1]->registration(
       _mapUsers[_clientId1]->getTestPort(), groupId)};
   EXPECT_TRUE(registrationReturnValue);
+  response = cpr::Get(
+      cpr::Url{"http://localhost:" + std::to_string(_server->getTestPort()) +
+               std::string("/srp/registered/users")});
+  EXPECT_EQ(response.status_code, 200);
+  jsonResponse = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponse);
+  // Check that the users array contains the expected username
+  found = false;
+  for (const auto &user : jsonResponse["users"]) {
+    if (user.s() == _clientId1) {
+      found = true;
+      break;
+    }
+  }
+  EXPECT_TRUE(found) << "Expected username '" << _clientId1
+                     << "' not found in registered users list.";
 }
 
 /**
@@ -436,10 +536,43 @@ TEST_F(SecureRemotePasswordProtocolTest,
 TEST_F(
     SecureRemotePasswordProtocolTest,
     Registration_WithValidPortNumberAndInvalidGroupIdGreaterThanMaximum_ShouldReturnSuccess) {
+  auto response = cpr::Get(
+      cpr::Url{"http://localhost:" + std::to_string(_server->getTestPort()) +
+               std::string("/srp/registered/users")});
+  EXPECT_EQ(response.status_code, 200);
+  crow::json::rvalue jsonResponse = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponse);
+  // Check that the users array contains the expected username
+  bool found = false;
+  for (const auto &user : jsonResponse["users"]) {
+    if (user.s() == _clientId1) {
+      found = true;
+      break;
+    }
+  }
+  EXPECT_FALSE(found) << "Expected username '" << _clientId1
+                      << "' to not be found in registered users list in the "
+                         "beginning of the test.";
   const unsigned int groupId{_srpParametersMap.rbegin()->first + 1};
   const bool registrationReturnValue{_mapUsers[_clientId1]->registration(
       _mapUsers[_clientId1]->getTestPort(), groupId)};
   EXPECT_TRUE(registrationReturnValue);
+  response = cpr::Get(
+      cpr::Url{"http://localhost:" + std::to_string(_server->getTestPort()) +
+               std::string("/srp/registered/users")});
+  EXPECT_EQ(response.status_code, 200);
+  jsonResponse = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponse);
+  // Check that the users array contains the expected username
+  found = false;
+  for (const auto &user : jsonResponse["users"]) {
+    if (user.s() == _clientId1) {
+      found = true;
+      break;
+    }
+  }
+  EXPECT_TRUE(found) << "Expected username '" << _clientId1
+                     << "' not found in registered users list.";
 }
 
 /**
@@ -450,7 +583,7 @@ TEST_F(
  * Should fail in the registration step.
  */
 TEST_F(SecureRemotePasswordProtocolTest,
-       Registration_WithInvalidPortNumber_ShouldReturnSuccess) {
+       Registration_WithInvalidPortNumber_ShouldReturnAnError) {
   const unsigned int invalidPortNumber{80};
   const bool registrationReturnValue{
       _mapUsers[_clientId1]->registration(invalidPortNumber)};

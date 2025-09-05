@@ -317,6 +317,33 @@ const bool Client::registrationComplete(const int portServerNumber,
                            std::string("/srp/register/complete")},
                   cpr::Header{{"Content-Type", "application/json"}},
                   cpr::Body{requestBody});
+    if (_debugFlag) {
+      printServerResponse(response);
+    }
+    if (response.status_code != 201) {
+      throw std::runtime_error("Client log | registrationComplete(): "
+                               "registration failed");
+    }
+    nlohmann::json parsedJson = nlohmann::json::parse(response.text);
+    const std::string extractedServerConfirmation =
+        parsedJson.at("confirmation").get<std::string>();
+    if (_debugFlag) {
+      std::cout << "\n--- Client log | /srp/register/complete server response "
+                   "extracted data ---"
+                << std::endl;
+      std::cout << "\tServer confirmation: " << extractedServerConfirmation
+                << std::endl;
+      std::cout << "----------------------" << std::endl;
+    }
+    if (_serverConfirmationMessage != _serverConfirmationMessage) {
+      throw std::runtime_error(
+          "Client log | registrationComplete(): "
+          "extracted server confirmation don't match, expected: '" +
+          _serverConfirmationMessage + "', actual: '" +
+          _serverConfirmationMessage + "'.");
+    }
+    // mark the registration step as complete at this point
+    _sessionData->registrationComplete = true;
     return registrationCompleteResult;
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;

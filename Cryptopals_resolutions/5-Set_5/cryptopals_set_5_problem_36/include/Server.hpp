@@ -57,6 +57,14 @@ public:
   void runServerTest();
 
   /**
+   * @brief This method will clear all the sessions in memory.
+   *
+   * This method will clear all the sessions in memory that were created
+   * after the execution of the Secure Remote Password protocol.
+   */
+  void clearSecureRemotePasswordMap();
+
+  /**
    * @brief This method will return the production port of the server.
    *
    * This method will return the production port of the server to establish a
@@ -158,6 +166,15 @@ private:
    * @return True if the validation passes, false otherwise.
    */
   bool vValidation(const std::string &clientId, const std::string &vHex);
+
+  /**
+   * @brief This method runs the route that provides the list of registered
+   * users.
+   *
+   * This method runs the route that provides the list of registered users
+   * who have completed the registration process.
+   */
+  void registeredUsersEndpoint();
 
   /* private fields */
   crow::SimpleApp _app;
