@@ -392,11 +392,11 @@ TEST_F(SecureRemotePasswordProtocolTest,
       cpr::Url{"http://localhost:" + std::to_string(_server->getTestPort()) +
                std::string("/srp/registered/users")});
   EXPECT_EQ(response.status_code, 200);
-  crow::json::rvalue jsonResponse = crow::json::load(response.text);
-  ASSERT_TRUE(jsonResponse);
+  crow::json::rvalue jsonResponseBefore = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponseBefore);
   // Check that the users array contains the expected username
   bool found = false;
-  for (const auto &user : jsonResponse["users"]) {
+  for (const auto &user : jsonResponseBefore["users"]) {
     if (user.s() == _clientId1) {
       found = true;
       break;
@@ -412,11 +412,11 @@ TEST_F(SecureRemotePasswordProtocolTest,
       cpr::Url{"http://localhost:" + std::to_string(_server->getTestPort()) +
                std::string("/srp/registered/users")});
   EXPECT_EQ(response.status_code, 200);
-  jsonResponse = crow::json::load(response.text);
-  ASSERT_TRUE(jsonResponse);
+  crow::json::rvalue jsonResponseAfter = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponseAfter);
   // Check that the users array contains the expected username
   found = false;
-  for (const auto &user : jsonResponse["users"]) {
+  for (const auto &user : jsonResponseAfter["users"]) {
     if (user.s() == _clientId1) {
       found = true;
       break;
@@ -441,11 +441,11 @@ TEST_F(
       cpr::Url{"http://localhost:" + std::to_string(_server->getTestPort()) +
                std::string("/srp/registered/users")});
   EXPECT_EQ(response.status_code, 200);
-  crow::json::rvalue jsonResponse = crow::json::load(response.text);
-  ASSERT_TRUE(jsonResponse);
+  crow::json::rvalue jsonResponseBefore = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponseBefore);
   // Check that the users array contains the expected username
   bool found = false;
-  for (const auto &user : jsonResponse["users"]) {
+  for (const auto &user : jsonResponseBefore["users"]) {
     if (user.s() == _clientId1) {
       found = true;
       break;
@@ -462,11 +462,11 @@ TEST_F(
       cpr::Url{"http://localhost:" + std::to_string(_server->getTestPort()) +
                std::string("/srp/registered/users")});
   EXPECT_EQ(response.status_code, 200);
-  jsonResponse = crow::json::load(response.text);
-  ASSERT_TRUE(jsonResponse);
+  crow::json::rvalue jsonResponseAfter = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponseAfter);
   // Check that the users array contains the expected username
   found = false;
-  for (const auto &user : jsonResponse["users"]) {
+  for (const auto &user : jsonResponseAfter["users"]) {
     if (user.s() == _clientId1) {
       found = true;
       break;
@@ -490,11 +490,11 @@ TEST_F(SecureRemotePasswordProtocolTest,
       cpr::Url{"http://localhost:" + std::to_string(_server->getTestPort()) +
                std::string("/srp/registered/users")});
   EXPECT_EQ(response.status_code, 200);
-  crow::json::rvalue jsonResponse = crow::json::load(response.text);
-  ASSERT_TRUE(jsonResponse);
+  crow::json::rvalue jsonResponseBefore = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponseBefore);
   // Check that the users array contains the expected username
   bool found = false;
-  for (const auto &user : jsonResponse["users"]) {
+  for (const auto &user : jsonResponseBefore["users"]) {
     if (user.s() == _clientId1) {
       found = true;
       break;
@@ -511,11 +511,11 @@ TEST_F(SecureRemotePasswordProtocolTest,
       cpr::Url{"http://localhost:" + std::to_string(_server->getTestPort()) +
                std::string("/srp/registered/users")});
   EXPECT_EQ(response.status_code, 200);
-  jsonResponse = crow::json::load(response.text);
-  ASSERT_TRUE(jsonResponse);
+  crow::json::rvalue jsonResponseAfter = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponseAfter);
   // Check that the users array contains the expected username
   found = false;
-  for (const auto &user : jsonResponse["users"]) {
+  for (const auto &user : jsonResponseAfter["users"]) {
     if (user.s() == _clientId1) {
       found = true;
       break;
@@ -540,11 +540,11 @@ TEST_F(
       cpr::Url{"http://localhost:" + std::to_string(_server->getTestPort()) +
                std::string("/srp/registered/users")});
   EXPECT_EQ(response.status_code, 200);
-  crow::json::rvalue jsonResponse = crow::json::load(response.text);
-  ASSERT_TRUE(jsonResponse);
+  crow::json::rvalue jsonResponseBefore = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponseBefore);
   // Check that the users array contains the expected username
   bool found = false;
-  for (const auto &user : jsonResponse["users"]) {
+  for (const auto &user : jsonResponseBefore["users"]) {
     if (user.s() == _clientId1) {
       found = true;
       break;
@@ -561,11 +561,11 @@ TEST_F(
       cpr::Url{"http://localhost:" + std::to_string(_server->getTestPort()) +
                std::string("/srp/registered/users")});
   EXPECT_EQ(response.status_code, 200);
-  jsonResponse = crow::json::load(response.text);
-  ASSERT_TRUE(jsonResponse);
+  crow::json::rvalue jsonResponseAfter = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponseAfter);
   // Check that the users array contains the expected username
   found = false;
-  for (const auto &user : jsonResponse["users"]) {
+  for (const auto &user : jsonResponseAfter["users"]) {
     if (user.s() == _clientId1) {
       found = true;
       break;
