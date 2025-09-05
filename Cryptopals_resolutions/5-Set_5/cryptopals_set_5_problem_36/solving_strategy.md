@@ -422,13 +422,23 @@ Specifications more information:
 
 31. If U and v are valid then store it inside the new session at the server side (Done)
 
-32. Perform the reception of the server response at the server side (TBD)
+32. Perform the reception of the server response at the client side (Done)
 
-33. Perform manual tests of the registration step (TBD).
+33. Perform manual tests of the registration step (Done).
 
-34. Add unit tests of the registration step (TBD).
+- This includes setting a client running the registration process against a server up and running.
 
-35. Add the first leg on server side of the Secure Remote Password protocol (TBD)
+New endpoint introduced to allow the correct test of the registration endpoint:
+
+Curl in production environment:
+
+```bash
+curl -X GET http://localhost:18080/srp/registered/users
+```
+
+34. Add unit tests of the registration step (Done).
+
+35. Add the first leg on server side of the Secure Remote Password protocol (in progress)
 
 36. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
 
