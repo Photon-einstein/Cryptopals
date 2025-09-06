@@ -191,10 +191,19 @@ void Server::handleRegisterInit() {
                               extractedGroupId <= _maxGroupId)
                                  ? extractedGroupId
                                  : _defaultGroupId;
+          std::lock_guard<std::mutex> lock(_secureRemotePasswordMapMutex);
           // cliend ID validation
           if (extractedClientId.size() == 0) {
             throw std::runtime_error("Server log | handleRegisterInit(): "
                                      "ClientId is null");
+          } else if (_secureRemotePasswordMap.find(extractedClientId) !=
+                         _secureRemotePasswordMap.end() &&
+                     _secureRemotePasswordMap[extractedClientId]
+                         ->registrationComplete) {
+            crow::json::wvalue err;
+            err["message"] = "Server log | handleRegisterInit(): Conflict, "
+                             "client is already registered";
+            return crow::response(409, err);
           }
           if (_debugFlag) {
             std::cout << "\n--- Server log | Extracted Data from a new client "
@@ -210,7 +219,6 @@ void Server::handleRegisterInit() {
               EncryptionUtility::generateCryptographicNonce(minSaltSize);
           const std::string hash =
               _srpParametersMap[extractedGroupId]._hashName;
-          std::lock_guard<std::mutex> lock(_secureRemotePasswordMapMutex);
           _secureRemotePasswordMap[extractedClientId] =
               std::make_unique<SessionData>(extractedGroupId, salt, hash);
           // reply to the client with the group ID parameters and the salt s
@@ -262,12 +270,14 @@ void Server::handleRegisterComplete() {
                      _secureRemotePasswordMap.end()) {
             throw std::runtime_error("Server log | handleRegisterComplete(): "
                                      "ClientId not found.");
-          } else if (_secureRemotePasswordMap[extractedClientId]
+          } else if (_secureRemotePasswordMap.find(extractedClientId) !=
+                         _secureRemotePasswordMap.end() &&
+                     _secureRemotePasswordMap[extractedClientId]
                          ->registrationComplete) {
-            throw std::runtime_error(
-                "Server log | handleRegisterComplete(): "
-                "Registration was already complete for the client: " +
-                extractedClientId);
+            crow::json::wvalue err;
+            err["message"] = "Server log | handleRegisterInit(): Conflict, "
+                             "client is already registered";
+            return crow::response(409, err);
           }
           // v validation
           if (extractedVHex.empty()) {
