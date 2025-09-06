@@ -441,7 +441,118 @@ curl -X GET http://localhost:18080/srp/registered/users
 - Assess if a user tries to register more than one time, second time should return an error (Done);
 - If several users try to register with the server, the server should be able to handle all the registrations (Done)
 
-35. Add the first leg on server side of the Secure Remote Password protocol (in progress)
+35. Refine the authentication process, including more detail on the information that should be
+    calculated and how (Done)
+
+**Registration Phase (already implemented):**
+
+- Client generates:
+  - x = H(s | P)
+  - s: salt (from server)
+  - P: password (user input)
+  - H: hash function (e.g., SHA-256)
+  - v = g^x mod N
+  - g: generator (from group parameters)
+  - N: large safe prime (from group parameters)
+
+* Client sends:
+  - U (username), v (verifier)
+  - Server stores:
+    - U, s, v, group ID
+
+**Authentication Phase (ongoing implementation):**
+
+Complete message workflow:
+
+Proposed communication flow present at RFC 2945 pg.5:
+
+```bash
+  Client                             Host
+--------                           ------
+  U                           -->
+                              <--    s, B, group_id
+  A, H(H(N) XOR H(g) | H(U) | s | A | B | K) simplified to HMAC-SHA256(K, salt) in this problem
+                              -->
+                              <--    H(A | M | K) simplified to  "OK" if HMAC-SHA256(K, salt) validates
+```
+
+**Diagram to follow**
+
+```bash
+  Client                             Host
+--------                           ------
+  U                           -->   # Client sends username (U)
+                              <--   # Server looks up (s, v, group_id), generates b, computes:
+                                    # k = H(N | PAD(g))
+                                    # B = kv + g^b mod N
+                                    # Sends s, B, group_id to client
+                                    s, B, groupId
+
+  # Client generates a, computes:
+  # A = g^a mod N
+  # u = H(A | B)
+  # x = H(s | P)
+  # S = (B - k * g^x) ^ (a + u * x) mod N
+  # K = H(S)
+  # M = H(H(N) XOR H(g) | H(U) | s | A | B | K)   <-- FULL RFC 2945/5054 CLIENT PROOF
+  A, M                        -->
+                              <--   # Server computes:
+                                    # u = H(A | B)
+                                    # S = (A * v^u) ^ b mod N
+                                    # K = H(S)
+                                    # M' = H(H(N) XOR H(g) | H(U) | s | A | B | K)
+                                    # If M == M', server sends:
+                                    # M2 = H(A | M | K)   <-- FULL RFC 2945/5054 SERVER PROOF
+                                    # Else, authentication fails
+                                    H(A | M | K)
+
+  # Client verifies M2:
+  # M2 = H(A | M | K)
+  # If valid, authentication is complete
+```
+
+Glossary:  
+**First exchange**
+
+- U: User ID
+
+- s: salt (from server)
+- B = kv + g^b mod N (server's ephemeral public value)
+- b: A new b must be generated for every authentication attempt (never reused).
+  - b in [1, N-1]
+  - not stored after session
+- k = H(N | PAD(g))
+  - H is the agreed hash function (e.g., SHA-256)
+  - N is the large safe prime (in bytes, big-endian)
+  - PAD(g) is the generator g, left-padded with zeros to the same length as N
+
+**Second exchange**
+**Client side**
+
+- A: A = g^a mod N (already sent to server)
+- a in [1, N-1]
+- u is the scrambling parameter: u = H(A | B)
+- S is the shared secret, at the client it is calculated as:
+  S = (B - k \* g^x) ^ (a + u \* x) mod N
+- K = H(S), S should be converted to byte array before hashing
+- M = H(H(N) XOR H(g) | H(U) | s | A | B | K)
+  where:
+
+  H() is the hash function,
+  N is the group prime,
+  g is the group generator,
+  U is the username,
+  s is the salt,
+  A and B are the public ephemeral values,
+  K is the session key.
+  No padding is required for g or U in this step.
+
+**Server side**
+
+- u is the scrambling parameter: u = H(A | B)
+- S = (A \* v^u) ^ b mod N
+
+35. Add the first leg on server side of the Secure Remote Password protocol, Authentication phase (in progress)
 
 36. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
 
