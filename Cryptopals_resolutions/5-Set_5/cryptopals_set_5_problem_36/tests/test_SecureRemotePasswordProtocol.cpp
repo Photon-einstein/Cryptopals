@@ -416,14 +416,17 @@ TEST_F(SecureRemotePasswordProtocolTest,
   ASSERT_TRUE(jsonResponseAfter);
   // Check that the users array contains the expected username
   found = false;
+  unsigned int counterTimesUser{0};
   for (const auto &user : jsonResponseAfter["users"]) {
     if (user.s() == _clientId1) {
       found = true;
-      break;
+      ++counterTimesUser;
     }
   }
-  EXPECT_TRUE(found) << "Expected username '" << _clientId1
-                     << "' not found in registered users list.";
+  EXPECT_TRUE(found);
+  EXPECT_EQ(counterTimesUser, 1)
+      << "Expected username '" << _clientId1
+      << "' to be found in registered users list only one time.";
 }
 
 /**
@@ -466,14 +469,17 @@ TEST_F(
   ASSERT_TRUE(jsonResponseAfter);
   // Check that the users array contains the expected username
   found = false;
+  unsigned int counterTimesUser{0};
   for (const auto &user : jsonResponseAfter["users"]) {
     if (user.s() == _clientId1) {
       found = true;
-      break;
+      ++counterTimesUser;
     }
   }
-  EXPECT_TRUE(found) << "Expected username '" << _clientId1
-                     << "' not found in registered users list.";
+  EXPECT_TRUE(found);
+  EXPECT_EQ(counterTimesUser, 1)
+      << "Expected username '" << _clientId1
+      << "' to be found in registered users list only one time.";
 }
 
 /**
@@ -515,14 +521,17 @@ TEST_F(SecureRemotePasswordProtocolTest,
   ASSERT_TRUE(jsonResponseAfter);
   // Check that the users array contains the expected username
   found = false;
+  unsigned int counterTimesUser{0};
   for (const auto &user : jsonResponseAfter["users"]) {
     if (user.s() == _clientId1) {
       found = true;
-      break;
+      ++counterTimesUser;
     }
   }
-  EXPECT_TRUE(found) << "Expected username '" << _clientId1
-                     << "' not found in registered users list.";
+  EXPECT_TRUE(found);
+  EXPECT_EQ(counterTimesUser, 1)
+      << "Expected username '" << _clientId1
+      << "' to be found in registered users list only one time.";
 }
 
 /**
@@ -565,14 +574,17 @@ TEST_F(
   ASSERT_TRUE(jsonResponseAfter);
   // Check that the users array contains the expected username
   found = false;
+  unsigned int counterTimesUser{0};
   for (const auto &user : jsonResponseAfter["users"]) {
     if (user.s() == _clientId1) {
       found = true;
-      break;
+      ++counterTimesUser;
     }
   }
-  EXPECT_TRUE(found) << "Expected username '" << _clientId1
-                     << "' not found in registered users list.";
+  EXPECT_TRUE(found);
+  EXPECT_EQ(counterTimesUser, 1)
+      << "Expected username '" << _clientId1
+      << "' to be found in registered users list only one time.";
 }
 
 /**
@@ -588,4 +600,187 @@ TEST_F(SecureRemotePasswordProtocolTest,
   const bool registrationReturnValue{
       _mapUsers[_clientId1]->registration(invalidPortNumber)};
   EXPECT_FALSE(registrationReturnValue);
+}
+
+/**
+ * @test Test the correctness of the registration method at the client and
+ * server side.
+ * @brief Test the correctness of the registration method at the client  and
+ * server side. Scenario:
+ * - Client 1 completes the registration process with the server;
+ * - Client 1 attempts the registration process with the server a second time,
+ * it should return an error message, as it has already registered once.
+ * - A post request with a registration/init is attempted for the same client
+ * ID, it is expected that the server will return an error;
+ */
+TEST_F(
+    SecureRemotePasswordProtocolTest,
+    Registration_ClientAttemptsRegisterMoreThanOnceWithPostRequestAsWell_ShouldReturnErrorMessageAtTheSecondAttempt) {
+  auto response = cpr::Get(
+      cpr::Url{"http://localhost:" + std::to_string(_server->getTestPort()) +
+               std::string("/srp/registered/users")});
+  EXPECT_EQ(response.status_code, 200);
+  crow::json::rvalue jsonResponseBefore = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponseBefore);
+  // Check that the users array contains the expected username
+  bool found = false;
+  for (const auto &user : jsonResponseBefore["users"]) {
+    if (user.s() == _clientId1) {
+      found = true;
+      break;
+    }
+  }
+  EXPECT_FALSE(found) << "Expected username '" << _clientId1
+                      << "' to not be found in registered users list in the "
+                         "beginning of the test.";
+  const unsigned int groupId{_srpParametersMap.rbegin()->first + 1};
+  const bool registrationReturnValue{_mapUsers[_clientId1]->registration(
+      _mapUsers[_clientId1]->getTestPort(), groupId)};
+  EXPECT_TRUE(registrationReturnValue);
+  response = cpr::Get(
+      cpr::Url{"http://localhost:" + std::to_string(_server->getTestPort()) +
+               std::string("/srp/registered/users")});
+  EXPECT_EQ(response.status_code, 200);
+  crow::json::rvalue jsonResponseAfter = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponseAfter);
+  // Check that the users array contains the expected username
+  found = false;
+  for (const auto &user : jsonResponseAfter["users"]) {
+    if (user.s() == _clientId1) {
+      found = true;
+      break;
+    }
+  }
+  EXPECT_TRUE(found) << "Expected username '" << _clientId1
+                     << "' to be found in registered users list in the "
+                        "beginning of the test.";
+  const bool registrationReturnValueSecondTime{
+      _mapUsers[_clientId1]->registration(_mapUsers[_clientId1]->getTestPort(),
+                                          groupId)};
+  EXPECT_FALSE(registrationReturnValueSecondTime)
+      << "Expected second registration of the username '" << _clientId1
+      << "' to fail.";
+  response = cpr::Get(
+      cpr::Url{"http://localhost:" + std::to_string(_server->getTestPort()) +
+               std::string("/srp/registered/users")});
+  EXPECT_EQ(response.status_code, 200);
+  crow::json::rvalue jsonResponseAfterSecondRegister =
+      crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponseAfterSecondRegister);
+  // Check that the users array contains the expected username
+  found = false;
+  unsigned int counterTimesUser{0};
+  for (const auto &user : jsonResponseAfterSecondRegister["users"]) {
+    if (user.s() == _clientId1) {
+      found = true;
+      ++counterTimesUser;
+    }
+  }
+  EXPECT_TRUE(found);
+  EXPECT_EQ(counterTimesUser, 1)
+      << "Expected username '" << _clientId1
+      << "' to be found in registered users list only one time.";
+  std::string requestBody = fmt::format(
+      R"({{
+        "clientId": "{}"
+    }})",
+      _mapUsers[_clientId1]->getClientId());
+  response = cpr::Post(cpr::Url{std::string("http://localhost:") +
+                                std::to_string(_server->getTestPort()) +
+                                std::string("/srp/register/init")},
+                       cpr::Header{{"Content-Type", "application/json"}},
+                       cpr::Body{requestBody});
+  EXPECT_EQ(response.status_code, 409);
+  crow::json::rvalue jsonResponse = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponse);
+  EXPECT_THAT(std::string(jsonResponse["message"].s()),
+              ::testing::EndsWith("Conflict, client is already registered"));
+}
+
+/**
+ * @test Test the correctness of the registration method at the client and
+ * server side.
+ * @brief Test the correctness of the registration method at the client  and
+ * server side. Scenario:
+ * - Client 1 completes the registration process with the server;
+ * - Client 1 attempts the registration process with the server a second time,
+ * it should return an error message, as it has already registered once.
+ * - A post request with a registration/init is attempted for the same client
+ * ID, it is expected that the server will return an error;
+ */
+TEST_F(
+    SecureRemotePasswordProtocolTest,
+    Registration_SeveralClientsAttemptToRegister_ShouldBeRegisteredAtTheServerWithSuccess) {
+  auto response = cpr::Get(
+      cpr::Url{"http://localhost:" + std::to_string(_server->getTestPort()) +
+               std::string("/srp/registered/users")});
+  EXPECT_EQ(response.status_code, 200);
+  crow::json::rvalue jsonResponseBefore = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponseBefore);
+  // Check that the users array contains the expected username
+  bool found = false;
+  std::map<std::string, bool> mapTrackClientRegistrationsBefore;
+  mapTrackClientRegistrationsBefore[_clientId1] = false;
+  mapTrackClientRegistrationsBefore[_clientId2] = false;
+  mapTrackClientRegistrationsBefore[_clientId3] = false;
+  for (const auto &user : jsonResponseBefore["users"]) {
+    if (mapTrackClientRegistrationsBefore.find(user.s()) !=
+        mapTrackClientRegistrationsBefore.end()) {
+      mapTrackClientRegistrationsBefore[user.s()] = true;
+    }
+  }
+  EXPECT_FALSE(mapTrackClientRegistrationsBefore[_clientId1])
+      << "Expected username '" << _clientId1
+      << "' to not be found in registered users list in the "
+         "beginning of the test.";
+  EXPECT_FALSE(mapTrackClientRegistrationsBefore[_clientId2])
+      << "Expected username '" << _clientId2
+      << "' to not be found in registered users list in the "
+         "beginning of the test.";
+  EXPECT_FALSE(mapTrackClientRegistrationsBefore[_clientId3])
+      << "Expected username '" << _clientId3
+      << "' to not be found in registered users list in the "
+         "beginning of the test.";
+  // registration client 1
+  const bool registrationReturnValue1{_mapUsers[_clientId1]->registration(
+      _mapUsers[_clientId1]->getTestPort())};
+  EXPECT_TRUE(registrationReturnValue1);
+  // registration client 2
+  const bool registrationReturnValue2{_mapUsers[_clientId2]->registration(
+      _mapUsers[_clientId1]->getTestPort())};
+  EXPECT_TRUE(registrationReturnValue2);
+  // registration client 3
+  const bool registrationReturnValue3{_mapUsers[_clientId3]->registration(
+      _mapUsers[_clientId1]->getTestPort())};
+  EXPECT_TRUE(registrationReturnValue3);
+  // check the registration on the server side of all the clients
+  response = cpr::Get(
+      cpr::Url{"http://localhost:" + std::to_string(_server->getTestPort()) +
+               std::string("/srp/registered/users")});
+  EXPECT_EQ(response.status_code, 200);
+  crow::json::rvalue jsonResponseAfter = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponseAfter);
+  // Check that the users array contains the expected username
+  std::map<std::string, unsigned int> mapTrackClientRegistrationsAfter;
+  mapTrackClientRegistrationsAfter[_clientId1] = 0;
+  mapTrackClientRegistrationsAfter[_clientId2] = 0;
+  mapTrackClientRegistrationsAfter[_clientId3] = 0;
+  for (const auto &user : jsonResponseAfter["users"]) {
+    if (mapTrackClientRegistrationsAfter.find(user.s()) !=
+        mapTrackClientRegistrationsAfter.end()) {
+      ++mapTrackClientRegistrationsAfter[user.s()];
+    }
+  }
+  EXPECT_EQ(mapTrackClientRegistrationsAfter[_clientId1], 1)
+      << "Expected username '" << _clientId1
+      << "' to be found in registered users list after the registration one "
+         "time";
+  EXPECT_EQ(mapTrackClientRegistrationsAfter[_clientId2], 1)
+      << "Expected username '" << _clientId2
+      << "' to be found in registered users list after the registration one "
+         "time";
+  EXPECT_EQ(mapTrackClientRegistrationsAfter[_clientId3], 1)
+      << "Expected username '" << _clientId3
+      << "' to be found in registered users list after the registration one "
+         "time";
 }

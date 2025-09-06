@@ -438,6 +438,9 @@ curl -X GET http://localhost:18080/srp/registered/users
 
 34. Add unit tests of the registration step (Done).
 
+- Assess if a user tries to register more than one time, second time should return an error (Done);
+- If several users try to register with the server, the server should be able to handle all the registrations (Done)
+
 35. Add the first leg on server side of the Secure Remote Password protocol (in progress)
 
 36. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
