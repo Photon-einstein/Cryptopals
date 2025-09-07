@@ -591,8 +591,8 @@ Glossary:
 
 35.4. Add the generation of the parameter b (private key) on the server side,
 should be abstracted to a utility, **should be at in the range [1, N-1] and**
-**should be at least 256 bits long** (in progress)
-35.5. Add the calculation of the parameter k on the server side, should be abstracted to a utility (TBD)
+**should be at least 256 bits long** (Done)
+35.5. Add the calculation of the parameter k on the server side, should be abstracted to a utility (in progress)
 35.6. Add the calculation of the parameter B (public key), should be abstracted to a utility,
 **constrains: 1 < B < N** (TBD)
 35.7. Send s, B and group ID to the client, at the server side (TBD)
