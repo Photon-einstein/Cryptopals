@@ -108,6 +108,20 @@ public:
   const bool registration(const int portServerNumber,
                           const unsigned int groupId = 1);
 
+  /**
+   * @brief This method will perform the authentication step with a given
+   * server.
+   *
+   * This method perform the authentication step with a given server.
+   * It is assumed that the registration was already completed at a previous
+   * time.
+   *
+   * @param portServerNumber The number of the server to use in this exchange.
+   *
+   * @return True if the authentication succeed, false otherwise.
+   */
+  const bool authentication(const int portServerNumber);
+
 private:
   /* private methods */
 
@@ -143,6 +157,20 @@ private:
    */
   const bool registrationComplete(const int portServerNumber,
                                   const unsigned int groupId);
+
+  /**
+   * @brief This method will perform the first step of the authentication
+   * with a given server.
+   *
+   * This method perform the first step of the authentication with a given
+   * server. It will perform the calculations and verifications involved
+   * at the first leg of the authentication of SRP protocol.
+   *
+   * @param portServerNumber The number of the server to use in this exchange.
+   *
+   * @return True if the authenticationInit succeed, false otherwise.
+   */
+  const bool authenticationInit(const int portServerNumber);
 
   /**
    * @brief This method will print the server response during the Secure

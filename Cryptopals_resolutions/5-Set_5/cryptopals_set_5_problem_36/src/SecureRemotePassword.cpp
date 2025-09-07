@@ -6,6 +6,9 @@
 
 #include "./../include/SecureRemotePassword.hpp"
 
+/* static fields initialization */
+unsigned int MyCryptoLibrary::SecureRemotePassword::_minSizePrivateKey = 256;
+
 /* constructor / destructor */
 
 /**
@@ -42,5 +45,21 @@ MyCryptoLibrary::SecureRemotePassword::getSrpParametersFilenameLocation() {
                              "parameters filename location is empty.");
   }
   return _srpParametersFilename;
+}
+/******************************************************************************/
+/**
+ * @brief This method returns the minimum size of a private key in bits,
+ * according to the SRP protocol.
+ *
+ * @return The minimum size of a private key at the SPP protocol, in bits.
+ */
+const unsigned int &
+MyCryptoLibrary::SecureRemotePassword::getMinSizePrivateKey() {
+  if (_minSizePrivateKey <= 0) {
+    throw std::runtime_error("Secure Remote Password log | "
+                             "getMinSizePrivateKey(): stored minSizePrivateKey "
+                             "is invalid");
+  }
+  return _minSizePrivateKey;
 }
 /******************************************************************************/

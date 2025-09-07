@@ -45,14 +45,16 @@ EncryptionUtility::generateCryptographicNonce(const std::size_t length) {
 std::string EncryptionUtility::sha256(const std::string &input) {
   EVP_MD_CTX *ctx = EVP_MD_CTX_new();
   if (!ctx)
-    throw std::runtime_error("Failed to create EVP_MD_CTX");
+    throw std::runtime_error("EncryptionUtility log | sha256(): "
+                             "Failed to create EVP_MD_CTX");
   unsigned char hash[EVP_MAX_MD_SIZE];
   unsigned int length = 0;
   if (EVP_DigestInit_ex(ctx, EVP_sha256(), nullptr) != 1 ||
       EVP_DigestUpdate(ctx, input.data(), input.size()) != 1 ||
       EVP_DigestFinal_ex(ctx, hash, &length) != 1) {
     EVP_MD_CTX_free(ctx);
-    throw std::runtime_error("EVP digest calculation failed");
+    throw std::runtime_error("EncryptionUtility log | sha256(): "
+                             "EVP digest calculation failed");
   }
   EVP_MD_CTX_free(ctx);
   // Convert to hex string
@@ -75,14 +77,16 @@ std::string EncryptionUtility::sha256(const std::string &input) {
 std::string EncryptionUtility::sha384(const std::string &input) {
   EVP_MD_CTX *ctx = EVP_MD_CTX_new();
   if (!ctx)
-    throw std::runtime_error("Failed to create EVP_MD_CTX");
+    throw std::runtime_error("EncryptionUtility log | sha384(): "
+                             "Failed to create EVP_MD_CTX");
   unsigned char hash[EVP_MAX_MD_SIZE];
   unsigned int length = 0;
   if (EVP_DigestInit_ex(ctx, EVP_sha384(), nullptr) != 1 ||
       EVP_DigestUpdate(ctx, input.data(), input.size()) != 1 ||
       EVP_DigestFinal_ex(ctx, hash, &length) != 1) {
     EVP_MD_CTX_free(ctx);
-    throw std::runtime_error("EVP digest calculation failed");
+    throw std::runtime_error("EncryptionUtility log | sha384(): "
+                             "EVP digest calculation failed");
   }
   EVP_MD_CTX_free(ctx);
   // Convert to hex string
@@ -105,14 +109,16 @@ std::string EncryptionUtility::sha384(const std::string &input) {
 std::string EncryptionUtility::sha512(const std::string &input) {
   EVP_MD_CTX *ctx = EVP_MD_CTX_new();
   if (!ctx)
-    throw std::runtime_error("Failed to create EVP_MD_CTX");
+    throw std::runtime_error("EncryptionUtility log | sha512(): "
+                             "Failed to create EVP_MD_CTX");
   unsigned char hash[EVP_MAX_MD_SIZE];
   unsigned int length = 0;
   if (EVP_DigestInit_ex(ctx, EVP_sha512(), nullptr) != 1 ||
       EVP_DigestUpdate(ctx, input.data(), input.size()) != 1 ||
       EVP_DigestFinal_ex(ctx, hash, &length) != 1) {
     EVP_MD_CTX_free(ctx);
-    throw std::runtime_error("EVP digest calculation failed");
+    throw std::runtime_error("EncryptionUtility log | sha512(): "
+                             "EVP digest calculation failed");
   }
   EVP_MD_CTX_free(ctx);
   // Convert to hex string
@@ -212,5 +218,61 @@ EncryptionUtility::generatePassword(std::size_t passwordLength) {
     password += chars[dis(gen)];
   }
   return password;
+}
+/******************************************************************************/
+/**
+ * @brief This method will generate a private key.
+ *
+ * This method will generate a private key to be used at a SRP protocol.
+ * Requirements of the private key:
+ * - should be at in the range [1, N-1];
+ * - should be at least minSizeBits;
+ *
+ * @param nHex N in hexadecimal format.
+ * @param minSizeBits The minimum amount of bits that the private key should
+ * have.
+ *
+ * @return The private key in a string, in hexadecimal format.
+ */
+std::string
+EncryptionUtility::generatePrivateKey(const std::string &nHex,
+                                      const unsigned int minSizeBits) {
+  // Convert N from hex to BIGNUM
+  MessageExtractionFacility::UniqueBIGNUM nBn =
+      MessageExtractionFacility::hexToUniqueBIGNUM(nHex);
+  // Prepare context and result
+  EncryptionUtility::BnCtxPtr ctx(BN_CTX_new());
+  if (!ctx) {
+    throw std::runtime_error("EncryptionUtility log | generatePrivateKey(): "
+                             "Failed to allocate BN_CTX.");
+  }
+  EncryptionUtility::BnPtr privateKey(BN_new());
+  if (!privateKey) {
+    throw std::runtime_error("EncryptionUtility log | generatePrivateKey(): "
+                             "Failed to allocate BIGNUM.");
+  }
+  int nBits = BN_num_bits(nBn.get());
+  if (minSizeBits > nBits) {
+    throw std::runtime_error(
+        "EncryptionUtility log | generatePrivateKey(): minSizeBits greater "
+        "than the number of bits of N");
+  }
+  int bits = std::max(static_cast<int>(minSizeBits), nBits);
+  // Generate random private key: 1 <= privateKey < N, at least minSizeBits bits
+  while (true) {
+    if (!BN_rand(privateKey.get(), bits, BN_RAND_TOP_ANY, BN_RAND_BOTTOM_ANY)) {
+      throw std::runtime_error(
+          "EncryptionUtility::generatePrivateKey(): BN_rand failed.");
+    }
+    // Ensure 1 <= privateKey < N and at least minSizeBits bits
+    if (BN_cmp(privateKey.get(), BN_value_one()) >= 0 &&
+        BN_cmp(privateKey.get(), nBn.get()) < 0 &&
+        BN_num_bits(privateKey.get()) >= static_cast<int>(minSizeBits)) {
+      break;
+    }
+    // Otherwise, try again
+  }
+  // Convert to hex string
+  return MessageExtractionFacility::BIGNUMToHex(privateKey.get());
 }
 /******************************************************************************/

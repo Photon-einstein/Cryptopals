@@ -48,6 +48,14 @@ public:
    */
   const std::string &getSrpParametersFilenameLocation();
 
+  /**
+   * @brief This method returns the minimum size of a private key in bits,
+   * according to the SRP protocol.
+   *
+   * @return The minimum size of a private key at the SPP protocol, in bits.
+   */
+  const unsigned int &getMinSizePrivateKey();
+
 private:
   /* private methods */
 
@@ -56,6 +64,7 @@ private:
   const std::string _srpParametersFilename{"../input/SrpParameters.json"};
   std::map<unsigned int, SrpParametersLoader::SrpParameters> _srpParametersMap;
   unsigned int _groupId;
+  static unsigned int _minSizePrivateKey;
 };
 
 } // namespace MyCryptoLibrary

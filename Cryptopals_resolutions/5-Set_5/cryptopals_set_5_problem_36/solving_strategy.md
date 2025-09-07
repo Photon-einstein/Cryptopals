@@ -405,7 +405,7 @@ Specifications more information:
   30.4. Generate v = g^x mod N (Done)
   30.5. Add the following leg at the client: (Done)
 
-  ```bash
+  ```text
   | Send U, v                    |
   |----------------------------->|
   ```
@@ -415,7 +415,7 @@ Specifications more information:
 - U be a new one;
 - v should be inside this space (0, N)
 
-  ```bash
+  ```text
   |        OK / Ack              |
   |<-----------------------------|
   ```
@@ -466,9 +466,9 @@ Complete message workflow:
 
 Proposed communication flow present at RFC 2945 pg.5:
 
-```bash
-  Client                             Host
---------                           ------
+```text
+  Client                             Server
+---------                           ---------
   U                           -->
                               <--    s, B, group_id
   A, H(H(N) XOR H(g) | H(U) | s | A | B | K) simplified to HMAC-SHA256(K, salt) in this problem
@@ -478,9 +478,9 @@ Proposed communication flow present at RFC 2945 pg.5:
 
 **Diagram to follow**
 
-```bash
-  Client                             Host
---------                           ------
+```text
+  Client                             Server
+---------                           ---------
   U                           -->   # Client sends username (U)
                               <--   # Server looks up (s, v, group_id), generates b, computes:
                                     # k = H(N | PAD(g))
@@ -495,8 +495,9 @@ Proposed communication flow present at RFC 2945 pg.5:
   # S = (B - k * g^x) ^ (a + u * x) mod N
   # K = H(S)
   # M = H(H(N) XOR H(g) | H(U) | s | A | B | K)   <-- FULL RFC 2945/5054 CLIENT PROOF
-  A, M                        -->
-                              <--   # Server computes:
+  U, A, M                     -->
+                              <--   # U serves to keep track of the state
+                                    # Server computes:
                                     # u = H(A | B)
                                     # S = (A * v^u) ^ b mod N
                                     # K = H(S)
@@ -554,6 +555,69 @@ Glossary:
 
 35. Add the first leg on server side of the Secure Remote Password protocol, Authentication phase (in progress)
 
-36. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
+- Endpoint name: /srp/auth/init
+- Endpoint goal: to allow the setting of the first exchange of information between the client and the server.
 
-37. Add the first leg on client side of the Secure Remote Password protocol (TBD)
+- Remaining Endpoint name: /srp/auth/complete
+- Remaining Endpoint goal: perform all the verifications and complete the authentication at the SRP protocol.
+
+```text
+  Client                             Host
+----------                         --------
+  # Client sends username (U)
+  U                           -->
+                              <--   # Server verifies U
+                                    # Server looks up (s, v, group_id), generates b, computes:
+                                    # k = H(N | PAD(g))
+                                    # B = kv + g^b mod N
+                                    # Sends s, B, group_id to client
+                                    s, B, groupId
+
+  # Client generates a, computes:
+  # A = g^a mod N
+  # u = H(A | B)
+  # x = H(s | P)
+  # S = (B - k * g^x) ^ (a + u * x) mod N
+  # K = H(S)
+```
+
+35.1. Add the sending of the U from the client side (Done)
+
+35.2. Add the verification of the U on the server side (Done)
+35.3. Add the lookup of s, v, group ID on the server side (Done)
+35.3.1. Verify salt (Done)
+35.3.2. Verify v (Done)
+35.3.3. Verify group ID (Done)
+
+35.4. Add the generation of the parameter b (private key) on the server side,
+should be abstracted to a utility, **should be at in the range [1, N-1] and**
+**should be at least 256 bits long** (in progress)
+35.5. Add the calculation of the parameter k on the server side, should be abstracted to a utility (TBD)
+35.6. Add the calculation of the parameter B (public key), should be abstracted to a utility,
+**constrains: 1 < B < N** (TBD)
+35.7. Send s, B and group ID to the client, at the server side (TBD)
+
+35.8. Add the verification of the salt, it should be the same as the one that was sent during the
+registration step, at the client side (TBD)
+35.9. Add the verification of the B parameter, **constraint: 1 < B < N** at the client side (TBD).
+35.9. Add the verification of the group ID, if it matches what it has stored for that session continue
+with the authentication, if it doesn't match, then abort the authentication, at the client side (TBD)
+35.10. Add the generation of the parameter a (private key) on the client side,
+should be abstracted to a utility, **should be at in the range [1, N-1] and**
+**should be at least 256 bits long**, at the client side (TBD)
+35.11. Add the calculation of the parameter A (public key), should be abstracted to a utility,
+**constrains: 1 < A < N**, at the client side (TBD)
+35.12. Add the calculation of the parameter u = H(A | B), at the client side (TBD)
+35.13. Add the calculation of the parameter x = H(s | P), use method already implemented at the
+registration step, at the client side (TBD)
+35.14. Add the calculation of the parameter S = (B - k _ g^x) ^ (a + u _ x) mod N, at the
+client side (TBD)
+35.15. Add the calculation of the parameter K = H(S) at the client side (TBD)
+
+36. Test manually with a binary client, the authentication step (TBD)
+
+37. Test with curl requests manually the authentication step, the init phase (TBD)
+
+38. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
+
+39. Add the first leg on client side of the Secure Remote Password protocol (TBD)
