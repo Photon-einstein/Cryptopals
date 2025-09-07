@@ -143,15 +143,14 @@ private:
   void handleRegisterComplete();
 
   /**
-   * @brief This method runs the route that performs the Secure Remote
-   * Password protocol authentication.
+   * @brief This method runs the route that performs the initialization of the
+   * Secure Remote Password protocol authentication step.
    *
    * This method runs the route that performs the Secure Remote Password
-   * protocol. It receives requests and make all the calculations to
-   * response to the requests, creating a symmetric key for each connection
-   * request, after performing the authentication.
+   * protocol initialization step, and the verifications and calculations
+   * associated with that exchange.
    */
-  void authenticationRoute();
+  void handleAuthenticationInit();
 
   /**
    * @brief This method perform the validation of the extracted v parameter

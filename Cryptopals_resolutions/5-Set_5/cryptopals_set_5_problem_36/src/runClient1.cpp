@@ -23,6 +23,16 @@ int main(void) {
   if (registrationResult == false) {
     throw std::runtime_error("runClient1 log | registration() failed.");
   }
+  std::cout << "\nClient " << clientId
+            << "'s registration was completed with success.\n"
+            << std::endl;
+  const bool authenticationResult =
+      client->authentication(client->getProductionPort());
+  if (authenticationResult == false) {
+    throw std::runtime_error("runClient1 log | authentication() failed.");
+  }
+  std::cout << "Client " << clientId
+            << "'s authentication was completed with success." << std::endl;
   /* end of the work */
   end = clock();
   time = (double)(end - start) / CLOCKS_PER_SEC;

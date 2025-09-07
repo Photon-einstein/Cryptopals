@@ -144,7 +144,7 @@ void Server::setupRoutes() {
   rootEndpoint();
   handleRegisterInit();
   handleRegisterComplete();
-  authenticationRoute();
+  handleAuthenticationInit();
   registeredUsersEndpoint();
 }
 /******************************************************************************/
@@ -263,6 +263,7 @@ void Server::handleRegisterComplete() {
               parsedJson.at("clientId").get<std::string>();
           std::string extractedVHex = parsedJson.at("v").get<std::string>();
           // client ID validation
+          std::lock_guard<std::mutex> lock(_secureRemotePasswordMapMutex);
           if (extractedClientId.empty()) {
             throw std::runtime_error("Server log | handleRegisterComplete(): "
                                      "ClientId is null");
@@ -315,16 +316,15 @@ void Server::handleRegisterComplete() {
 }
 /******************************************************************************/
 /**
- * @brief This method runs the route that performs the Secure Remote Password
- * protocol authentication.
+ * @brief This method runs the route that performs the initialization of the
+ * Secure Remote Password protocol authentication step.
  *
- * This method runs the route that performs the Secure Remote Password protocol.
- * It receives requests and make all the calculations to response to the
- * requests, creating a symmetric key for each connection request, after
- * performing the authentication.
+ * This method runs the route that performs the Secure Remote Password protocol
+ * initialization step, and the verifications and calculations associated with
+ * that exchange.
  */
-void Server::authenticationRoute() {
-  CROW_ROUTE(_app, "/authentication")
+void Server::handleAuthenticationInit() {
+  CROW_ROUTE(_app, "/srp/auth/init")
       .methods("POST"_method)([&](const crow::request &req) {
         crow::json::wvalue res;
         try {
@@ -333,9 +333,71 @@ void Server::authenticationRoute() {
               parsedJson.at("clientId").get<std::string>();
           if (_debugFlag) {
             std::cout << "\n--- Server log | Extracted Data from a new client "
-                         "request connection ---"
+                         "request authentication ---"
                       << std::endl;
             std::cout << "\tClient ID: " << extractedClientId << std::endl;
+            std::cout << "----------------------" << std::endl;
+          }
+          // client id verification
+          std::lock_guard<std::mutex> lock(_secureRemotePasswordMapMutex);
+          if (extractedClientId.empty()) {
+            throw std::runtime_error("Server log | handleAuthenticationInit(): "
+                                     "Client received is null");
+          } else if (_secureRemotePasswordMap.find(extractedClientId) ==
+                     _secureRemotePasswordMap.end()) {
+            throw std::runtime_error("Server log | handleAuthenticationInit(): "
+                                     "Client " +
+                                     extractedClientId +
+                                     " has not registered before.");
+          } else if (!_secureRemotePasswordMap[extractedClientId]
+                          ->registrationComplete) {
+            throw std::runtime_error("Server log | handleAuthenticationInit(): "
+                                     "Client " +
+                                     extractedClientId +
+                                     " has not a completed registration.");
+          }
+          const unsigned int groupId{
+              _secureRemotePasswordMap[extractedClientId]->_groupId};
+          const long unsigned int saltSize{
+              _secureRemotePasswordMap[extractedClientId]->_salt.size()};
+          const long unsigned int minSaltSize{
+              _minSaltSizesMap.at(_srpParametersMap.at(groupId)._hashName)};
+          const std::string extractedVHex{
+              _secureRemotePasswordMap[extractedClientId]->_vHex};
+          if (_srpParametersMap.find(groupId) == _srpParametersMap.end()) {
+            throw std::runtime_error("Server log | handleAuthenticationInit(): "
+                                     "Client " +
+                                     extractedClientId +
+                                     ": stored group ID is not valid.");
+          } else if (saltSize < minSaltSize) {
+            throw std::runtime_error(
+                "Server log | handleAuthenticationInit(): "
+                "Client " +
+                extractedClientId +
+                ": stored salt doesn't meet minimum size criteria.");
+          } else if (!vValidation(extractedClientId, extractedVHex)) {
+            throw std::runtime_error(
+                "Server log | handleAuthenticationInit(): "
+                "Client " +
+                extractedClientId +
+                ": stored v doesn't meet the minimum criteria.");
+          }
+          // private key generation
+          const unsigned int minPrivateKeyBits =
+              _secureRemotePasswordMap[extractedClientId]
+                  ->_secureRemotePassword->getMinSizePrivateKey();
+          _secureRemotePasswordMap[extractedClientId]->_privateKeyHex =
+              EncryptionUtility::generatePrivateKey(
+                  _srpParametersMap.at(groupId)._nHex, minPrivateKeyBits);
+          if (_debugFlag) {
+            std::cout << "\n--- Server log | Private key generated at the "
+                         "authentication phase---"
+                      << std::endl;
+            std::cout << "\tClient ID: " << extractedClientId << std::endl;
+            std::cout
+                << "\tPrivate key: "
+                << _secureRemotePasswordMap[extractedClientId]->_privateKeyHex
+                << std::endl;
             std::cout << "----------------------" << std::endl;
           }
         } catch (const nlohmann::json::exception &e) {

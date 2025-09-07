@@ -158,6 +158,43 @@ const bool Client::registration(const int portServerNumber,
 }
 /******************************************************************************/
 /**
+ * @brief This method will perform the authentication step with a given
+ * server.
+ *
+ * This method perform the authentication step with a given server.
+ * It is assumed that the registration was already completed at a previous
+ * time.
+ *
+ * @param portServerNumber The number of the server to use in this exchange.
+ *
+ * @return True if the authentication succeed, false otherwise.
+ */
+const bool Client::authentication(const int portServerNumber) {
+  bool registrationResult{true};
+  try {
+    if (portServerNumber < 1023 || (portServerNumber != _portServerProduction &&
+                                    portServerNumber != _portServerTest)) {
+      throw std::runtime_error("Client log | authentication(): "
+                               "Invalid port server number used.");
+    }
+    // check if the registration was already done
+    if (!_sessionData->registrationComplete) {
+      throw std::runtime_error("Client log | authentication(): "
+                               "Registration is not completed.");
+    }
+    registrationResult = authenticationInit(portServerNumber);
+    if (!registrationResult) {
+      return registrationResult;
+    }
+    return true;
+  } catch (const std::exception &e) {
+    std::cerr << e.what() << std::endl;
+    registrationResult = false;
+    return registrationResult;
+  }
+}
+/******************************************************************************/
+/**
  * @brief This method will perform the first step of the registration
  * with a given server.
  *
@@ -349,6 +386,47 @@ const bool Client::registrationComplete(const int portServerNumber,
     std::cerr << e.what() << std::endl;
     registrationCompleteResult = false;
     return registrationCompleteResult;
+  }
+}
+/******************************************************************************/
+/**
+ * @brief This method will perform the first step of the authentication
+ * with a given server.
+ *
+ * This method perform the first step of the authentication with a given
+ * server. It will perform the calculations and verifications involved
+ * at the first leg of the authentication of SRP protocol.
+ *
+ * @param portServerNumber The number of the server to use in this exchange.
+ *
+ * @return True if the authenticationInit succeed, false otherwise.
+ */
+const bool Client::authenticationInit(const int portServerNumber) {
+  bool authenticationInitResult{true};
+  try {
+    std::string requestBody = fmt::format(
+        R"({{
+        "clientId": "{}"
+    }})",
+        getClientId());
+    cpr::Response response =
+        cpr::Post(cpr::Url{std::string("http://localhost:") +
+                           std::to_string(portServerNumber) +
+                           std::string("/srp/auth/init")},
+                  cpr::Header{{"Content-Type", "application/json"}},
+                  cpr::Body{requestBody});
+    if (_debugFlag) {
+      printServerResponse(response);
+    }
+    if (response.status_code != 201) {
+      throw std::runtime_error("Client log | authenticationInit(): "
+                               "authentication failed");
+    }
+    return authenticationInitResult;
+  } catch (const std::exception &e) {
+    std::cerr << e.what() << std::endl;
+    authenticationInitResult = false;
+    return authenticationInitResult;
   }
 }
 /******************************************************************************/
