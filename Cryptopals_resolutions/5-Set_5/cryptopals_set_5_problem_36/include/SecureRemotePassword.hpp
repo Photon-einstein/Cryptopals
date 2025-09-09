@@ -65,6 +65,7 @@ private:
   std::map<unsigned int, SrpParametersLoader::SrpParameters> _srpParametersMap;
   unsigned int _groupId;
   static unsigned int _minSizePrivateKey;
+  std::map<unsigned int, MessageExtractionFacility::UniqueBIGNUM> _kMap;
 };
 
 } // namespace MyCryptoLibrary

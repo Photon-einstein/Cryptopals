@@ -4,9 +4,11 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
+#include <iomanip>
 #include <memory>
 #include <openssl/bn.h>
 #include <openssl/err.h>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -92,6 +94,15 @@ std::string BIGNUMToHex(BIGNUM *bn);
  * @throws std::runtime_error if conversion fails.
  */
 std::string BIGNUMToDec(BIGNUM *bn);
+
+/**
+ * @brief Converts an unsigned int to a zero-padded hexadecimal string.
+ *
+ * @param value The unsigned integer to convert.
+ * @param width The minimum width of the resulting hex string (default: 2).
+ * @return The hexadecimal string representation, zero-padded to 'width'.
+ */
+std::string uintToHex(unsigned int value, size_t width = 2);
 
 }; // namespace MessageExtractionFacility
 

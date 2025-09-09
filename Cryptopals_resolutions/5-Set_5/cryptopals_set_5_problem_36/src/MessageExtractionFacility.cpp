@@ -177,3 +177,17 @@ std::string MessageExtractionFacility::BIGNUMToDec(BIGNUM *bn) {
   return dec_str;
 }
 /******************************************************************************/
+/**
+ * @brief Converts an unsigned int to a zero-padded hexadecimal string.
+ *
+ * @param value The unsigned integer to convert.
+ * @param width The minimum width of the resulting hex string (default: 2).
+ * @return The hexadecimal string representation, zero-padded to 'width'.
+ */
+std::string MessageExtractionFacility::uintToHex(unsigned int value,
+                                                 size_t width) {
+  std::ostringstream oss;
+  oss << std::hex << std::setw(width) << std::setfill('0') << value;
+  return oss.str();
+}
+/******************************************************************************/
