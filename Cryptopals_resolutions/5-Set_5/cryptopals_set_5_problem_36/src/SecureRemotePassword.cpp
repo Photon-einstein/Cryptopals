@@ -4,6 +4,7 @@
 #include <openssl/evp.h>
 #include <stdexcept>
 
+#include "./../include/EncryptionUtility.hpp"
 #include "./../include/SecureRemotePassword.hpp"
 
 /* static fields initialization */
@@ -26,6 +27,11 @@ MyCryptoLibrary::SecureRemotePassword::SecureRemotePassword(
     : _debugFlag{debugFlag} {
   _srpParametersMap = SrpParametersLoader::loadSrpParameters(
       getSrpParametersFilenameLocation());
+  for (const auto &[groupId, params] : _srpParametersMap) {
+    const std::string gHex = MessageExtractionFacility::uintToHex(params._g);
+    _kMap[groupId] =
+        EncryptionUtility::calculateK(params._nHex, gHex, params._hashName);
+  }
 }
 /******************************************************************************/
 MyCryptoLibrary::SecureRemotePassword::~SecureRemotePassword() {}

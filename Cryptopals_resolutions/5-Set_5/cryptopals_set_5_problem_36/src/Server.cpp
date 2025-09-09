@@ -1,4 +1,5 @@
 #include <nlohmann/json.hpp>
+#include <openssl/bn.h>
 #include <openssl/conf.h>
 #include <openssl/err.h>
 #include <openssl/evp.h>
@@ -502,5 +503,67 @@ void Server::registeredUsersEndpoint() {
       return crow::response(400, err);
     }
   });
+}
+/******************************************************************************/
+/**
+ * @brief Helper: Convert hex string to byte vector
+ */
+std::vector<uint8_t> hexToBytes(const std::string &hex) {
+  std::vector<uint8_t> bytes;
+  for (size_t i = 0; i < hex.length(); i += 2) {
+    std::string byteString = hex.substr(i, 2);
+    uint8_t byte = (uint8_t)strtol(byteString.c_str(), nullptr, 16);
+    bytes.push_back(byte);
+  }
+  return bytes;
+}
+
+/**
+ * @brief Helper: Pad a byte vector to a given size
+ */
+std::vector<uint8_t> padLeft(const std::vector<uint8_t> &input, size_t size) {
+  if (input.size() >= size)
+    return input;
+  std::vector<uint8_t> padded(size - input.size(), 0x00);
+  padded.insert(padded.end(), input.begin(), input.end());
+  return padded;
+}
+
+/**
+ * @brief This method calculate the value of k
+ */
+std::vector<uint8_t> calculateK(const std::string &nHex,
+                                const std::string &gHex,
+                                const std::string &hashName) {
+  // 1. Convert N and g to bytes
+  std::vector<uint8_t> nBytes = hexToBytes(nHex);
+  std::vector<uint8_t> gBytes = hexToBytes(gHex);
+
+  // 2. Pad g to length of N
+  std::vector<uint8_t> gPadded = padLeft(gBytes, nBytes.size());
+
+  // 3. Concatenate N || PAD(g)
+  std::vector<uint8_t> input(nBytes);
+  input.insert(input.end(), gPadded.begin(), gPadded.end());
+
+  // 4. Hash with the agreed hash function
+  const EVP_MD *md = nullptr;
+  if (hashName == "SHA-256")
+    md = EVP_sha256();
+  else if (hashName == "SHA-384")
+    md = EVP_sha384();
+  else if (hashName == "SHA-512")
+    md = EVP_sha512();
+  else
+    throw std::runtime_error("Unsupported hash");
+
+  std::vector<uint8_t> hash(EVP_MAX_MD_SIZE);
+  unsigned int hashLen = 0;
+  EVP_Digest(input.data(), input.size(), hash.data(), &hashLen, md, nullptr);
+  hash.resize(hashLen);
+
+  return hash; // If you want k as bytes
+               // If you want k as a BIGNUM:
+               // BIGNUM* k = BN_bin2bn(hash.data(), hash.size(), nullptr);
 }
 /******************************************************************************/
