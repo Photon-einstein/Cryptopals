@@ -12,9 +12,13 @@
  * @param salt The salt that is going to be used with this client ID session.
  * @param hash The hash algorithm that is to be used with  this client ID
  * session.
+ * @param debugFlag If true there is be more information in the logs, false
+ * otherwise.
  */
 SessionData::SessionData(const unsigned int groupId, const std::string &salt,
-                         const std::string &hash) {
+                         const std::string &hash, const bool debugFlag)
+    : _secureRemotePassword{
+          std::make_unique<MyCryptoLibrary::SecureRemotePassword>(debugFlag)} {
   if (groupId <= 0 || salt.empty() || hash.empty()) {
     throw std::runtime_error("SessionData log | constructor(): "
                              "Invalid input parameters given.");

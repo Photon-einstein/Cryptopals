@@ -285,8 +285,8 @@ const bool Client::registrationInit(const int portServerNumber,
                                "Minimum salt size is not met.");
     }
     // Data storage
-    _sessionData = std::make_unique<SessionData>(extractedGroupId,
-                                                 extractedSalt, extractedSha);
+    _sessionData = std::make_unique<SessionData>(
+        extractedGroupId, extractedSalt, extractedSha, _debugFlag);
     if (_sessionData.get() == nullptr) {
       throw std::runtime_error("Client log | registrationInit(): "
                                "_sessionData value returned is null.");
