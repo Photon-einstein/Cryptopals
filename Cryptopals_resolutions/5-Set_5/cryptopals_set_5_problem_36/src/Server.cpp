@@ -220,7 +220,8 @@ void Server::handleRegisterInit() {
           const std::string hash =
               _srpParametersMap[extractedGroupId]._hashName;
           _secureRemotePasswordMap[extractedClientId] =
-              std::make_unique<SessionData>(extractedGroupId, salt, hash);
+              std::make_unique<SessionData>(extractedGroupId, salt, hash,
+                                            _debugFlag);
           // reply to the client with the group ID parameters and the salt s
           res["clientId"] = extractedClientId;
           res["groupId"] = extractedGroupId;

@@ -18,9 +18,11 @@ struct SessionData {
    * session
    * @param salt The salt that is going to be used with this client ID session.
    * @param hash The hash algorithm that is to be used with client ID session.
+   * @param debugFlag If true there is be more information in the logs, false
+   * otherwise.
    */
   explicit SessionData(const unsigned int groupId, const std::string &salt,
-                       const std::string &hash);
+                       const std::string &hash, const bool debugFlag);
 
   /**
    * @brief This method will perform the destruction of the SessionData

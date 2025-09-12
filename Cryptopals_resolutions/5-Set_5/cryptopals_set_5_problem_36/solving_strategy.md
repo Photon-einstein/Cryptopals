@@ -596,9 +596,9 @@ should be abstracted to a utility, **should be at in the range [1, N-1] and**
 formula: k = H(N | PAD(g)) (Done)
 
 35.6. Add the calculation of the parameter B (public key), should be abstracted to a utility,
-**constrains: 1 < B < N, formula: B = kv + g^b mod N** (in progress)
+**constrains: 1 < B < N, formula: B = kv + g^b mod N** (Done)
 
-35.7. Send s, B and group ID to the client, at the server side (TBD)
+35.7. Send s, B and group ID to the client, at the server side (in progress)
 35.8. Add the verification of the salt, it should be the same as the one that was sent during the
 registration step, at the client side (TBD)
 35.9. Add the verification of the B parameter, **constraint: 1 < B < N** at the client side (TBD).
