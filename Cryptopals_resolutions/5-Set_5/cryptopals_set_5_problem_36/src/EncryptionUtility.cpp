@@ -220,62 +220,6 @@ EncryptionUtility::generatePassword(std::size_t passwordLength) {
 }
 /******************************************************************************/
 /**
- * @brief This method will generate a private key.
- *
- * This method will generate a private key to be used at a SRP protocol.
- * Requirements of the private key:
- * - should be at in the range [1, N-1];
- * - should be at least minSizeBits;
- *
- * @param nHex N in hexadecimal format.
- * @param minSizeBits The minimum amount of bits that the private key should
- * have.
- *
- * @return The private key in a string, in hexadecimal format.
- */
-std::string
-EncryptionUtility::generatePrivateKey(const std::string &nHex,
-                                      const unsigned int minSizeBits) {
-  // Convert N from hex to BIGNUM
-  MessageExtractionFacility::UniqueBIGNUM nBn =
-      MessageExtractionFacility::hexToUniqueBIGNUM(nHex);
-  // Prepare context and result
-  EncryptionUtility::BnCtxPtr ctx(BN_CTX_new());
-  if (!ctx) {
-    throw std::runtime_error("EncryptionUtility log | generatePrivateKey(): "
-                             "Failed to allocate BN_CTX.");
-  }
-  EncryptionUtility::BnPtr privateKey(BN_new());
-  if (!privateKey) {
-    throw std::runtime_error("EncryptionUtility log | generatePrivateKey(): "
-                             "Failed to allocate BIGNUM.");
-  }
-  int nBits = BN_num_bits(nBn.get());
-  if (minSizeBits > nBits) {
-    throw std::runtime_error(
-        "EncryptionUtility log | generatePrivateKey(): minSizeBits greater "
-        "than the number of bits of N");
-  }
-  int bits = std::max(static_cast<int>(minSizeBits), nBits);
-  // Generate random private key: 1 <= privateKey < N, at least minSizeBits bits
-  while (true) {
-    if (!BN_rand(privateKey.get(), bits, BN_RAND_TOP_ANY, BN_RAND_BOTTOM_ANY)) {
-      throw std::runtime_error(
-          "EncryptionUtility::generatePrivateKey(): BN_rand failed.");
-    }
-    // Ensure 1 <= privateKey < N and at least minSizeBits bits
-    if (BN_cmp(privateKey.get(), BN_value_one()) >= 0 &&
-        BN_cmp(privateKey.get(), nBn.get()) < 0 &&
-        BN_num_bits(privateKey.get()) >= static_cast<int>(minSizeBits)) {
-      break;
-    }
-    // Otherwise, try again
-  }
-  // Convert to hex string
-  return MessageExtractionFacility::BIGNUMToHex(privateKey.get());
-}
-/******************************************************************************/
-/**
  * @brief Helper: Pad a byte vector to a given size.
  *
  * Pads the input vector with leading zeros so that its size matches the

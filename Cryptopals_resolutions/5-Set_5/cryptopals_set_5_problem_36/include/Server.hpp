@@ -102,6 +102,12 @@ public:
    */
   const unsigned int getDefaultGroupId();
 
+  /**
+   * @brief Returns whether this class is acting as a server.
+   * @return True if this is a server, false otherwise.
+   */
+  static bool getIsServerFlag();
+
 private:
   /* private methods */
 
@@ -194,6 +200,7 @@ private:
 
   const std::map<std::string, unsigned int> _minSaltSizesMap;
   const std::unordered_map<std::string, EncryptionUtility::HashFn> _hashMap;
+  static bool _isServerFlag;
 };
 
 #endif // SERVER_HPP

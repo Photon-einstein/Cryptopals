@@ -11,6 +11,8 @@
 #include "./../include/Client.hpp"
 #include "./../include/EncryptionUtility.hpp"
 
+bool Client::_isServerFlag = false;
+
 /* constructor / destructor */
 
 /**
@@ -154,6 +156,10 @@ const bool Client::registration(const int portServerNumber,
     std::cerr << e.what() << std::endl;
     registrationResult = false;
     return registrationResult;
+  } catch (...) {
+    std::cerr << "Client log | Unknown exception caught" << std::endl;
+    registrationResult = false;
+    return registrationResult;
   }
 }
 /******************************************************************************/
@@ -191,8 +197,18 @@ const bool Client::authentication(const int portServerNumber) {
     std::cerr << e.what() << std::endl;
     registrationResult = false;
     return registrationResult;
+  } catch (...) {
+    std::cerr << "Client log | Unknown exception caught" << std::endl;
+    registrationResult = false;
+    return registrationResult;
   }
 }
+/******************************************************************************/
+/**
+ * @brief Returns whether this class is acting as a server.
+ * @return True if this is a server, false otherwise.
+ */
+bool Client::getIsServerFlag() { return _isServerFlag; }
 /******************************************************************************/
 /**
  * @brief This method will perform the first step of the registration
@@ -296,6 +312,10 @@ const bool Client::registrationInit(const int portServerNumber,
     std::cerr << e.what() << std::endl;
     registrationInitResult = false;
     return registrationInitResult;
+  } catch (...) {
+    std::cerr << "Client log | Unknown exception caught" << std::endl;
+    registrationInitResult = false;
+    return registrationInitResult;
   }
 }
 /******************************************************************************/
@@ -386,6 +406,10 @@ const bool Client::registrationComplete(const int portServerNumber,
     std::cerr << e.what() << std::endl;
     registrationCompleteResult = false;
     return registrationCompleteResult;
+  } catch (...) {
+    std::cerr << "Client log | Unknown exception caught" << std::endl;
+    registrationCompleteResult = false;
+    return registrationCompleteResult;
   }
 }
 /******************************************************************************/
@@ -427,6 +451,10 @@ const bool Client::authenticationInit(const int portServerNumber) {
     std::cerr << e.what() << std::endl;
     authenticationInitResult = false;
     return authenticationInitResult;
+  } catch (...) {
+    std::cerr << "Client log | Unknown exception caught" << std::endl;
+    authenticationInitResult = false;
+    return authenticationInitResult;
   }
 }
 /******************************************************************************/
@@ -459,6 +487,10 @@ void Client::printServerResponse(const cpr::Response &response) {
       std::cout << response.text << "\n";
       std::cerr << "Warning: Body is not valid JSON, printing raw. Error: "
                 << e.what() << "\n";
+    } catch (...) {
+      // Not valid JSON, print as raw text
+      std::cout << response.text << "\n";
+      std::cerr << "Client log | Unknown exception caught" << "\n";
     }
   }
 }

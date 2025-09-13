@@ -7,6 +7,8 @@
 #include "./../include/MessageExtractionFacility.hpp"
 #include "./../include/Server.hpp"
 
+bool Server::_isServerFlag = true;
+
 /* constructor / destructor */
 
 /**
@@ -133,6 +135,12 @@ const std::string &Server::getSrpParametersFilenameLocation() {
 const unsigned int Server::getDefaultGroupId() { return _defaultGroupId; }
 /******************************************************************************/
 /**
+ * @brief Returns whether this class is acting as a server.
+ * @return True if this is a server, false otherwise.
+ */
+bool Server::getIsServerFlag() { return _isServerFlag; }
+/******************************************************************************/
+/**
  * @brief This method will start the endpoints that the server
  * provides to his clients
  *
@@ -242,6 +250,10 @@ void Server::handleRegisterInit() {
               std::string("Server log | An unexpected error occurred: ") +
               e.what();
           return crow::response(400, err);
+        } catch (...) {
+          crow::json::wvalue err;
+          err["message"] = std::string("Client log | Unknown exception caught");
+          return crow::response(500, err);
         }
       });
 }
@@ -312,6 +324,10 @@ void Server::handleRegisterComplete() {
               std::string("Server log | An unexpected error occurred: ") +
               e.what();
           return crow::response(400, err);
+        } catch (...) {
+          crow::json::wvalue err;
+          err["message"] = std::string("Client log | Unknown exception caught");
+          return crow::response(500, err);
         }
       });
 }
@@ -388,7 +404,7 @@ void Server::handleAuthenticationInit() {
               _secureRemotePasswordMap[extractedClientId]
                   ->_secureRemotePassword->getMinSizePrivateKey();
           _secureRemotePasswordMap[extractedClientId]->_privateKeyHex =
-              EncryptionUtility::generatePrivateKey(
+              MyCryptoLibrary::SecureRemotePassword::generatePrivateKey(
                   _srpParametersMap.at(groupId)._nHex, minPrivateKeyBits);
           if (_debugFlag) {
             std::cout << "\n--- Server log | Private key generated at the "
@@ -401,6 +417,36 @@ void Server::handleAuthenticationInit() {
                 << std::endl;
             std::cout << "----------------------" << std::endl;
           }
+          // public key generation
+          _secureRemotePasswordMap[extractedClientId]->_publicKeyHex =
+              MyCryptoLibrary::SecureRemotePassword::calculatePublicKey(
+                  _secureRemotePasswordMap[extractedClientId]->_privateKeyHex,
+                  _srpParametersMap.at(groupId)._nHex,
+                  MessageExtractionFacility::uintToHex(
+                      _srpParametersMap[groupId]._g),
+                  Server::getIsServerFlag(),
+                  _secureRemotePasswordMap[extractedClientId]
+                      ->_secureRemotePassword->getKMap()
+                      .at(groupId)
+                      .get(),
+                  _secureRemotePasswordMap[extractedClientId]->_vHex);
+          if (_debugFlag) {
+            std::cout << "\n--- Server log | Public key generated at the "
+                         "authentication phase---"
+                      << std::endl;
+            std::cout << "\tClient ID: " << extractedClientId << std::endl;
+            std::cout
+                << "\tPublic key: "
+                << _secureRemotePasswordMap[extractedClientId]->_publicKeyHex
+                << std::endl;
+            std::cout << "----------------------" << std::endl;
+          }
+          // Send s, B and group ID to the client
+          res["clientId"] = extractedClientId;
+          res["salt"] = _secureRemotePasswordMap[extractedClientId]->_salt;
+          res["B"] = _secureRemotePasswordMap[extractedClientId]->_publicKeyHex;
+          res["groupId"] = groupId;
+          return crow::response(201, res);
         } catch (const nlohmann::json::exception &e) {
           crow::json::wvalue err;
           err["message"] =
@@ -412,8 +458,11 @@ void Server::handleAuthenticationInit() {
               std::string("Server log | An unexpected error occurred: ") +
               e.what();
           return crow::response(400, err);
+        } catch (...) {
+          crow::json::wvalue err;
+          err["message"] = std::string("Client log | Unknown exception caught");
+          return crow::response(500, err);
         }
-        return crow::response(201, res);
       });
 }
 /******************************************************************************/
@@ -466,6 +515,9 @@ bool Server::vValidation(const std::string &clientId, const std::string &vHex) {
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
     return false;
+  } catch (...) {
+    std::cerr << "Unknown exception caught" << std::endl;
+    return false;
   }
   return true;
 }
@@ -501,6 +553,10 @@ void Server::registeredUsersEndpoint() {
       err["message"] =
           std::string("Server log | An unexpected error occurred: ") + e.what();
       return crow::response(400, err);
+    } catch (...) {
+      crow::json::wvalue err;
+      err["message"] = std::string("Client log | Unknown exception caught");
+      return crow::response(500, err);
     }
   });
 }

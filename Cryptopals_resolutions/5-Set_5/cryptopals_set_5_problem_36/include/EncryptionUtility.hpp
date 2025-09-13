@@ -132,23 +132,6 @@ const std::map<std::string, unsigned int> getMinSaltSizes();
 const std::string generatePassword(std::size_t passwordLength = 16);
 
 /**
- * @brief This method will generate a private key.
- *
- * This method will generate a private key to be used at a SRP protocol.
- * Requirements of the private key:
- * - should be at in the range [1, N-1];
- * - should be at least minSizeBits;
- *
- * @param nHex N in hexadecimal format.
- * @param minSizeBits The minimum amount of bits that the private key should
- * have.
- *
- * @return The private key in a string, in hexadecimal format.
- */
-std::string generatePrivateKey(const std::string &nHex,
-                               const unsigned int minSizeBits);
-
-/**
  * @brief Helper: Pad a byte vector to a given size.
  *
  * Pads the input vector with leading zeros so that its size matches the
