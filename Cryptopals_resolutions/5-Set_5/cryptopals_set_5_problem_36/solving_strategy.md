@@ -594,27 +594,32 @@ should be abstracted to a utility, **should be at in the range [1, N-1] and**
 **should be at least 256 bits long** (Done)
 35.5. Add the calculation of the parameter k on the server side, should be abstracted to a utility,
 formula: k = H(N | PAD(g)) (Done)
-
+35.5.1. Add tests to the k[groupID] values (Done)
 35.6. Add the calculation of the parameter B (public key), should be abstracted to a utility,
 **constrains: 1 < B < N, formula: B = kv + g^b mod N** (Done)
+35.7. Add call at the server side, to calculate his public key B (Done)
+35.8. Send s, B and group ID to the client, at the server side (Done)
 
-35.7. Send s, B and group ID to the client, at the server side (in progress)
-35.8. Add the verification of the salt, it should be the same as the one that was sent during the
+35.9. Add reception of the s, B and group ID and its validation at the client side(in progress)
+
+35.10. Add call at the client side, to calculate his private key a (TBD)
+35.11. Add call at the client side, to calculate his public key A (TBD)
+35.12. Add the verification of the salt, it should be the same as the one that was sent during the
 registration step, at the client side (TBD)
-35.9. Add the verification of the B parameter, **constraint: 1 < B < N** at the client side (TBD).
-35.9. Add the verification of the group ID, if it matches what it has stored for that session continue
+35.13. Add the verification of the B parameter, **constraint: 1 < B < N** at the client side (TBD).
+35.14. Add the verification of the group ID, if it matches what it has stored for that session continue
 with the authentication, if it doesn't match, then abort the authentication, at the client side (TBD)
-35.10. Add the generation of the parameter a (private key) on the client side,
+35.15. Add the generation of the parameter a (private key) on the client side,
 should be abstracted to a utility, **should be at in the range [1, N-1] and**
 **should be at least 256 bits long**, at the client side (TBD)
-35.11. Add the calculation of the parameter A (public key), should be abstracted to a utility,
+35.16. Add the calculation of the parameter A (public key), should be abstracted to a utility,
 **constrains: 1 < A < N**, at the client side (TBD)
-35.12. Add the calculation of the parameter u = H(A | B), at the client side (TBD)
-35.13. Add the calculation of the parameter x = H(s | P), use method already implemented at the
+35.17. Add the calculation of the parameter u = H(A | B), at the client side (TBD)
+35.18. Add the calculation of the parameter x = H(s | P), use method already implemented at the
 registration step, at the client side (TBD)
-35.14. Add the calculation of the parameter S = (B - k _ g^x) ^ (a + u _ x) mod N, at the
+35.19. Add the calculation of the parameter S = (B - k _ g^x) ^ (a + u _ x) mod N, at the
 client side (TBD)
-35.15. Add the calculation of the parameter K = H(S) at the client side (TBD)
+35.20. Add the calculation of the parameter K = H(S) at the client side (TBD)
 
 36. Test manually with a binary client, the authentication step (TBD)
 

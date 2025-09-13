@@ -122,6 +122,12 @@ public:
    */
   const bool authentication(const int portServerNumber);
 
+  /**
+   * @brief Returns whether this class is acting as a server.
+   * @return True if this is a server, false otherwise.
+   */
+  static bool getIsServerFlag();
+
 private:
   /* private methods */
 
@@ -238,6 +244,7 @@ private:
   const unsigned int _passwordSize{20}; // bytes
   const std::unordered_map<std::string, EncryptionUtility::HashFn> _hashMap;
   const std::string _serverConfirmationMessage{"Ack"};
+  static bool _isServerFlag;
 };
 
 #endif // CLIENT_HPP

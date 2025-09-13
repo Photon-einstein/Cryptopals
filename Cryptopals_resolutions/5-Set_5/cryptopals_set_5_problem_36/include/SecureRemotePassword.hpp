@@ -73,6 +73,23 @@ public:
   getKMap() const;
 
   /**
+   * @brief This method will generate a private key.
+   *
+   * This method will generate a private key to be used at a SRP protocol.
+   * Requirements of the private key:
+   * - should be at in the range [1, N-1];
+   * - should be at least minSizeBits;
+   *
+   * @param nHex N in hexadecimal format.
+   * @param minSizeBits The minimum amount of bits that the private key should
+   * have.
+   *
+   * @return The private key in a string, in hexadecimal format.
+   */
+  static std::string generatePrivateKey(const std::string &nHex,
+                                        const unsigned int minSizeBits);
+
+  /**
    * @brief Calculates the SRP public key (A or B).
    *
    * For the client: A = g^a mod N

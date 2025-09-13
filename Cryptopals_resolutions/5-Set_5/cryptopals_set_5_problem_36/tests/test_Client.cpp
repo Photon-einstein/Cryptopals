@@ -22,13 +22,14 @@ TEST(ClientTest,
   EXPECT_EQ(client.getTestPort(), expectedServerTestPort);
   EXPECT_EQ(client.getSrpParametersFilenameLocation(),
             expectedSrpParametersFilename);
+  EXPECT_FALSE(Client::getIsServerFlag());
 }
 
 /**
  * @test Test the correctness of the construction of the Client class, with
  * invalid input parameters given.
  * @brief Test the correctness of the construction of the Client class, with
- * invalid input parameters given.
+ * invalid input parameters given, should throw an error.
  */
 TEST(ClientTest,
      ClientConstructor_WithInvalidInputParameters_ShouldThrowAnError) {
@@ -45,7 +46,8 @@ TEST(ClientTest,
 /**
  * @test Test the correctness of {get/set}ProductionPort in the Client class.
  * @brief Test the correctness of {get/set}ProductionPort in the Client class,
- * with valid production port provided at the setProductionPort.
+ * with valid production port provided at the setProductionPort, should match
+ * the reference.
  */
 TEST(
     ClientTest,
@@ -56,12 +58,14 @@ TEST(
   Client client(expectedClientId, debugFlag);
   client.setProductionPort(expectedServerProductionPort);
   EXPECT_EQ(client.getProductionPort(), expectedServerProductionPort);
+  EXPECT_FALSE(Client::getIsServerFlag());
 }
 
 /**
  * @test Test the correctness of {get/set}ProductionPort in the Client class.
  * @brief Test the correctness of {get/set}ProductionPort in the Client class,
- * with invalid production port provided at the setProductionPort.
+ * with invalid production port provided at the setProductionPort, should throw
+ * an error.
  */
 TEST(
     ClientTest,
@@ -82,7 +86,7 @@ TEST(
 /**
  * @test Test the correctness of {get/set}TestPort in the Client class.
  * @brief Test the correctness of {get/set}TestPort in the Client class, with
- * valid test port provided at the setTestPort.
+ * valid test port provided at the setTestPort, should match the reference.
  */
 TEST(ClientTest,
      SetTestPort_WithValidInputParametersAtSetTestPort_ShouldMatchReference) {
@@ -92,12 +96,13 @@ TEST(ClientTest,
   Client client(expectedClientId, debugFlag);
   client.setTestPort(expectedServerTestPort);
   EXPECT_EQ(client.getTestPort(), expectedServerTestPort);
+  EXPECT_FALSE(Client::getIsServerFlag());
 }
 
 /**
  * @test Test the correctness of {get/set}TestPort in the Client class.
  * @brief Test the correctness of {get/set}TestPort in the Client class, with
- * invalid test port provided at the setTestPort.
+ * invalid test port provided at the setTestPort, should throw an error.
  */
 TEST(ClientTest,
      SetTestPort_WithInvalidInputParametersAtSetTestPort_ShouldThrowAnError) {
