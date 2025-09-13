@@ -356,11 +356,9 @@ Example of the kind of response by the given server:
     27.7. Curl with no userId field: (Done)
 
 28. Add tests to the Registration method at the client side (Done)
-
 29. Extract the first leg of the registration to a shared method, and fix the tests if needed (Done)
-
 30. Add the skeleton of the registration process on the client side, the second leg,
-    with the following scope:
+    with the following scope, study phase (Done)
 
 - handleRegisterComplete() → handles /srp/register/complete (At the server side)
 
@@ -399,32 +397,30 @@ Specifications more information:
   Use a secure PRNG (e.g., OpenSSL RAND_bytes, C++ std::random_device + std::uniform_int_distribution).
   Include alphanumeric + special characters to maximize entropy.
 
-  30.1. Add an auxiliary method to generate a password, minimum size should be 16 bytes (Done)
-  30.2. Generate a password at the client side (Done)
-  30.3. Generate x = H(s | P) (Done)
-  30.4. Generate v = g^x mod N (Done)
-  30.5. Add the following leg at the client: (Done)
+30. Add an auxiliary method to generate a password, minimum size should be 16 bytes (Done)
+31. Generate a password at the client side (Done)
+32. Generate x = H(s | P) (Done)
+33. Generate v = g^x mod N (Done)
+34. Add the following leg at the client: (Done)
 
-  ```text
-  | Send U, v                    |
-  |----------------------------->|
-  ```
+```text
+| Send U, v                    |
+|----------------------------->|
+```
 
-30. Add the reception and validation of the user U and the v parameter. (Done)
+35. Add the reception and validation of the user U and the v parameter. (Done)
 
 - U be a new one;
 - v should be inside this space (0, N)
 
-  ```text
-  |        OK / Ack              |
-  |<-----------------------------|
-  ```
+```text
+|        OK / Ack              |
+|<-----------------------------|
+```
 
-31. If U and v are valid then store it inside the new session at the server side (Done)
-
-32. Perform the reception of the server response at the client side (Done)
-
-33. Perform manual tests of the registration step (Done).
+36. If U and v are valid then store it inside the new session at the server side (Done)
+37. Perform the reception of the server response at the client side (Done)
+38. Perform manual tests of the registration step (Done).
 
 - This includes setting a client running the registration process against a server up and running.
 
@@ -436,12 +432,12 @@ Curl in production environment:
 curl -X GET http://localhost:18080/srp/registered/users
 ```
 
-34. Add unit tests of the registration step (Done).
+39. Add unit tests of the registration step (Done).
 
 - Assess if a user tries to register more than one time, second time should return an error (Done);
 - If several users try to register with the server, the server should be able to handle all the registrations (Done)
 
-35. Refine the authentication process, including more detail on the information that should be
+40. Refine the authentication process, including more detail on the information that should be
     calculated and how (Done)
 
 **Registration Phase (already implemented):**
@@ -553,7 +549,7 @@ Glossary:
 - u is the scrambling parameter: u = H(A | B)
 - S = (A \* v^u) ^ b mod N
 
-35. Add the first leg on server side of the Secure Remote Password protocol, Authentication phase (in progress)
+41. Add the first leg on server side of the Secure Remote Password protocol, Authentication phase. Study phase (in progress)
 
 - Endpoint name: /srp/auth/init
 - Endpoint goal: to allow the setting of the first exchange of information between the client and the server.
@@ -581,50 +577,42 @@ Glossary:
   # K = H(S)
 ```
 
-35.1. Add the sending of the U from the client side (Done)
+42. Add the sending of the U from the client side (Done)
+43. Add the verification of the U on the server side (Done)
+44. Add the lookup of s, v, group ID on the server side (Done)
+45. Verify salt (Done)
+46. Verify v (Done)
+47. Verify group ID (Done)
+48. Add the generation of the parameter b (private key) on the server side,
+    should be abstracted to a utility, **should be at in the range [1, N-1] and**
+    **should be at least 256 bits long** (Done)
+49. Add the calculation of the parameter k on the server side, should be abstracted to a utility,
+    formula: k = H(N | PAD(g)) (Done)
+50. Add tests to the k[groupID] values (Done)
+51. Add the calculation of the parameter B (public key), should be abstracted to a utility,
+    **constrains: 1 < B < N, formula: B = kv + g^b mod N** (Done)
+52. Add call at the server side, to calculate his public key B (Done)
+53. Send s, B and group ID to the client, at the server side (Done)
+54. Add reception of the s, B and group ID and its validation at the client side (Done)
+55. Add call at the client side, to calculate his private key a (Done)
+56. Add call at the client side, to calculate his public key A (Done)
 
-35.2. Add the verification of the U on the server side (Done)
-35.3. Add the lookup of s, v, group ID on the server side (Done)
-35.3.1. Verify salt (Done)
-35.3.2. Verify v (Done)
-35.3.3. Verify group ID (Done)
+57. Add the verification of the B parameter, **constraint: 1 < B < N** at the client side (in progress).
 
-35.4. Add the generation of the parameter b (private key) on the server side,
-should be abstracted to a utility, **should be at in the range [1, N-1] and**
-**should be at least 256 bits long** (Done)
-35.5. Add the calculation of the parameter k on the server side, should be abstracted to a utility,
-formula: k = H(N | PAD(g)) (Done)
-35.5.1. Add tests to the k[groupID] values (Done)
-35.6. Add the calculation of the parameter B (public key), should be abstracted to a utility,
-**constrains: 1 < B < N, formula: B = kv + g^b mod N** (Done)
-35.7. Add call at the server side, to calculate his public key B (Done)
-35.8. Send s, B and group ID to the client, at the server side (Done)
-
-35.9. Add reception of the s, B and group ID and its validation at the client side(in progress)
-
-35.10. Add call at the client side, to calculate his private key a (TBD)
-35.11. Add call at the client side, to calculate his public key A (TBD)
-35.12. Add the verification of the salt, it should be the same as the one that was sent during the
-registration step, at the client side (TBD)
-35.13. Add the verification of the B parameter, **constraint: 1 < B < N** at the client side (TBD).
-35.14. Add the verification of the group ID, if it matches what it has stored for that session continue
-with the authentication, if it doesn't match, then abort the authentication, at the client side (TBD)
-35.15. Add the generation of the parameter a (private key) on the client side,
-should be abstracted to a utility, **should be at in the range [1, N-1] and**
-**should be at least 256 bits long**, at the client side (TBD)
-35.16. Add the calculation of the parameter A (public key), should be abstracted to a utility,
-**constrains: 1 < A < N**, at the client side (TBD)
-35.17. Add the calculation of the parameter u = H(A | B), at the client side (TBD)
-35.18. Add the calculation of the parameter x = H(s | P), use method already implemented at the
-registration step, at the client side (TBD)
-35.19. Add the calculation of the parameter S = (B - k _ g^x) ^ (a + u _ x) mod N, at the
-client side (TBD)
-35.20. Add the calculation of the parameter K = H(S) at the client side (TBD)
-
-36. Test manually with a binary client, the authentication step (TBD)
-
-37. Test with curl requests manually the authentication step, the init phase (TBD)
-
-38. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
-
-39. Add the first leg on client side of the Secure Remote Password protocol (TBD)
+58. Add the verification of the group ID, if it matches what it has stored for that session continue
+    with the authentication, if it doesn't match, then abort the authentication, at the client side (TBD)
+59. Add the generation of the parameter a (private key) on the client side,
+    should be abstracted to a utility, **should be at in the range [1, N-1] and**
+    **should be at least 256 bits long**, at the client side (TBD)
+60. Add the calculation of the parameter A (public key), should be abstracted to a utility,
+    **constrains: 1 < A < N**, at the client side (TBD)
+61. Add the calculation of the parameter u = H(A | B), at the client side (TBD)
+62. Add the calculation of the parameter x = H(s | P), use method already implemented at the
+    registration step, at the client side (TBD)
+63. Add the calculation of the parameter S = (B - k _ g^x) ^ (a + u _ x) mod N, at the
+    client side (TBD)
+64. Add the calculation of the parameter K = H(S) at the client side (TBD)
+65. Test manually with a binary client, the authentication step (TBD)
+66. Test with curl requests manually the authentication step, the init phase (TBD)
+67. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
+68. Add the first leg on client side of the Secure Remote Password protocol (TBD)

@@ -111,6 +111,19 @@ public:
                                         const BIGNUM *k = nullptr,
                                         const std::string &vHex = "");
 
+  /**
+   * @brief This method does the validation of the public key.
+   *
+   * This method does the validation of the public key. It enforces:
+   * 1 < public key < N
+   *
+   * @param publicKeyHex The public key (a or b) in hex.
+   * @param nHex The group prime N in hexadecimal format.
+   * @return True if the validation passes, false otherwise.
+   */
+  static bool validatePublicKey(const std::string &publicKeyHex,
+                                const std::string &nHex);
+
 private:
   /* private methods */
 

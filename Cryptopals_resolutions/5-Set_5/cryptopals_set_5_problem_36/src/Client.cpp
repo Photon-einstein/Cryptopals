@@ -446,6 +446,64 @@ const bool Client::authenticationInit(const int portServerNumber) {
       throw std::runtime_error("Client log | authenticationInit(): "
                                "authentication failed");
     }
+    // Reception of s, B and group ID from the server
+    nlohmann::json parsedJson = nlohmann::json::parse(response.text);
+    const std::string extractedClientId =
+        parsedJson.at("clientId").get<std::string>();
+    const std::string extractedSaltHex =
+        parsedJson.at("salt").get<std::string>();
+    const std::string extractedBHex = parsedJson.at("B").get<std::string>();
+    const unsigned int extractedGroupId =
+        parsedJson.at("groupId").get<unsigned int>();
+    // Validation of s, B and group ID from the server
+    if (extractedClientId != _clientId) {
+      throw std::runtime_error(
+          "Client log | authenticationInit(): "
+          "extracted cliend ID doesn't match at the client's side.");
+    } else if (extractedSaltHex != _sessionData->_salt) {
+      throw std::runtime_error(
+          "Client log | authenticationInit(): "
+          "extracted salt doesn't match at the client's side.");
+    } else if (extractedGroupId != _sessionData->_groupId) {
+      throw std::runtime_error(
+          "Client log | authenticationInit(): "
+          "Group ID received from the server doesn't match session's one.");
+    } else if (!MyCryptoLibrary::SecureRemotePassword::validatePublicKey(
+                   extractedBHex, _srpParametersMap[extractedGroupId]._nHex)) {
+      throw std::runtime_error("Client log | authenticationInit(): "
+                               "Server public key failed the verification.");
+    }
+    // private key generation
+    const unsigned int minPrivateKeyBits =
+        _sessionData->_secureRemotePassword->getMinSizePrivateKey();
+    _sessionData->_privateKeyHex =
+        MyCryptoLibrary::SecureRemotePassword::generatePrivateKey(
+            _srpParametersMap.at(extractedGroupId)._nHex, minPrivateKeyBits);
+    if (_debugFlag) {
+      std::cout << "\n--- Client log | Private key generated at the "
+                   "authentication phase---"
+                << std::endl;
+      std::cout << "\tClient ID: " << extractedClientId << std::endl;
+      std::cout << "\tPrivate key: " << _sessionData->_privateKeyHex
+                << std::endl;
+      std::cout << "----------------------" << std::endl;
+    }
+    // public key generation
+    _sessionData->_publicKeyHex =
+        MyCryptoLibrary::SecureRemotePassword::calculatePublicKey(
+            _sessionData->_privateKeyHex,
+            _srpParametersMap.at(extractedGroupId)._nHex,
+            MessageExtractionFacility::uintToHex(
+                _srpParametersMap[extractedGroupId]._g),
+            Client::getIsServerFlag());
+    if (_debugFlag) {
+      std::cout << "\n--- Client log | Public key generated at the "
+                   "authentication phase---"
+                << std::endl;
+      std::cout << "\tClient ID: " << extractedClientId << std::endl;
+      std::cout << "\tPublic key: " << _sessionData->_publicKeyHex << std::endl;
+      std::cout << "----------------------" << std::endl;
+    }
     return authenticationInitResult;
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
@@ -470,10 +528,10 @@ const bool Client::authenticationInit(const int portServerNumber) {
  * of the Secure Remote Password protocol.
  */
 void Client::printServerResponse(const cpr::Response &response) {
-  std::cout << "Status Code: " << response.status_code << "\n";
+  std::cout << "Status Code: " << response.status_code << std::endl;
   std::cout << "Headers:\n";
   for (const auto &header : response.header) {
-    std::cout << header.first << ": " << header.second << "\n";
+    std::cout << header.first << ": " << header.second << std::endl;
   }
   std::cout << "Body:\n";
   if (response.text.empty()) {
@@ -481,16 +539,17 @@ void Client::printServerResponse(const cpr::Response &response) {
   } else {
     try {
       nlohmann::json parsedJson = nlohmann::json::parse(response.text);
-      std::cout << parsedJson.dump(2) << "\n"; // '2' for 2-space indentation
+      std::cout << parsedJson.dump(2)
+                << std::endl; // '2' for 2-space indentation
     } catch (const nlohmann::json::exception &e) {
       // Not valid JSON, print as raw text
-      std::cout << response.text << "\n";
+      std::cout << response.text << std::endl;
       std::cerr << "Warning: Body is not valid JSON, printing raw. Error: "
-                << e.what() << "\n";
+                << e.what() << std::endl;
     } catch (...) {
       // Not valid JSON, print as raw text
-      std::cout << response.text << "\n";
-      std::cerr << "Client log | Unknown exception caught" << "\n";
+      std::cout << response.text << std::endl;
+      std::cerr << "Client log | Unknown exception caught" << std::endl;
     }
   }
 }
