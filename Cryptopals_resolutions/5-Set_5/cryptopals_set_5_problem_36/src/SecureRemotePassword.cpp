@@ -248,3 +248,39 @@ std::string MyCryptoLibrary::SecureRemotePassword::calculatePublicKey(
   return MessageExtractionFacility::BIGNUMToHex(result.get());
 }
 /******************************************************************************/
+/**
+ * @brief This method does the validation of the public key.
+ *
+ * This method does the validation of the public key. It enforces:
+ * 1 < public key < N
+ *
+ * @param publicKeyHex The public key (a or b) in hex.
+ * @param nHex The group prime N in hexadecimal format.
+ * @return True if the validation passes, false otherwise.
+ */
+bool MyCryptoLibrary::SecureRemotePassword::validatePublicKey(
+    const std::string &publicKeyHex, const std::string &nHex) {
+  // input parameter validation
+  if (publicKeyHex.empty() || nHex.empty()) {
+    std::cerr << "Secure Remote Password log | validatePublicKey(): parameters "
+                 "received are empty."
+              << std::endl;
+    return false;
+  }
+  // Convert inputs to BIGNUMs
+  MessageExtractionFacility::UniqueBIGNUM publicKey =
+      MessageExtractionFacility::hexToUniqueBIGNUM(publicKeyHex);
+  MessageExtractionFacility::UniqueBIGNUM n =
+      MessageExtractionFacility::hexToUniqueBIGNUM(nHex);
+  EncryptionUtility::BnCtxPtr ctx(BN_CTX_new());
+  if (BN_cmp(publicKey.get(), BN_value_one()) <= 0 ||
+      BN_cmp(publicKey.get(), n.get()) >= 0) {
+    std::cerr << "Secure Remote Password log | validatePublicKey(): Public key "
+                 "not in "
+                 "valid range (1 < key < N)."
+              << std::endl;
+    return false;
+  }
+  return true;
+}
+/******************************************************************************/
