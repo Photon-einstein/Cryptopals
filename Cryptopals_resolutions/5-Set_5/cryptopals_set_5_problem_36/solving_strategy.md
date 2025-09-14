@@ -606,14 +606,16 @@ Glossary:
     **constrains: 1 < A < N**, at the client side (Done)
 61. Add the calculation of the parameter u = H(A | B), at the client side (Done)
 62. Add tests to the parameter u = H(A | B) using the method calculateHashConcat (Done)
-
 63. Add the calculation of the parameter x = H(s | P), use method already implemented at the
-    registration step, at the client side (in progress)
+    registration step, at the client side (Done)
+64. Add tests at the client side to ensure that x is well performed, as the output
+    of the method calculateX (Done)
 
-64. Add the calculation of the parameter S = (B - k _ g^x) ^ (a + u _ x) mod N, at the
-    client side (TBD)
-65. Add the calculation of the parameter K = H(S) at the client side (TBD)
-66. Test manually with a binary client, the authentication step (TBD)
-67. Test with curl requests manually the authentication step, the init phase (TBD)
-68. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
-69. Add the first leg on client side of the Secure Remote Password protocol (TBD)
+65. Add the calculation of the parameter S = (B - k _ g^x) ^ (a + u _ x) mod N, at the
+    client side (in progress)
+
+66. Add the calculation of the parameter K = H(S) at the client side (TBD)
+67. Test manually with a binary client, the authentication step (TBD)
+68. Test with curl requests manually the authentication step, the init phase (TBD)
+69. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
+70. Add the first leg on client side of the Secure Remote Password protocol (TBD)

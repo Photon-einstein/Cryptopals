@@ -424,3 +424,36 @@ const std::string MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
   return digestX;
 }
 /******************************************************************************/
+/**
+ * @brief This method will perform the following calculation:
+ * x = H(s | P).
+ *
+ * This method will perform the following calculation:
+ * x = H(s | P).
+ * Clarification:
+ * - H: hash algorithm;
+ * - s: salt;
+ * - P: password;
+ * - x: output of the hash;
+ *
+ * @param hash The hash algorithm used in this calculation.
+ * @param password The password used in this calculation, received in plaintext.
+ * @param salt The salt used in this calculation, received in hexadecimal format
+ *
+ * @return The result of H(s | P) in hexadecimal format.
+ */
+const std::string
+MyCryptoLibrary::SecureRemotePassword::calculateX(const std::string &hash,
+                                                  const std::string &password,
+                                                  const std::string &salt) {
+  if (_hashMap.find(hash) == _hashMap.end()) {
+    throw std::runtime_error("SecureRemotePassword log | calculateX(): "
+                             "hash algorithm not recognized.");
+  }
+  const std::string saltPlaintext =
+      MessageExtractionFacility::hexToPlaintext(salt);
+  const std::string digestX = _hashMap.at(hash)(saltPlaintext + password);
+  return MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
+      hash, saltPlaintext, password);
+}
+/******************************************************************************/

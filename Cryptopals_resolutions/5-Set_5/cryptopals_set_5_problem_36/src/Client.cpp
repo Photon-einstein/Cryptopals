@@ -230,7 +230,7 @@ const bool Client::registrationInit(const int portServerNumber,
     std::string requestBody = fmt::format(
         R"({{
         "clientId": "{}",
-        "requestedGroup": "{}"
+        "requestedGroup": {}
     }})",
         getClientId(), groupId);
     cpr::Response response =
@@ -510,7 +510,7 @@ const bool Client::authenticationInit(const int portServerNumber) {
       std::cout << "----------------------" << std::endl;
     }
     // u calculation
-    _sessionData->_u =
+    _sessionData->_uHex =
         MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
             _srpParametersMap.at(extractedGroupId)._hashName,
             MessageExtractionFacility::hexToPlaintext(
@@ -522,7 +522,20 @@ const bool Client::authenticationInit(const int portServerNumber) {
                    "authentication phase---"
                 << std::endl;
       std::cout << "\tClient ID: " << extractedClientId << std::endl;
-      std::cout << "\tu = H(A | B): " << _sessionData->_u << std::endl;
+      std::cout << "\tu = H(A | B): " << _sessionData->_uHex << std::endl;
+      std::cout << "----------------------" << std::endl;
+    }
+    // x calculation
+    _sessionData->_xHex = MyCryptoLibrary::SecureRemotePassword::calculateX(
+        _sessionData->_hash, _sessionData->_password, _sessionData->_salt);
+    if (_debugFlag) {
+      std::cout
+          << "\n--- Client log | Password derived secret x generated at the "
+             "authentication phase---"
+          << std::endl;
+      std::cout << "\tClient ID: " << extractedClientId << std::endl;
+      std::cout << "x(hex) = H(s | P): '" << _sessionData->_xHex << "'."
+                << std::endl;
       std::cout << "----------------------" << std::endl;
     }
     return authenticationInitResult;

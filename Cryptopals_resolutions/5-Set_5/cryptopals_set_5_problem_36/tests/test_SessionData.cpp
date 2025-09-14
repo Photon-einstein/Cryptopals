@@ -299,3 +299,66 @@ TEST(SessionDataTest,
                 ::testing::EndsWith("hash algorithm not recognized."));
   }
 }
+
+/**
+ * @test Test the correctness of the calculation of the x parameter with
+ * SHA-256.
+ * @brief Verifies that the private key parameter x, computed as x = H(salt |
+ * password) using SHA-256, matches the expected reference value for known input
+ * values. This ensures the implementation of x generation is correct and
+ * compatible with other SRP implementations.
+ */
+TEST(SessionDataTest, CalculateXWithSHA256_ShouldMatchReference) {
+  const std::string hash = "SHA-256";
+  const std::string salt =
+      "3F455AE2504D25D0E5A24E363358CD58A3E41EB18AD066FEB81A7A1E82369DED";
+  const std::string password = "correct horse battery staple";
+  const std::string expectedX =
+      "C7B1D9ACBB0A27CAFB9BD497B107AC4A9692F5830DC4EF5B66EFEB1D5D1DA62B";
+  const std::string x =
+      MyCryptoLibrary::SecureRemotePassword::calculateX(hash, password, salt);
+  EXPECT_EQ(x, expectedX);
+}
+
+/**
+ * @test Test the correctness of the calculation of the x parameter with
+ * SHA-384.
+ * @brief Verifies that the private key parameter x, computed as x = H(salt |
+ * password) using SHA-384, matches the expected reference value for known input
+ * values. This ensures the implementation of x generation is correct and
+ * compatible with other SRP implementations.
+ */
+TEST(SessionDataTest, CalculateXWithSHA384_ShouldMatchReference) {
+  const std::string hash = "SHA-384";
+  const std::string salt = "BFB160DEA15A3E9C974E1797AA02F8B1F0FBE6D97AA18E40577"
+                           "C07A9E2F40BB02C8F612B42BADBCBE37691B9A2382B30";
+  const std::string password = "correct horse battery staple";
+  const std::string expectedX =
+      "BAA9E5AACA4BCDE30DCA7BF067150107B50985BC4B8AF806A32D4ECC44A0A8DE7EFCFDE4"
+      "0F08D999A648BA97B40A2B44";
+  const std::string x =
+      MyCryptoLibrary::SecureRemotePassword::calculateX(hash, password, salt);
+  EXPECT_EQ(x, expectedX);
+}
+
+/**
+ * @test Test the correctness of the calculation of the x parameter with
+ * SHA-512.
+ * @brief Verifies that the private key parameter x, computed as x = H(salt |
+ * password) using SHA-512, matches the expected reference value for known input
+ * values. This ensures the implementation of x generation is correct and
+ * compatible with other SRP implementations.
+ */
+TEST(SessionDataTest, CalculateXWithSHA512_ShouldMatchReference) {
+  const std::string hash = "SHA-512";
+  const std::string salt =
+      "6B479DEBFE96BB93AC51E60F534536E4E493549EE1DA41A145E415612FFBA766A2CEAF2B"
+      "FB2DAF34585EF383E860EBD6C44627FAE2B88341F9BDA494A8B55D62";
+  const std::string password = "correct horse battery staple";
+  const std::string expectedX =
+      "9DC4BEE24F50EB07947529E5E321604FC631034FE84A57345A7A0954067CFF3BC4B8DB"
+      "87C8132C1E49E7998956366461F5E9A3AAD5E4567D70F729BFD43FA459";
+  const std::string x =
+      MyCryptoLibrary::SecureRemotePassword::calculateX(hash, password, salt);
+  EXPECT_EQ(x, expectedX);
+}
