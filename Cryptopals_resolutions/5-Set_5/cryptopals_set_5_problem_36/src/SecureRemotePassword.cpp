@@ -4,11 +4,13 @@
 #include <openssl/evp.h>
 #include <stdexcept>
 
-#include "./../include/EncryptionUtility.hpp"
 #include "./../include/SecureRemotePassword.hpp"
 
 /* static fields initialization */
 unsigned int MyCryptoLibrary::SecureRemotePassword::_minSizePrivateKey = 256;
+std::unordered_map<std::string, EncryptionUtility::HashFn>
+    MyCryptoLibrary::SecureRemotePassword::_hashMap =
+        EncryptionUtility::getHashMap();
 
 /* constructor / destructor */
 
@@ -353,34 +355,72 @@ MyCryptoLibrary::SecureRemotePassword::calculateK(const std::string &nHex,
 }
 /******************************************************************************/
 /**
- * @brief This method calculates the value of U for the SRP protocol.
+ * @brief This method will perform the calculation v = g^x mod N.
  *
- * @param hashName The name of the hash function to use (e.g., "SHA-256").
- * @param aHex The client's public key A in hexadecimal format.
- * @param bHex The server's public key B in hexadecimal format.
- * @return The calculated value of U as a hexadecimal string.
- * @throws std::runtime_error if an error occurs during calculation.
+ * @param xHex The value of x, as a hexadecimal string.
+ * @param nHex The value of the large prime N, as a hexadecimal string.
+ * @param g The value of the generator g.
+ *
+ * @return The result of v = g^x mod N, in hexadecimal format.
+ * @throw std::runtime_error If the calculation fails.
  */
-std::string
-MyCryptoLibrary::SecureRemotePassword::calculateU(const std::string &hashName,
-                                                  const std::string &AHex,
-                                                  const std::string &BHex) {
-  // Convert A and B from hex to bytes
-  std::vector<uint8_t> ABytes = MessageExtractionFacility::hexToBytes(AHex);
-  std::vector<uint8_t> BBytes = MessageExtractionFacility::hexToBytes(BHex);
-  // Concatenate A || B
-  std::vector<uint8_t> inputBytes(ABytes);
-  inputBytes.insert(inputBytes.end(), BBytes.begin(), BBytes.end());
-  const auto &hashMap = EncryptionUtility::getHashMap();
-  auto it = hashMap.find(hashName);
-  if (it == hashMap.end()) {
+const std::string MyCryptoLibrary::SecureRemotePassword::calculateV(
+    const std::string &xHex, const std::string &nHex, unsigned int g) {
+  // Allocate with RAII
+  EncryptionUtility::BnCtxPtr ctx(BN_CTX_new());
+  if (!ctx) {
     throw std::runtime_error(
-        "SecureRemotePassword::calculateU(): Unsupported hash");
+        "SecureRemotePassword log | calculateV(): Failed to allocate BN_CTX.");
   }
-  std::string hashHex = it->second(std::string(
-      reinterpret_cast<const char *>(inputBytes.data()), inputBytes.size()));
-  // Convert hashHex to uppercase (if not already)
-  // std::transform(hashHex.begin(), hashHex.end(), hashHex.begin(), ::toupper);
-  return hashHex;
+  EncryptionUtility::BnPtr gBn(BN_new());
+  EncryptionUtility::BnPtr vBn(BN_new());
+  if (!gBn || !vBn) {
+    throw std::runtime_error(
+        "SecureRemotePassword log | calculateV(): Failed to allocate BIGNUMs.");
+  }
+  BIGNUM *xBn = nullptr;
+  BIGNUM *nBn = nullptr;
+  if (!BN_hex2bn(&xBn, xHex.c_str()) || !BN_hex2bn(&nBn, nHex.c_str())) {
+    BN_free(xBn);
+    BN_free(nBn);
+    throw std::runtime_error("SecureRemotePassword log | calculateV(): Failed "
+                             "to convert hex strings to BIGNUM.");
+  }
+  // Wrap xBn and nBn now that they're allocated
+  EncryptionUtility::BnPtr xPtr(xBn);
+  EncryptionUtility::BnPtr nPtr(nBn);
+  BN_set_word(gBn.get(), g);
+  // Compute v = g^x mod N
+  if (!BN_mod_exp(vBn.get(), gBn.get(), xPtr.get(), nPtr.get(), ctx.get())) {
+    throw std::runtime_error(
+        "SecureRemotePassword log | calculateV(): BN_mod_exp failed.");
+  }
+  // Convert result to hex string
+  EncryptionUtility::OsslStr vHex(BN_bn2hex(vBn.get()));
+  if (!vHex) {
+    throw std::runtime_error("SecureRemotePassword log | calculateV(): Failed "
+                             "to convert result to hex.");
+  }
+  return std::string(vHex.get()); // safely copy to std::string
+}
+/******************************************************************************/
+/**
+ * @brief Calculates a hash digest of the concatenation of two values.
+ *
+ * @param hashName The hash algorithm to use (e.g., "SHA-256").
+ * @param left The left value in plaintext
+ * @param right The right value in plaintext
+ * @return The hash digest in hexadecimal format.
+ */
+const std::string MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
+    const std::string &hashName, const std::string &left,
+    const std::string &right) {
+  if (_hashMap.find(hashName) == _hashMap.end()) {
+    throw std::runtime_error(
+        "SecureRemotePassword log | calculateHashConcat(): "
+        "hash algorithm not recognized.");
+  }
+  const std::string digestX = _hashMap.at(hashName)(left + right);
+  return digestX;
 }
 /******************************************************************************/

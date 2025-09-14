@@ -6,6 +6,7 @@
 #include <openssl/sha.h>
 #include <vector>
 
+#include "EncryptionUtility.hpp"
 #include "MessageExtractionFacility.hpp"
 #include "SrpParametersLoader.hpp"
 
@@ -145,17 +146,29 @@ public:
              const std::string &hashName);
 
   /**
-   * @brief Computes the SRP scrambling parameter u = H(A | B).
+   * @brief This method will perform the calculation v = g^x mod N.
    *
-   * @param hashName The hash function name (e.g., "SHA-256").
-   * @param aHex The public key A in hexadecimal format.
-   * @param bHex The public key B in hexadecimal format.
-   * @return The scrambling parameter u as a hexadecimal string.
-   * @throws std::runtime_error if the hash function is not supported.
+   * @param xHex The value of x, as a hexadecimal string.
+   * @param nHex The value of the large prime N, as a hexadecimal string.
+   * @param g The value of the generator g.
+   *
+   * @return The result of v = g^x mod N, in hexadecimal format.
+   * @throw std::runtime_error If the calculation fails.
    */
-  static std::string calculateU(const std::string &hashName,
-                                const std::string &aHex,
-                                const std::string &bHex);
+  static const std::string calculateV(const std::string &xHex,
+                                      const std::string &nHex, unsigned int g);
+
+  /**
+   * @brief Calculates a hash digest of the concatenation of two values.
+   *
+   * @param hashName The hash algorithm to use (e.g., "SHA-256").
+   * @param left The left value in plaintext
+   * @param right The right value in plaintext
+   * @return The hash digest in hexadecimal format.
+   */
+  static const std::string calculateHashConcat(const std::string &hashName,
+                                               const std::string &left,
+                                               const std::string &right);
 
 private:
   /* private methods */
@@ -166,6 +179,7 @@ private:
   std::map<unsigned int, SrpParametersLoader::SrpParameters> _srpParametersMap;
   unsigned int _groupId;
   static unsigned int _minSizePrivateKey;
+  static std::unordered_map<std::string, EncryptionUtility::HashFn> _hashMap;
   std::map<unsigned int, MessageExtractionFacility::UniqueBIGNUM> _kMap;
 };
 

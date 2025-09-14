@@ -605,7 +605,7 @@ Glossary:
 60. Add the calculation of the parameter A (public key), should be abstracted to a utility,
     **constrains: 1 < A < N**, at the client side (Done)
 61. Add the calculation of the parameter u = H(A | B), at the client side (Done)
-62. Add tests to the calculateU method (Done)
+62. Add tests to the parameter u = H(A | B) using the method calculateHashConcat (Done)
 
 63. Add the calculation of the parameter x = H(s | P), use method already implemented at the
     registration step, at the client side (in progress)
