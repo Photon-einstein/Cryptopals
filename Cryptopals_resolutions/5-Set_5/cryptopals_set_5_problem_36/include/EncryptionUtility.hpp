@@ -144,26 +144,6 @@ const std::string generatePassword(std::size_t passwordLength = 16);
  */
 std::vector<uint8_t> padLeft(const std::vector<uint8_t> &input, size_t size);
 
-/**
- * @brief Calculates the SRP multiplier parameter k = H(N | PAD(g)).
- *
- * This method computes the SRP parameter k as specified in RFC 5054:
- *   k = H(N | PAD(g))
- * where H is the agreed hash function, N is the group prime (as a hex string),
- * and PAD(g) is the generator g left-padded with zeros to the length of N.
- * The result is returned as a UniqueBIGNUM.
- *
- * @param nHex The group prime N in hexadecimal format.
- * @param gHex The generator g in hexadecimal format.
- * @param hashName The name of the hash function to use (e.g., "SHA-256").
- * @return The computed k parameter as a UniqueBIGNUM.
- * @throws std::invalid_argument if N or g is empty, or if g >= N.
- * @throws std::runtime_error if conversion or hashing fails.
- */
-MessageExtractionFacility::UniqueBIGNUM calculateK(const std::string &nHex,
-                                                   const std::string &gHex,
-                                                   const std::string &hashName);
-
 }; // namespace EncryptionUtility
 
 #endif // ENCRYPTION_UTILITY_HPP

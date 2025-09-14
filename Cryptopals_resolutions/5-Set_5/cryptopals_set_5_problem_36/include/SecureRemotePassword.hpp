@@ -124,6 +124,39 @@ public:
   static bool validatePublicKey(const std::string &publicKeyHex,
                                 const std::string &nHex);
 
+  /**
+   * @brief Calculates the SRP multiplier parameter k = H(N | PAD(g)).
+   *
+   * This method computes the SRP parameter k as specified in RFC 5054:
+   *   k = H(N | PAD(g))
+   * where H is the agreed hash function, N is the group prime (as a hex
+   * string), and PAD(g) is the generator g left-padded with zeros to the length
+   * of N. The result is returned as a UniqueBIGNUM.
+   *
+   * @param nHex The group prime N in hexadecimal format.
+   * @param gHex The generator g in hexadecimal format.
+   * @param hashName The name of the hash function to use (e.g., "SHA-256").
+   * @return The computed k parameter as a UniqueBIGNUM.
+   * @throws std::invalid_argument if N or g is empty, or if g >= N.
+   * @throws std::runtime_error if conversion or hashing fails.
+   */
+  static MessageExtractionFacility::UniqueBIGNUM
+  calculateK(const std::string &nHex, const std::string &gHex,
+             const std::string &hashName);
+
+  /**
+   * @brief Computes the SRP scrambling parameter u = H(A | B).
+   *
+   * @param hashName The hash function name (e.g., "SHA-256").
+   * @param aHex The public key A in hexadecimal format.
+   * @param bHex The public key B in hexadecimal format.
+   * @return The scrambling parameter u as a hexadecimal string.
+   * @throws std::runtime_error if the hash function is not supported.
+   */
+  static std::string calculateU(const std::string &hashName,
+                                const std::string &aHex,
+                                const std::string &bHex);
+
 private:
   /* private methods */
 

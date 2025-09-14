@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <openssl/sha.h>
+
 #include "../include/EncryptionUtility.hpp"
 
 /**
@@ -10,9 +12,11 @@
  */
 TEST(SHA512Test, sha512_WithEmptyString_ShouldMatchReference) {
   const std::string expectedHashValue(
-      "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c"
-      "5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e");
-  EXPECT_EQ(EncryptionUtility::sha512(""), expectedHashValue);
+      "CF83E1357EEFB8BDF1542850D66D8007D620E4050B5715DC83F4A921D36CE9CE47D0D13C"
+      "5D85F2B0FF8318D2877EEC2F63B931BD47417A81A538327AF927DA3E");
+  const std::string hash{EncryptionUtility::sha512("")};
+  EXPECT_EQ(hash, expectedHashValue);
+  EXPECT_EQ(hash.length(), SHA512_DIGEST_LENGTH * 2);
 }
 
 /**
@@ -23,9 +27,11 @@ TEST(SHA512Test, sha512_WithEmptyString_ShouldMatchReference) {
  */
 TEST(SHA512Test, sha512_WithShortString_ShouldMatchReference) {
   const std::string expectedHashValue(
-      "ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a"
-      "274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f");
-  EXPECT_EQ(EncryptionUtility::sha512("abc"), expectedHashValue);
+      "DDAF35A193617ABACC417349AE20413112E6FA4E89A97EA20A9EEEE64B55D39A2192992A"
+      "274FC1A836BA3C23A3FEEBBD454D4423643CE80E2A9AC94FA54CA49F");
+  const std::string hash{EncryptionUtility::sha512("abc")};
+  EXPECT_EQ(hash, expectedHashValue);
+  EXPECT_EQ(hash.length(), SHA512_DIGEST_LENGTH * 2);
 }
 
 /**
@@ -36,9 +42,11 @@ TEST(SHA512Test, sha512_WithShortString_ShouldMatchReference) {
  */
 TEST(SHA512Test, sha512_WithHelloWorld_ShouldMatchReference) {
   const std::string expectedHashValue(
-      "309ecc489c12d6eb4cc40f50c902f2b4d0ed77ee511a7c7a9bcd3ca86d4cd86f989dd35b"
-      "c5ff499670da34255b45b0cfd830e81f605dcf7dc5542e93ae9cd76f");
-  EXPECT_EQ(EncryptionUtility::sha512("hello world"), expectedHashValue);
+      "309ECC489C12D6EB4CC40F50C902F2B4D0ED77EE511A7C7A9BCD3CA86D4CD86F989DD35B"
+      "C5FF499670DA34255B45B0CFD830E81F605DCF7DC5542E93AE9CD76F");
+  const std::string hash{EncryptionUtility::sha512("hello world")};
+  EXPECT_EQ(hash, expectedHashValue);
+  EXPECT_EQ(hash.length(), SHA512_DIGEST_LENGTH * 2);
 }
 
 // --- Edge cases ---
@@ -53,9 +61,11 @@ TEST(SHA512Test, sha512_WithHelloWorld_ShouldMatchReference) {
 TEST(SHA512Test, sha512_WithVeryLongString_ShouldMatchReference) {
   const std::string input(1'000'000, 'a');
   const std::string expectedHashValue(
-      "e718483d0ce769644e2e42c7bc15b4638e1f98b13b2044285632a803afa973ebde0ff244"
-      "877ea60a4cb0432ce577c31beb009c5c2c49aa2e4eadb217ad8cc09b");
-  EXPECT_EQ(EncryptionUtility::sha512(input), expectedHashValue);
+      "E718483D0CE769644E2E42C7BC15B4638E1F98B13B2044285632A803AFA973EBDE0FF244"
+      "877EA60A4CB0432CE577C31BEB009C5C2C49AA2E4EADB217AD8CC09B");
+  const std::string hash{EncryptionUtility::sha512(input)};
+  EXPECT_EQ(hash, expectedHashValue);
+  EXPECT_EQ(hash.length(), SHA512_DIGEST_LENGTH * 2);
 }
 
 /**
@@ -69,9 +79,11 @@ TEST(SHA512Test, sha512_WithStringWithNullByte_ShouldMatchReference) {
   const std::string input =
       std::string("abc\0def", 7); // includes '\0' in middle
   const std::string expectedHashValue(
-      "1f3108537ca81c8e53e1dfff2166866fc30b81869de3f9d2bd3a585a95794a29dab168cf"
-      "b8464119620a991d9ac800f73c0ba0f32342e50ec2db63c28a7ca809");
-  EXPECT_EQ(EncryptionUtility::sha512(input), expectedHashValue);
+      "1F3108537CA81C8E53E1DFFF2166866FC30B81869DE3F9D2BD3A585A95794A29DAB168CF"
+      "B8464119620A991D9AC800F73C0BA0F32342E50EC2DB63C28A7CA809");
+  const std::string hash{EncryptionUtility::sha512(input)};
+  EXPECT_EQ(hash, expectedHashValue);
+  EXPECT_EQ(hash.length(), SHA512_DIGEST_LENGTH * 2);
 }
 
 /**
@@ -87,9 +99,11 @@ TEST(SHA512Test, sha512_WithAllByteValues_ShouldMatchReference) {
     input.push_back(static_cast<char>(i));
   }
   const std::string expectedHashValue(
-      "1e7b80bc8edc552c8feeb2780e111477e5bc70465fac1a77b29b35980c3f0ce4a036a6c9"
-      "462036824bd56801e62af7e9feba5c22ed8a5af877bf7de117dcac6d");
-  EXPECT_EQ(EncryptionUtility::sha512(input), expectedHashValue);
+      "1E7B80BC8EDC552C8FEEB2780E111477E5BC70465FAC1A77B29B35980C3F0CE4A036A6C9"
+      "462036824BD56801E62AF7E9FEBA5C22ED8A5AF877BF7DE117DCAC6D");
+  const std::string hash{EncryptionUtility::sha512(input)};
+  EXPECT_EQ(hash, expectedHashValue);
+  EXPECT_EQ(hash.length(), SHA512_DIGEST_LENGTH * 2);
 }
 
 /**
@@ -102,7 +116,9 @@ TEST(SHA512Test, sha512_WithAllByteValues_ShouldMatchReference) {
 TEST(SHA512Test, sha512_WithRepeatedPattern_ShouldMatchReference) {
   const std::string input(1000, 'a');
   const std::string expectedHashValue(
-      "67ba5535a46e3f86dbfbed8cbbaf0125c76ed549ff8b0b9e03e0c88cf90fa634fa7b12b4"
-      "7d77b694de488ace8d9a65967dc96df599727d3292a8d9d447709c97");
-  EXPECT_EQ(EncryptionUtility::sha512(input), expectedHashValue);
+      "67BA5535A46E3F86DBFBED8CBBAF0125C76ED549FF8B0B9E03E0C88CF90FA634FA7B12B4"
+      "7D77B694DE488ACE8D9A65967DC96DF599727D3292A8D9D447709C97");
+  const std::string hash{EncryptionUtility::sha512(input)};
+  EXPECT_EQ(hash, expectedHashValue);
+  EXPECT_EQ(hash.length(), SHA512_DIGEST_LENGTH * 2);
 }
