@@ -473,6 +473,8 @@ const bool Client::authenticationInit(const int portServerNumber) {
       throw std::runtime_error("Client log | authenticationInit(): "
                                "Server public key failed the verification.");
     }
+    // store of B server's public key
+    _sessionData->_peerPublicKeyHex = extractedBHex;
     // private key generation
     const unsigned int minPrivateKeyBits =
         _sessionData->_secureRemotePassword->getMinSizePrivateKey();
@@ -501,7 +503,20 @@ const bool Client::authenticationInit(const int portServerNumber) {
                    "authentication phase---"
                 << std::endl;
       std::cout << "\tClient ID: " << extractedClientId << std::endl;
-      std::cout << "\tPublic key: " << _sessionData->_publicKeyHex << std::endl;
+      std::cout << "\tPublic key: " << _sessionData->_privateKeyHex
+                << std::endl;
+      std::cout << "----------------------" << std::endl;
+    }
+    // u calculation
+    _sessionData->_u = MyCryptoLibrary::SecureRemotePassword::calculateU(
+        _srpParametersMap.at(extractedGroupId)._hashName,
+        _sessionData->_publicKeyHex, _sessionData->_peerPublicKeyHex);
+    if (_debugFlag) {
+      std::cout << "\n--- Client log | Scrambling parameter u generated at the "
+                   "authentication phase---"
+                << std::endl;
+      std::cout << "\tClient ID: " << extractedClientId << std::endl;
+      std::cout << "\tu = H(A | B): " << _sessionData->_u << std::endl;
       std::cout << "----------------------" << std::endl;
     }
     return authenticationInitResult;

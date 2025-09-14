@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <openssl/sha.h>
+
 #include "../include/EncryptionUtility.hpp"
 
 /**
@@ -10,9 +12,11 @@
  */
 TEST(SHA384Test, sha384_WithEmptyString_ShouldMatchReference) {
   const std::string expectedHashValue(
-      "38b060a751ac96384cd9327eb1b1e36a21fdb71114be07434c0cc7bf63f6e1da"
-      "274edebfe76f65fbd51ad2f14898b95b");
-  EXPECT_EQ(EncryptionUtility::sha384(""), expectedHashValue);
+      "38B060A751AC96384CD9327EB1B1E36A21FDB71114BE07434C0CC7BF63F6E1DA"
+      "274EDEBFE76F65FBD51AD2F14898B95B");
+  const std::string hash{EncryptionUtility::sha384("")};
+  EXPECT_EQ(hash, expectedHashValue);
+  EXPECT_EQ(hash.length(), SHA384_DIGEST_LENGTH * 2);
 }
 
 /**
@@ -23,9 +27,11 @@ TEST(SHA384Test, sha384_WithEmptyString_ShouldMatchReference) {
  */
 TEST(SHA384Test, sha384_WithShortString_ShouldMatchReference) {
   const std::string expectedHashValue(
-      "cb00753f45a35e8bb5a03d699ac65007272c32ab0eded1631a8b605a43ff5bed"
-      "8086072ba1e7cc2358baeca134c825a7");
-  EXPECT_EQ(EncryptionUtility::sha384("abc"), expectedHashValue);
+      "CB00753F45A35E8BB5A03D699AC65007272C32AB0EDED1631A8B605A43FF5BED"
+      "8086072BA1E7CC2358BAECA134C825A7");
+  const std::string hash{EncryptionUtility::sha384("abc")};
+  EXPECT_EQ(hash, expectedHashValue);
+  EXPECT_EQ(hash.length(), SHA384_DIGEST_LENGTH * 2);
 }
 
 /**
@@ -36,9 +42,11 @@ TEST(SHA384Test, sha384_WithShortString_ShouldMatchReference) {
  */
 TEST(SHA384Test, sha384_WithHelloWorld_ShouldMatchReference) {
   const std::string expectedHashValue(
-      "fdbd8e75a67f29f701a4e040385e2e23986303ea10239211af907f"
-      "cbb83578b3e417cb71ce646efd0819dd8c088de1bd");
-  EXPECT_EQ(EncryptionUtility::sha384("hello world"), expectedHashValue);
+      "FDBD8E75A67F29F701A4E040385E2E23986303EA10239211AF907F"
+      "CBB83578B3E417CB71CE646EFD0819DD8C088DE1BD");
+  const std::string hash{EncryptionUtility::sha384("hello world")};
+  EXPECT_EQ(hash, expectedHashValue);
+  EXPECT_EQ(hash.length(), SHA384_DIGEST_LENGTH * 2);
 }
 
 // --- Edge cases ---
@@ -53,9 +61,11 @@ TEST(SHA384Test, sha384_WithHelloWorld_ShouldMatchReference) {
 TEST(SHA384Test, sha384_WithVeryLongString_ShouldMatchReference) {
   const std::string input(1'000'000, 'a');
   const std::string expectedHashValue(
-      "9d0e1809716474cb086e834e310a4a1ced149e9c00f248527972cec5704c2a5b"
-      "07b8b3dc38ecc4ebae97ddd87f3d8985");
-  EXPECT_EQ(EncryptionUtility::sha384(input), expectedHashValue);
+      "9D0E1809716474CB086E834E310A4A1CED149E9C00F248527972CEC5704C2A5B"
+      "07B8B3DC38ECC4EBAE97DDD87F3D8985");
+  const std::string hash{EncryptionUtility::sha384(input)};
+  EXPECT_EQ(hash, expectedHashValue);
+  EXPECT_EQ(hash.length(), SHA384_DIGEST_LENGTH * 2);
 }
 
 /**
@@ -69,9 +79,11 @@ TEST(SHA384Test, sha384_WithStringWithNullByte_ShouldMatchReference) {
   const std::string input =
       std::string("abc\0def", 7); // includes '\0' in middle
   const std::string expectedHashValue(
-      "bc3837e347023944602db615e0e2043d13b85e76bd2b4caaecff8baf20796767"
-      "353da289710ce9a68ae124d139318f7a");
-  EXPECT_EQ(EncryptionUtility::sha384(input), expectedHashValue);
+      "BC3837E347023944602DB615E0E2043D13B85E76BD2B4CAAECFF8BAF20796767"
+      "353DA289710CE9A68AE124D139318F7A");
+  const std::string hash{EncryptionUtility::sha384(input)};
+  EXPECT_EQ(hash, expectedHashValue);
+  EXPECT_EQ(hash.length(), SHA384_DIGEST_LENGTH * 2);
 }
 
 /**
@@ -87,9 +99,11 @@ TEST(SHA384Test, sha384_WithAllByteValues_ShouldMatchReference) {
     input.push_back(static_cast<char>(i));
   }
   const std::string expectedHashValue(
-      "ffdaebff65ed05cf400f0221c4ccfb4b2104fb6a51f87e40be6c4309386bfdec"
-      "2892e9179b34632331a59592737db5c5");
-  EXPECT_EQ(EncryptionUtility::sha384(input), expectedHashValue);
+      "FFDAEBFF65ED05CF400F0221C4CCFB4B2104FB6A51F87E40BE6C4309386BFDEC"
+      "2892E9179B34632331A59592737DB5C5");
+  const std::string hash{EncryptionUtility::sha384(input)};
+  EXPECT_EQ(hash, expectedHashValue);
+  EXPECT_EQ(hash.length(), SHA384_DIGEST_LENGTH * 2);
 }
 
 /**
@@ -102,7 +116,9 @@ TEST(SHA384Test, sha384_WithAllByteValues_ShouldMatchReference) {
 TEST(SHA384Test, sha384_WithRepeatedPattern_ShouldMatchReference) {
   const std::string input(1000, 'a');
   const std::string expectedHashValue(
-      "f54480689c6b0b11d0303285d9a81b21a93bca6ba5a1b4472765dca4da45ee328"
-      "082d469c650cd3b61b16d3266ab8ced");
-  EXPECT_EQ(EncryptionUtility::sha384(input), expectedHashValue);
+      "F54480689C6B0B11D0303285D9A81B21A93BCA6BA5A1B4472765DCA4DA45EE328"
+      "082D469C650CD3B61B16D3266AB8CED");
+  const std::string hash{EncryptionUtility::sha384(input)};
+  EXPECT_EQ(hash, expectedHashValue);
+  EXPECT_EQ(hash.length(), SHA384_DIGEST_LENGTH * 2);
 }

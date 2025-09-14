@@ -35,8 +35,7 @@ MyCryptoLibrary::SecureRemotePassword::SecureRemotePassword(
     const unsigned int groupId = entry.first;
     const SrpParametersLoader::SrpParameters &params = entry.second;
     const std::string gHex = MessageExtractionFacility::uintToHex(params._g);
-    _kMap[groupId] =
-        EncryptionUtility::calculateK(params._nHex, gHex, params._hashName);
+    _kMap[groupId] = calculateK(params._nHex, gHex, params._hashName);
     if (_debugFlag) {
       std::cout << "k[group ID = " << groupId << "] = "
                 << MessageExtractionFacility::BIGNUMToHex(_kMap[groupId].get())
@@ -276,11 +275,112 @@ bool MyCryptoLibrary::SecureRemotePassword::validatePublicKey(
   if (BN_cmp(publicKey.get(), BN_value_one()) <= 0 ||
       BN_cmp(publicKey.get(), n.get()) >= 0) {
     std::cerr << "Secure Remote Password log | validatePublicKey(): Public key "
-                 "not in "
-                 "valid range (1 < key < N)."
+                 "not in valid range (1 < key < N)."
               << std::endl;
     return false;
   }
   return true;
+}
+/******************************************************************************/
+/**
+ * @brief Calculates the SRP multiplier parameter k = H(N | PAD(g)).
+ *
+ * This method computes the SRP parameter k as specified in RFC 5054:
+ *   k = H(N | PAD(g))
+ * where H is the agreed hash function, N is the group prime (as a hex string),
+ * and PAD(g) is the generator g left-padded with zeros to the length of N.
+ * The result is returned as a UniqueBIGNUM.
+ *
+ * @param nHex The group prime N in hexadecimal format.
+ * @param gHex The generator g in hexadecimal format.
+ * @param hashName The name of the hash function to use (e.g., "SHA-256").
+ * @return The computed k parameter as a UniqueBIGNUM.
+ * @throws std::invalid_argument if N or g is empty, or if g >= N.
+ * @throws std::runtime_error if conversion or hashing fails.
+ */
+MessageExtractionFacility::UniqueBIGNUM
+MyCryptoLibrary::SecureRemotePassword::calculateK(const std::string &nHex,
+                                                  const std::string &gHex,
+                                                  const std::string &hashName) {
+  // input parameters validation
+  if (nHex.empty() || gHex.empty()) {
+    throw std::invalid_argument(
+        "SecureRemotePassword::calculateK(): N or g is empty.");
+  }
+  // 1. Convert N and g to bytes and validate parameters one more time
+  std::vector<uint8_t> nBytes = MessageExtractionFacility::hexToBytes(nHex);
+  std::vector<uint8_t> gBytes = MessageExtractionFacility::hexToBytes(gHex);
+  if (nBytes.empty() ||
+      nBytes.size() < 16) { // 16 bytes / 128 bits minimum for safety
+    throw std::invalid_argument(
+        "SecureRemotePassword::calculateK(): N is too small or invalid.");
+  } else if (gBytes.empty()) {
+    throw std::invalid_argument(
+        "SecureRemotePassword::calculateK(): g is invalid.");
+  }
+  BIGNUM *nBn = BN_bin2bn(nBytes.data(), nBytes.size(), nullptr);
+  BIGNUM *gBn = BN_bin2bn(gBytes.data(), gBytes.size(), nullptr);
+  if (!nBn || !gBn) {
+    BN_free(nBn);
+    BN_free(gBn);
+    throw std::runtime_error("SecureRemotePassword::calculateK: Failed to "
+                             "convert N or g to BIGNUM.");
+  } else if (BN_cmp(gBn, nBn) >= 0) {
+    BN_free(nBn);
+    BN_free(gBn);
+    throw std::invalid_argument(
+        "SecureRemotePassword::calculateK: g must be less than N.");
+  }
+  BN_free(nBn);
+  BN_free(gBn);
+  // 2. Pad g to length of N
+  std::vector<uint8_t> gPadded =
+      EncryptionUtility::padLeft(gBytes, nBytes.size());
+  // 3. Concatenate N || PAD(g)
+  std::vector<uint8_t> inputBytes(nBytes);
+  inputBytes.insert(inputBytes.end(), gPadded.begin(), gPadded.end());
+  // 5. Hash
+  const auto &hashMap = EncryptionUtility::getHashMap();
+  auto it = hashMap.find(hashName);
+  if (it == hashMap.end()) {
+    throw std::runtime_error(
+        "SecureRemotePassword::calculateK(): Unsupported hash");
+  }
+  std::string hashHex = it->second(std::string(
+      reinterpret_cast<const char *>(inputBytes.data()), inputBytes.size()));
+  // 6. Convert Hex to BigNum
+  return MessageExtractionFacility::hexToUniqueBIGNUM(hashHex);
+}
+/******************************************************************************/
+/**
+ * @brief This method calculates the value of U for the SRP protocol.
+ *
+ * @param hashName The name of the hash function to use (e.g., "SHA-256").
+ * @param aHex The client's public key A in hexadecimal format.
+ * @param bHex The server's public key B in hexadecimal format.
+ * @return The calculated value of U as a hexadecimal string.
+ * @throws std::runtime_error if an error occurs during calculation.
+ */
+std::string
+MyCryptoLibrary::SecureRemotePassword::calculateU(const std::string &hashName,
+                                                  const std::string &AHex,
+                                                  const std::string &BHex) {
+  // Convert A and B from hex to bytes
+  std::vector<uint8_t> ABytes = MessageExtractionFacility::hexToBytes(AHex);
+  std::vector<uint8_t> BBytes = MessageExtractionFacility::hexToBytes(BHex);
+  // Concatenate A || B
+  std::vector<uint8_t> inputBytes(ABytes);
+  inputBytes.insert(inputBytes.end(), BBytes.begin(), BBytes.end());
+  const auto &hashMap = EncryptionUtility::getHashMap();
+  auto it = hashMap.find(hashName);
+  if (it == hashMap.end()) {
+    throw std::runtime_error(
+        "SecureRemotePassword::calculateU(): Unsupported hash");
+  }
+  std::string hashHex = it->second(std::string(
+      reinterpret_cast<const char *>(inputBytes.data()), inputBytes.size()));
+  // Convert hashHex to uppercase (if not already)
+  // std::transform(hashHex.begin(), hashHex.end(), hashHex.begin(), ::toupper);
+  return hashHex;
 }
 /******************************************************************************/

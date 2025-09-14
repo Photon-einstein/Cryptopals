@@ -596,23 +596,24 @@ Glossary:
 54. Add reception of the s, B and group ID and its validation at the client side (Done)
 55. Add call at the client side, to calculate his private key a (Done)
 56. Add call at the client side, to calculate his public key A (Done)
-
-57. Add the verification of the B parameter, **constraint: 1 < B < N** at the client side (in progress).
-
+57. Add the verification of the B parameter, **constraint: 1 < B < N** at the client side (Done).
 58. Add the verification of the group ID, if it matches what it has stored for that session continue
-    with the authentication, if it doesn't match, then abort the authentication, at the client side (TBD)
+    with the authentication, if it doesn't match, then abort the authentication, at the client side (Done)
 59. Add the generation of the parameter a (private key) on the client side,
     should be abstracted to a utility, **should be at in the range [1, N-1] and**
-    **should be at least 256 bits long**, at the client side (TBD)
+    **should be at least 256 bits long**, at the client side (Done)
 60. Add the calculation of the parameter A (public key), should be abstracted to a utility,
-    **constrains: 1 < A < N**, at the client side (TBD)
-61. Add the calculation of the parameter u = H(A | B), at the client side (TBD)
-62. Add the calculation of the parameter x = H(s | P), use method already implemented at the
-    registration step, at the client side (TBD)
-63. Add the calculation of the parameter S = (B - k _ g^x) ^ (a + u _ x) mod N, at the
+    **constrains: 1 < A < N**, at the client side (Done)
+61. Add the calculation of the parameter u = H(A | B), at the client side (Done)
+62. Add tests to the calculateU method (Done)
+
+63. Add the calculation of the parameter x = H(s | P), use method already implemented at the
+    registration step, at the client side (in progress)
+
+64. Add the calculation of the parameter S = (B - k _ g^x) ^ (a + u _ x) mod N, at the
     client side (TBD)
-64. Add the calculation of the parameter K = H(S) at the client side (TBD)
-65. Test manually with a binary client, the authentication step (TBD)
-66. Test with curl requests manually the authentication step, the init phase (TBD)
-67. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
-68. Add the first leg on client side of the Secure Remote Password protocol (TBD)
+65. Add the calculation of the parameter K = H(S) at the client side (TBD)
+66. Test manually with a binary client, the authentication step (TBD)
+67. Test with curl requests manually the authentication step, the init phase (TBD)
+68. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
+69. Add the first leg on client side of the Secure Remote Password protocol (TBD)

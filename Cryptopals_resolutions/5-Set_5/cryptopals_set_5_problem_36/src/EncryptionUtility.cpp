@@ -62,7 +62,9 @@ std::string EncryptionUtility::sha256(const std::string &input) {
     oss << std::hex << std::setw(2) << std::setfill('0')
         << static_cast<int>(hash[i]);
   }
-  return oss.str();
+  std::string shaHex = oss.str();
+  std::transform(shaHex.begin(), shaHex.end(), shaHex.begin(), ::toupper);
+  return shaHex;
 }
 /******************************************************************************/
 /**
@@ -94,7 +96,9 @@ std::string EncryptionUtility::sha384(const std::string &input) {
     oss << std::hex << std::setw(2) << std::setfill('0')
         << static_cast<int>(hash[i]);
   }
-  return oss.str();
+  std::string shaHex = oss.str();
+  std::transform(shaHex.begin(), shaHex.end(), shaHex.begin(), ::toupper);
+  return shaHex;
 }
 /******************************************************************************/
 /**
@@ -126,7 +130,9 @@ std::string EncryptionUtility::sha512(const std::string &input) {
     oss << std::hex << std::setw(2) << std::setfill('0')
         << static_cast<int>(hash[i]);
   }
-  return oss.str();
+  std::string shaHex = oss.str();
+  std::transform(shaHex.begin(), shaHex.end(), shaHex.begin(), ::toupper);
+  return shaHex;
 }
 /******************************************************************************/
 /**
@@ -237,82 +243,5 @@ EncryptionUtility::padLeft(const std::vector<uint8_t> &input, size_t size) {
   std::vector<uint8_t> padded(size - input.size(), 0x00);
   padded.insert(padded.end(), input.begin(), input.end());
   return padded;
-}
-/******************************************************************************/
-/**
- * @brief Calculates the SRP multiplier parameter k = H(N | PAD(g)).
- *
- * This method computes the SRP parameter k as specified in RFC 5054:
- *   k = H(N | PAD(g))
- * where H is the agreed hash function, N is the group prime (as a hex string),
- * and PAD(g) is the generator g left-padded with zeros to the length of N.
- * The result is returned as a UniqueBIGNUM.
- *
- * @param nHex The group prime N in hexadecimal format.
- * @param gHex The generator g in hexadecimal format.
- * @param hashName The name of the hash function to use (e.g., "SHA-256").
- * @return The computed k parameter as a UniqueBIGNUM.
- * @throws std::invalid_argument if N or g is empty, or if g >= N.
- * @throws std::runtime_error if conversion or hashing fails.
- */
-MessageExtractionFacility::UniqueBIGNUM
-EncryptionUtility::calculateK(const std::string &nHex, const std::string &gHex,
-                              const std::string &hashName) {
-  // input parameters validation
-  if (nHex.empty() || gHex.empty()) {
-    throw std::invalid_argument(
-        "EncryptionUtility::calculateK(): N or g is empty.");
-  }
-  // 1. Convert N and g to bytes and validate parameters one more time
-  std::vector<uint8_t> nBytes = MessageExtractionFacility::hexToBytes(nHex);
-  std::vector<uint8_t> gBytes = MessageExtractionFacility::hexToBytes(gHex);
-  if (nBytes.empty() ||
-      nBytes.size() < 16) { // 16 bytes / 128 bits minimum for safety
-    throw std::invalid_argument(
-        "EncryptionUtility::calculateK(): N is too small or invalid.");
-  }
-  BIGNUM *nBn = BN_bin2bn(nBytes.data(), nBytes.size(), nullptr);
-  BIGNUM *gBn = BN_bin2bn(gBytes.data(), gBytes.size(), nullptr);
-  if (!nBn || !gBn) {
-    BN_free(nBn);
-    BN_free(gBn);
-    throw std::runtime_error(
-        "EncryptionUtility::calculateK: Failed to convert N or g to BIGNUM.");
-  } else if (BN_cmp(gBn, nBn) >= 0) {
-    BN_free(nBn);
-    BN_free(gBn);
-    throw std::invalid_argument(
-        "EncryptionUtility::calculateK: g must be less than N.");
-  }
-  BN_free(nBn);
-  BN_free(gBn);
-  // 2. Pad g to length of N
-  std::vector<uint8_t> gPadded = padLeft(gBytes, nBytes.size());
-  // 3. Concatenate N || PAD(g)
-  std::vector<uint8_t> input(nBytes);
-  input.insert(input.end(), gPadded.begin(), gPadded.end());
-  // 4. Hash with the agreed hash function
-  const EVP_MD *md = nullptr;
-  if (hashName == "SHA-256") {
-    md = EVP_sha256();
-  } else if (hashName == "SHA-384") {
-    md = EVP_sha384();
-  } else if (hashName == "SHA-512") {
-    md = EVP_sha512();
-  } else {
-    throw std::runtime_error(
-        "EncryptionUtility::calculateK(): Unsupported hash");
-  }
-  std::vector<uint8_t> hash(EVP_MAX_MD_SIZE);
-  unsigned int hashLen = 0;
-  EVP_Digest(input.data(), input.size(), hash.data(), &hashLen, md, nullptr);
-  hash.resize(hashLen);
-  // 5. Convert hash to BIGNUM and wrap in UniqueBIGNUM
-  BIGNUM *kBn = BN_bin2bn(hash.data(), hash.size(), nullptr);
-  if (!kBn) {
-    throw std::runtime_error(
-        "EncryptionUtility::calculateK(): BN_bin2bn failed.");
-  }
-  return MessageExtractionFacility::UniqueBIGNUM(kBn);
 }
 /******************************************************************************/
