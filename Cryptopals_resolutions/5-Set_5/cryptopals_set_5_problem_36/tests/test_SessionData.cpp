@@ -122,12 +122,13 @@ TEST(SessionDataTest, SessionData_GetKMultiplierMap_ShouldMatchReference) {
 }
 
 /**
- * @test Test the correctness of the calculateU method with SHA-256.
+ * @test Test the correctness of the calculation of the u = H(A | B)
+ * parameter with SHA-256.
  * @brief Verifies that the scrambling parameter u, computed from known A and B
  * values using SHA-256, matches the expected reference value and has the
  * correct length.
  */
-TEST(SessionDataTest, CalculateUWithSHA256_ShouldMatchReference) {
+TEST(SessionDataTest, calculateHashConcatWithSHA256_ShouldMatchReference) {
   std::string AHex =
       "F6FDBCA9750B211E9A12DE1D60E54C7942C65D1D30826E552824E10A0777FEA1"
       "B38EE8CE5F2AC5D3BE76886D3F630EF44584382E8C303D8249420D08586B52F0"
@@ -155,8 +156,9 @@ TEST(SessionDataTest, CalculateUWithSHA256_ShouldMatchReference) {
       "2C598A9D7090BA64FE89A3364F87FE7B27BBED1862A01A42A348CD64AFEE58CC"
       "CA02B0764B813608C0A98DC9F815294D26746DF7DC28B79C6EABF08017406C06";
   std::string hashName = "SHA-256";
-  std::string uHex =
-      MyCryptoLibrary::SecureRemotePassword::calculateU(hashName, AHex, BHex);
+  std::string uHex = MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
+      hashName, MessageExtractionFacility::hexToPlaintext(AHex),
+      MessageExtractionFacility::hexToPlaintext(BHex));
   std::string expectedUHex =
       "49510A0BB9F42F1068F4446E620A4DF30453369329F2A001EF33A72510AA1810";
   EXPECT_EQ(uHex.length(), SHA256_DIGEST_LENGTH * 2);
@@ -164,12 +166,13 @@ TEST(SessionDataTest, CalculateUWithSHA256_ShouldMatchReference) {
 }
 
 /**
- * @test Test the correctness of the calculateU method with SHA-384.
+ * @test Test the correctness of the calculation of the u = H(A | B)
+ * parameter with SHA-384.
  * @brief Verifies that the scrambling parameter u, computed from known A and B
  * values using SHA-384, matches the expected reference value and has the
  * correct length.
  */
-TEST(SessionDataTest, CalculateUWithSHA384_ShouldMatchReference) {
+TEST(SessionDataTest, calculateHashConcatWithSHA384_ShouldMatchReference) {
   std::string AHex =
       "F6FDBCA9750B211E9A12DE1D60E54C7942C65D1D30826E552824E10A0777FEA1"
       "B38EE8CE5F2AC5D3BE76886D3F630EF44584382E8C303D8249420D08586B52F0"
@@ -197,8 +200,9 @@ TEST(SessionDataTest, CalculateUWithSHA384_ShouldMatchReference) {
       "2C598A9D7090BA64FE89A3364F87FE7B27BBED1862A01A42A348CD64AFEE58CC"
       "CA02B0764B813608C0A98DC9F815294D26746DF7DC28B79C6EABF08017406C06";
   std::string hashName = "SHA-384";
-  std::string uHex =
-      MyCryptoLibrary::SecureRemotePassword::calculateU(hashName, AHex, BHex);
+  std::string uHex = MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
+      hashName, MessageExtractionFacility::hexToPlaintext(AHex),
+      MessageExtractionFacility::hexToPlaintext(BHex));
   std::string expectedUHex =
       "0314B21EC992117D9C5F683036DD2F475EC67FE8E645534598B728CB32B4CB5A"
       "0140F855718AFE6C1D03A44E2B5639EC";
@@ -207,12 +211,13 @@ TEST(SessionDataTest, CalculateUWithSHA384_ShouldMatchReference) {
 }
 
 /**
- * @test Test the correctness of the calculateU method with SHA-512.
+ * @test Test the correctness of the calculation of the u = H(A | B)
+ * parameter with SHA-512.
  * @brief Verifies that the scrambling parameter u, computed from known A and B
  * values using SHA-512, matches the expected reference value and has the
  * correct length.
  */
-TEST(SessionDataTest, CalculateUWithSHA512_ShouldMatchReference) {
+TEST(SessionDataTest, calculateHashConcatWithSHA512_ShouldMatchReference) {
   std::string AHex =
       "F6FDBCA9750B211E9A12DE1D60E54C7942C65D1D30826E552824E10A0777FEA1"
       "B38EE8CE5F2AC5D3BE76886D3F630EF44584382E8C303D8249420D08586B52F0"
@@ -240,8 +245,9 @@ TEST(SessionDataTest, CalculateUWithSHA512_ShouldMatchReference) {
       "2C598A9D7090BA64FE89A3364F87FE7B27BBED1862A01A42A348CD64AFEE58CC"
       "CA02B0764B813608C0A98DC9F815294D26746DF7DC28B79C6EABF08017406C06";
   std::string hashName = "SHA-512";
-  std::string uHex =
-      MyCryptoLibrary::SecureRemotePassword::calculateU(hashName, AHex, BHex);
+  std::string uHex = MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
+      hashName, MessageExtractionFacility::hexToPlaintext(AHex),
+      MessageExtractionFacility::hexToPlaintext(BHex));
   std::string expectedUHex =
       "AB6BDCAAC999E71946DA5047698DD4EAA2146D8097D03628E394880D6D21672D"
       "C12EEEC2BD18C4050E6D725C3FAC7D86CA10A79F3A08E277A872B521C4742CDF";
@@ -250,11 +256,13 @@ TEST(SessionDataTest, CalculateUWithSHA512_ShouldMatchReference) {
 }
 
 /**
- * @test Test that calculateU throws an exception for an unknown hash name.
- * @brief Verifies that the calculateU method throws std::runtime_error when an
- * unsupported hash algorithm is provided.
+ * @test Test that during the u calculation, it throws an exception for
+ * an unknown hash name.
+ * @brief Verifies that the calculateHashConcat method throws
+ * std::runtime_error when an unsupported hash algorithm is provided.
  */
-TEST(SessionDataTest, CalculateU_WithUnknownHash_ShouldThrowRuntimeError) {
+TEST(SessionDataTest,
+     calculateHashConcat_WithUnknownHash_ShouldThrowRuntimeError) {
   std::string AHex =
       "F6FDBCA9750B211E9A12DE1D60E54C7942C65D1D30826E552824E10A0777FEA1"
       "B38EE8CE5F2AC5D3BE76886D3F630EF44584382E8C303D8249420D08586B52F0"
@@ -283,8 +291,11 @@ TEST(SessionDataTest, CalculateU_WithUnknownHash_ShouldThrowRuntimeError) {
       "CA02B0764B813608C0A98DC9F815294D26746DF7DC28B79C6EABF08017406C06";
   std::string unknownHash = "SHA-999";
   try {
-    MyCryptoLibrary::SecureRemotePassword::calculateU(unknownHash, AHex, BHex);
+    MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
+        unknownHash, MessageExtractionFacility::hexToPlaintext(AHex),
+        MessageExtractionFacility::hexToPlaintext(BHex));
   } catch (const std::runtime_error &e) {
-    EXPECT_THAT(std::string(e.what()), ::testing::EndsWith("Unsupported hash"));
+    EXPECT_THAT(std::string(e.what()),
+                ::testing::EndsWith("hash algorithm not recognized."));
   }
 }

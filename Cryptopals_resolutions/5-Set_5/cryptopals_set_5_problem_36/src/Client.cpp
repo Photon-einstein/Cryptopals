@@ -29,8 +29,7 @@ bool Client::_isServerFlag = false;
  */
 Client::Client(const std::string &clientId, const bool debugFlag)
     : _clientId{clientId}, _debugFlag{debugFlag},
-      _minSaltSizesMap{EncryptionUtility::getMinSaltSizes()},
-      _hashMap{EncryptionUtility::getHashMap()} {
+      _minSaltSizesMap{EncryptionUtility::getMinSaltSizes()} {
   if (_clientId.size() == 0) {
     throw std::runtime_error("Client log | constructor(): "
                              "Client ID is null.");
@@ -351,14 +350,17 @@ const bool Client::registrationComplete(const int portServerNumber,
                 << std::endl;
     }
     // x calc
-    const std::string xHex = calculateX(
-        _sessionData->_hash, _sessionData->_password, _sessionData->_salt);
+    const std::string xHex =
+        MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
+            _sessionData->_hash, _sessionData->_password,
+            MessageExtractionFacility::hexToPlaintext(_sessionData->_salt));
     if (_debugFlag) {
       std::cout << "x(hex) = H(s | P): '" << xHex << "'." << std::endl;
     }
     // v calc
-    std::string vHex = calculateV(xHex, _srpParametersMap.at(groupId)._nHex,
-                                  _srpParametersMap.at(groupId)._g);
+    std::string vHex = MyCryptoLibrary::SecureRemotePassword::calculateV(
+        xHex, _srpParametersMap.at(groupId)._nHex,
+        _srpParametersMap.at(groupId)._g);
     if (_debugFlag) {
       std::cout << "v(hex) = g^x mod N ='" << vHex << "'." << std::endl;
     }
@@ -508,9 +510,13 @@ const bool Client::authenticationInit(const int portServerNumber) {
       std::cout << "----------------------" << std::endl;
     }
     // u calculation
-    _sessionData->_u = MyCryptoLibrary::SecureRemotePassword::calculateU(
-        _srpParametersMap.at(extractedGroupId)._hashName,
-        _sessionData->_publicKeyHex, _sessionData->_peerPublicKeyHex);
+    _sessionData->_u =
+        MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
+            _srpParametersMap.at(extractedGroupId)._hashName,
+            MessageExtractionFacility::hexToPlaintext(
+                _sessionData->_publicKeyHex),
+            MessageExtractionFacility::hexToPlaintext(
+                _sessionData->_peerPublicKeyHex));
     if (_debugFlag) {
       std::cout << "\n--- Client log | Scrambling parameter u generated at the "
                    "authentication phase---"
@@ -567,85 +573,5 @@ void Client::printServerResponse(const cpr::Response &response) {
       std::cerr << "Client log | Unknown exception caught" << std::endl;
     }
   }
-}
-/******************************************************************************/
-/**
- * @brief This method will perform the following calculation:
- * x = H(s | P).
- *
- * This method will perform the following calculation:
- * x = H(s | P).
- * Clarification:
- * - H: hash algorithm;
- * - s: salt;
- * - P: password;
- * - x: output of the hash;
- *
- * @param hash The hash algorithm used in this calculation.
- * @param password The password used in this calculation, received in plaintext.
- * @param salt The salt used in this calculation, received in hexadecimal format
- *
- * @return The result of H(s | P) in hexadecimal format.
- */
-const std::string Client::calculateX(const std::string &hash,
-                                     const std::string &password,
-                                     const std::string &salt) {
-  if (_hashMap.find(hash) == _hashMap.end()) {
-    throw std::runtime_error("Client log | calculateX(): "
-                             "hash algorithm not recognized.");
-  }
-  const std::string saltPlaintext =
-      MessageExtractionFacility::hexToPlaintext(salt);
-  const std::string digestX = _hashMap.at(hash)(saltPlaintext + password);
-  return digestX;
-}
-/******************************************************************************/
-/**
- * @brief This method will perform the calculation v = g^x mod N.
- *
- * @param xHex The value of x, as a hexadecimal string.
- * @param nHex The value of the large prime N, as a hexadecimal string.
- * @param g The value of the generator g.
- *
- * @return The result of v = g^x mod N, in hexadecimal format.
- * @throw std::runtime_error If the calculation fails.
- */
-const std::string Client::calculateV(const std::string &xHex,
-                                     const std::string &nHex, unsigned int g) {
-  // Allocate with RAII
-  EncryptionUtility::BnCtxPtr ctx(BN_CTX_new());
-  if (!ctx) {
-    throw std::runtime_error(
-        "Client log | calculateV(): Failed to allocate BN_CTX.");
-  }
-  EncryptionUtility::BnPtr gBn(BN_new());
-  EncryptionUtility::BnPtr vBn(BN_new());
-  if (!gBn || !vBn) {
-    throw std::runtime_error(
-        "Client log | calculateV(): Failed to allocate BIGNUMs.");
-  }
-  BIGNUM *xBn = nullptr;
-  BIGNUM *nBn = nullptr;
-  if (!BN_hex2bn(&xBn, xHex.c_str()) || !BN_hex2bn(&nBn, nHex.c_str())) {
-    BN_free(xBn);
-    BN_free(nBn);
-    throw std::runtime_error(
-        "Client log | calculateV(): Failed to convert hex strings to BIGNUM.");
-  }
-  // Wrap xBn and nBn now that they're allocated
-  EncryptionUtility::BnPtr xPtr(xBn);
-  EncryptionUtility::BnPtr nPtr(nBn);
-  BN_set_word(gBn.get(), g);
-  // Compute v = g^x mod N
-  if (!BN_mod_exp(vBn.get(), gBn.get(), xPtr.get(), nPtr.get(), ctx.get())) {
-    throw std::runtime_error("Client log | calculateV(): BN_mod_exp failed.");
-  }
-  // Convert result to hex string
-  EncryptionUtility::OsslStr vHex(BN_bn2hex(vBn.get()));
-  if (!vHex) {
-    throw std::runtime_error(
-        "Client log | calculateV(): Failed to convert result to hex.");
-  }
-  return std::string(vHex.get()); // safely copy to std::string
 }
 /******************************************************************************/

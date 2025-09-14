@@ -189,44 +189,7 @@ private:
    * @param response The response sent by the server during the execution
    * of the Secure Remote Password protocol.
    */
-  void printServerResponse(const cpr::Response &response);
-
-  /**
-   * @brief This method will perform the following calculation:
-   * x = H(s | P).
-   *
-   * This method will perform the following calculation:
-   * x = H(s | P).
-   * Clarification:
-   * - H: hash algorithm;
-   * - s: salt;
-   * - P: password;
-   * - x: output of the hash;
-   *
-   * @param hash The hash algorithm used in this calculation.
-   * @param password The password used in this calculation, received in
-   * plaintext.
-   * @param salt The salt used in this calculation, received in hexadecimal
-   * format
-   *
-   * @return The result of H(s | P) in hexadecimal format.
-   */
-  const std::string calculateX(const std::string &hash,
-                               const std::string &password,
-                               const std::string &salt);
-
-  /**
-   * @brief This method will perform the calculation v = g^x mod N.
-   *
-   * @param xHex The value of x, as a hexadecimal string.
-   * @param nHex The value of the large prime N, as a hexadecimal string.
-   * @param g The value of the generator g.
-   *
-   * @return The result of v = g^x mod N, in hexadecimal format.
-   * @throw std::runtime_error If the calculation fails.
-   */
-  const std::string calculateV(const std::string &xHex, const std::string &nHex,
-                               unsigned int g);
+  static void printServerResponse(const cpr::Response &response);
 
   /* private fields */
 
@@ -242,7 +205,6 @@ private:
   const std::map<std::string, unsigned int> _minSaltSizesMap;
   std::unique_ptr<SessionData> _sessionData;
   const unsigned int _passwordSize{20}; // bytes
-  const std::unordered_map<std::string, EncryptionUtility::HashFn> _hashMap;
   const std::string _serverConfirmationMessage{"Ack"};
   static bool _isServerFlag;
 };
