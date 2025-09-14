@@ -170,6 +170,30 @@ public:
                                                const std::string &left,
                                                const std::string &right);
 
+  /**
+   * @brief This method will perform the following calculation:
+   * x = H(s | P).
+   *
+   * This method will perform the following calculation:
+   * x = H(s | P).
+   * Clarification:
+   * - H: hash algorithm;
+   * - s: salt;
+   * - P: password;
+   * - x: output of the hash;
+   *
+   * @param hash The hash algorithm used in this calculation.
+   * @param password The password used in this calculation, received in
+   * plaintext.
+   * @param salt The salt used in this calculation, received in hexadecimal
+   * format
+   *
+   * @return The result of H(s | P) in hexadecimal format.
+   */
+  static const std::string calculateX(const std::string &hash,
+                                      const std::string &password,
+                                      const std::string &salt);
+
 private:
   /* private methods */
 

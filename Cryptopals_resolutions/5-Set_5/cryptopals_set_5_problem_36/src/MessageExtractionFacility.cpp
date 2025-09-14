@@ -58,7 +58,9 @@ MessageExtractionFacility::toHexString(const std::vector<unsigned char> &data) {
     ss << std::setw(2)
        << static_cast<int>(byte); // Convert to int to print properly
   }
-  return ss.str();
+  std::string hexStr = ss.str();
+  std::transform(hexStr.begin(), hexStr.end(), hexStr.begin(), ::toupper);
+  return hexStr;
 }
 /******************************************************************************/
 /**
@@ -145,6 +147,7 @@ std::string MessageExtractionFacility::BIGNUMToHex(BIGNUM *bn) {
   }
   std::string hexStr(hexChars);
   OPENSSL_free(hexChars); // Free memory allocated by BN_bn2hex
+  std::transform(hexStr.begin(), hexStr.end(), hexStr.begin(), ::toupper);
   return hexStr;
 }
 /******************************************************************************/
@@ -188,6 +191,8 @@ std::string MessageExtractionFacility::uintToHex(unsigned int value,
                                                  size_t width) {
   std::ostringstream oss;
   oss << std::hex << std::setw(width) << std::setfill('0') << value;
-  return oss.str();
+  std::string hexStr = oss.str();
+  std::transform(hexStr.begin(), hexStr.end(), hexStr.begin(), ::toupper);
+  return hexStr;
 }
 /******************************************************************************/

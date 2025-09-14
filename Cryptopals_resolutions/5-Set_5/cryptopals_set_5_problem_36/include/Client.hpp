@@ -128,6 +128,10 @@ public:
    */
   static bool getIsServerFlag();
 
+  static std::string calculateX(const std::string &hash,
+                                const std::string &salt,
+                                const std::string &password);
+
 private:
   /* private methods */
 
