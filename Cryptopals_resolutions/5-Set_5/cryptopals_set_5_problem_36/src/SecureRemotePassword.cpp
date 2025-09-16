@@ -1,7 +1,9 @@
+#include <algorithm>
 #include <iostream>
 #include <openssl/bn.h>
 #include <openssl/err.h>
 #include <openssl/evp.h>
+#include <sstream>
 #include <stdexcept>
 
 #include "./../include/SecureRemotePassword.hpp"
@@ -455,5 +457,104 @@ MyCryptoLibrary::SecureRemotePassword::calculateX(const std::string &hash,
   const std::string digestX = _hashMap.at(hash)(saltPlaintext + password);
   return MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
       hash, saltPlaintext, password);
+}
+/******************************************************************************/
+/**
+ * @brief This function calculates the session key S for the client in the SRP
+ * protocol.
+ *
+ * Formula: S = (B - k * g^x) ^ (a + u * x) mod N
+ *
+ * @param BHex The hexadecimal representation of the server's public key B.
+ * @param kHex The hexadecimal representation of the SRP multiplier parameter k.
+ * @param g The SRP generator.
+ * @param xHex The hexadecimal representation of the client's private value x.
+ * @param aHex The hexadecimal representation of the client's private key a.
+ * @param uHex The hexadecimal representation of the SRP scrambling parameter u.
+ * @param nHex The hexadecimal representation of the SRP modulus N.
+ * @return The session key S as a hexadecimal string.
+ * @throw std::runtime_error if any of the calculations fail.
+ */
+std::string MyCryptoLibrary::SecureRemotePassword::calculateS(
+    const std::string &BHex, const std::string &kHex, unsigned int g,
+    const std::string &xHex, const std::string &aHex, const std::string &uHex,
+    const std::string &nHex) {
+  BN_CTX *ctx = BN_CTX_new();
+  if (!ctx) {
+    throw std::runtime_error(
+        "SecureRemotePassword log | calculateS(): Failed to allocate BN_CTX.");
+  }
+
+  BIGNUM *B = BN_new(), *k = BN_new(), *gx = BN_new(), *x = BN_new();
+  BIGNUM *a = BN_new(), *u = BN_new(), *N = BN_new();
+  BIGNUM *tmp1 = BN_new(), *tmp2 = BN_new(), *S = BN_new();
+
+  if (!B || !k || !gx || !x || !a || !u || !N || !tmp1 || !tmp2 || !S) {
+    throw std::runtime_error(
+        "SecureRemotePassword log | calculateS(): BIGNUM allocation failed");
+  }
+
+  BN_hex2bn(&B, BHex.c_str());
+  BN_hex2bn(&k, kHex.c_str());
+  BN_set_word(gx, g);
+  BN_hex2bn(&x, xHex.c_str());
+  BN_hex2bn(&a, aHex.c_str());
+  BN_hex2bn(&u, uHex.c_str());
+  BN_hex2bn(&N, nHex.c_str());
+
+  // Compute g^x mod N
+  if (!BN_mod_exp(gx, gx, x, N, ctx)) {
+    throw std::runtime_error(
+        "SecureRemotePassword log | calculateS(): BN_mod_exp(g^x) failed");
+  }
+
+  // Compute k * g^x mod N
+  if (!BN_mod_mul(tmp1, k, gx, N, ctx)) {
+    throw std::runtime_error(
+        "SecureRemotePassword log | calculateS(): BN_mod_mul(k * g^x) failed");
+  }
+
+  // Compute (B - k * g^x) mod N
+  if (!BN_mod_sub(tmp2, B, tmp1, N, ctx)) {
+    throw std::runtime_error("SecureRemotePassword log | calculateS(): "
+                             "BN_mod_sub(B - k * g^x) failed");
+  }
+
+  // Compute (a + u * x)
+  if (!BN_mul(tmp1, u, x, ctx)) {
+    throw std::runtime_error(
+        "SecureRemotePassword log | calculateS(): BN_mul(u * x) failed");
+  }
+  if (!BN_add(tmp1, a, tmp1)) {
+    throw std::runtime_error(
+        "SecureRemotePassword log | calculateS(): BN_add(a + u * x) failed");
+  }
+
+  // Compute S = (B - k * g^x) ^ (a + u * x) mod N
+  if (!BN_mod_exp(S, tmp2, tmp1, N, ctx)) {
+    throw std::runtime_error(
+        "SecureRemotePassword log | calculateS(): BN_mod_exp(S) failed");
+  }
+
+  // Convert S to hex string (uppercase)
+  char *SHex = BN_bn2hex(S);
+  std::string SStr = SHex ? SHex : "";
+  OPENSSL_free(SHex);
+
+  // Free resources
+  BN_free(B);
+  BN_free(k);
+  BN_free(gx);
+  BN_free(x);
+  BN_free(a);
+  BN_free(u);
+  BN_free(N);
+  BN_free(tmp1);
+  BN_free(tmp2);
+  BN_free(S);
+  BN_CTX_free(ctx);
+
+  std::transform(SStr.begin(), SStr.end(), SStr.begin(), ::toupper);
+  return SStr;
 }
 /******************************************************************************/

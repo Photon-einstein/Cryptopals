@@ -610,12 +610,14 @@ Glossary:
     registration step, at the client side (Done)
 64. Add tests at the client side to ensure that x is well performed, as the output
     of the method calculateX (Done)
+65. Add the calculation of the parameter S = (B - k \* g^x) ^ (a + u \* x) mod N, at the client side (Done)
+66. Make a python script to verify the parameter S value in parallel (Done)
 
-65. Add the calculation of the parameter S = (B - k _ g^x) ^ (a + u _ x) mod N, at the
-    client side (in progress)
+67. Add the calculation at the client side (in progress)
 
-66. Add the calculation of the parameter K = H(S) at the client side (TBD)
-67. Test manually with a binary client, the authentication step (TBD)
-68. Test with curl requests manually the authentication step, the init phase (TBD)
-69. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
-70. Add the first leg on client side of the Secure Remote Password protocol (TBD)
+68. Add unit tests to verify the validity of the method that performs the parameter S calculation (TBD)
+69. Add the calculation of the parameter K = H(S) at the client side (TBD)
+70. Test manually with a binary client, the authentication step (TBD)
+71. Test with curl requests manually the authentication step, the init phase (TBD)
+72. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
+73. Add the first leg on client side of the Secure Remote Password protocol (TBD)
