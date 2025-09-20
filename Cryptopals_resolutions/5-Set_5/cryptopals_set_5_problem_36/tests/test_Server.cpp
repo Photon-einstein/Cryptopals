@@ -18,8 +18,9 @@ TEST(ServerTest, Server_WithValidInputParameters_ShouldMatchReference) {
   Server server(debugFlag);
   EXPECT_EQ(server.getProductionPort(), expectedProductionPort);
   EXPECT_EQ(server.getTestPort(), expectedTestPort);
-  EXPECT_EQ(server.getSrpParametersFilenameLocation(),
-            expectedSrpParametersFilename);
+  EXPECT_EQ(
+      MyCryptoLibrary::SecureRemotePassword::getSrpParametersFilenameLocation(),
+      expectedSrpParametersFilename);
   EXPECT_EQ(server.getDefaultGroupId(), expectedDefaultGroupId);
 }
 
@@ -40,8 +41,9 @@ TEST(ServerTest,
   Server server(debugFlag, expectedDefaultGroupId);
   EXPECT_EQ(server.getProductionPort(), expectedProductionPort);
   EXPECT_EQ(server.getTestPort(), expectedTestPort);
-  EXPECT_EQ(server.getSrpParametersFilenameLocation(),
-            expectedSrpParametersFilename);
+  EXPECT_EQ(
+      MyCryptoLibrary::SecureRemotePassword::getSrpParametersFilenameLocation(),
+      expectedSrpParametersFilename);
   EXPECT_EQ(server.getDefaultGroupId(), expectedDefaultGroupId);
 }
 
@@ -64,8 +66,9 @@ TEST(
   Server server(debugFlag, invalidGroupId);
   EXPECT_EQ(server.getProductionPort(), expectedProductionPort);
   EXPECT_EQ(server.getTestPort(), expectedTestPort);
-  EXPECT_EQ(server.getSrpParametersFilenameLocation(),
-            expectedSrpParametersFilename);
+  EXPECT_EQ(
+      MyCryptoLibrary::SecureRemotePassword::getSrpParametersFilenameLocation(),
+      expectedSrpParametersFilename);
   EXPECT_EQ(server.getDefaultGroupId(), expectedDefaultGroupId);
 }
 
@@ -88,7 +91,8 @@ TEST(
   Server server(debugFlag, invalidGroupId);
   EXPECT_EQ(server.getProductionPort(), expectedProductionPort);
   EXPECT_EQ(server.getTestPort(), expectedTestPort);
-  EXPECT_EQ(server.getSrpParametersFilenameLocation(),
-            expectedSrpParametersFilename);
+  EXPECT_EQ(
+      MyCryptoLibrary::SecureRemotePassword::getSrpParametersFilenameLocation(),
+      expectedSrpParametersFilename);
   EXPECT_EQ(server.getDefaultGroupId(), expectedDefaultGroupId);
 }
