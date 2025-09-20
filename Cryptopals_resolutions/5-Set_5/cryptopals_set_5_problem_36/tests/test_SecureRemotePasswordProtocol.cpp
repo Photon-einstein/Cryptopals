@@ -1,3 +1,4 @@
+#include "../include/SecureRemotePassword.hpp"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -25,7 +26,8 @@ protected:
     _mapUsers[_clientId2]->setTestPort(_server->getTestPort());
     _mapUsers[_clientId3]->setTestPort(_server->getTestPort());
     _srpParametersMap = SrpParametersLoader::loadSrpParameters(
-        _server->getSrpParametersFilenameLocation());
+        MyCryptoLibrary::SecureRemotePassword::
+            getSrpParametersFilenameLocation());
     _minSaltSizesMap = EncryptionUtility::getMinSaltSizes();
   }
 

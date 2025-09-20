@@ -45,6 +45,7 @@ struct SessionData {
   std::string _peerPublicKeyHex;
   std::string _uHex;
   std::string _xHex;
+  std::string _SHex;
 };
 
 #endif // SESSION_DATA_HPP

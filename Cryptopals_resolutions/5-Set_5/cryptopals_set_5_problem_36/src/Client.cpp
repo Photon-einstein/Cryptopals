@@ -29,13 +29,16 @@ bool Client::_isServerFlag = false;
  */
 Client::Client(const std::string &clientId, const bool debugFlag)
     : _clientId{clientId}, _debugFlag{debugFlag},
-      _minSaltSizesMap{EncryptionUtility::getMinSaltSizes()} {
+      _minSaltSizesMap{EncryptionUtility::getMinSaltSizes()},
+      _srpParametersFilename{MyCryptoLibrary::SecureRemotePassword::
+                                 getSrpParametersFilenameLocation()} {
   if (_clientId.size() == 0) {
     throw std::runtime_error("Client log | constructor(): "
                              "Client ID is null.");
   }
   _srpParametersMap = SrpParametersLoader::loadSrpParameters(
-      getSrpParametersFilenameLocation());
+      MyCryptoLibrary::SecureRemotePassword::
+          getSrpParametersFilenameLocation());
 }
 /******************************************************************************/
 Client::~Client() {}
@@ -534,8 +537,36 @@ const bool Client::authenticationInit(const int portServerNumber) {
              "authentication phase---"
           << std::endl;
       std::cout << "\tClient ID: " << extractedClientId << std::endl;
-      std::cout << "x(hex) = H(s | P): '" << _sessionData->_xHex << "'."
+      std::cout << "\tx(hex) = H(s | P): '" << _sessionData->_xHex << "'."
                 << std::endl;
+      std::cout << "----------------------" << std::endl;
+    }
+    // S calculation
+    const std::string BHex = _sessionData->_peerPublicKeyHex;
+    const std::string kHex = MessageExtractionFacility::BIGNUMToHex(
+        MyCryptoLibrary::SecureRemotePassword::getKMap()
+            .at(_sessionData->_groupId)
+            .get());
+    const unsigned int g =
+        _sessionData->_secureRemotePassword->getSrpParametersMap()
+            .at(_sessionData->_groupId)
+            ._g;
+    const std::string xHex = _sessionData->_xHex;
+    const std::string aHex = _sessionData->_privateKeyHex;
+    const std::string uHex = _sessionData->_uHex;
+    const std::string nHex =
+        _sessionData->_secureRemotePassword->getSrpParametersMap()
+            .at(_sessionData->_groupId)
+            ._nHex;
+    _sessionData->_SHex = MyCryptoLibrary::SecureRemotePassword::calculateS(
+        BHex, kHex, g, xHex, aHex, uHex, nHex);
+    if (_debugFlag) {
+      std::cout
+          << "\n--- Client log | Password shared secret S generated at the "
+             "authentication phase---"
+          << std::endl;
+      std::cout << "\tClient ID: " << extractedClientId << std::endl;
+      std::cout << "\tS(hex): '" << _sessionData->_SHex << "'." << std::endl;
       std::cout << "----------------------" << std::endl;
     }
     return authenticationInitResult;

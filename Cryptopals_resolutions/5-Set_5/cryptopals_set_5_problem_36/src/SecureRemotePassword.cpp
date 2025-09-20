@@ -14,6 +14,14 @@ std::unordered_map<std::string, EncryptionUtility::HashFn>
     MyCryptoLibrary::SecureRemotePassword::_hashMap =
         EncryptionUtility::getHashMap();
 
+const std::string
+    MyCryptoLibrary::SecureRemotePassword::_srpParametersFilename =
+        "../input/SrpParameters.json";
+
+const std::map<unsigned int, MessageExtractionFacility::UniqueBIGNUM>
+    MyCryptoLibrary::SecureRemotePassword::_kMap =
+        MyCryptoLibrary::SecureRemotePassword::calculateKMultiplierParameters();
+
 /* constructor / destructor */
 
 /**
@@ -28,30 +36,61 @@ std::unordered_map<std::string, EncryptionUtility::HashFn>
  */
 MyCryptoLibrary::SecureRemotePassword::SecureRemotePassword(
     const bool debugFlag)
-    : _debugFlag{debugFlag} {
-  _srpParametersMap = SrpParametersLoader::loadSrpParameters(
-      getSrpParametersFilenameLocation());
-  if (debugFlag) {
+    : _debugFlag{debugFlag},
+      _srpParametersMap{SrpParametersLoader::loadSrpParameters(
+          getSrpParametersFilenameLocation())} {
+  if (_debugFlag) {
     std::cout << std::endl;
   }
-  for (const std::pair<const unsigned int, SrpParametersLoader::SrpParameters>
-           &entry : _srpParametersMap) {
+  for (const auto &entry : _srpParametersMap) {
     const unsigned int groupId = entry.first;
-    const SrpParametersLoader::SrpParameters &params = entry.second;
-    const std::string gHex = MessageExtractionFacility::uintToHex(params._g);
-    _kMap[groupId] = calculateK(params._nHex, gHex, params._hashName);
     if (_debugFlag) {
       std::cout << "k[group ID = " << groupId << "] = "
-                << MessageExtractionFacility::BIGNUMToHex(_kMap[groupId].get())
+                << MessageExtractionFacility::BIGNUMToHex(
+                       _kMap.at(groupId).get())
                 << std::endl;
     }
   }
-  if (debugFlag) {
+  if (_debugFlag) {
     std::cout << std::endl;
   }
 }
 /******************************************************************************/
 MyCryptoLibrary::SecureRemotePassword::~SecureRemotePassword() {}
+/******************************************************************************/
+/**
+ * @brief Calculates and stores the SRP multiplier parameter k for each group.
+ *
+ * This method iterates over all loaded SRP parameter groups and computes the
+ * multiplier parameter k for each group using the formula k = H(N | PAD(g)),
+ * where H is the group's hash function, N is the group prime, and PAD(g) is
+ * the generator g left-padded with zeros to match the length of N. The
+ * computed k values are stored in the internal _kMap for efficient retrieval
+ * during protocol operations.
+ *
+ * This method is typically called during object construction or
+ * initialization to ensure that all required k values are available for SRP
+ * calculations.
+ *
+ * @return A map from group ID (unsigned int) to the corresponding
+ * UniqueBIGNUM representing k.
+ * @throws std::runtime_error if any required parameters are missing or if
+ * calculation fails.
+ */
+std::map<unsigned int, MessageExtractionFacility::UniqueBIGNUM>
+MyCryptoLibrary::SecureRemotePassword::calculateKMultiplierParameters() {
+  std::map<unsigned int, SrpParametersLoader::SrpParameters> srpParametersMap{
+      SrpParametersLoader::loadSrpParameters(
+          getSrpParametersFilenameLocation())};
+  std::map<unsigned int, MessageExtractionFacility::UniqueBIGNUM> kMap;
+  for (const auto &entry : srpParametersMap) {
+    const unsigned int groupId = entry.first;
+    const SrpParametersLoader::SrpParameters &params = entry.second;
+    const std::string gHex = MessageExtractionFacility::uintToHex(params._g);
+    kMap[groupId] = calculateK(params._nHex, gHex, params._hashName);
+  }
+  return kMap;
+}
 /******************************************************************************/
 /**
  * @brief This method returns the location of the file where the public
@@ -100,12 +139,32 @@ MyCryptoLibrary::SecureRemotePassword::getMinSizePrivateKey() {
  *         corresponding UniqueBIGNUM representing k.
  */
 const std::map<unsigned int, MessageExtractionFacility::UniqueBIGNUM> &
-MyCryptoLibrary::SecureRemotePassword::getKMap() const {
+MyCryptoLibrary::SecureRemotePassword::getKMap() {
   if (_kMap.empty()) {
     throw std::runtime_error("Secure Remote Password log | "
                              "getKMap(): dictionary not initialized");
   }
   return _kMap;
+}
+/******************************************************************************/
+/**
+ * @brief Returns a constant reference to the map of SRP parameter groups.
+ *
+ * This method provides access to the internal map that associates each SRP
+ * group ID with its corresponding parameters loaded from the configuration
+ * file.
+ *
+ * @return A constant reference to the map from group ID (unsigned int) to
+ * SrpParametersLoader::SrpParameters.
+ */
+const std::map<unsigned int, SrpParametersLoader::SrpParameters> &
+MyCryptoLibrary::SecureRemotePassword::getSrpParametersMap() const {
+  if (_kMap.empty()) {
+    throw std::runtime_error(
+        "Secure Remote Password log | "
+        "getSrpParametersMap(): dictionary not initialized");
+  }
+  return _srpParametersMap;
 }
 /******************************************************************************/
 /**
@@ -140,12 +199,13 @@ std::string MyCryptoLibrary::SecureRemotePassword::generatePrivateKey(
   }
   int nBits = BN_num_bits(nBn.get());
   if (minSizeBits > nBits) {
-    throw std::runtime_error(
-        "SecureRemotePassword log | generatePrivateKey(): minSizeBits greater "
-        "than the number of bits of N");
+    throw std::runtime_error("SecureRemotePassword log | "
+                             "generatePrivateKey(): minSizeBits greater "
+                             "than the number of bits of N");
   }
   int bits = std::max(static_cast<int>(minSizeBits), nBits);
-  // Generate random private key: 1 <= privateKey < N, at least minSizeBits bits
+  // Generate random private key: 1 <= privateKey < N, at least minSizeBits
+  // bits
   while (true) {
     if (!BN_rand(privateKey.get(), bits, BN_RAND_TOP_ANY, BN_RAND_BOTTOM_ANY)) {
       throw std::runtime_error(
@@ -244,9 +304,9 @@ std::string MyCryptoLibrary::SecureRemotePassword::calculatePublicKey(
   // Enforce 1 < result < N
   if (BN_cmp(result.get(), BN_value_one()) <= 0 ||
       BN_cmp(result.get(), n.get()) >= 0) {
-    throw std::runtime_error(
-        "Secure Remote Password log | calculatePublicKey(): Public key not in "
-        "valid range (1 < key < N).");
+    throw std::runtime_error("Secure Remote Password log | "
+                             "calculatePublicKey(): Public key not in "
+                             "valid range (1 < key < N).");
   }
   return MessageExtractionFacility::BIGNUMToHex(result.get());
 }
@@ -291,9 +351,9 @@ bool MyCryptoLibrary::SecureRemotePassword::validatePublicKey(
  *
  * This method computes the SRP parameter k as specified in RFC 5054:
  *   k = H(N | PAD(g))
- * where H is the agreed hash function, N is the group prime (as a hex string),
- * and PAD(g) is the generator g left-padded with zeros to the length of N.
- * The result is returned as a UniqueBIGNUM.
+ * where H is the agreed hash function, N is the group prime (as a hex
+ * string), and PAD(g) is the generator g left-padded with zeros to the length
+ * of N. The result is returned as a UniqueBIGNUM.
  *
  * @param nHex The group prime N in hexadecimal format.
  * @param gHex The generator g in hexadecimal format.
@@ -371,14 +431,14 @@ const std::string MyCryptoLibrary::SecureRemotePassword::calculateV(
   // Allocate with RAII
   EncryptionUtility::BnCtxPtr ctx(BN_CTX_new());
   if (!ctx) {
-    throw std::runtime_error(
-        "SecureRemotePassword log | calculateV(): Failed to allocate BN_CTX.");
+    throw std::runtime_error("SecureRemotePassword log | calculateV(): "
+                             "Failed to allocate BN_CTX.");
   }
   EncryptionUtility::BnPtr gBn(BN_new());
   EncryptionUtility::BnPtr vBn(BN_new());
   if (!gBn || !vBn) {
-    throw std::runtime_error(
-        "SecureRemotePassword log | calculateV(): Failed to allocate BIGNUMs.");
+    throw std::runtime_error("SecureRemotePassword log | calculateV(): "
+                             "Failed to allocate BIGNUMs.");
   }
   BIGNUM *xBn = nullptr;
   BIGNUM *nBn = nullptr;
@@ -439,8 +499,10 @@ const std::string MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
  * - x: output of the hash;
  *
  * @param hash The hash algorithm used in this calculation.
- * @param password The password used in this calculation, received in plaintext.
- * @param salt The salt used in this calculation, received in hexadecimal format
+ * @param password The password used in this calculation, received in
+ * plaintext.
+ * @param salt The salt used in this calculation, received in hexadecimal
+ * format
  *
  * @return The result of H(s | P) in hexadecimal format.
  */
@@ -466,11 +528,13 @@ MyCryptoLibrary::SecureRemotePassword::calculateX(const std::string &hash,
  * Formula: S = (B - k * g^x) ^ (a + u * x) mod N
  *
  * @param BHex The hexadecimal representation of the server's public key B.
- * @param kHex The hexadecimal representation of the SRP multiplier parameter k.
+ * @param kHex The hexadecimal representation of the SRP multiplier parameter
+ * k.
  * @param g The SRP generator.
  * @param xHex The hexadecimal representation of the client's private value x.
  * @param aHex The hexadecimal representation of the client's private key a.
- * @param uHex The hexadecimal representation of the SRP scrambling parameter u.
+ * @param uHex The hexadecimal representation of the SRP scrambling parameter
+ * u.
  * @param nHex The hexadecimal representation of the SRP modulus N.
  * @return The session key S as a hexadecimal string.
  * @throw std::runtime_error if any of the calculations fail.
@@ -481,19 +545,16 @@ std::string MyCryptoLibrary::SecureRemotePassword::calculateS(
     const std::string &nHex) {
   BN_CTX *ctx = BN_CTX_new();
   if (!ctx) {
-    throw std::runtime_error(
-        "SecureRemotePassword log | calculateS(): Failed to allocate BN_CTX.");
+    throw std::runtime_error("SecureRemotePassword log | calculateS(): "
+                             "Failed to allocate BN_CTX.");
   }
-
   BIGNUM *B = BN_new(), *k = BN_new(), *gx = BN_new(), *x = BN_new();
   BIGNUM *a = BN_new(), *u = BN_new(), *N = BN_new();
   BIGNUM *tmp1 = BN_new(), *tmp2 = BN_new(), *S = BN_new();
-
   if (!B || !k || !gx || !x || !a || !u || !N || !tmp1 || !tmp2 || !S) {
     throw std::runtime_error(
         "SecureRemotePassword log | calculateS(): BIGNUM allocation failed");
   }
-
   BN_hex2bn(&B, BHex.c_str());
   BN_hex2bn(&k, kHex.c_str());
   BN_set_word(gx, g);
@@ -501,46 +562,39 @@ std::string MyCryptoLibrary::SecureRemotePassword::calculateS(
   BN_hex2bn(&a, aHex.c_str());
   BN_hex2bn(&u, uHex.c_str());
   BN_hex2bn(&N, nHex.c_str());
-
   // Compute g^x mod N
   if (!BN_mod_exp(gx, gx, x, N, ctx)) {
     throw std::runtime_error(
         "SecureRemotePassword log | calculateS(): BN_mod_exp(g^x) failed");
   }
-
   // Compute k * g^x mod N
   if (!BN_mod_mul(tmp1, k, gx, N, ctx)) {
-    throw std::runtime_error(
-        "SecureRemotePassword log | calculateS(): BN_mod_mul(k * g^x) failed");
+    throw std::runtime_error("SecureRemotePassword log | calculateS(): "
+                             "BN_mod_mul(k * g^x) failed");
   }
-
   // Compute (B - k * g^x) mod N
   if (!BN_mod_sub(tmp2, B, tmp1, N, ctx)) {
     throw std::runtime_error("SecureRemotePassword log | calculateS(): "
                              "BN_mod_sub(B - k * g^x) failed");
   }
-
   // Compute (a + u * x)
   if (!BN_mul(tmp1, u, x, ctx)) {
     throw std::runtime_error(
         "SecureRemotePassword log | calculateS(): BN_mul(u * x) failed");
   }
-  if (!BN_add(tmp1, a, tmp1)) {
+  if (!BN_mod_add(tmp1, a, tmp1, N, ctx)) {
     throw std::runtime_error(
         "SecureRemotePassword log | calculateS(): BN_add(a + u * x) failed");
   }
-
   // Compute S = (B - k * g^x) ^ (a + u * x) mod N
   if (!BN_mod_exp(S, tmp2, tmp1, N, ctx)) {
     throw std::runtime_error(
         "SecureRemotePassword log | calculateS(): BN_mod_exp(S) failed");
   }
-
   // Convert S to hex string (uppercase)
   char *SHex = BN_bn2hex(S);
   std::string SStr = SHex ? SHex : "";
   OPENSSL_free(SHex);
-
   // Free resources
   BN_free(B);
   BN_free(k);
@@ -553,7 +607,7 @@ std::string MyCryptoLibrary::SecureRemotePassword::calculateS(
   BN_free(tmp2);
   BN_free(S);
   BN_CTX_free(ctx);
-
+  // to upper case conversion
   std::transform(SStr.begin(), SStr.end(), SStr.begin(), ::toupper);
   return SStr;
 }

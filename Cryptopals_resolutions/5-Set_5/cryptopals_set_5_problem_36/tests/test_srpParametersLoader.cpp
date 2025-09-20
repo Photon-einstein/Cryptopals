@@ -37,7 +37,8 @@ protected:
 TEST_F(SrpParametersLoaderTest,
        loadSrpParameters_WithCorrectFilename_ShouldMatchReference) {
   _srpParametersMap = SrpParametersLoader::loadSrpParameters(
-      _secureRemotePassword->getSrpParametersFilenameLocation());
+      MyCryptoLibrary::SecureRemotePassword::
+          getSrpParametersFilenameLocation());
   ASSERT_EQ(_srpParametersMap.size(), 7);
   // Group ID 1 test
   ASSERT_EQ(_srpParametersMap[1]._groupId, 1);
@@ -202,7 +203,7 @@ TEST_F(SrpParametersLoaderTest,
 TEST_F(SrpParametersLoaderTest,
        loadSrpParameters_WithIncorrectFilename_ShouldMatchThrowAnException) {
   std::string faultyFilename =
-      _secureRemotePassword->getSrpParametersFilenameLocation();
+      MyCryptoLibrary::SecureRemotePassword::getSrpParametersFilenameLocation();
   faultyFilename[0] ^= 0x01; // flip one bit
   try {
     _srpParametersMap = SrpParametersLoader::loadSrpParameters(faultyFilename);

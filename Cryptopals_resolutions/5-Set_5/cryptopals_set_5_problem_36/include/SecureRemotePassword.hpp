@@ -41,13 +41,35 @@ public:
   /* public methods */
 
   /**
+   * @brief Calculates and stores the SRP multiplier parameter k for each group.
+   *
+   * This method iterates over all loaded SRP parameter groups and computes the
+   * multiplier parameter k for each group using the formula k = H(N | PAD(g)),
+   * where H is the group's hash function, N is the group prime, and PAD(g) is
+   * the generator g left-padded with zeros to match the length of N. The
+   * computed k values are stored in the internal _kMap for efficient retrieval
+   * during protocol operations.
+   *
+   * This method is typically called during object construction or
+   * initialization to ensure that all required k values are available for SRP
+   * calculations.
+   *
+   * @return A map from group ID (unsigned int) to the corresponding
+   * UniqueBIGNUM representing k.
+   * @throws std::runtime_error if any required parameters are missing or if
+   * calculation fails.
+   */
+  static std::map<unsigned int, MessageExtractionFacility::UniqueBIGNUM>
+  calculateKMultiplierParameters();
+
+  /**
    * @brief This method returns the location of the file where the public
    * configurations of the Secure Remote Password protocol are available.
    *
    * @return Filename where the public configurations of the Secure Remote
    * Password protocol are available.
    */
-  const std::string &getSrpParametersFilenameLocation();
+  static const std::string &getSrpParametersFilenameLocation();
 
   /**
    * @brief This method returns the minimum size of a private key in bits,
@@ -70,8 +92,21 @@ public:
    * @return A constant reference to the map from group ID (unsigned int) to the
    *         corresponding UniqueBIGNUM representing k.
    */
-  const std::map<unsigned int, MessageExtractionFacility::UniqueBIGNUM> &
-  getKMap() const;
+  static const std::map<unsigned int, MessageExtractionFacility::UniqueBIGNUM> &
+  getKMap();
+
+  /**
+   * @brief Returns a constant reference to the map of SRP parameter groups.
+   *
+   * This method provides access to the internal map that associates each SRP
+   * group ID with its corresponding parameters loaded from the configuration
+   * file.
+   *
+   * @return A constant reference to the map from group ID (unsigned int) to
+   * SrpParametersLoader::SrpParameters.
+   */
+  const std::map<unsigned int, SrpParametersLoader::SrpParameters> &
+  getSrpParametersMap() const;
 
   /**
    * @brief This method will generate a private key.
@@ -222,12 +257,13 @@ private:
 
   /* private members */
   bool _debugFlag;
-  const std::string _srpParametersFilename{"../input/SrpParameters.json"};
+  static const std::string _srpParametersFilename;
   std::map<unsigned int, SrpParametersLoader::SrpParameters> _srpParametersMap;
   unsigned int _groupId;
   static unsigned int _minSizePrivateKey;
   static std::unordered_map<std::string, EncryptionUtility::HashFn> _hashMap;
-  std::map<unsigned int, MessageExtractionFacility::UniqueBIGNUM> _kMap;
+  static const std::map<unsigned int, MessageExtractionFacility::UniqueBIGNUM>
+      _kMap;
 };
 
 } // namespace MyCryptoLibrary
