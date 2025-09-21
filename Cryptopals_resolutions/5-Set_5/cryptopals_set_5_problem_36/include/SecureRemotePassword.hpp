@@ -116,13 +116,13 @@ public:
    * - should be at in the range [1, N-1];
    * - should be at least minSizeBits;
    *
-   * @param nHex N in hexadecimal format.
+   * @param NHex N in hexadecimal format.
    * @param minSizeBits The minimum amount of bits that the private key should
    * have.
    *
    * @return The private key in a string, in hexadecimal format.
    */
-  static std::string generatePrivateKey(const std::string &nHex,
+  static std::string generatePrivateKey(const std::string &NHex,
                                         const unsigned int minSizeBits);
 
   /**
@@ -132,7 +132,7 @@ public:
    * For the server: B = (k*v + g^b) mod N
    *
    * @param privateKeyHex The private key (a or b) in hex.
-   * @param nHex The group prime N in hexadecimal format.
+   * @param NHex The group prime N in hexadecimal format.
    * @param gHex The generator g in hexadecimal format.
    * @param isServer If true, computes B (server); if false, computes A
    * (client).
@@ -142,7 +142,7 @@ public:
    * @throws std::runtime_error if constraints are not met.
    */
   static std::string calculatePublicKey(const std::string &privateKeyHex,
-                                        const std::string &nHex,
+                                        const std::string &NHex,
                                         const std::string &gHex, bool isServer,
                                         const BIGNUM *k = nullptr,
                                         const std::string &vHex = "");
@@ -154,11 +154,11 @@ public:
    * 1 < public key < N
    *
    * @param publicKeyHex The public key (a or b) in hex.
-   * @param nHex The group prime N in hexadecimal format.
+   * @param NHex The group prime N in hexadecimal format.
    * @return True if the validation passes, false otherwise.
    */
   static bool validatePublicKey(const std::string &publicKeyHex,
-                                const std::string &nHex);
+                                const std::string &NHex);
 
   /**
    * @brief Calculates the SRP multiplier parameter k = H(N | PAD(g)).
@@ -169,7 +169,7 @@ public:
    * string), and PAD(g) is the generator g left-padded with zeros to the length
    * of N. The result is returned as a UniqueBIGNUM.
    *
-   * @param nHex The group prime N in hexadecimal format.
+   * @param NHex The group prime N in hexadecimal format.
    * @param gHex The generator g in hexadecimal format.
    * @param hashName The name of the hash function to use (e.g., "SHA-256").
    * @return The computed k parameter as a UniqueBIGNUM.
@@ -177,21 +177,21 @@ public:
    * @throws std::runtime_error if conversion or hashing fails.
    */
   static MessageExtractionFacility::UniqueBIGNUM
-  calculateK(const std::string &nHex, const std::string &gHex,
+  calculateK(const std::string &NHex, const std::string &gHex,
              const std::string &hashName);
 
   /**
    * @brief This method will perform the calculation v = g^x mod N.
    *
    * @param xHex The value of x, as a hexadecimal string.
-   * @param nHex The value of the large prime N, as a hexadecimal string.
+   * @param NHex The value of the large prime N, as a hexadecimal string.
    * @param g The value of the generator g.
    *
    * @return The result of v = g^x mod N, in hexadecimal format.
    * @throw std::runtime_error If the calculation fails.
    */
   static const std::string calculateV(const std::string &xHex,
-                                      const std::string &nHex, unsigned int g);
+                                      const std::string &NHex, unsigned int g);
 
   /**
    * @brief Calculates a hash digest of the concatenation of two values.
@@ -243,18 +243,18 @@ public:
    * @param aHex The hexadecimal representation of the client's private key a.
    * @param uHex The hexadecimal representation of the SRP scrambling parameter
    * u.
-   * @param nHex The hexadecimal representation of the SRP modulus N.
+   * @param NHex The hexadecimal representation of the SRP modulus N.
    * @return The session key S as a hexadecimal string.
    * @throw std::runtime_error if any of the calculations fail.
    */
   static std::string
   calculateS(const std::string &BHex, const std::string &kHex, unsigned int g,
              const std::string &xHex, const std::string &aHex,
-             const std::string &uHex, const std::string &nHex);
+             const std::string &uHex, const std::string &NHex);
 
   /**
-   * @brief This method calculates the session key K for the client in the SRP
-   * protocol.
+   * @brief This method calculates the session key K for the client in the
+   * SRP protocol.
    *
    * Formula: K = H(S)
    * Clarification:
@@ -263,11 +263,44 @@ public:
    *
    * @param hash The hash algorithm (e.g., "SHA-256").
    * @param SHex The shared secret, in hexadecimal format.
-   * @return The session key S as a hexadecimal string.
+   * @return The session key K as a hexadecimal string.
    * @throw std::runtime_error if any of the calculations fail.
    */
   static std::string calculateK(const std::string &hash,
                                 const std::string &SHex);
+
+  /**
+   * @brief This method calculates the SRP M value (message authentication code)
+   * for the client.
+   *
+   * Formula: H(H(N) XOR H(g) | H(U) | s | A | B | K)
+   * Clarification:
+   * - H: hash algorithm;
+   * - N: modulus;
+   * - g: generator;
+   * - U: username;
+   * - s: salt;
+   * - A: client's public key;
+   * - B: server's public key;
+   * - K: session key;
+   *
+   * @param hashName The hash algorithm to use (e.g., "SHA-256").
+   * @param NHex The hexadecimal representation of the modulus N.
+   * @param gHex The hexadecimal representation of the generator g.
+   * @param username The username.
+   * @param saltHex The hexadecimal representation of the salt.
+   * @param AHex The hexadecimal representation of the client's public key A.
+   * @param BHex The hexadecimal representation of the server's public key B.
+   * @param KHex The hexadecimal representation of the SRP multiplier parameter
+   * k.
+   * @return The computed M value as a hexadecimal string.
+   * @throw std::runtime_error if any of the calculations fail.
+   */
+  static std::string
+  calculateM(const std::string &hashName, const std::string &NHex,
+             const std::string &gHex, const std::string &username,
+             const std::string &saltHex, const std::string &AHex,
+             const std::string &BHex, const std::string &KHex);
 
 private:
   /* private methods */

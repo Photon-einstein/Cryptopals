@@ -252,7 +252,7 @@ Example of the kind of response by the given server:
     24.1. Curl with only a userId: (Done)
 
     ````bash
-      curl -X POST http://localhost:18080/src/register/init \
+      curl -X POST http://localhost:18080/srp/register/init \
       -H "Content-Type: application/json" \
       -d '{
             "clientId": "client123"
@@ -261,7 +261,7 @@ Example of the kind of response by the given server:
     24.2. Curl with a userId and requestedGroup < default: (Done)
 
     ```bash
-      curl -X POST http://localhost:18080/src/register/init \
+      curl -X POST http://localhost:18080/srp/register/init \
       -H "Content-Type: application/json" \
       -d '{
             "clientId": "client123",
@@ -272,7 +272,7 @@ Example of the kind of response by the given server:
     24.3. Curl with a userId and requestedGroup = default: (Done)
 
     ```bash
-      curl -X POST http://localhost:18080/src/register/init \
+      curl -X POST http://localhost:18080/srp/register/init \
       -H "Content-Type: application/json" \
       -d '{
             "clientId": "client123",
@@ -283,7 +283,7 @@ Example of the kind of response by the given server:
     24.4. Curl with a userId and requestedGroup > default: (Done)
 
     ```bash
-      curl -X POST http://localhost:18080/src/register/init \
+      curl -X POST http://localhost:18080/srp/register/init \
       -H "Content-Type: application/json" \
       -d '{
             "clientId": "client123",
@@ -294,7 +294,7 @@ Example of the kind of response by the given server:
     24.5. Curl with a userId and an invalid groupId, lower bound: (Done)
 
     ```bash
-      curl -X POST http://localhost:18080/src/register/init \
+      curl -X POST http://localhost:18080/srp/register/init \
       -H "Content-Type: application/json" \
       -d '{
             "clientId": "client123",
@@ -305,7 +305,7 @@ Example of the kind of response by the given server:
     24.6. Curl with a userId and an invalid groupId, upper bound: (Done)
 
     ```bash
-      curl -X POST http://localhost:18080/src/register/init \
+      curl -X POST http://localhost:18080/srp/register/init \
       -H "Content-Type: application/json" \
       -d '{
             "clientId": "client123",
@@ -316,7 +316,7 @@ Example of the kind of response by the given server:
     24.7. Curl with an empty userId: (Done)
 
     ```bash
-      curl -X POST http://localhost:18080/src/register/init \
+      curl -X POST http://localhost:18080/srp/register/init \
       -H "Content-Type: application/json" \
       -d '{
             "clientId": ""
@@ -326,7 +326,7 @@ Example of the kind of response by the given server:
     24.8. Curl with no userId field: (Done)
 
     ```bash
-      curl -X POST http://localhost:18080/src/register/init \
+      curl -X POST http://localhost:18080/srp/register/init \
       -H "Content-Type: application/json" \
       -d '{
           }' | jq
@@ -339,7 +339,7 @@ Example of the kind of response by the given server:
 27. Add tests to the handleRegisterInit endpoint at the server side (Done)
 
     ```bash
-      curl -X POST http://localhost:18080/src/register/init \
+      curl -X POST http://localhost:18080/srp/register/init \
       -H "Content-Type: application/json" \
       -d '{
             "clientId": "<client_ID>", // string
@@ -624,9 +624,66 @@ Glossary:
 69. Add the calculation of the parameter K = H(S) at the client side (Done)
 70. Add a script in python to double-check the calculation in parallel. (Done)
 71. Add unit tests to check the correctness of the method that performs the K calculation (Done)
+72. Test manually with a binary client, the authentication step (Done)
+73. Test with curl requests manually the authentication step, the init phase (Done)
 
-72. Test manually with a binary client, the authentication step (in progress)
+```bash
+curl -X POST http://localhost:18080/srp/auth/init \
+ -H "Content-Type: application/json" \
+ -d '{
+"clientId": "Bob"
+}' | jq
+```
 
-73. Test with curl requests manually the authentication step, the init phase (TBD)
-74. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
-75. Add the first leg on client side of the Secure Remote Password protocol (TBD)
+74. Assessment of what is still missing being done of the SRP protocol (Done)
+
+**Already implemented at the '/srp/auth/init' endpoint:**
+
+```text
+  Client                             Host
+----------                         --------
+  # Client sends username (U)
+  U                           -->
+                              <--   # Server verifies U
+                                    # Server looks up (s, v, group_id), generates b, computes:
+                                    # k = H(N | PAD(g))
+                                    # B = kv + g^b mod N
+                                    # Sends s, B, group_id to client
+                                    s, B, groupId
+
+  # Client generates a, computes:
+  # A = g^a mod N
+  # u = H(A | B)
+  # x = H(s | P)
+  # S = (B - k * g^x) ^ (a + u * x) mod N
+  # K = H(S)
+```
+
+**To be implemented at the '/srp/auth/complete' endpoint:**
+
+```text
+  Client                             Host
+----------                         --------
+  # M = H(H(N) XOR H(g) | H(U) | s | A | B | K)   <-- FULL RFC 2945/5054 CLIENT PROOF
+  U, A, M                     -->
+                              <--   # U serves to keep track of the state
+                                    # Server computes:
+                                    # u = H(A | B)
+                                    # S = (A * v^u) ^ b mod N
+                                    # K = H(S)
+                                    # M' = H(H(N) XOR H(g) | H(U) | s | A | B | K)
+                                    # If M == M', server sends:
+                                    # M2 = H(A | M | K)   <-- FULL RFC 2945/5054 SERVER PROOF
+                                    # Else, authentication fails
+                                    H(A | M | K)
+
+  # Client verifies M2:
+  # M2 = H(A | M | K)
+  # If valid, authentication is complete
+```
+
+76. Add skeleton code for the '/srp/auth/complete' endpoint at the client side (Done)
+77. Add the method to perform the calculation of the M parameter (Done)
+78. Create a python script to calculate the M parameter in parallel (Done)
+
+79. Create unit tests to assess the correct calculation of the M parameter (in progress)
