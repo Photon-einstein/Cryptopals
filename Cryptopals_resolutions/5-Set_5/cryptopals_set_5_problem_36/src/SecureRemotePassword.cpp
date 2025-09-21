@@ -623,7 +623,7 @@ std::string MyCryptoLibrary::SecureRemotePassword::calculateS(
  *
  * @param hash The hash algorithm (e.g., "SHA-256").
  * @param SHex The shared secret, in hexadecimal format.
- * @return The session key K as an hexadecimal string.
+ * @return The session key K as a hexadecimal string.
  * @throw std::runtime_error if any of the calculations fail.
  */
 std::string
