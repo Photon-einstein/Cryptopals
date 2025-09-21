@@ -621,10 +621,12 @@ Glossary:
     67.6. Group ID 6 (Done)
     67.7. Group ID 7 (Done)
 68. Add the calculation at the client side (Done)
+69. Add the calculation of the parameter K = H(S) at the client side (Done)
+70. Add a script in python to double-check the calculation in parallel. (Done)
+71. Add unit tests to check the correctness of the method that performs the K calculation (Done)
 
-69. Add the calculation of the parameter K = H(S) at the client side (in progress)
+72. Test manually with a binary client, the authentication step (in progress)
 
-70. Test manually with a binary client, the authentication step (TBD)
-71. Test with curl requests manually the authentication step, the init phase (TBD)
-72. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
-73. Add the first leg on client side of the Secure Remote Password protocol (TBD)
+73. Test with curl requests manually the authentication step, the init phase (TBD)
+74. Add the skeleton of the SecureRemotePassword on the Client class (TBD)
+75. Add the first leg on client side of the Secure Remote Password protocol (TBD)

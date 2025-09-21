@@ -522,7 +522,7 @@ MyCryptoLibrary::SecureRemotePassword::calculateX(const std::string &hash,
 }
 /******************************************************************************/
 /**
- * @brief This function calculates the session key S for the client in the SRP
+ * @brief This method calculates the session key S for the client in the SRP
  * protocol.
  *
  * Formula: S = (B - k * g^x) ^ (a + u * x) mod N
@@ -610,5 +610,39 @@ std::string MyCryptoLibrary::SecureRemotePassword::calculateS(
   // to upper case conversion
   std::transform(SStr.begin(), SStr.end(), SStr.begin(), ::toupper);
   return SStr;
+}
+/******************************************************************************/
+/**
+ * @brief This method calculates the session key K for the client in the SRP
+ * protocol.
+ *
+ * Formula: K = H(S)
+ * Clarification:
+ * - H: hash algorithm;
+ * - S: shared secret in hexadecimal format;
+ *
+ * @param hash The hash algorithm (e.g., "SHA-256").
+ * @param SHex The shared secret, in hexadecimal format.
+ * @return The session key K as an hexadecimal string.
+ * @throw std::runtime_error if any of the calculations fail.
+ */
+std::string
+MyCryptoLibrary::SecureRemotePassword::calculateK(const std::string &hash,
+                                                  const std::string &SHex) {
+  // Check hash algorithm exists
+  if (_hashMap.find(hash) == _hashMap.end()) {
+    throw std::runtime_error("SecureRemotePassword log | calculateK(): "
+                             "hash algorithm not recognized.");
+  }
+  // Convert S from hex string to bytes
+  std::vector<uint8_t> SBytes = MessageExtractionFacility::hexToBytes(SHex);
+  // Convert bytes to string for hashing
+  std::string SPlaintext(reinterpret_cast<const char *>(SBytes.data()),
+                         SBytes.size());
+  // Hash the byte string
+  std::string KHex = _hashMap.at(hash)(SPlaintext);
+  // Return as uppercase hex
+  std::transform(KHex.begin(), KHex.end(), KHex.begin(), ::toupper);
+  return KHex;
 }
 /******************************************************************************/

@@ -230,7 +230,7 @@ public:
                                       const std::string &salt);
 
   /**
-   * @brief This function calculates the session key S for the client in the SRP
+   * @brief This method calculates the session key S for the client in the SRP
    * protocol.
    *
    * Formula: S = (B - k * g^x) ^ (a + u * x) mod N
@@ -251,6 +251,23 @@ public:
   calculateS(const std::string &BHex, const std::string &kHex, unsigned int g,
              const std::string &xHex, const std::string &aHex,
              const std::string &uHex, const std::string &nHex);
+
+  /**
+   * @brief This method calculates the session key K for the client in the SRP
+   * protocol.
+   *
+   * Formula: K = H(S)
+   * Clarification:
+   * - H: hash algorithm;
+   * - S: shared secret in hexadecimal format;
+   *
+   * @param hash The hash algorithm (e.g., "SHA-256").
+   * @param SHex The shared secret, in hexadecimal format.
+   * @return The session key S as a hexadecimal string.
+   * @throw std::runtime_error if any of the calculations fail.
+   */
+  static std::string calculateK(const std::string &hash,
+                                const std::string &SHex);
 
 private:
   /* private methods */

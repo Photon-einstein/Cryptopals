@@ -46,6 +46,7 @@ struct SessionData {
   std::string _uHex;
   std::string _xHex;
   std::string _SHex;
+  std::string _KHex;
 };
 
 #endif // SESSION_DATA_HPP
