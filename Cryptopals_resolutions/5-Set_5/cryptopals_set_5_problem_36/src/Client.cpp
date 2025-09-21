@@ -569,6 +569,9 @@ const bool Client::authenticationInit(const int portServerNumber) {
       std::cout << "\tS(hex): '" << _sessionData->_SHex << "'." << std::endl;
       std::cout << "----------------------" << std::endl;
     }
+    // K calculation
+    _sessionData->_KHex = MyCryptoLibrary::SecureRemotePassword::calculateK(
+        _sessionData->_hash, _sessionData->_SHex);
     return authenticationInitResult;
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
