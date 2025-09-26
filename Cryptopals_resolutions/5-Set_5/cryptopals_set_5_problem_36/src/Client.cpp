@@ -578,9 +578,56 @@ const bool Client::authenticationInit(const int portServerNumber) {
     authenticationInitResult = false;
     return authenticationInitResult;
   } catch (...) {
-    std::cerr << "Client log | Unknown exception caught" << std::endl;
+    std::cerr << "Client log | authenticationInit(): "
+              << "Unknown exception caught" << std::endl;
     authenticationInitResult = false;
     return authenticationInitResult;
+  }
+}
+/******************************************************************************/
+/**
+ * @brief This method will perform the final step of the authentication
+ * with a given server.
+ *
+ * This method perform the final step of the authentication with a given
+ * server. It will perform the calculations and verifications involved
+ * at the second leg of the authentication of SRP protocol.
+ *
+ * @param portServerNumber The number of the server to use in this exchange.
+ *
+ * @return True if the authenticationComplete succeed, false otherwise.
+ */
+const bool Client::authenticationComplete(const int portServerNumber) {
+  bool authenticationCompleteResult{true};
+  try {
+    std::string requestBody = fmt::format(
+        R"({{
+        "clientId": "{}"
+    }})",
+        getClientId());
+    cpr::Response response =
+        cpr::Post(cpr::Url{std::string("http://localhost:") +
+                           std::to_string(portServerNumber) +
+                           std::string("/srp/auth/complete")},
+                  cpr::Header{{"Content-Type", "application/json"}},
+                  cpr::Body{requestBody});
+    if (_debugFlag) {
+      printServerResponse(response);
+    }
+    if (response.status_code != 201) {
+      throw std::runtime_error("Client log | authenticationComplete(): "
+                               "authentication failed");
+    }
+    return authenticationCompleteResult;
+  } catch (const std::exception &e) {
+    std::cerr << e.what() << std::endl;
+    authenticationCompleteResult = false;
+    return authenticationCompleteResult;
+  } catch (...) {
+    std::cerr << "Client log | authenticationComplete(): "
+              << "Unknown exception caught" << std::endl;
+    authenticationCompleteResult = false;
+    return authenticationCompleteResult;
   }
 }
 /******************************************************************************/

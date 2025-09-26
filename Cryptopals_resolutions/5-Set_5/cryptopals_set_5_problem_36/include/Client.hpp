@@ -183,6 +183,20 @@ private:
   const bool authenticationInit(const int portServerNumber);
 
   /**
+   * @brief This method will perform the final step of the authentication
+   * with a given server.
+   *
+   * This method perform the final step of the authentication with a given
+   * server. It will perform the calculations and verifications involved
+   * at the second leg of the authentication of SRP protocol.
+   *
+   * @param portServerNumber The number of the server to use in this exchange.
+   *
+   * @return True if the authenticationComplete succeed, false otherwise.
+   */
+  const bool authenticationComplete(const int portServerNumber);
+
+  /**
    * @brief This method will print the server response during the Secure
    * Remote Password protocol.
    *
