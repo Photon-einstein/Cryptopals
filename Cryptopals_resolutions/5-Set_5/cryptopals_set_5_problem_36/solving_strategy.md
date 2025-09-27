@@ -685,5 +685,6 @@ curl -X POST http://localhost:18080/srp/auth/init \
 76. Add skeleton code for the '/srp/auth/complete' endpoint at the client side (Done)
 77. Add the method to perform the calculation of the M parameter (Done)
 78. Create a python script to calculate the M parameter in parallel (Done)
-
-79. Create unit tests to assess the correct calculation of the M parameter (in progress)
+79. Create unit tests to assess the correct calculation of the M parameter (Done)
+80. Finish the sending of the data at the client side with the parameters U, A, M, during
+    the srp/auth/complete (Done)

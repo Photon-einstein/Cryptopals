@@ -700,14 +700,22 @@ std::string MyCryptoLibrary::SecureRemotePassword::calculateM(
   const std::string hashG{hashFn(gPlain)};
   // H(U)
   std::string hashU{hashFn(username)};
+  std::vector<uint8_t> hashUBytes =
+      MessageExtractionFacility::hexToBytes(hashU);
+  const std::string hashUPlain(
+      reinterpret_cast<const char *>(hashUBytes.data()), hashUBytes.size());
   // H(N) XOR H(g)
   if (hashN.size() != hashG.size()) {
     throw std::runtime_error("SecureRemotePassword log | calculateM(): "
                              "H(N) and H(g) length mismatch.");
   }
-  std::string hashN_xor_hashG(hashN.size(), '\0');
-  for (size_t i = 0; i < hashN.size(); ++i) {
-    hashN_xor_hashG[i] = hashN[i] ^ hashG[i];
+  std::vector<uint8_t> hashNBytes =
+      MessageExtractionFacility::hexToBytes(hashN);
+  std::vector<uint8_t> hashGBytes =
+      MessageExtractionFacility::hexToBytes(hashG);
+  std::string hashN_xor_hashG(hashNBytes.size(), '\0');
+  for (size_t i = 0; i < hashNBytes.size(); ++i) {
+    hashN_xor_hashG[i] = hashNBytes[i] ^ hashGBytes[i];
   }
   // Prepare salt, A, B, K as bytes
   std::vector<uint8_t> saltBytes =
@@ -724,7 +732,7 @@ std::string MyCryptoLibrary::SecureRemotePassword::calculateM(
   const std::string KPlain(reinterpret_cast<const char *>(KBytes.data()),
                            KBytes.size());
   // Concatenate all parts
-  const std::string MInput{hashN_xor_hashG + hashU + saltPlain + APlain +
+  const std::string MInput{hashN_xor_hashG + hashUPlain + saltPlain + APlain +
                            BPlain + KPlain};
   // Hash the concatenated value
   std::string MHex{hashFn(MInput)};

@@ -160,6 +160,13 @@ protected:
       "104D5D50C140D510A955DE28FC97DF89A6B788A58046063BA9F9B7309C95DB60"
       "B0BC86421ADD1B822D4D907646B6DE637034FBDC652143A620049010D3966803"
       "3575CCC392600D7F2059C6E1356C655C17281ECCF4AC7253AD45C750CDCD902F";
+  const std::string _username{"Bob"};
+  const std::string _saltHex{
+      "4118F5DFB7D944C02FAEDBED7982BF5505BF4B681A14EA54C5D2F2471BC2C793"
+      "CE74D80D8D889A85E34BD536355A3E059AC9C34331D83FC16C757C214D99246A"};
+  const std::string _KHex{
+      "39FDCEC9D0DC0BD723318C18F55951C3BB9B442FDE6452AA5BAC2B8F6A2B61BF"
+      "406C79A849C324AA0B3DD7854FB5C56763E305889689E04C8E83A95E244410E7"};
 };
 
 /**
@@ -702,6 +709,86 @@ TEST_F(SessionDataTest, CalculateKUnknownHash_ShouldThrowAnError) {
     const std::string unknownHash{"SHA-999"};
     const std::string K{
         MyCryptoLibrary::SecureRemotePassword::calculateK(unknownHash, _SHex)};
+  } catch (const std::runtime_error &e) {
+    EXPECT_THAT(std::string(e.what()),
+                ::testing::EndsWith("hash algorithm not recognized."));
+  }
+}
+
+/**
+ * @test Test the correctness of the SRP M parameter (client's proof)
+ * calculation with the hash SHA-256.
+ * @brief Verifies that M calculation matches the expected
+ * reference value.
+ */
+TEST_F(SessionDataTest, CalculateMHash256_ShouldMatchReference) {
+  const std::string hash{"SHA-256"};
+  const unsigned int groupId{7};
+  const std::string NHex{_srpParametersMap.at(groupId)._nHex};
+  const std::string gHex{
+      MessageExtractionFacility::uintToHex(_srpParametersMap.at(groupId)._g)};
+  const std::string M{MyCryptoLibrary::SecureRemotePassword::calculateM(
+      hash, NHex, gHex, _username, _saltHex, _A_Hex, _B_Hex, _KHex)};
+  const std::string expectedM_SHA256{
+      "40CE6C8C3797FABF8BBB745BD897B3DA49A34DF022C6BA00C5CB3FE4AD7DFE78"};
+  EXPECT_EQ(M, expectedM_SHA256);
+}
+
+/**
+ * @test Test the correctness of the SRP M parameter (client's proof)
+ * calculation with the hash SHA-384.
+ * @brief Verifies that M calculation matches the expected
+ * reference value.
+ */
+TEST_F(SessionDataTest, CalculateMHash384_ShouldMatchReference) {
+  const std::string hash{"SHA-384"};
+  const unsigned int groupId{7};
+  const std::string NHex{_srpParametersMap.at(groupId)._nHex};
+  const std::string gHex{
+      MessageExtractionFacility::uintToHex(_srpParametersMap.at(groupId)._g)};
+  const std::string M{MyCryptoLibrary::SecureRemotePassword::calculateM(
+      hash, NHex, gHex, _username, _saltHex, _A_Hex, _B_Hex, _KHex)};
+  const std::string expectedM_SHA384{
+      "50900EE69884E6F973BE913531587BE7825D03390557D3C04012504E71D77967"
+      "80FEAEABE8CC6053F011D3712388AA3C"};
+  EXPECT_EQ(M, expectedM_SHA384);
+}
+
+/**
+ * @test Test the correctness of the SRP M parameter (client's proof)
+ * calculation with the hash SHA-512.
+ * @brief Verifies that M calculation matches the expected
+ * reference value.
+ */
+TEST_F(SessionDataTest, CalculateMHash512_ShouldMatchReference) {
+  const std::string hash{"SHA-512"};
+  const unsigned int groupId{7};
+  const std::string NHex{_srpParametersMap.at(groupId)._nHex};
+  const std::string gHex{
+      MessageExtractionFacility::uintToHex(_srpParametersMap.at(groupId)._g)};
+  const std::string M{MyCryptoLibrary::SecureRemotePassword::calculateM(
+      hash, NHex, gHex, _username, _saltHex, _A_Hex, _B_Hex, _KHex)};
+  const std::string expectedM_SHA512{
+      "9583CD0DAC1491D6DFE73CE953460FC0C33F2B6CDA2651D79CF2458C2C2FD60F"
+      "F5FD8FDC61391C5AFD09B939F141F78AC1D237A57408DEC11EF2659063C63D2F"};
+  EXPECT_EQ(M, expectedM_SHA512);
+}
+
+/**
+ * @test Test that during the M calculation, it throws an exception when
+ * an unknown hash name is provided.
+ * @brief Verifies that the calculateM method throws
+ * std::runtime_error when an unsupported hash algorithm is provided.
+ */
+TEST_F(SessionDataTest, CalculateMUnknownHash_ShouldThrowAnError) {
+  try {
+    const std::string hash{"UNKNOWN-HASH"};
+    const unsigned int groupId{7};
+    const std::string NHex{_srpParametersMap.at(groupId)._nHex};
+    const std::string gHex{
+        MessageExtractionFacility::uintToHex(_srpParametersMap.at(groupId)._g)};
+    const std::string M{MyCryptoLibrary::SecureRemotePassword::calculateM(
+        hash, NHex, gHex, _username, _saltHex, _A_Hex, _B_Hex, _KHex)};
   } catch (const std::runtime_error &e) {
     EXPECT_THAT(std::string(e.what()),
                 ::testing::EndsWith("hash algorithm not recognized."));
