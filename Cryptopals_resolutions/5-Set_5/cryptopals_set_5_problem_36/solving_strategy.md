@@ -688,3 +688,16 @@ curl -X POST http://localhost:18080/srp/auth/init \
 79. Create unit tests to assess the correct calculation of the M parameter (Done)
 80. Finish the sending of the data at the client side with the parameters U, A, M, during
     the srp/auth/complete (Done)
+81. Add the reception and verification of the data in the server at the srp/auth/complete endpoint (Done)
+
+82. Server calculation of u = H(A | B) (in progress)
+
+83. Server calculation of S = (A \* v^u) ^ b mod N (TBD)
+84. Server calculation of K = H(S) (TBD)
+85. Server calculation of M' = H(H(N) XOR H(g) | H(U) | s | A | B | K) (TBD)
+86. Add the calculation of the M' at the server side and the compare with the M received (TBD)
+87. Add a method to calculate M2 (TBD)
+88. Add unit tests of the calculation of M2 (TBD)
+89. Add a python script to double-check the method in Cpp (TBD)
+90. Add the calculation of the M2 at the server side (TBD)
+91. Add the sending of the M2 to the client (TBD)
