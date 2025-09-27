@@ -194,7 +194,7 @@ const bool Client::authentication(const int portServerNumber) {
     if (!registrationResult) {
       return registrationResult;
     }
-    return true;
+    return authenticationComplete(portServerNumber);
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
     registrationResult = false;
@@ -508,8 +508,7 @@ const bool Client::authenticationInit(const int portServerNumber) {
                    "authentication phase---"
                 << std::endl;
       std::cout << "\tClient ID: " << extractedClientId << std::endl;
-      std::cout << "\tPublic key: " << _sessionData->_privateKeyHex
-                << std::endl;
+      std::cout << "\tPublic key: " << _sessionData->_publicKeyHex << std::endl;
       std::cout << "----------------------" << std::endl;
     }
     // u calculation
@@ -606,13 +605,21 @@ const bool Client::authenticationComplete(const int portServerNumber) {
             _srpParametersMap.at(_sessionData->_groupId)._g),
         _clientId, _sessionData->_salt, _sessionData->_publicKeyHex,
         _sessionData->_peerPublicKeyHex, _sessionData->_KHex)};
+    if (_debugFlag) {
+      std::cout << "\n--- Client log | Verification value M generated at the "
+                   "authentication phase---"
+                << std::endl;
+      std::cout << "\tClient ID: " << _clientId << std::endl;
+      std::cout << "\tM(hex): '" << MHex << "'." << std::endl;
+      std::cout << "----------------------" << std::endl;
+    }
     std::string requestBody = fmt::format(
         R"({{
         "clientId": "{}",
         "M": "{}",
-        "K": "{}"
+        "A": "{}"
     }})",
-        getClientId(), MHex, _sessionData->_KHex);
+        getClientId(), MHex, _sessionData->_publicKeyHex);
     cpr::Response response =
         cpr::Post(cpr::Url{std::string("http://localhost:") +
                            std::to_string(portServerNumber) +

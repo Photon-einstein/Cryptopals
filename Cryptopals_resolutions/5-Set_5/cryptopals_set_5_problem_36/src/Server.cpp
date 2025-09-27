@@ -153,6 +153,7 @@ void Server::setupRoutes() {
   handleRegisterInit();
   handleRegisterComplete();
   handleAuthenticationInit();
+  handleAuthenticationComplete();
   registeredUsersEndpoint();
 }
 /******************************************************************************/
@@ -252,7 +253,7 @@ void Server::handleRegisterInit() {
           return crow::response(400, err);
         } catch (...) {
           crow::json::wvalue err;
-          err["message"] = std::string("Client log | Unknown exception caught");
+          err["message"] = std::string("Server log | Unknown exception caught");
           return crow::response(500, err);
         }
       });
@@ -326,7 +327,7 @@ void Server::handleRegisterComplete() {
           return crow::response(400, err);
         } catch (...) {
           crow::json::wvalue err;
-          err["message"] = std::string("Client log | Unknown exception caught");
+          err["message"] = std::string("Server log | Unknown exception caught");
           return crow::response(500, err);
         }
       });
@@ -460,7 +461,82 @@ void Server::handleAuthenticationInit() {
           return crow::response(400, err);
         } catch (...) {
           crow::json::wvalue err;
-          err["message"] = std::string("Client log | Unknown exception caught");
+          err["message"] = std::string("Server log | Unknown exception caught");
+          return crow::response(500, err);
+        }
+      });
+}
+/******************************************************************************/
+/**
+ * @brief This method runs the route that performs the conclusion of the
+ * Secure Remote Password protocol authentication step.
+ *
+ * This method runs the route that performs the Secure Remote Password
+ * protocol finalization step, and the verifications and calculations
+ * associated with that exchange.
+ */
+void Server::handleAuthenticationComplete() {
+  CROW_ROUTE(_app, "/srp/auth/complete")
+      .methods("POST"_method)([&](const crow::request &req) {
+        crow::json::wvalue res;
+        try {
+          nlohmann::json parsedJson = nlohmann::json::parse(req.body);
+          std::string extractedClientId{
+              parsedJson.at("clientId").get<std::string>()};
+          std::string extractedMHex{parsedJson.at("M").get<std::string>()};
+          std::string extractedAHex{parsedJson.at("A").get<std::string>()};
+          if (_debugFlag) {
+            std::cout << "\n--- Server log | Extracted Data from a new client "
+                         "request authentication ---"
+                      << std::endl;
+            std::cout << "\tClient ID: " << extractedClientId << std::endl;
+            std::cout << "\tM: " << extractedMHex << std::endl;
+            std::cout << "\tA: " << extractedAHex << std::endl;
+            std::cout << "----------------------" << std::endl;
+          }
+          // client id verification
+          std::lock_guard<std::mutex> lock(_secureRemotePasswordMapMutex);
+          if (extractedClientId.empty()) {
+            throw std::runtime_error(
+                "Server log | handleAuthenticationComplete(): "
+                "Client received is null");
+          } else if (_secureRemotePasswordMap.find(extractedClientId) ==
+                     _secureRemotePasswordMap.end()) {
+            throw std::runtime_error(
+                "Server log | handleAuthenticationComplete(): "
+                "Client " +
+                extractedClientId + " has not registered before.");
+          } else if (!_secureRemotePasswordMap[extractedClientId]
+                          ->registrationComplete) {
+            throw std::runtime_error(
+                "Server log | handleAuthenticationComplete(): "
+                "Client " +
+                extractedClientId + " has not a completed registration.");
+          }
+          // other parameters verification
+          if (extractedMHex.empty() || extractedAHex.empty()) {
+            throw std::runtime_error(
+                "Server log | handleAuthenticationComplete(): "
+                "Parameters received are empty.");
+          }
+          // A update at the server side
+          _secureRemotePasswordMap.at(extractedClientId)->_peerPublicKeyHex =
+              extractedAHex;
+          return crow::response(201, res);
+        } catch (const nlohmann::json::exception &e) {
+          crow::json::wvalue err;
+          err["message"] =
+              std::string("Server log | JSON parsing error: ") + e.what();
+          return crow::response(404, err);
+        } catch (const std::exception &e) {
+          crow::json::wvalue err;
+          err["message"] =
+              std::string("Server log | An unexpected error occurred: ") +
+              e.what();
+          return crow::response(400, err);
+        } catch (...) {
+          crow::json::wvalue err;
+          err["message"] = std::string("Server log | Unknown exception caught");
           return crow::response(500, err);
         }
       });
@@ -555,7 +631,7 @@ void Server::registeredUsersEndpoint() {
       return crow::response(400, err);
     } catch (...) {
       crow::json::wvalue err;
-      err["message"] = std::string("Client log | Unknown exception caught");
+      err["message"] = std::string("Server log | Unknown exception caught");
       return crow::response(500, err);
     }
   });

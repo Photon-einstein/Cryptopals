@@ -159,6 +159,16 @@ private:
   void handleAuthenticationInit();
 
   /**
+   * @brief This method runs the route that performs the conclusion of the
+   * Secure Remote Password protocol authentication step.
+   *
+   * This method runs the route that performs the Secure Remote Password
+   * protocol finalization step, and the verifications and calculations
+   * associated with that exchange.
+   */
+  void handleAuthenticationComplete();
+
+  /**
    * @brief This method perform the validation of the extracted v parameter
    * at the registration step.
    *
