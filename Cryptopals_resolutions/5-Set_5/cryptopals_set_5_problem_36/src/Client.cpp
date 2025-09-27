@@ -600,11 +600,19 @@ const bool Client::authenticationInit(const int portServerNumber) {
 const bool Client::authenticationComplete(const int portServerNumber) {
   bool authenticationCompleteResult{true};
   try {
+    const std::string MHex{MyCryptoLibrary::SecureRemotePassword::calculateM(
+        _sessionData->_hash, _srpParametersMap.at(_sessionData->_groupId)._nHex,
+        MessageExtractionFacility::uintToHex(
+            _srpParametersMap.at(_sessionData->_groupId)._g),
+        _clientId, _sessionData->_salt, _sessionData->_publicKeyHex,
+        _sessionData->_peerPublicKeyHex, _sessionData->_KHex)};
     std::string requestBody = fmt::format(
         R"({{
-        "clientId": "{}"
+        "clientId": "{}",
+        "M": "{}",
+        "K": "{}"
     }})",
-        getClientId());
+        getClientId(), MHex, _sessionData->_KHex);
     cpr::Response response =
         cpr::Post(cpr::Url{std::string("http://localhost:") +
                            std::to_string(portServerNumber) +
