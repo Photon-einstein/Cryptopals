@@ -22,8 +22,10 @@ def calculate_x(hash_name, salt_hex, password):
 
 if __name__ == "__main__":
     # Example usage
-    salt_hex = "6B479DEBFE96BB93AC51E60F534536E4E493549EE1DA41A145E415612""" \
-    "FFBA766A2CEAF2BFB2DAF34585EF383E860EBD6C44627FAE2B88341F9BDA494A8B55D62"
+    salt_hex = (
+        "6B479DEBFE96BB93AC51E60F534536E4E493549EE1DA41A145E415612"
+        "FFBA766A2CEAF2BFB2DAF34585EF383E860EBD6C44627FAE2B88341F9"
+        "BDA494A8B55D62")
     password = "correct horse battery staple"
     hash_name = "SHA-512"
     x = calculate_x(hash_name, salt_hex, password)

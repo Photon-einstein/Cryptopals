@@ -519,9 +519,53 @@ void Server::handleAuthenticationComplete() {
                 "Server log | handleAuthenticationComplete(): "
                 "Parameters received are empty.");
           }
-          // A update at the server side
+          // Client's public key A update at the server side
           _secureRemotePasswordMap.at(extractedClientId)->_peerPublicKeyHex =
               extractedAHex;
+          // u calculation
+          _secureRemotePasswordMap.at(extractedClientId)->_uHex =
+              MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
+                  _srpParametersMap
+                      .at(_secureRemotePasswordMap.at(extractedClientId)
+                              ->_groupId)
+                      ._hashName,
+                  MessageExtractionFacility::hexToPlaintext(
+                      _secureRemotePasswordMap.at(extractedClientId)
+                          ->_peerPublicKeyHex),
+                  MessageExtractionFacility::hexToPlaintext(
+                      _secureRemotePasswordMap.at(extractedClientId)
+                          ->_publicKeyHex));
+          if (_debugFlag) {
+            std::cout
+                << "\n--- Server log | Scrambling parameter u generated at the "
+                   "authentication phase---"
+                << std::endl;
+            std::cout << "\tClient ID: " << extractedClientId << std::endl;
+            std::cout << "\tu = H(A | B): "
+                      << _secureRemotePasswordMap.at(extractedClientId)->_uHex
+                      << std::endl;
+            std::cout << "----------------------" << std::endl;
+          }
+          // S server calculation
+          _secureRemotePasswordMap.at(extractedClientId)
+              ->_SHex = MyCryptoLibrary::SecureRemotePassword::calculateSServer(
+              _secureRemotePasswordMap.at(extractedClientId)->_peerPublicKeyHex,
+              _secureRemotePasswordMap.at(extractedClientId)->_vHex,
+              _secureRemotePasswordMap.at(extractedClientId)->_uHex,
+              _secureRemotePasswordMap.at(extractedClientId)->_privateKeyHex,
+              _srpParametersMap
+                  .at(_secureRemotePasswordMap.at(extractedClientId)->_groupId)
+                  ._nHex);
+          if (_debugFlag) {
+            std::cout << "\n--- Server log | Shared secret S generated at the "
+                         "authentication phase---"
+                      << std::endl;
+            std::cout << "\tClient ID: " << extractedClientId << std::endl;
+            std::cout << "\tS = (A * v^u) ^ b mod N: "
+                      << _secureRemotePasswordMap.at(extractedClientId)->_SHex
+                      << std::endl;
+            std::cout << "----------------------" << std::endl;
+          }
           return crow::response(201, res);
         } catch (const nlohmann::json::exception &e) {
           crow::json::wvalue err;

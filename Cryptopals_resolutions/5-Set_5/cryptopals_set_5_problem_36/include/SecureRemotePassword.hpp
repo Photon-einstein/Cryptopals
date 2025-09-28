@@ -247,10 +247,31 @@ public:
    * @return The session key S as a hexadecimal string.
    * @throw std::runtime_error if any of the calculations fail.
    */
-  static std::string
-  calculateS(const std::string &BHex, const std::string &kHex, unsigned int g,
-             const std::string &xHex, const std::string &aHex,
-             const std::string &uHex, const std::string &NHex);
+  static std::string calculateSClient(const std::string &BHex,
+                                      const std::string &kHex, unsigned int g,
+                                      const std::string &xHex,
+                                      const std::string &aHex,
+                                      const std::string &uHex,
+                                      const std::string &NHex);
+
+  /**
+   * @brief Calculates the SRP shared secret S for the server side.
+   *
+   * Formula: S = (A * v^u) ^ b mod N
+   *
+   * @param AHex The hexadecimal representation of the client's public key A.
+   * @param vHex The hexadecimal representation of the verifier v.
+   * @param uHex The hexadecimal representation of the scrambling parameter u.
+   * @param bHex The hexadecimal representation of the server's private key b.
+   * @param NHex The hexadecimal representation of the modulus N.
+   * @return The shared secret S as a hexadecimal string.
+   * @throw std::runtime_error if any of the calculations fail.
+   */
+  static std::string calculateSServer(const std::string &AHex,
+                                      const std::string &vHex,
+                                      const std::string &uHex,
+                                      const std::string &bHex,
+                                      const std::string &NHex);
 
   /**
    * @brief This method calculates the session key K for the client in the
