@@ -557,8 +557,9 @@ const bool Client::authenticationInit(const int portServerNumber) {
         _sessionData->_secureRemotePassword->getSrpParametersMap()
             .at(_sessionData->_groupId)
             ._nHex;
-    _sessionData->_SHex = MyCryptoLibrary::SecureRemotePassword::calculateS(
-        BHex, kHex, g, xHex, aHex, uHex, nHex);
+    _sessionData->_SHex =
+        MyCryptoLibrary::SecureRemotePassword::calculateSClient(
+            BHex, kHex, g, xHex, aHex, uHex, nHex);
     if (_debugFlag) {
       std::cout
           << "\n--- Client log | Password shared secret S generated at the "

@@ -20,8 +20,8 @@ SessionData::SessionData(const unsigned int groupId, const std::string &salt,
     : _secureRemotePassword{
           std::make_unique<MyCryptoLibrary::SecureRemotePassword>(debugFlag)} {
   if (groupId <= 0 || salt.empty() || hash.empty()) {
-    throw std::runtime_error("SessionData log | constructor(): "
-                             "Invalid input parameters given.");
+    throw std::invalid_argument("SessionData log | constructor(): "
+                                "Invalid input parameters given.");
   }
   _groupId = groupId;
   _salt = salt;

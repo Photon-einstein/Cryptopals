@@ -88,7 +88,7 @@ protected:
       "121F773DEE392FF993A08983C3818EA4B9EA5599607E2745C35CB145A9A581"
       "FDF59D663345EAD48EC3D96B85BDE691DC46FB4E62446F0C52B5120D2FFBD7"
       "C340"}; // Private key parameter x (hex)
-  const std::string _aHex =
+  const std::string _aHex{
       "ADEBD662C22FA9628A187C02BCB9A0BD84A3B7719D5993F7022C273218F0EF"
       "737E937FFB3D4166D096AB8B424BB0ECE76FA698761DA7BB4C4BCE9DD95B93"
       "3E43862249ED3A6D8D6CAC6A8357E0A75665DE247C414B0DFEDD158FD216F0"
@@ -122,12 +122,48 @@ protected:
       "D81988E034CFAEAE15754FA8136E04FCD9B77A948B477A70D6548C61D29DE0"
       "810B8D62D554DD6B87FBBE40D62FBDD24D0B94030BC629B647D2A93F99B090"
       "7344399049E3AF6406AAAEB057D23F3C24A5FC6CD3D8CC21A2CCA6FBA6EE58"
-      "B9"; // Client private ephemeral a (hex)
-  const std::string _uHex =
+      "B9"}; // Client private ephemeral a (hex)
+  const std::string _bHex{
+      "9CB52A1B2C3E796FA127EB79236B7141618AEBB9313ED7E35502B7DF63123C"
+      "64FB935E4160F89DE3748254A045EF5F69305619A21C7E7ECC82A55BA8DBA6"
+      "683F8F457CB600FD21EF6AB53ED14C35AF00C62CA77B0BDFFC115D13174821"
+      "3577BE2D58712A4FED86837859AD124167D3BE3578FE1BAAFAEDE0AEB96E88"
+      "8C6536CA32377BACDDEB3B52F593EB4D43D6313AECBEDE807C68B185869307"
+      "BDFB0B775DC738503BFA7CFCB7D93C2894EBB2312EA6B6A3D45AA7B6F829EA"
+      "D2AFFA1629C30D9CF65E48DA43A261449822818AA80324C8D37BCD7F94C590"
+      "278CF5D926E01F635F46283A6A2257862024D86F8F0518128C766DBFC3F77F"
+      "D6BEEF73A7F08CF5B7A142CFBB9FC3B40D820403F42C3001330F2D74353C13"
+      "A631C7D219F18C9F8A3C923447A7A5A87D40564A2E8ACEDC69122BFC08D594"
+      "C3CB808B9F761EB2567AA4306AA028C71353CCD9C0D292D54BAE912DFB5490"
+      "9EB6772D0FB6B1BB8F7E292949B01249149856509DF80C827F1057867CBEDD"
+      "065AD8B5FB3FDD9A11A5823EACBF8728CA436A9ECCB9FC88A33434CCE836C6"
+      "292323D3CBA33E8BCD0AA5E907B64F1649A0A35E3EC4BAB99D8EA91568C68C"
+      "FE8D5A2CD443D8D58D9715CE002A4575C46BAC735A3846ADD2E6CDDAFEFAC8"
+      "799A2E339F6FAAA576D1D305C460F9C19D328348067BAEE89A1C6AF6E1D1A5"
+      "42D1FBA1E982924D7E4F5257B59156D210F62C623F34BD6B3BC4D31BAE16FF"
+      "E19AEF9E906A0B27CD9F908743C78207F5540AAA50DD69B5996A3B8CB57EDB"
+      "255719853682E69D8E004DCE5789875DDF8F46A217B8BC6BCDCDC8A98C0491"
+      "EB61E1565AA42BFD0DA7CAB35CF3128B61FB820C5321E759EC25C94DBAFE25"
+      "09CEB605CC300A19E521DBF2F461B46FDF799B09332D10FB67E3ADC34E0D69"
+      "6162F6D0E4BED14480B7A9C555697D86F649D02747278634B6F9EFEEF4B9DA"
+      "D7358E68769A8A102085AFE43DF353CB8058B5B6269AED9B39A9105826A59B"
+      "3254BC234D416C4917AF0FFACE256E093D4996120E794AC413D36A35FA2E52"
+      "F9D8935CC173F70719C5C4072D321946508617A22323581C3170B23FA004E3"
+      "465B831BE258C78EDE1C6BC5ADC84FA7ADFD2748E57B86D7B2269036CD07FB"
+      "37340B16EB1C47209E7F6BCBF624BFFE81FA586C5BA8C95D7E5B2C8CC64B39"
+      "3A9D743B3D05FB5A617E2E209870D852978FA5CBE17836E9C144490418A152"
+      "DD72BA5318B48D7D817DEA3794F3013612C25315E7E60774E5305CECDF49B6"
+      "D0BFB84572ABB355BF7453ABB30D4D2B3A48041587FEB7BBB983CEF9F8D79C"
+      "587DA7A1A594FD8DD6F4013BFA6870BA07AC8FA177B54BAF1FCFB83273DF4C"
+      "043670AADE717841C7A95C87BCBF8F554E9F2E81053290ED57F329611C7274"
+      "E80DEFA13EE52B39D5705B4BD9B7C8DF3D40CBE48C03AD452617F0F5CDD028"
+      "CA" // Server private ephemeral b (hex)
+  };
+  const std::string _uHex{
       "121F773DEE392FF993A08983C3818EA4B9EA5599607E2745C35CB145A9A581"
       "FDF59D663345EAD48EC3D96B85BDE691DC46FB4E62446F0C52B5120D2FFBD7"
-      "C340"; // Scrambling parameter u (hex)
-  const std::string _SHex =
+      "C340"}; // Scrambling parameter u (hex)
+  const std::string _SHex{
       "6C6B5A37B694B4D1102ABAB6DEEBBB8A4E20145322CF216B93E253AAE7A31EE6"
       "FD1479DED9F72B111289CD724221EAE2B05338C397EF942ACA4E24AD698825EF"
       "BBE6C7CB9D98D2EF21FC4A25FE3921174FD20892267B46FC5F1EAC06C65AB938"
@@ -159,7 +195,7 @@ protected:
       "AA137EFCE697B23A613F9AB6BCD31D54F5B5CF64E72089E1A4DB4DD503B96EEF"
       "104D5D50C140D510A955DE28FC97DF89A6B788A58046063BA9F9B7309C95DB60"
       "B0BC86421ADD1B822D4D907646B6DE637034FBDC652143A620049010D3966803"
-      "3575CCC392600D7F2059C6E1356C655C17281ECCF4AC7253AD45C750CDCD902F";
+      "3575CCC392600D7F2059C6E1356C655C17281ECCF4AC7253AD45C750CDCD902F"};
   const std::string _username{"Bob"};
   const std::string _saltHex{
       "4118F5DFB7D944C02FAEDBED7982BF5505BF4B681A14EA54C5D2F2471BC2C793"
@@ -167,6 +203,39 @@ protected:
   const std::string _KHex{
       "39FDCEC9D0DC0BD723318C18F55951C3BB9B442FDE6452AA5BAC2B8F6A2B61BF"
       "406C79A849C324AA0B3DD7854FB5C56763E305889689E04C8E83A95E244410E7"};
+  const std::string _vHex{
+      "1568E0B0AE00EA52EB8FE8442E1410AB59F17507D3C41B77E3CA36646CD9090D"
+      "AEA70CC690BE9DD640FCE59C70DE913AFE98B68F6B116F28972EBF46C5C31DD0"
+      "70A438DB0A0F68CBF66A3B41EA29B14891F4F58FC7A0BD75C2FA240DA70363B4"
+      "4858B1531D05352BD1DFFB783C7F57D4720BD571FBB2D5C44A36A653A5B83F00"
+      "98ECCDC8A22D9499EA1F4D114DDF4405F328BA816413D49136CB7D9919C36658"
+      "94BD7603B9F1B5A9A66FFDCE170B39CA7F785E5002F39DFD949463393760B472"
+      "96D229E9B3FBF49DFE2CB2915B25F9CEFDFCF3F97A25C24C5E33FBEE6C8F5C13"
+      "56EE491549C91E932FDD7DDA4C68C2F7B3D637C798A89674C634973321567CB9"
+      "C3D137F28109B5020E2588E08ABE0B38FD488FB8CB1A67E24C2CC6D3DEDC8FC4"
+      "650DF9DDB296D6FE8E6366E387CF5F7B12D71DDD5E4337F90044006F2AB61C0B"
+      "3BB02053E7365CC9E4F013EE6A44E9FC47B46E94DC7A4DE30A43D3D1BC395233"
+      "58FD79F43B7C500ACD3A0F9908879909EB3AD25A36A66FF800297D6CC1159448"
+      "909369E4FCDE5C83EA78AD17E31F96901DAE523230816E22E151ED1BEC6206BA"
+      "3B2A475414694086342C434A10654EB6285D66B393E2D8C185BF667E2CE1726D"
+      "49A61EEFCE89F23E6F37682002B056D55839FA0C1BF7A399878FC7CD6F9D5C3A"
+      "7AFF2C4D709E90DBA3A562997F75593DA5EE0223362D5AD17CB8B45AD7D5D3F6"
+      "D619DB80A1DBAC894AA4AE8D7E72D2B17F64BA3DCBC224229ED8AA8A39BB2812"
+      "5D5FB29BCB4C2920FD231DB297307FE93727795DB1C37715ADAA62737A4DA13E"
+      "0504EC7E42B60823667B1C69E2DF891355573B713C8CCB3533BCBC4BBCFFAB58"
+      "B22EF2991D68642FFFF4E6C753C827A37A966638A16C23D41CB93CD638CB031B"
+      "46F34257454B3D017077611070C9CA3ADFFA040987E52A2A363463A1D28F0076"
+      "7046BD023636C0C3939965B380FB22154923A0EB19F28570093BF2C5208C85CC"
+      "F69BFD00C30F731FF453F28CC6FCF1EA7FA4660C5547363CC6DB47ADBC2D034E"
+      "4C46756087269CB9AC24644EE2CF632326BCBFE3479D61B1721D95C2A856E909"
+      "2C39F2060E2F26131F2DCA79506915258B17DA7753ECFFAD6CB3F40918EE801D"
+      "6776219A8C741A028BC9649ED8E704C1F119DBE277822A135E069E338DFF1245"
+      "199FB0363B68F12FE377CFEFC05F4CEBDBA130AC3E5ABB68FB38D8ECC6164077"
+      "808F635D9C5390E4E67E34025FCD58330F979A8AF77EFDC281EB06DA37FACB0E"
+      "6AFC42D58253C64390A955C01C02412F68BE5C0F141F550AC9083E160D1CB27E"
+      "6104C5EAA0BCCE3A0EBEB3675BB1394D7844D6EA7C9BB70626EBC8459F584925"
+      "B2D4F3F7DFA46C34BF6F5FE04BB842965A75B4714003F5C20D8279E2183D6D54"
+      "CCEE840C9A76BCB83F633B98E4E141BFF5EE1D8DCCC4F2932C693A1A5ED474DE"};
 };
 
 /**
@@ -203,7 +272,7 @@ TEST_F(SessionDataTest, SessionData_WithInvalidGroupId_ShouldThrowAnError) {
   const bool debugFlag{false};
   try {
     SessionData session(groupId, salt, hash, debugFlag);
-  } catch (const std::runtime_error &e) {
+  } catch (const std::invalid_argument &e) {
     EXPECT_THAT(std::string(e.what()),
                 ::testing::EndsWith("Invalid input parameters given."));
   }
@@ -223,7 +292,7 @@ TEST_F(SessionDataTest, SessionData_WithInvalidSalt_ShouldThrowAnError) {
   const bool debugFlag{false};
   try {
     SessionData session(groupId, salt, hash, debugFlag);
-  } catch (const std::runtime_error &e) {
+  } catch (const std::invalid_argument &e) {
     EXPECT_THAT(std::string(e.what()),
                 ::testing::EndsWith("Invalid input parameters given."));
   }
@@ -244,7 +313,7 @@ TEST_F(SessionDataTest, SessionData_WithInvalidHash_ShouldThrowAnError) {
   const bool debugFlag{false};
   try {
     SessionData session(groupId, salt, hash, debugFlag);
-  } catch (const std::runtime_error &e) {
+  } catch (const std::invalid_argument &e) {
     EXPECT_THAT(std::string(e.what()),
                 ::testing::EndsWith("Invalid input parameters given."));
   }
@@ -263,8 +332,8 @@ TEST_F(SessionDataTest, SessionData_GetKMultiplierMap_ShouldMatchReference) {
   const std::string hash{"SHA-256"};
   const bool debugFlag{false};
   SessionData session(groupId, salt, hash, debugFlag);
-  const std::map<unsigned int, MessageExtractionFacility::UniqueBIGNUM> &kMap =
-      session._secureRemotePassword->getKMap();
+  const std::map<unsigned int, MessageExtractionFacility::UniqueBIGNUM> &kMap{
+      session._secureRemotePassword->getKMap()};
   const unsigned int groupsSize{7};
   EXPECT_EQ(kMap.size(), groupsSize);
   EXPECT_EQ(MessageExtractionFacility::BIGNUMToHex(kMap.at(1).get()),
@@ -294,12 +363,12 @@ TEST_F(SessionDataTest, SessionData_GetKMultiplierMap_ShouldMatchReference) {
  * correct length.
  */
 TEST_F(SessionDataTest, calculateHashConcatWithSHA256_ShouldMatchReference) {
-  std::string hashName = "SHA-256";
-  std::string uHex = MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
+  std::string hashName{"SHA-256"};
+  std::string uHex{MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
       hashName, MessageExtractionFacility::hexToPlaintext(_A_Hex),
-      MessageExtractionFacility::hexToPlaintext(_B_Hex));
-  std::string expectedUHex =
-      "49510A0BB9F42F1068F4446E620A4DF30453369329F2A001EF33A72510AA1810";
+      MessageExtractionFacility::hexToPlaintext(_B_Hex))};
+  std::string expectedUHex{
+      "49510A0BB9F42F1068F4446E620A4DF30453369329F2A001EF33A72510AA1810"};
   EXPECT_EQ(uHex.length(), SHA256_DIGEST_LENGTH * 2);
   EXPECT_EQ(uHex, expectedUHex);
 }
@@ -312,13 +381,13 @@ TEST_F(SessionDataTest, calculateHashConcatWithSHA256_ShouldMatchReference) {
  * correct length.
  */
 TEST_F(SessionDataTest, calculateHashConcatWithSHA384_ShouldMatchReference) {
-  std::string hashName = "SHA-384";
-  std::string uHex = MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
+  std::string hashName{"SHA-384"};
+  std::string uHex{MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
       hashName, MessageExtractionFacility::hexToPlaintext(_A_Hex),
-      MessageExtractionFacility::hexToPlaintext(_B_Hex));
-  std::string expectedUHex =
+      MessageExtractionFacility::hexToPlaintext(_B_Hex))};
+  std::string expectedUHex{
       "0314B21EC992117D9C5F683036DD2F475EC67FE8E645534598B728CB32B4CB5A"
-      "0140F855718AFE6C1D03A44E2B5639EC";
+      "0140F855718AFE6C1D03A44E2B5639EC"};
   EXPECT_EQ(uHex.length(), SHA384_DIGEST_LENGTH * 2);
   EXPECT_EQ(uHex, expectedUHex);
 }
@@ -331,13 +400,13 @@ TEST_F(SessionDataTest, calculateHashConcatWithSHA384_ShouldMatchReference) {
  * correct length.
  */
 TEST_F(SessionDataTest, calculateHashConcatWithSHA512_ShouldMatchReference) {
-  std::string hashName = "SHA-512";
-  std::string uHex = MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
+  std::string hashName{"SHA-512"};
+  std::string uHex{MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
       hashName, MessageExtractionFacility::hexToPlaintext(_A_Hex),
-      MessageExtractionFacility::hexToPlaintext(_B_Hex));
-  std::string expectedUHex =
+      MessageExtractionFacility::hexToPlaintext(_B_Hex))};
+  std::string expectedUHex{
       "AB6BDCAAC999E71946DA5047698DD4EAA2146D8097D03628E394880D6D21672D"
-      "C12EEEC2BD18C4050E6D725C3FAC7D86CA10A79F3A08E277A872B521C4742CDF";
+      "C12EEEC2BD18C4050E6D725C3FAC7D86CA10A79F3A08E277A872B521C4742CDF"};
   EXPECT_EQ(uHex.length(), SHA512_DIGEST_LENGTH * 2);
   EXPECT_EQ(uHex, expectedUHex);
 }
@@ -346,18 +415,38 @@ TEST_F(SessionDataTest, calculateHashConcatWithSHA512_ShouldMatchReference) {
  * @test Test that during the u calculation, it throws an exception for
  * an unknown hash name.
  * @brief Verifies that the calculateHashConcat method throws
- * std::runtime_error when an unsupported hash algorithm is provided.
+ * std::invalid_argument when an unsupported hash algorithm is provided.
  */
 TEST_F(SessionDataTest,
        calculateHashConcat_WithUnknownHash_ShouldThrowRuntimeError) {
-  std::string unknownHash = "SHA-999";
+  const std::string unknownHash{"unknownHash"};
   try {
     MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
         unknownHash, MessageExtractionFacility::hexToPlaintext(_A_Hex),
         MessageExtractionFacility::hexToPlaintext(_B_Hex));
-  } catch (const std::runtime_error &e) {
+  } catch (const std::invalid_argument &e) {
     EXPECT_THAT(std::string(e.what()),
                 ::testing::EndsWith("hash algorithm not recognized."));
+  }
+}
+
+/**
+ * @test Test that during the u calculation, it throws an exception with
+ * empty input parameters.
+ * @brief Verifies that the calculateHashConcat method throws
+ * std::invalid_argument when empty input parameters are provided.
+ */
+TEST_F(SessionDataTest,
+       calculateHashConcat_WithEmptyInputParameters_ShouldThrowRuntimeError) {
+  const std::string hash{"SHA-256"};
+  const std::string leftEmpty{}, rightEmpty{};
+  try {
+    MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(hash, leftEmpty,
+                                                               rightEmpty);
+  } catch (const std::invalid_argument &e) {
+    EXPECT_THAT(std::string(e.what()),
+                ::testing::EndsWith(
+                    "invalid input parameters received, cannot be empty."));
   }
 }
 
@@ -370,14 +459,14 @@ TEST_F(SessionDataTest,
  * and compatible with other SRP implementations.
  */
 TEST_F(SessionDataTest, CalculateXWithSHA256_ShouldMatchReference) {
-  const std::string hash = "SHA-256";
-  const std::string salt =
-      "3F455AE2504D25D0E5A24E363358CD58A3E41EB18AD066FEB81A7A1E82369DED";
-  const std::string password = "correct horse battery staple";
-  const std::string expectedX =
-      "C7B1D9ACBB0A27CAFB9BD497B107AC4A9692F5830DC4EF5B66EFEB1D5D1DA62B";
-  const std::string x =
-      MyCryptoLibrary::SecureRemotePassword::calculateX(hash, password, salt);
+  const std::string hash{"SHA-256"};
+  const std::string salt{
+      "3F455AE2504D25D0E5A24E363358CD58A3E41EB18AD066FEB81A7A1E82369DED"};
+  const std::string password{"correct horse battery staple"};
+  const std::string expectedX{
+      "C7B1D9ACBB0A27CAFB9BD497B107AC4A9692F5830DC4EF5B66EFEB1D5D1DA62B"};
+  const std::string x{
+      MyCryptoLibrary::SecureRemotePassword::calculateX(hash, password, salt)};
   EXPECT_EQ(x, expectedX);
 }
 
@@ -390,15 +479,15 @@ TEST_F(SessionDataTest, CalculateXWithSHA256_ShouldMatchReference) {
  * and compatible with other SRP implementations.
  */
 TEST_F(SessionDataTest, CalculateXWithSHA384_ShouldMatchReference) {
-  const std::string hash = "SHA-384";
-  const std::string salt = "BFB160DEA15A3E9C974E1797AA02F8B1F0FBE6D97AA18E40577"
-                           "C07A9E2F40BB02C8F612B42BADBCBE37691B9A2382B30";
-  const std::string password = "correct horse battery staple";
-  const std::string expectedX = "BAA9E5AACA4BCDE30DCA7BF067150107B50985BC4B8A"
-                                "F806A32D4ECC44A0A8DE7EFCFDE4"
-                                "0F08D999A648BA97B40A2B44";
-  const std::string x =
-      MyCryptoLibrary::SecureRemotePassword::calculateX(hash, password, salt);
+  const std::string hash{"SHA-384"};
+  const std::string salt{"BFB160DEA15A3E9C974E1797AA02F8B1F0FBE6D97AA18E40577"
+                         "C07A9E2F40BB02C8F612B42BADBCBE37691B9A2382B30"};
+  const std::string password{"correct horse battery staple"};
+  const std::string expectedX{"BAA9E5AACA4BCDE30DCA7BF067150107B50985BC4B8A"
+                              "F806A32D4ECC44A0A8DE7EFCFDE4"
+                              "0F08D999A648BA97B40A2B44"};
+  const std::string x{
+      MyCryptoLibrary::SecureRemotePassword::calculateX(hash, password, salt)};
   EXPECT_EQ(x, expectedX);
 }
 
@@ -411,18 +500,41 @@ TEST_F(SessionDataTest, CalculateXWithSHA384_ShouldMatchReference) {
  * and compatible with other SRP implementations.
  */
 TEST_F(SessionDataTest, CalculateXWithSHA512_ShouldMatchReference) {
-  const std::string hash = "SHA-512";
-  const std::string salt =
+  const std::string hash{"SHA-512"};
+  const std::string salt{
       "6B479DEBFE96BB93AC51E60F534536E4E493549EE1DA41A145E415612FFBA766A2CEAF"
-      "2B"
-      "FB2DAF34585EF383E860EBD6C44627FAE2B88341F9BDA494A8B55D62";
-  const std::string password = "correct horse battery staple";
-  const std::string expectedX =
+      "2BFB2DAF34585EF383E860EBD6C44627FAE2B88341F9BDA494A8B55D62"};
+  const std::string password{"correct horse battery staple"};
+  const std::string expectedX{
       "9DC4BEE24F50EB07947529E5E321604FC631034FE84A57345A7A0954067CFF3BC4B8DB"
-      "87C8132C1E49E7998956366461F5E9A3AAD5E4567D70F729BFD43FA459";
-  const std::string x =
-      MyCryptoLibrary::SecureRemotePassword::calculateX(hash, password, salt);
+      "87C8132C1E49E7998956366461F5E9A3AAD5E4567D70F729BFD43FA459"};
+  const std::string x{
+      MyCryptoLibrary::SecureRemotePassword::calculateX(hash, password, salt)};
   EXPECT_EQ(x, expectedX);
+}
+
+/**
+ * @test Test that during the X calculation, it throws an exception when
+ * an unknown hash name is provided.
+ * @brief Verifies that the calculateX method throws
+ * std::invalid_argument when an unsupported hash algorithm is provided.
+ */
+TEST_F(SessionDataTest, CalculateXUnknownHash_ShouldThrowAnError) {
+  try {
+    const std::string unknownHash{"unknownHash"};
+    const std::string salt{
+        "6B479DEBFE96BB93AC51E60F534536E4E493549EE1DA41A145E415612FFBA766A2CEAF"
+        "2BFB2DAF34585EF383E860EBD6C44627FAE2B88341F9BDA494A8B55D62"};
+    const std::string password{"correct horse battery staple"};
+    const std::string expectedX{
+        "9DC4BEE24F50EB07947529E5E321604FC631034FE84A57345A7A0954067CFF3BC4B8DB"
+        "87C8132C1E49E7998956366461F5E9A3AAD5E4567D70F729BFD43FA459"};
+    const std::string x{MyCryptoLibrary::SecureRemotePassword::calculateX(
+        unknownHash, password, salt)};
+  } catch (const std::invalid_argument &e) {
+    EXPECT_THAT(std::string(e.what()),
+                ::testing::EndsWith("hash algorithm not recognized."));
+  }
 }
 
 /**
@@ -431,19 +543,19 @@ TEST_F(SessionDataTest, CalculateXWithSHA512_ShouldMatchReference) {
  * @brief Verifies that the client side S calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateSGroup1_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateSClientGroup1_ShouldMatchReference) {
   const unsigned int groupId{1};
-  const std::string kHex =
-      MessageExtractionFacility::BIGNUMToHex(_kMap.at(groupId).get());
-  const unsigned int g = _srpParametersMap.at(groupId)._g;
-  const std::string NHex = _srpParametersMap.at(groupId)._nHex;
-  const std::string S{MyCryptoLibrary::SecureRemotePassword::calculateS(
+  const std::string kHex{
+      MessageExtractionFacility::BIGNUMToHex(_kMap.at(groupId).get())};
+  const unsigned int g{_srpParametersMap.at(groupId)._g};
+  const std::string NHex{_srpParametersMap.at(groupId)._nHex};
+  const std::string S{MyCryptoLibrary::SecureRemotePassword::calculateSClient(
       _BHex, kHex, g, _xHex, _aHex, _uHex, NHex)};
-  const std::string expectedS =
+  const std::string expectedS{
       "4398E45A6D27D7BD611C581328A37B1E368C56BE846B5CD64DE83B6588B69F0A99"
       "9CDF7E886F18E520AFD53BE717E2DBAA364B61136E3B2884EE472F930577F866EC"
       "DE9044E3B0F583A3BDC3E5044D87FA6427B79F71A9A2E670B9D70069FC39817174"
-      "14F845B49D88EE96D2537D38069255D78EF8D336AF148BDDFD6E7FA818";
+      "14F845B49D88EE96D2537D38069255D78EF8D336AF148BDDFD6E7FA818"};
   EXPECT_EQ(S, expectedS);
 }
 
@@ -453,21 +565,21 @@ TEST_F(SessionDataTest, CalculateSGroup1_ShouldMatchReference) {
  * @brief Verifies that the client side S calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateSGroup2_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateSClientGroup2_ShouldMatchReference) {
   const unsigned int groupId{2};
-  const std::string kHex =
-      MessageExtractionFacility::BIGNUMToHex(_kMap.at(groupId).get());
-  const unsigned int g = _srpParametersMap.at(groupId)._g;
-  const std::string NHex = _srpParametersMap.at(groupId)._nHex;
-  const std::string S{MyCryptoLibrary::SecureRemotePassword::calculateS(
+  const std::string kHex{
+      MessageExtractionFacility::BIGNUMToHex(_kMap.at(groupId).get())};
+  const unsigned int g{_srpParametersMap.at(groupId)._g};
+  const std::string NHex{_srpParametersMap.at(groupId)._nHex};
+  const std::string S{MyCryptoLibrary::SecureRemotePassword::calculateSClient(
       _BHex, kHex, g, _xHex, _aHex, _uHex, NHex)};
-  const std::string expectedS =
+  const std::string expectedS{
       "716013AAB9CCA511E6387655A9A5B24F672C62BA6CE3477D63C23997A055ACEA062A"
       "15F2998A909503247906C385BB7C36913C0F2F6CF8C003FC0EB56CD8BD15C311E174"
       "712706C74BB73AF59511061175ED6C328C46D386A906C178A595E11F1ABFA8C5D673"
       "7480D0B507DD31985BD9108C819381D167D7F5D973D57DCAA876E631578B731DD604"
       "70C3302329D5823137A56C9C09A63CAF9D55B3AA92FC54EE888A30BC0296A62A061D"
-      "3DB5164A72A684EDE20505CD41D888F0C34C669DC022";
+      "3DB5164A72A684EDE20505CD41D888F0C34C669DC022"};
   EXPECT_EQ(S, expectedS);
 }
 
@@ -477,15 +589,15 @@ TEST_F(SessionDataTest, CalculateSGroup2_ShouldMatchReference) {
  * @brief Verifies that the client side S calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateSGroup3_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateSClientGroup3_ShouldMatchReference) {
   const unsigned int groupId{3};
-  const std::string kHex =
-      MessageExtractionFacility::BIGNUMToHex(_kMap.at(groupId).get());
-  const unsigned int g = _srpParametersMap.at(groupId)._g;
-  const std::string NHex = _srpParametersMap.at(groupId)._nHex;
-  const std::string S{MyCryptoLibrary::SecureRemotePassword::calculateS(
+  const std::string kHex{
+      MessageExtractionFacility::BIGNUMToHex(_kMap.at(groupId).get())};
+  const unsigned int g{_srpParametersMap.at(groupId)._g};
+  const std::string NHex{_srpParametersMap.at(groupId)._nHex};
+  const std::string S{MyCryptoLibrary::SecureRemotePassword::calculateSClient(
       _BHex, kHex, g, _xHex, _aHex, _uHex, NHex)};
-  const std::string expectedS =
+  const std::string expectedS{
       "3B9DC69549A728745A930D0C6B1BF8E77B46BCDE5214E511DD8F409256AD228D25E1"
       "E5F24237C9FC5A305D0ABA39C4743D536AACA8DA981432A2B1BFD4E3AD05B2F4EEB9"
       "75E31BEE3822A1DBCFBBFA2177B7B5C9DE33E755E77D0A57F11A51BE32342AD85B36"
@@ -493,7 +605,7 @@ TEST_F(SessionDataTest, CalculateSGroup3_ShouldMatchReference) {
       "D9E5F9CC8F692C1C4A71CDAEC99E723BED4A4FD7D4908AA0D58A0D521BD2337FB943"
       "0B89B396EDAB2094F519555AAA15BE86E5C9E4F571F7C30231B99AEDD77DC985B83D"
       "126318C9D0BFA4BC9861DDF27C74B15EA597C3D750DD46F9F9D927810313065CD40C"
-      "258B5378DF32CFA1D0358E6FF764A01DA9AE";
+      "258B5378DF32CFA1D0358E6FF764A01DA9AE"};
   EXPECT_EQ(S, expectedS);
 }
 
@@ -503,15 +615,15 @@ TEST_F(SessionDataTest, CalculateSGroup3_ShouldMatchReference) {
  * @brief Verifies that the client side S calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateSGroup4_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateSClientGroup4_ShouldMatchReference) {
   const unsigned int groupId{4};
-  const std::string kHex =
-      MessageExtractionFacility::BIGNUMToHex(_kMap.at(groupId).get());
-  const unsigned int g = _srpParametersMap.at(groupId)._g;
-  const std::string NHex = _srpParametersMap.at(groupId)._nHex;
-  const std::string S{MyCryptoLibrary::SecureRemotePassword::calculateS(
+  const std::string kHex{
+      MessageExtractionFacility::BIGNUMToHex(_kMap.at(groupId).get())};
+  const unsigned int g{_srpParametersMap.at(groupId)._g};
+  const std::string NHex{_srpParametersMap.at(groupId)._nHex};
+  const std::string S{MyCryptoLibrary::SecureRemotePassword::calculateSClient(
       _BHex, kHex, g, _xHex, _aHex, _uHex, NHex)};
-  const std::string expectedS =
+  const std::string expectedS{
       "B736BEADDFB3E1DF75ADE7E4876C4E59B0513257809BBAB03729C91570B855136488"
       "CBF671F1A5C2D5084FC8EED574EF27D8A9682FAA8416B0BF83F8548D5AC7D422CE18"
       "CCDB2B45B136F6A993FA98E2EE8A5CA606FBA8EF289346D1ABD4F5E2F597465E61B2"
@@ -523,7 +635,7 @@ TEST_F(SessionDataTest, CalculateSGroup4_ShouldMatchReference) {
       "B725FFDFB1E0D18912B976B440239F556C70970F9CC3FFC745EC995BC2B031552B51"
       "C3E566C8C882D9F2A28056728088689F4DB675DC91AA65AB201D9A2CE88D897F4483"
       "E83BDEC2A639AEB8261D0347D1C08EFCA315873A9E5E2FD6FEEA70C5BB7900D67770"
-      "9196BF8BF85B63AE2C05";
+      "9196BF8BF85B63AE2C05"};
   EXPECT_EQ(S, expectedS);
 }
 
@@ -533,15 +645,15 @@ TEST_F(SessionDataTest, CalculateSGroup4_ShouldMatchReference) {
  * @brief Verifies that the client side S calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateSGroup5_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateSClientGroup5_ShouldMatchReference) {
   const unsigned int groupId{5};
-  const std::string kHex =
-      MessageExtractionFacility::BIGNUMToHex(_kMap.at(groupId).get());
-  const unsigned int g = _srpParametersMap.at(groupId)._g;
-  const std::string NHex = _srpParametersMap.at(groupId)._nHex;
-  const std::string S{MyCryptoLibrary::SecureRemotePassword::calculateS(
+  const std::string kHex{
+      MessageExtractionFacility::BIGNUMToHex(_kMap.at(groupId).get())};
+  const unsigned int g{_srpParametersMap.at(groupId)._g};
+  const std::string NHex{_srpParametersMap.at(groupId)._nHex};
+  const std::string S{MyCryptoLibrary::SecureRemotePassword::calculateSClient(
       _BHex, kHex, g, _xHex, _aHex, _uHex, NHex)};
-  const std::string expectedS =
+  const std::string expectedS{
       "3C33133F89EE37B39353281B41C48AFF0219BFE339842E16A1D715DB57551A2B505"
       "5EA486C865A6B597726289BD36E8109A66BCADCF5474927463CEF8FB6D595F4E598"
       "E3ED548AB916939D85DAEAC5497E106D8AC4B422B65E799C002228E03A26A8A7CEC"
@@ -557,7 +669,7 @@ TEST_F(SessionDataTest, CalculateSGroup5_ShouldMatchReference) {
       "588671F49228FCB2B6BDA13AF2150D700ACBF43AA029FB79B333977A24403E216E3"
       "908C40046DC21EEF9F1A5AEA5A505EC387F957F313B5D98B1FB086481E4BC389F61"
       "CFD4AEBD95195DBA78AF8713137F31F6973E479112ADF6DF701B4F366EFAD68A27D"
-      "5752183B29A4974EF80";
+      "5752183B29A4974EF80"};
   EXPECT_EQ(S, expectedS);
 }
 
@@ -567,15 +679,15 @@ TEST_F(SessionDataTest, CalculateSGroup5_ShouldMatchReference) {
  * @brief Verifies that the client side S calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateSGroup6_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateSClientGroup6_ShouldMatchReference) {
   const unsigned int groupId{6};
-  const std::string kHex =
-      MessageExtractionFacility::BIGNUMToHex(_kMap.at(groupId).get());
-  const unsigned int g = _srpParametersMap.at(groupId)._g;
-  const std::string NHex = _srpParametersMap.at(groupId)._nHex;
-  const std::string S{MyCryptoLibrary::SecureRemotePassword::calculateS(
+  const std::string kHex{
+      MessageExtractionFacility::BIGNUMToHex(_kMap.at(groupId).get())};
+  const unsigned int g{_srpParametersMap.at(groupId)._g};
+  const std::string NHex{_srpParametersMap.at(groupId)._nHex};
+  const std::string S{MyCryptoLibrary::SecureRemotePassword::calculateSClient(
       _BHex, kHex, g, _xHex, _aHex, _uHex, NHex)};
-  const std::string expectedS =
+  const std::string expectedS{
       "EB8BEB81C71ED17AE4EBB1EB5525CD53E8A1135FA1A4649B1C47ABC437FCA640099"
       "6DFC3DEDB4AB40AD280DDEEEFA612F182A398A0CDE560E06CED1723F2793E955DC3"
       "741E0A7023F40EE23DD3AF91CB89FCB2077BE33AF8B4F6BD16F464EF5F37761EB02"
@@ -598,25 +710,25 @@ TEST_F(SessionDataTest, CalculateSGroup6_ShouldMatchReference) {
       "992A204EDC5BBCD9B492928F5E0BFDEC7AC2BFF2276CD48D90798142F58B1EED2B4"
       "72C71160E4AA006ADFE358186D6D43226D0A9D99002281A417826C3842868A6DBF2"
       "C0E397AAF08A8C47E3EC63B44F89681F0F204DAE8A14930F8F2380C3CCF2007BDAF"
-      "98F7B5A0E3E1EFC9CEEBA527CB0FE605448648C2C9638A4BAC80ED1EFB2F28";
+      "98F7B5A0E3E1EFC9CEEBA527CB0FE605448648C2C9638A4BAC80ED1EFB2F28"};
   EXPECT_EQ(S, expectedS);
 }
 
 /**
  * @test Test the correctness of the SRP S parameter calculation for group
- * ID 7.
+ * ID 7 at the client side.
  * @brief Verifies that the client side S calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateSGroup7_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateSClientGroup7_ShouldMatchReference) {
   const unsigned int groupId{7};
-  const std::string kHex =
-      MessageExtractionFacility::BIGNUMToHex(_kMap.at(groupId).get());
-  const unsigned int g = _srpParametersMap.at(groupId)._g;
-  const std::string NHex = _srpParametersMap.at(groupId)._nHex;
-  const std::string S{MyCryptoLibrary::SecureRemotePassword::calculateS(
+  const std::string kHex{
+      MessageExtractionFacility::BIGNUMToHex(_kMap.at(groupId).get())};
+  const unsigned int g{_srpParametersMap.at(groupId)._g};
+  const std::string NHex{_srpParametersMap.at(groupId)._nHex};
+  const std::string S{MyCryptoLibrary::SecureRemotePassword::calculateSClient(
       _BHex, kHex, g, _xHex, _aHex, _uHex, NHex)};
-  const std::string expectedS =
+  const std::string expectedS{
       "059C7926144D7BDC2BBC6F2FB1C007AEF852B00B4320496A7D542F0BE68A328424E9"
       "6DDE623A2A4B6F7319285E0FD74F46830050AE91D0D0A72481F84E0411A6283AE6BF"
       "862B5849AA031C0D807514C743FBBB8057EA9DD2A24DE26EA8A23484B297AB9EFDB8"
@@ -647,7 +759,7 @@ TEST_F(SessionDataTest, CalculateSGroup7_ShouldMatchReference) {
       "CDB56487FC643841B14DF0A76A1CC2A385032B4894A14E61F81439BCF56A837D190B"
       "74B0581786FB90DF363517B295F3C39EB190EC75D007D1260D785F5C6B6C037ACF0B"
       "8E898786361062D21DB2D1B3E656BA982E14AD2C66D51D4C889BC2C507CE2CFA6B9D"
-      "9CDCFCBC";
+      "9CDCFCBC"};
   EXPECT_EQ(S, expectedS);
 }
 
@@ -702,16 +814,33 @@ TEST_F(SessionDataTest, CalculateKHash512_ShouldMatchReference) {
  * @test Test that during the K calculation, it throws an exception when
  * an unknown hash name is provided.
  * @brief Verifies that the calculateK method throws
- * std::runtime_error when an unsupported hash algorithm is provided.
+ * std::invalid_argument when an unsupported hash algorithm is provided.
  */
 TEST_F(SessionDataTest, CalculateKUnknownHash_ShouldThrowAnError) {
   try {
-    const std::string unknownHash{"SHA-999"};
+    const std::string unknownHash{"unknownHash"};
     const std::string K{
         MyCryptoLibrary::SecureRemotePassword::calculateK(unknownHash, _SHex)};
-  } catch (const std::runtime_error &e) {
+  } catch (const std::invalid_argument &e) {
     EXPECT_THAT(std::string(e.what()),
                 ::testing::EndsWith("hash algorithm not recognized."));
+  }
+}
+
+/**
+ * @test Test that during the K calculation, it throws an exception when
+ * an empty input parameter is provided.
+ * @brief Verifies that the calculateK method throws
+ * std::invalid_argument when an empty input parameter is provided.
+ */
+TEST_F(SessionDataTest, CalculateKWithEmptyInputParameter_ShouldThrowAnError) {
+  try {
+    const std::string hash{"SHA-256"};
+    const std::string emptyS{};
+    const std::string K{
+        MyCryptoLibrary::SecureRemotePassword::calculateK(hash, emptyS)};
+  } catch (const std::invalid_argument &e) {
+    EXPECT_THAT(std::string(e.what()), ::testing::EndsWith("SHex in empty."));
   }
 }
 
@@ -778,7 +907,7 @@ TEST_F(SessionDataTest, CalculateMHash512_ShouldMatchReference) {
  * @test Test that during the M calculation, it throws an exception when
  * an unknown hash name is provided.
  * @brief Verifies that the calculateM method throws
- * std::runtime_error when an unsupported hash algorithm is provided.
+ * std::invalid_argument when an unsupported hash algorithm is provided.
  */
 TEST_F(SessionDataTest, CalculateMUnknownHash_ShouldThrowAnError) {
   try {
@@ -789,8 +918,92 @@ TEST_F(SessionDataTest, CalculateMUnknownHash_ShouldThrowAnError) {
         MessageExtractionFacility::uintToHex(_srpParametersMap.at(groupId)._g)};
     const std::string M{MyCryptoLibrary::SecureRemotePassword::calculateM(
         hash, NHex, gHex, _username, _saltHex, _A_Hex, _B_Hex, _KHex)};
-  } catch (const std::runtime_error &e) {
+  } catch (const std::invalid_argument &e) {
     EXPECT_THAT(std::string(e.what()),
                 ::testing::EndsWith("hash algorithm not recognized."));
+  }
+}
+
+/**
+ * @test Test that during the M calculation, it throws an exception when
+ * an empty input parameter is provided.
+ * @brief Verifies that the calculateM method throws
+ * std::invalid_argument when an empty input parameter is provided.
+ */
+TEST_F(SessionDataTest, CalculateMWithEmptyInputParameter_ShouldThrowAnError) {
+  try {
+    const std::string hash{"SHA-256"};
+    const unsigned int groupId{7};
+    const std::string NHexEmpty{};
+    const std::string gHex{
+        MessageExtractionFacility::uintToHex(_srpParametersMap.at(groupId)._g)};
+    const std::string M{MyCryptoLibrary::SecureRemotePassword::calculateM(
+        hash, NHexEmpty, gHex, _username, _saltHex, _A_Hex, _B_Hex, _KHex)};
+  } catch (const std::invalid_argument &e) {
+    EXPECT_THAT(std::string(e.what()),
+                ::testing::EndsWith("empty input parameters received."));
+  }
+}
+
+/**
+ * @test Test the correctness of the SRP S parameter calculation for group
+ * ID 7 at the server side.
+ * @brief Verifies that the server side S calculation matches the expected
+ * reference value.
+ */
+TEST_F(SessionDataTest, CalculateSServerGroup7_ShouldMatchReference) {
+  const unsigned int groupId{7};
+  const std::string NHex{_srpParametersMap.at(groupId)._nHex};
+  const std::string S{MyCryptoLibrary::SecureRemotePassword::calculateSServer(
+      _A_Hex, _vHex, _uHex, _bHex, NHex)};
+  const std::string expectedS{
+      "0C6D558A61E9A9A4BB70C1EA12372EF29C38259B006869A612D26C425106B726AB949D61"
+      "2CC94A650C0902A6F034F9B641355BC611C48104EFB35F976818AAAEBDC5E273E4849C32"
+      "7E5DD8805F4851A040046CD8234276044C63C7BBAAB2A1EECCED2D86D921943B4EAAE19B"
+      "F44C5D5A8FEC658D7780F0EBB08C1D75CFD954007CC2B2C0264EA1EC34A13151017FE935"
+      "46651E66B803B887F550D5118A1236BE813E0AFC63AAFAFB823DD10304D396D482981A1F"
+      "DFF43E50CD913390CAE456F4B91D5B73D8D958F3B92961DF2BB28C177364FCD25ABF6637"
+      "056D32AD8AF15E97756F56DDEDC4E69CC8FA500B83E94B895EAF087A4B3878C26024395C"
+      "0CA9FDBB82B91414A8E38F4D79B8D1522BC09C5A3397C981C2C51174782F12D3C7166B3C"
+      "41B4816B6FC6D5D62A32494E74C153A7CD2B0888582924FC3F3C6FB5A9206003549DEBE5"
+      "5DDAB8520BB918E74471B546EF85DCBEE09EDE9DA0F15E0DB9788821E330BB2FF7385FD3"
+      "95CD78222AB24149B47A6555D17881DE582991245E02FE36825FA98F7BEB022B630BD04E"
+      "5D6A1EB76DB96FBC61335C7C7DC7AF62743DEEDA1626ADB0B705220FBF18F6E74212A0CA"
+      "FDA99395281A015F69DDEE8052CF7FE6F7313F3598804D81F6EA3C57CFB3956610940A3A"
+      "7AE151B5D305EF60332C4441DEFA6E42FA034C6AA3BE89EBBD5BAEF61894F64DCF979424"
+      "C18D9E0E6BC2D0A9C5D8478EC9E15E53C6ACE2FFCC72BDD28C212898BB577AA99FBA327F"
+      "35F8E979FA60132FB4C0B8214326D8D1224E39468C95E5AB922EE7B3AE8CCE9191EA8E7C"
+      "E64BC358800D9F5F9EF958640EED3DECBB65149685FC9DD17B2724F113A228CBA177C356"
+      "BD6BF7F70112DDB73D16EEEFF44DB1941CDDEDCDEEF8BF7DF319CAD194B5BA830924279E"
+      "042E2C835AE450926764E7F87F72D2957EDCD13508C2A17E6BE455CBF5E62B714217DD93"
+      "C4CC386C8D674136912770BC066A394D02C723C47418F18D3ABBBA1060BE7C38A17C0D6A"
+      "56527B8E1E2BAFA387B9F46BE94461E72D70DA59431B7CC083843139CA16A2EDFBF2851F"
+      "A318E0693CEB2881202817701B02358326E07673FBF2DCCF7D7C4748B0699F5E6D21BFDA"
+      "3FE0066FD18A92867FA661D5D3531D64F0D819F519CE7562B80E35636E3A9B4BD10D00AC"
+      "CD6A780C429D76D46589CDA608ABA3F8348322761ED6EFAD135267A13D72FF56C8798074"
+      "FA1E88B6EDDDDE5C320076347FA19D165C3C389A9D83BCFCC2D489701029B4A103C70800"
+      "303F26956027A63130114E39725AF5629AF8B2E48685368C02065D50F3EF7D9E9E77D447"
+      "084740083FF0D45D335D4558DA3AB17D487A260C80A87AA9D7E67FD207A43043A9AA5032"
+      "379992E58DF49262ED2BF58A83CDF939BF5D5B11D76B4C601290FD8DD457D22D8BAD3985"
+      "3E7879C59C0A10AB8EB3CD82D7A04E9B"};
+  EXPECT_EQ(S, expectedS);
+}
+
+/**
+ * @test Test that during the S calculation at the server side, it throws an
+ * exception when invalid input parameters are provided.
+ * @brief Verifies that the calculateSServer method throws
+ * std::invalid_argument when invalid input parameters are provided.
+ */
+TEST_F(SessionDataTest,
+       CalculateSServerInvalidInputParameters_ShouldThrowAnError) {
+  try {
+    const unsigned int groupId{7};
+    const std::string NHexInvalid{""};
+    const std::string S{MyCryptoLibrary::SecureRemotePassword::calculateSServer(
+        _A_Hex, _vHex, _uHex, _bHex, NHexInvalid)};
+  } catch (const std::invalid_argument &e) {
+    EXPECT_THAT(std::string(e.what()),
+                ::testing::EndsWith("One or more input parameters are empty."));
   }
 }
