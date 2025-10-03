@@ -1,5 +1,10 @@
-from calculateSServer import calculateSServer
-from calculateSClient import calculateSClient
+try:
+    from calculateSServer import calculateSServer
+    from calculateSClient import calculateSClient
+except ImportError as e:
+    print(f"ImportError: {e}. Make sure 'calculateSServer.py' and 'calculateSClient.py' are in the same directory or in your PYTHONPATH.")
+    import sys
+    sys.exit(1)
 
 # Fill in with RFC vector values
 N_hex = "EEAF0AB9ADB38DD69C33F80AFA8FC5E86072618775FF3C0B9EA2314C9C256576D674DF7496EA81D3383B4813D692C6E0E0D5D8E250B98BE48E495C1D6089DAD15DC7D7B46154D6B6CE8EF4AD69B15D4982559B297BCF1885C529F566660E57EC68EDBC3C05726CC02FD4CBF4976EAA9AFD5138FE8376435B9FC61D2FC0EB06E3"  # RFC N
