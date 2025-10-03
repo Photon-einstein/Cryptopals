@@ -33,3 +33,9 @@ coverage/
 
 # png images, as they have low quality
 *.png
+
+# virtual environment folders
+venv/
+.env/
+.venv/
+__pycache__/

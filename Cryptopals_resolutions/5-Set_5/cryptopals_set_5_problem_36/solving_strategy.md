@@ -697,12 +697,35 @@ curl -X POST http://localhost:18080/srp/auth/init \
     85.2 Add tests with invalid parameters, empty string (Done)
 86. Server calculation of S = (A \* v^u) ^ b mod N (Done)
 
-87. Server calculation of K = H(S) (in progress)
+87. Find the reason to the mismatch between the S at the client side and at the Server side (in progress).
 
-88. Server calculation of M' = H(H(N) XOR H(g) | H(U) | s | A | B | K) (TBD)
-89. Add the calculation of the M' at the server side and the compare with the M received (TBD)
-90. Add a method to calculate M2 (TBD)
-91. Add unit tests of the calculation of M2 (TBD)
-92. Add a python script to double-check the method in Cpp (TBD)
-93. Add the calculation of the M2 at the server side (TBD)
-94. Add the sending of the M2 to the client (TBD)
+    ```text
+    S client = (B - k * g^x) ^ (a + u * x) mod N
+    S server = (A * v^u) ^ b mod N
+    ```
+
+    87.1. Cross-Check Python and C++ Implementations with the same inputs at the server (Done)
+    87.2. Cross-Check Python and C++ Implementations with the same inputs at the client (Done)
+    87.3. Check if 'B' is correct (Done)
+    87.4. Check if 'k' is the same at the client and the server (Done)
+    87.5. Check if the 'g' is the same at the client and at the server (Done)
+    87.6. Check if the 'a' is the correct at the client side (Done)
+    87.7. Check if the 'u' match at the client and server side (Done)
+    87.8. Check if the 'N' math at the client and the server side (Done)
+    87.9. Check if the 'v' at the server side match the one sent at the client side (Done)
+    87.10. Check if the 'b' is the correct one at the server side (Done)
+    87.11. Check if the 'A' is the correct one at the server side (Done)
+
+    87.12. Test with Known RFC Vectors (in progress)
+
+    - Compare S server with the reference, it is matching the reference (Done)
+    - Compare S client with the reference, it is not matching the reference (Done)
+
+88. Server calculation of K = H(S) (TBD)
+89. Server calculation of M' = H(H(N) XOR H(g) | H(U) | s | A | B | K) (TBD)
+90. Add the calculation of the M' at the server side and the compare with the M received (TBD)
+91. Add a method to calculate M2 (TBD)
+92. Add unit tests of the calculation of M2 (TBD)
+93. Add a python script to double-check the method in Cpp (TBD)
+94. Add the calculation of the M2 at the server side (TBD)
+95. Add the sending of the M2 to the client (TBD)
