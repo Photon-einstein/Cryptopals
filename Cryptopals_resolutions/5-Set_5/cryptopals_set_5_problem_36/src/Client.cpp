@@ -542,7 +542,9 @@ const bool Client::authenticationInit(const int portServerNumber) {
       std::cout << "----------------------" << std::endl;
     }
     // S calculation
-    std::cout << "[DEBUG] Group ID: " << _sessionData->_groupId << std::endl;
+    if (_debugFlag) {
+      std::cout << "[DEBUG] Group ID: " << _sessionData->_groupId << std::endl;
+    }
     const std::string BHex{_sessionData->_peerPublicKeyHex};
     const std::string kHex{MessageExtractionFacility::BIGNUMToHex(
         MyCryptoLibrary::SecureRemotePassword::getKMap()
