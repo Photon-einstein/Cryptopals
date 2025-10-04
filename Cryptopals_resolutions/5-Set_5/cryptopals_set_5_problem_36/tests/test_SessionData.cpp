@@ -1233,29 +1233,6 @@ TEST_F(SessionDataTest, CalculateVWithRFC5054TestVector_ShouldMatchReference) {
   EXPECT_LT(BN_cmp(vBn.get(), nBn.get()), 0);
 }
 
-/**
- * @test Test the correctness of the calculation of the SRP verifier v = g^x mod
- * N using the RFC-5054 test vector for group 1.
- * @brief Verifies that the verifier v, computed from known x, N, and g values,
- * matches the expected reference value from RFC-5054.
- */
-TEST_F(SessionDataTest,
-       CalculateVWithRFC5054TestVectorGroup1_ShouldMatchReference) {
-  const unsigned int groupId{1};
-  const std::string xHex{_xRFC5054TestVectorValue};
-  const std::string NHex{_srpParametersMap.at(groupId)._nHex};
-  const unsigned int g{_srpParametersMap.at(groupId)._g};
-  const std::string vHex{
-      MyCryptoLibrary::SecureRemotePassword::calculateV(xHex, NHex, g)};
-  EXPECT_EQ(vHex, _vRFC5054TestVectorValue);
-  // Check that v is in the correct range: 1 < v < N
-  MessageExtractionFacility::UniqueBIGNUM vBn{
-      MessageExtractionFacility::hexToUniqueBIGNUM(vHex)};
-  MessageExtractionFacility::UniqueBIGNUM nBn{
-      MessageExtractionFacility::hexToUniqueBIGNUM(NHex)};
-  EXPECT_GT(BN_cmp(vBn.get(), BN_value_one()), 0);
-  EXPECT_LT(BN_cmp(vBn.get(), nBn.get()), 0);
-}
 
 /**
  * @test Test the correctness of the calculation of the SRP verifier v = g^x mod
