@@ -1233,7 +1233,6 @@ TEST_F(SessionDataTest, CalculateVWithRFC5054TestVector_ShouldMatchReference) {
   EXPECT_LT(BN_cmp(vBn.get(), nBn.get()), 0);
 }
 
-
 /**
  * @test Test the correctness of the calculation of the SRP verifier v = g^x mod
  * N using the RFC-5054 test vector for group 2.
