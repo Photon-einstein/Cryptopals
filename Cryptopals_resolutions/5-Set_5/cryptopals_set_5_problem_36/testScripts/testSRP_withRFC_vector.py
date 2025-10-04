@@ -2,8 +2,11 @@ try:
     from calculateSServer import calculateSServer
     from calculateSClient import calculateSClient
 except ImportError as e:
-    print(f"ImportError: {e}. Make sure 'calculateSServer.py' and 'calculateSClient.py' are in the same directory or in your PYTHONPATH.")
+    print(
+        f"ImportError: {e}. Make sure 'calculateSServer.py' and 'calculateSClient.py' are in the same directory or in your PYTHONPATH."
+    )
     import sys
+
     sys.exit(1)
 
 # Fill in with RFC vector values
