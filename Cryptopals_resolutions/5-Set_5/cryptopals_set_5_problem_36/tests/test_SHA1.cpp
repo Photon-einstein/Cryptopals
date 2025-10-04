@@ -111,8 +111,6 @@ TEST(SHA1Test, sha1_WithRepeatedPattern_ShouldMatchReference) {
   const std::string input(1000, 'a');
   const std::string expectedHashValue(
       "7F9000257A4F0B9C44A3DF0C7C7A9A96FDFD5B3C");
-  // The expected value above is a placeholder. Replace with the actual SHA1
-  // hash of 1000 'a's.
   const std::string hash{EncryptionUtility::sha1(input)};
   EXPECT_EQ(
       hash,
