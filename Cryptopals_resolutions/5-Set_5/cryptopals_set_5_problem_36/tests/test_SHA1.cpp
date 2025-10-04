@@ -110,10 +110,8 @@ TEST(SHA1Test, sha1_WithAllByteValues_ShouldMatchReference) {
 TEST(SHA1Test, sha1_WithRepeatedPattern_ShouldMatchReference) {
   const std::string input(1000, 'a');
   const std::string expectedHashValue(
-      "7F9000257A4F0B9C44A3DF0C7C7A9A96FDFD5B3C");
+      "291E9A6C66994949B57BA5E650361E98FC36B1BA");
   const std::string hash{EncryptionUtility::sha1(input)};
-  EXPECT_EQ(
-      hash,
-      "291E9A6C66994949B57BA5E650361E98FC36B1BA"); // Actual SHA1 of 1000 'a's
+  EXPECT_EQ(hash, expectedHashValue); // Actual SHA1 of 1000 'a's
   EXPECT_EQ(hash.length(), SHA_DIGEST_LENGTH * 2);
 }
