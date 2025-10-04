@@ -740,14 +740,78 @@ curl -X POST http://localhost:18080/srp/auth/init \
       99.1. Add tests when the client is making the method call (Done)
       99.2. Add tests when the server is making the method call (Done)
 
-101.  When there is some non-deterministic value, place the RFC-5054 test vectors to get a deterministic
-      final value to the protocol (in progress)
+101.  Get a complete overview of the entire SRP protocol (Done)
 
-102.  Server calculation of K = H(S) (TBD)
-103.  Server calculation of M' = H(H(N) XOR H(g) | H(U) | s | A | B | K) (TBD)
-104.  Add the calculation of the M' at the server side and the compare with the M received (TBD)
-105.  Add a method to calculate M2 (TBD)
-106.  Add unit tests of the calculation of M2 (TBD)
-107.  Add a python script to double-check the method in Cpp (TBD)
-108.  Add the calculation of the M2 at the server side (TBD)
-109.  Add the sending of the M2 to the client (TBD)
+**Registration Flow**
+
+```text
+Client                        Server
+  |                              |
+  |    Request SRP params (U)    |
+  |----------------------------->|
+  |                              |
+  |   Receive groupId (N, g)     |
+  |   and salt (s)               |
+  |<-----------------------------|
+  |                              |
+  | Compute:                     |
+  | x = H(s | H(U|":"| P))       |
+  | v = g^x mod N                |
+  |                              |
+  | Send U, v                    |
+  |----------------------------->|
+  |                              |
+  |        OK / Ack              |
+  |<-----------------------------|
+```
+
+**Authentication Flow**
+
+```text
+  Client                             Server
+---------                           ---------
+  U                           -->   # Client sends username (U)
+                              <--   # Server looks up (s, v, group_id), generates b, computes:
+                                    # k = H(N | PAD(g))
+                                    # B = kv + g^b mod N
+                                    # Sends s, B, group_id to client
+                                    s, B, groupId
+
+  # Client generates a, computes:
+  # A = g^a mod N
+  # u = H(A | B)
+  # x = H(s | H(U|":"| P))
+  # S = (B - k * g^x) ^ (a + u * x) mod N
+  # K = H(S)
+  # M = H(H(N) XOR H(g) | H(U) | s | A | B | K)   <-- FULL RFC 2945/5054 CLIENT PROOF
+  U, A, M                     -->
+                              <--   # U serves to keep track of the state
+                                    # Server computes:
+                                    # u = H(A | B)
+                                    # S = (A * v^u) ^ b mod N
+                                    # K = H(S)
+                                    # M' = H(H(N) XOR H(g) | H(U) | s | A | B | K)
+                                    # If M == M', server sends:
+                                    # M2 = H(A | M | K)   <-- FULL RFC 2945/5054 SERVER PROOF
+                                    # Else, authentication fails
+                                    H(A | M | K)
+
+  # Client verifies M2:
+  # M2 = H(A | M | K)
+  # If valid, authentication is complete
+```
+
+102.  Compare the implementation against the RFC-5054 to see if there is some mismatch (in progress)
+
+103.  When there is some non-deterministic value, place the RFC-5054 test vectors to get a deterministic
+      final value to the protocol, both S client and S server should match.
+      Then start replacing those values for the actual results of the intermediate methods, the results
+      should still match until a predefined point, the problem should appear during this process (TBD)
+104.  Server calculation of K = H(S) (TBD)
+105.  Server calculation of M' = H(H(N) XOR H(g) | H(U) | s | A | B | K) (TBD)
+106.  Add the calculation of the M' at the server side and the compare with the M received (TBD)
+107.  Add a method to calculate M2 (TBD)
+108.  Add unit tests of the calculation of M2 (TBD)
+109.  Add a python script to double-check the method in Cpp (TBD)
+110.  Add the calculation of the M2 at the server side (TBD)
+111.  Add the sending of the M2 to the client (TBD)
