@@ -236,6 +236,42 @@ protected:
       "6104C5EAA0BCCE3A0EBEB3675BB1394D7844D6EA7C9BB70626EBC8459F584925"
       "B2D4F3F7DFA46C34BF6F5FE04BB842965A75B4714003F5C20D8279E2183D6D54"
       "CCEE840C9A76BCB83F633B98E4E141BFF5EE1D8DCCC4F2932C693A1A5ED474DE"};
+  // RFC-5054 Test vector reference values for test purposes
+  const std::string _usernameRFC5054TestVectorValue{"alice"};
+  const std::string _passwordRFC5054TestVectorValue{"password123"};
+  const std::string _saltRFC5054TestVectorValue{
+      "BEB25379D1A8581EB5A727673A2441EE"};
+  const std::string _kMultiplierRFC5054TestVectorValue{
+      "7556AA045AEF2CDD07ABAF0F665C3E818913186F"};
+  const std::string _xRFC5054TestVectorValue{
+      "94B7555AABE9127CC58CCF4993DB6CF84D16C124"};
+  const std::string _vRFC5054TestVectorValue{
+      "7E273DE8696FFC4F4E337D05B4B375BEB0DDE1569E8FA00A9886D8129BADA1F1822223CA"
+      "1A605B530E379BA4729FDC59F105B4787E5186F5C671085A1447B52A48CF1970B4FB6F84"
+      "00BBF4CEBFBB168152E08AB5EA53D15C1AFF87B2B9DA6E04E058AD51CC72BFC9033B564E"
+      "26480D78E955A5E29E7AB245DB2BE315E2099AFB"};
+  const std::string _aRFC5054TestVectorValue{
+      "60975527035CF2AD1989806F0407210BC81EDC04E2762A56AFD529DDDA2D4393"};
+  const std::string _bRFC5054TestVectorValue{
+      "E487CB59D31AC550471E81F00F6928E01DDA08E974A004F49E61F5D105284D20"};
+  const std::string _A_RFC5054TestVectorValue{
+      "61D5E490F6F1B79547B0704C436F523DD0E560F0C64115BB72557EC44352E8903211C046"
+      "92272D8B2D1A5358A2CF1B6E0BFCF99F921530EC8E39356179EAE45E42BA92AEACED8251"
+      "71E1E8B9AF6D9C03E1327F44BE087EF06530E69F66615261EEF54073CA11CF5858F0EDFD"
+      "FE15EFEAB349EF5D76988A3672FAC47B0769447B"};
+  const std::string _B_RFC5054TestVectorValue{
+      "BD0C61512C692C0CB6D041FA01BB152D4916A1E77AF46AE105393011BAF38964DC46A067"
+      "0DD125B95A981652236F99D9B681CBF87837EC996C6DA04453728610D0C6DDB58B318885"
+      "D7D82C7F8DEB75CE7BD4FBAA37089E6F9C6059F388838E7A00030B331EB76840910440B1"
+      "B27AAEAEEB4012B7D7665238A8E3FB004B117B58"};
+  const std::string _uRFC5054TestVectorValue{
+      "CE38B9593487DA98554ED47D70A7AE5F462EF019"};
+  const std::string _S_RFC5054TestVectorValue{
+      "B0DC82BABCF30674AE450C0287745E7990A3381F63B387AAF271A10D233861E359B48220"
+      "F7C4693C9AE12B0A6F67809F0876E2D013800D6C41BB59B6D5979B5C00A172B4A2A5903A"
+      "0BDCAF8A709585EB2AFAFA8F3499B200210DCC1F10EB33943CD67FC88A2F39A4BE5BEC4E"
+      "C0A3212DC346D7E474B29EDE8A469FFECA686E5A"};
+  const std::string _hashNameRFC5054TestVectorValue{"SHA-1"};
 };
 
 /**
@@ -335,6 +371,16 @@ TEST_F(SessionDataTest, SessionData_GetKMultiplierMap_ShouldMatchReference) {
   const std::map<unsigned int, MessageExtractionFacility::UniqueBIGNUM> &kMap{
       session._secureRemotePassword->getKMap()};
   const unsigned int groupsSize{7};
+  // Test to RFC-5054 test vector
+  EXPECT_EQ(
+      MessageExtractionFacility::BIGNUMToHex(
+          MyCryptoLibrary::SecureRemotePassword::calculateK(
+              _srpParametersMap.at(1)._nHex,
+              MessageExtractionFacility::uintToHex(_srpParametersMap.at(1)._g),
+              _hashNameRFC5054TestVectorValue)
+              .get()),
+      _kMultiplierRFC5054TestVectorValue);
+  // Test to the several group ID's
   EXPECT_EQ(kMap.size(), groupsSize);
   EXPECT_EQ(MessageExtractionFacility::BIGNUMToHex(kMap.at(1).get()),
             "1A1A4C140CDE70AE360C1EC33A33155B1022DF951732A476A862EB3AB8206A5C");
@@ -353,6 +399,83 @@ TEST_F(SessionDataTest, SessionData_GetKMultiplierMap_ShouldMatchReference) {
   EXPECT_EQ(MessageExtractionFacility::BIGNUMToHex(kMap.at(7).get()),
             "4D52644EEB89DCEB292AEA0DC86CF8D1EE820E92B7F840F2E075004249315CE5EB"
             "61FD1FE6F8DC35E51495357EC0B4E14CAF9EF159D093BAD019514927476AC5");
+}
+
+/**
+ * @test Test the correctness of the calculation of the SRP public key A
+ * (client) using the RFC-5054 test vector for group 1.
+ * @brief Verifies that the public key A, computed from known a, N, and g
+ * values, matches the expected reference value from RFC-5054.
+ */
+TEST_F(SessionDataTest,
+       CalculatePublicKeyClientWithRFC5054TestVector_ShouldMatchReference) {
+  const unsigned int groupId{1};
+  const std::string privateKeyHex{_aRFC5054TestVectorValue};
+  const std::string NHex{_srpParametersMap.at(groupId)._nHex};
+  const std::string gHex{
+      MessageExtractionFacility::uintToHex(_srpParametersMap.at(groupId)._g)};
+  const bool isServer{false};
+  const std::string expectedAHex{_A_RFC5054TestVectorValue};
+  std::string AHex{MyCryptoLibrary::SecureRemotePassword::calculatePublicKey(
+      privateKeyHex, NHex, gHex, isServer)};
+  EXPECT_EQ(AHex, expectedAHex);
+  // Check that 1 < A < N
+  MessageExtractionFacility::UniqueBIGNUM A_Bn{
+      MessageExtractionFacility::hexToUniqueBIGNUM(AHex)};
+  MessageExtractionFacility::UniqueBIGNUM N_Bn{
+      MessageExtractionFacility::hexToUniqueBIGNUM(NHex)};
+  EXPECT_GT(BN_cmp(A_Bn.get(), BN_value_one()), 0);
+  EXPECT_LT(BN_cmp(A_Bn.get(), N_Bn.get()), 0);
+}
+
+/**
+ * @test Test the correctness of the calculation of the SRP public key B
+ * (server) using the RFC-5054 test vector for group 1.
+ * @brief Verifies that the public key B, computed from known b, N, g, k, and v
+ * values, matches the expected reference value from RFC-5054.
+ */
+TEST_F(SessionDataTest,
+       CalculatePublicKeyServerWithRFC5054TestVector_ShouldMatchReference) {
+  const unsigned int groupId{1};
+  const std::string privateKeyHex{_bRFC5054TestVectorValue};
+  const std::string NHex{_srpParametersMap.at(groupId)._nHex};
+  const std::string gHex{
+      MessageExtractionFacility::uintToHex(_srpParametersMap.at(groupId)._g)};
+  const bool isServer{true};
+  // k as BIGNUM
+  MessageExtractionFacility::UniqueBIGNUM kBn{
+      MessageExtractionFacility::hexToUniqueBIGNUM(
+          _kMultiplierRFC5054TestVectorValue)};
+  const std::string vHex{_vRFC5054TestVectorValue};
+  const std::string expectedBHex{_B_RFC5054TestVectorValue};
+  std::string BHex{MyCryptoLibrary::SecureRemotePassword::calculatePublicKey(
+      privateKeyHex, NHex, gHex, isServer, kBn.get(), vHex)};
+  EXPECT_EQ(BHex, expectedBHex);
+  // Check that 1 < B < N
+  MessageExtractionFacility::UniqueBIGNUM B_Bn{
+      MessageExtractionFacility::hexToUniqueBIGNUM(BHex)};
+  MessageExtractionFacility::UniqueBIGNUM N_Bn{
+      MessageExtractionFacility::hexToUniqueBIGNUM(NHex)};
+  EXPECT_GT(BN_cmp(B_Bn.get(), BN_value_one()), 0);
+  EXPECT_LT(BN_cmp(B_Bn.get(), N_Bn.get()), 0);
+}
+
+/**
+ * @test Test the correctness of the calculation of the u = H(A | B)
+ * parameter with SHA-1.
+ * @brief Verifies that the scrambling parameter u, computed from known A and
+ * B values using SHA-1, matches the expected reference value and has the
+ * correct length, using as inputs the RFC-5054 test vector.
+ */
+TEST_F(SessionDataTest,
+       calculateHashConcatWithSHA1RFC5054TestVector_ShouldMatchReference) {
+  std::string hashName{"SHA-1"};
+  std::string uHex{MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
+      hashName,
+      MessageExtractionFacility::hexToPlaintext(_A_RFC5054TestVectorValue),
+      MessageExtractionFacility::hexToPlaintext(_B_RFC5054TestVectorValue))};
+  EXPECT_EQ(uHex.length(), SHA_DIGEST_LENGTH * 2);
+  EXPECT_EQ(uHex, _uRFC5054TestVectorValue);
 }
 
 /**
@@ -452,6 +575,23 @@ TEST_F(SessionDataTest,
 
 /**
  * @test Test the correctness of the calculation of the x parameter with
+ * SHA-1 according to the RFC-5054 test vector.
+ * @brief Verifies that the private key parameter x, computed as
+ * x = H(salt | H(username | ":" | password))
+ * using SHA-1, matches the expected reference value for known
+ * input values. This ensures the implementation of x generation is correct
+ * and compatible with other SRP implementations.
+ */
+TEST_F(SessionDataTest,
+       CalculateXWithSHA1RFC5054TestVector_ShouldMatchReference) {
+  const std::string x{MyCryptoLibrary::SecureRemotePassword::calculateX(
+      _hashNameRFC5054TestVectorValue, _usernameRFC5054TestVectorValue,
+      _passwordRFC5054TestVectorValue, _saltRFC5054TestVectorValue)};
+  EXPECT_EQ(x, _xRFC5054TestVectorValue);
+}
+
+/**
+ * @test Test the correctness of the calculation of the x parameter with
  * SHA-256.
  * @brief Verifies that the private key parameter x, computed as x = H(salt |
  * password) using SHA-256, matches the expected reference value for known
@@ -464,9 +604,9 @@ TEST_F(SessionDataTest, CalculateXWithSHA256_ShouldMatchReference) {
       "3F455AE2504D25D0E5A24E363358CD58A3E41EB18AD066FEB81A7A1E82369DED"};
   const std::string password{"correct horse battery staple"};
   const std::string expectedX{
-      "C7B1D9ACBB0A27CAFB9BD497B107AC4A9692F5830DC4EF5B66EFEB1D5D1DA62B"};
-  const std::string x{
-      MyCryptoLibrary::SecureRemotePassword::calculateX(hash, password, salt)};
+      "05CD5AE5950F4508FFB0ECEDD0677D4EB21DF7197ABBCF99C0FE8F815618B36C"};
+  const std::string x{MyCryptoLibrary::SecureRemotePassword::calculateX(
+      hash, _username, password, salt)};
   EXPECT_EQ(x, expectedX);
 }
 
@@ -483,11 +623,11 @@ TEST_F(SessionDataTest, CalculateXWithSHA384_ShouldMatchReference) {
   const std::string salt{"BFB160DEA15A3E9C974E1797AA02F8B1F0FBE6D97AA18E40577"
                          "C07A9E2F40BB02C8F612B42BADBCBE37691B9A2382B30"};
   const std::string password{"correct horse battery staple"};
-  const std::string expectedX{"BAA9E5AACA4BCDE30DCA7BF067150107B50985BC4B8A"
-                              "F806A32D4ECC44A0A8DE7EFCFDE4"
-                              "0F08D999A648BA97B40A2B44"};
-  const std::string x{
-      MyCryptoLibrary::SecureRemotePassword::calculateX(hash, password, salt)};
+  const std::string expectedX{
+      "491F06E71E720BE1445BF94374ECB6979BC444D10896F219F80D900F907BCFA57B55DFD7"
+      "B50568309E8DFDD3EF5BFD79"};
+  const std::string x{MyCryptoLibrary::SecureRemotePassword::calculateX(
+      hash, _username, password, salt)};
   EXPECT_EQ(x, expectedX);
 }
 
@@ -506,10 +646,10 @@ TEST_F(SessionDataTest, CalculateXWithSHA512_ShouldMatchReference) {
       "2BFB2DAF34585EF383E860EBD6C44627FAE2B88341F9BDA494A8B55D62"};
   const std::string password{"correct horse battery staple"};
   const std::string expectedX{
-      "9DC4BEE24F50EB07947529E5E321604FC631034FE84A57345A7A0954067CFF3BC4B8DB"
-      "87C8132C1E49E7998956366461F5E9A3AAD5E4567D70F729BFD43FA459"};
-  const std::string x{
-      MyCryptoLibrary::SecureRemotePassword::calculateX(hash, password, salt)};
+      "0A2F9B27C8CA003ED59F0A03767B8E62983A13D934DDA4A0ED0F03253F83D613DF727DDC"
+      "82A4AC73FBB9D211F8EB35B0DA077824D7E5AD17F9ACA28C65BE614F"};
+  const std::string x{MyCryptoLibrary::SecureRemotePassword::calculateX(
+      hash, _username, password, salt)};
   EXPECT_EQ(x, expectedX);
 }
 
@@ -526,15 +666,30 @@ TEST_F(SessionDataTest, CalculateXUnknownHash_ShouldThrowAnError) {
         "6B479DEBFE96BB93AC51E60F534536E4E493549EE1DA41A145E415612FFBA766A2CEAF"
         "2BFB2DAF34585EF383E860EBD6C44627FAE2B88341F9BDA494A8B55D62"};
     const std::string password{"correct horse battery staple"};
-    const std::string expectedX{
-        "9DC4BEE24F50EB07947529E5E321604FC631034FE84A57345A7A0954067CFF3BC4B8DB"
-        "87C8132C1E49E7998956366461F5E9A3AAD5E4567D70F729BFD43FA459"};
     const std::string x{MyCryptoLibrary::SecureRemotePassword::calculateX(
-        unknownHash, password, salt)};
+        unknownHash, _username, password, salt)};
   } catch (const std::invalid_argument &e) {
     EXPECT_THAT(std::string(e.what()),
                 ::testing::EndsWith("hash algorithm not recognized."));
   }
+}
+
+/**
+ * @test Test the correctness of the SRP S parameter calculation for group
+ * ID 1 with the input values of the test vector of the RFC-5054.
+ * @brief Verifies that the client side S calculation matches the expected
+ * reference value.
+ */
+TEST_F(SessionDataTest,
+       CalculateSClientGroup1RFC5054TestVector_ShouldMatchReference) {
+  const unsigned int groupId{1};
+  const unsigned int g{_srpParametersMap.at(groupId)._g};
+  const std::string NHex{_srpParametersMap.at(groupId)._nHex};
+  const std::string S{MyCryptoLibrary::SecureRemotePassword::calculateSClient(
+      _B_RFC5054TestVectorValue, _kMultiplierRFC5054TestVectorValue, g,
+      _xRFC5054TestVectorValue, _aRFC5054TestVectorValue,
+      _uRFC5054TestVectorValue, NHex)};
+  EXPECT_EQ(S, _S_RFC5054TestVectorValue);
 }
 
 /**
@@ -765,6 +920,20 @@ TEST_F(SessionDataTest, CalculateSClientGroup7_ShouldMatchReference) {
 
 /**
  * @test Test the correctness of the SRP K parameter calculation with the
+ * hash SHA-1.
+ * @brief Verifies that K calculation matches the expected
+ * reference value.
+ */
+TEST_F(SessionDataTest, CalculateKHash1_ShouldMatchReference) {
+  const std::string hash{"SHA-1"};
+  const std::string K{
+      MyCryptoLibrary::SecureRemotePassword::calculateK(hash, _SHex)};
+  const std::string expectedK_SHA1{"64025F1B480E8DEB71704F18E28BB7B7CC515B98"};
+  EXPECT_EQ(K, expectedK_SHA1);
+}
+
+/**
+ * @test Test the correctness of the SRP K parameter calculation with the
  * hash SHA-256.
  * @brief Verifies that K calculation matches the expected
  * reference value.
@@ -846,11 +1015,29 @@ TEST_F(SessionDataTest, CalculateKWithEmptyInputParameter_ShouldThrowAnError) {
 
 /**
  * @test Test the correctness of the SRP M parameter (client's proof)
+ * calculation with the hash SHA-1.
+ * @brief Verifies that M calculation matches the expected
+ * reference value.
+ */
+TEST_F(SessionDataTest, CalculateMHashSHA1_ShouldMatchReference) {
+  const std::string hash{"SHA-1"};
+  const unsigned int groupId{7};
+  const std::string NHex{_srpParametersMap.at(groupId)._nHex};
+  const std::string gHex{
+      MessageExtractionFacility::uintToHex(_srpParametersMap.at(groupId)._g)};
+  const std::string M{MyCryptoLibrary::SecureRemotePassword::calculateM(
+      hash, NHex, gHex, _username, _saltHex, _A_Hex, _B_Hex, _KHex)};
+  const std::string expectedM_SHA1{"0966DD8D340DC969DE7B10D1EE36E5EBC709040B"};
+  EXPECT_EQ(M, expectedM_SHA1);
+}
+
+/**
+ * @test Test the correctness of the SRP M parameter (client's proof)
  * calculation with the hash SHA-256.
  * @brief Verifies that M calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateMHash256_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateMHashSHA256_ShouldMatchReference) {
   const std::string hash{"SHA-256"};
   const unsigned int groupId{7};
   const std::string NHex{_srpParametersMap.at(groupId)._nHex};
@@ -869,7 +1056,7 @@ TEST_F(SessionDataTest, CalculateMHash256_ShouldMatchReference) {
  * @brief Verifies that M calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateMHash384_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateMHashSHA384_ShouldMatchReference) {
   const std::string hash{"SHA-384"};
   const unsigned int groupId{7};
   const std::string NHex{_srpParametersMap.at(groupId)._nHex};
@@ -889,7 +1076,7 @@ TEST_F(SessionDataTest, CalculateMHash384_ShouldMatchReference) {
  * @brief Verifies that M calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateMHash512_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateMHashSHA512_ShouldMatchReference) {
   const std::string hash{"SHA-512"};
   const unsigned int groupId{7};
   const std::string NHex{_srpParametersMap.at(groupId)._nHex};
@@ -943,6 +1130,22 @@ TEST_F(SessionDataTest, CalculateMWithEmptyInputParameter_ShouldThrowAnError) {
     EXPECT_THAT(std::string(e.what()),
                 ::testing::EndsWith("empty input parameters received."));
   }
+}
+
+/**
+ * @test Test the correctness of the SRP S parameter calculation for group
+ * ID 1 at the server side, using the RFC-5054 test vectors.
+ * @brief Verifies that the server side S calculation matches the expected
+ * reference value.
+ */
+TEST_F(SessionDataTest,
+       CalculateSServerGroup1RFC5054TestVector_ShouldMatchReference) {
+  const unsigned int groupId{1};
+  const std::string NHex{_srpParametersMap.at(groupId)._nHex};
+  const std::string S{MyCryptoLibrary::SecureRemotePassword::calculateSServer(
+      _A_RFC5054TestVectorValue, _vRFC5054TestVectorValue,
+      _uRFC5054TestVectorValue, _bRFC5054TestVectorValue, NHex)};
+  EXPECT_EQ(S, _S_RFC5054TestVectorValue);
 }
 
 /**
@@ -1006,4 +1209,297 @@ TEST_F(SessionDataTest,
     EXPECT_THAT(std::string(e.what()),
                 ::testing::EndsWith("One or more input parameters are empty."));
   }
+}
+
+/**
+ * @test Test the correctness of the calculation of the SRP verifier v = g^x mod
+ * N using the RFC-5054 test vector for group 1.
+ * @brief Verifies that the verifier v, computed from known x, N, and g values,
+ * matches the expected reference value from RFC-5054.
+ */
+TEST_F(SessionDataTest, CalculateVWithRFC5054TestVector_ShouldMatchReference) {
+  const std::string xHex{_xRFC5054TestVectorValue};
+  const std::string NHex{_srpParametersMap.at(1)._nHex};
+  const unsigned int g{_srpParametersMap.at(1)._g};
+  const std::string vHex{
+      MyCryptoLibrary::SecureRemotePassword::calculateV(xHex, NHex, g)};
+  EXPECT_EQ(vHex, _vRFC5054TestVectorValue);
+  // Check that v is in the correct range: 1 < v < N
+  MessageExtractionFacility::UniqueBIGNUM vBn{
+      MessageExtractionFacility::hexToUniqueBIGNUM(vHex)};
+  MessageExtractionFacility::UniqueBIGNUM nBn{
+      MessageExtractionFacility::hexToUniqueBIGNUM(NHex)};
+  EXPECT_GT(BN_cmp(vBn.get(), BN_value_one()), 0);
+  EXPECT_LT(BN_cmp(vBn.get(), nBn.get()), 0);
+}
+
+/**
+ * @test Test the correctness of the calculation of the SRP verifier v = g^x mod
+ * N using the RFC-5054 test vector for group 2.
+ * @brief Verifies that the verifier v, computed from known x, N, and g values,
+ * matches the expected reference value from RFC-5054.
+ */
+TEST_F(SessionDataTest,
+       CalculateVWithRFC5054TestVectorGroup2_ShouldMatchReference) {
+  const unsigned int groupId{2};
+  const std::string xHex{_xRFC5054TestVectorValue};
+  const std::string NHex{_srpParametersMap.at(groupId)._nHex};
+  const unsigned int g{_srpParametersMap.at(groupId)._g};
+  const std::string vHex{
+      MyCryptoLibrary::SecureRemotePassword::calculateV(xHex, NHex, g)};
+  const std::string vExpected{
+      "661B6FEA4BBE1A09DF5A17A9ADF65D8AE890AA2F2EA450EFB5200A5C5DAE98FA2FF0677E"
+      "BB8C70012CC41B344A18D10C79A64A7AC6B392DB99E0C8F16D7A50ADBE2955103DD38E5C"
+      "5A287DA9F4264CF93FEDFF3AA6CE47F18A53EC41EA2E7BF36C53DE4B223266558DC0E6DD"
+      "EC513E059B0879112637C7EDCA8516338A4B5ACF4D634133DB26BA80870B1EB342AD68C9"
+      "56F71A03171D23A76A4C735199027155B40103CAECC131DED02A2664C4E17A0AAD2B204D"
+      "600BB9BBDAB7387B130C00DD"};
+  EXPECT_EQ(vHex, vExpected);
+  // Check that v is in the correct range: 1 < v < N
+  MessageExtractionFacility::UniqueBIGNUM vBn{
+      MessageExtractionFacility::hexToUniqueBIGNUM(vHex)};
+  MessageExtractionFacility::UniqueBIGNUM nBn{
+      MessageExtractionFacility::hexToUniqueBIGNUM(NHex)};
+  EXPECT_GT(BN_cmp(vBn.get(), BN_value_one()), 0);
+  EXPECT_LT(BN_cmp(vBn.get(), nBn.get()), 0);
+}
+
+/**
+ * @test Test the correctness of the calculation of the SRP verifier v = g^x mod
+ * N using the RFC-5054 test vector for group 3.
+ * @brief Verifies that the verifier v, computed from known x, N, and g values,
+ * matches the expected reference value from RFC-5054.
+ */
+TEST_F(SessionDataTest,
+       CalculateVWithRFC5054TestVectorGroup3_ShouldMatchReference) {
+  const unsigned int groupId{3};
+  const std::string xHex{_xRFC5054TestVectorValue};
+  const std::string NHex{_srpParametersMap.at(groupId)._nHex};
+  const unsigned int g{_srpParametersMap.at(groupId)._g};
+  const std::string vHex{
+      MyCryptoLibrary::SecureRemotePassword::calculateV(xHex, NHex, g)};
+  const std::string vExpected{
+      "960C64FA1148B0074457E3EB45DB6F7929B368CD06C6C582FB39E5961178C8946D940DA7"
+      "8BDC3E73F1A60CDBC7BBA2FBD83D31BC3906E986038455B81FB881FED4F8119B312138CE"
+      "17AFC09B12BA91C9A49F2AB593993255138F6EC39E95F67294248DF9D95AAE72ACE37B95"
+      "A747C6B35112E68B0F33A3C57563E0F75415084B5C6594179CB97A10ACEAC6338D1DEF7D"
+      "CE73A0BD3689D5FEF55EBED63CBB4AC5B049E53A9D9B5075AB32F771F5EA881B92D29CD2"
+      "7348328F3F9235B2A58CF43262365C1B1DD6B7D96BC2DF3AE70E1009E2CFEA30115DC226"
+      "0C17C54BBF4AF223C773EE4BCF6DBEE2990CB484E38ADDFD0DF6BE7727CE1875EBCCF15F"
+      "538B310C"};
+  EXPECT_EQ(vHex, vExpected);
+  // Check that v is in the correct range: 1 < v < N
+  MessageExtractionFacility::UniqueBIGNUM vBn{
+      MessageExtractionFacility::hexToUniqueBIGNUM(vHex)};
+  MessageExtractionFacility::UniqueBIGNUM nBn{
+      MessageExtractionFacility::hexToUniqueBIGNUM(NHex)};
+  EXPECT_GT(BN_cmp(vBn.get(), BN_value_one()), 0);
+  EXPECT_LT(BN_cmp(vBn.get(), nBn.get()), 0);
+}
+
+/**
+ * @test Test the correctness of the calculation of the SRP verifier v = g^x mod
+ * N using the RFC-5054 test vector for group 4.
+ * @brief Verifies that the verifier v, computed from known x, N, and g values,
+ * matches the expected reference value from RFC-5054.
+ */
+TEST_F(SessionDataTest,
+       CalculateVWithRFC5054TestVectorGroup4_ShouldMatchReference) {
+  const unsigned int groupId{4};
+  const std::string xHex{_xRFC5054TestVectorValue};
+  const std::string NHex{_srpParametersMap.at(groupId)._nHex};
+  const unsigned int g{_srpParametersMap.at(groupId)._g};
+  const std::string vHex{
+      MyCryptoLibrary::SecureRemotePassword::calculateV(xHex, NHex, g)};
+  const std::string vExpected{
+      "24CBD3A96ED900D33FA12BA65FB24DD2E45EF35658C0930BCECA6F50656C32F930BBDAD3"
+      "B0BCF7790F8DD74E213EE25E3EB4749550F32CD07B8BB2F60006F3819DCA00AE13A20727"
+      "DAD29339467DD9926670FBA4ADA87E719EBCA0F51FE8E427C965857B7B726DE324D0A256"
+      "4906DA4CEBFC625E9482DA305C23026B19004759AE863B1FB906B5A97131BCF80A67D513"
+      "9ED06CBD22AF1639627CF450735E52832D416ADB16DE0AC8DBDB9E31377AE48DE9097580"
+      "D9B185007E0E5CCEE0499E8597F86A2AE74C2D931C27722F5B61B8827D422744368E7640"
+      "6BFDCB08E1057AF858B3C17F2D1B2E9648B63F897C751044B1F90C5F9C262115CB28B383"
+      "6106D40C62144D318232845145D7832D254A329F42276ADE4FE63D6D2748160DDB5E1A08"
+      "64DEE473EE1CD59CAEF54D729E6417B710A923909C2B801CA2F211C6C782EFC6798B389C"
+      "A7DDBBC9B3BC4F0F418F0AADB688221F40FED75DD535C59BDB4A74A6C217B28C4E6BE6F3"
+      "A227FABE8EE94BC33EE6BEF9C5F368CBD90AA6D137249245"};
+  EXPECT_EQ(vHex, vExpected);
+  // Check that v is in the correct range: 1 < v < N
+  MessageExtractionFacility::UniqueBIGNUM vBn{
+      MessageExtractionFacility::hexToUniqueBIGNUM(vHex)};
+  MessageExtractionFacility::UniqueBIGNUM nBn{
+      MessageExtractionFacility::hexToUniqueBIGNUM(NHex)};
+  EXPECT_GT(BN_cmp(vBn.get(), BN_value_one()), 0);
+  EXPECT_LT(BN_cmp(vBn.get(), nBn.get()), 0);
+}
+
+/**
+ * @test Test the correctness of the calculation of the SRP verifier v = g^x mod
+ * N using the RFC-5054 test vector for group 5.
+ * @brief Verifies that the verifier v, computed from known x, N, and g values,
+ * matches the expected reference value from RFC-5054.
+ */
+TEST_F(SessionDataTest,
+       CalculateVWithRFC5054TestVectorGroup5_ShouldMatchReference) {
+  const unsigned int groupId{5};
+  const std::string xHex{_xRFC5054TestVectorValue};
+  const std::string NHex{_srpParametersMap.at(groupId)._nHex};
+  const unsigned int g{_srpParametersMap.at(groupId)._g};
+  const std::string vHex{
+      MyCryptoLibrary::SecureRemotePassword::calculateV(xHex, NHex, g)};
+  const std::string vExpected{
+      "30716D4386A077C18F80259CE80B9F4A15015F2ECFDF3968E2B057B5BDDAD3DD9150DC1F"
+      "82F450B8CC0F41CA6F5145B99A30CBCDE2FDDEA420C0218E8446D22EE25EB74F960C31A5"
+      "6FFE975B2BCCF3A18DA7F9C146CDD8ACD432695EEF4B4F28F889A09FC7EFA4053AECAA07"
+      "137707F670642220569B9C5EDE52BFE3E0976DF7BF5F75B513832D8F26A02AF4308061DB"
+      "7DF2F694D4828AB14354A02D466884AEE59593079094198187EBC6BAEE861501D7BF3FFC"
+      "D712AD1780237EF2486E9B70BD3C0B2F386E775D115040B481D63CC4B2D978D9BCEA3AA1"
+      "87D33A55F087623474357E37CB94F6909E34E7CBB1C10FF61D587721FDFB63C313A80B39"
+      "295FED0E4A29A3CBE6C9A8BCA9B9D454B3AB744026E33ACCFF7D1B67A2F12B8D76EB3153"
+      "31ED261FACBCA7B21F434E3021603A479B4CDCA5E0EBEC0E69386233EC803B4F38B50F5C"
+      "7D91CC7E78CE766494A9C5B7CFF844946FBB96189AFF9EACC34EDCABE56BB66085766993"
+      "36E1B53E13C14B0B1B6D17E449DF3B3D6AD29FE1AB7A22FEF7F4465063D35263DF4A161C"
+      "37DF117E0E6CD9C98F2291E8D243DF729A40800AE426260D6923CBF342B29C4F22E83199"
+      "CCA9897E7C5C94C682167FF32BF5693413C0455BEFBEE0571243E31D3AD19EE48DE853AD"
+      "7A3FE29070BC1DB48C964892AF73590878F957DA1D5660F7B68B1B8C86F13251A25DFD9D"
+      "FD8C2ABF34CD44DD"};
+  EXPECT_EQ(vHex, vExpected);
+  // Check that v is in the correct range: 1 < v < N
+  MessageExtractionFacility::UniqueBIGNUM vBn{
+      MessageExtractionFacility::hexToUniqueBIGNUM(vHex)};
+  MessageExtractionFacility::UniqueBIGNUM nBn{
+      MessageExtractionFacility::hexToUniqueBIGNUM(NHex)};
+  EXPECT_GT(BN_cmp(vBn.get(), BN_value_one()), 0);
+  EXPECT_LT(BN_cmp(vBn.get(), nBn.get()), 0);
+}
+
+/**
+ * @test Test the correctness of the calculation of the SRP verifier v = g^x mod
+ * N using the RFC-5054 test vector for group 6.
+ * @brief Verifies that the verifier v, computed from known x, N, and g values,
+ * matches the expected reference value from RFC-5054.
+ */
+TEST_F(SessionDataTest,
+       CalculateVWithRFC5054TestVectorGroup6_ShouldMatchReference) {
+  const unsigned int groupId{6};
+  const std::string xHex{_xRFC5054TestVectorValue};
+  const std::string NHex{_srpParametersMap.at(groupId)._nHex};
+  const unsigned int g{_srpParametersMap.at(groupId)._g};
+  const std::string vHex{
+      MyCryptoLibrary::SecureRemotePassword::calculateV(xHex, NHex, g)};
+  const std::string vExpected{
+      "61708BC4B7BFD9DDB4AB62BB393240315C971E2BD347EC3EFEAC435F82B27157BC609000"
+      "2A27B607C21010BFA471976C7476EFD356F312D68C25F464804E566BFD34C7E9F56FAFF6"
+      "9FE3CA094ADE6FE5F5B0AA782569BA4163CA6727B845A920DE2309A4D15310B7EA4A5322"
+      "971CA9524676C7B7D2E380A725A8EA6C8B049B2F2F69F5F0E7190A7BA24046290FD08B70"
+      "DE4E2E5384F58106C6017FB63BD4DFE867D8D594E37AAFD011B891BDB627CFD90EE88C14"
+      "63C63E9587CE4A5461DECCC91C6627B4F9E989FB11A55BCDF4FFA76786650634185C79FD"
+      "D7CD04B761FA78D8252325E47B4E4C58CDDB40B58DFF06C4A2070EABC3A85CB518E7F4E6"
+      "149F3A08DE96226FF336149AB0C5AF51D10A5FDBC816D094107DD9BAE6E9B997E013DA6F"
+      "97F2BDB800FFDB726E3D7266A87C1490B306E10CADC0BE05186526445B5324FC5F5C258C"
+      "0572684CC2F44EDC5F8C2D43C84B88037EA7EFBD96850B70E56899C420665E9A15C99D67"
+      "471C0082491B233CE05A41DE0843C9F0127007C56E86701A172C97AD3AD84152840B560E"
+      "B06B060F56BFCC34C5DC361A6271D9CA165983FC733D454C50EAB45ACEB0EB4DE3C6EBB8"
+      "6F2270E5EEDE5DDC2E5082029E8CC6DE29ED28C968574A7AE10DD1506406AFFA1899C1DE"
+      "DB8842F2DEBFAD1CEBC5A6258897E09DFB7A6F4127218890786E371C73333ED299D04EE1"
+      "10679DBB100A61B590B4806A1A8554A98FB1B5BBA8C6F43BB20BC495FD8249495DA4C8CF"
+      "6F5E691BD0C138B33F270BA722AB76D175D18BF42A8261FD3AFE7BE47DAE9743A35F6E38"
+      "E442E10DC217D33750CFFFC470E6C9EBD19EC57078A22AA235334176B644C97750A54194"
+      "5CF4A0B09CB0D2BAE839172934B68964A86CA56371045DA404BC879647B3B2EFC76C08DE"
+      "4237E404F5D197900F1C34A2D4570F7EF4C49DBF623732A97B34320AA82F8B06549177DB"
+      "5AD68AC3E6B0A0933EB22426EDD367B9E07107EFC9CA91DC2095B6E4A156D87FF3B5135A"
+      "571F3A28BBD8B571BE261696DA6BD81BE7449B276DE444B1FAF2268289C43949C042E801"
+      "B2A29D9295A9660B0CA222C3"};
+  EXPECT_EQ(vHex, vExpected);
+  // Check that v is in the correct range: 1 < v < N
+  MessageExtractionFacility::UniqueBIGNUM vBn{
+      MessageExtractionFacility::hexToUniqueBIGNUM(vHex)};
+  MessageExtractionFacility::UniqueBIGNUM nBn{
+      MessageExtractionFacility::hexToUniqueBIGNUM(NHex)};
+  EXPECT_GT(BN_cmp(vBn.get(), BN_value_one()), 0);
+  EXPECT_LT(BN_cmp(vBn.get(), nBn.get()), 0);
+}
+
+/**
+ * @test Test the correctness of the calculation of the SRP verifier v = g^x mod
+ * N using the RFC-5054 test vector for group 7.
+ * @brief Verifies that the verifier v, computed from known x, N, and g values,
+ * matches the expected reference value from RFC-5054.
+ */
+TEST_F(SessionDataTest,
+       CalculateVWithRFC5054TestVectorGroup7_ShouldMatchReference) {
+  const unsigned int groupId{7};
+  const std::string xHex{_xRFC5054TestVectorValue};
+  const std::string NHex{_srpParametersMap.at(groupId)._nHex};
+  const unsigned int g{_srpParametersMap.at(groupId)._g};
+  const std::string vHex{
+      MyCryptoLibrary::SecureRemotePassword::calculateV(xHex, NHex, g)};
+  const std::string vExpected{
+      "F3BB0C1E824D5FACA88D2ABD8498B0F98D0C0662E7C51E5D33C2C5754C1A47748E75FAFD"
+      "7888656172DFFD5B4A9AB2674A4EAFBAC89EEE766E49DD91C1081B03B73A44000B7A10BA"
+      "320AA523EBB6F7FB78B3517ACA34FD6F950BB47E8E12622AD3AB1E53B54307B479CF0136"
+      "EFE852D2B232A91DC0B200B829D2493CCF7986EA594AEEC946EDB9226A83DDD12A3BB389"
+      "39598676E2796F5AEC344B98DE05AFF5B4590A479C73EE44DAB49007A791356F547D6543"
+      "2B6911C945E68C11122033A29255C72A39AE0402E9A105CAE1622D1C83C838CFFE873D6E"
+      "57B6807EF1378B8D6CE06C8887C1755261CABEDE3FD4AACB82EAB63BDF63F729939EEEC4"
+      "4E5C619958BE8C32E72D91DE809EAB3B82909BC9F96DFB833256C2B9184CB4D20AD00E36"
+      "953EC248682197B3FBDFB8AC3401AC9C1E854E167418218E8DDD4167E537752DE45B2A30"
+      "F42B2973B38F92308AC9814E64708807578416E022B22B2FA830881B324151893E061F72"
+      "E88A09D45120ECC5911806AE39C41BA0367E7FA07C3F0203CA7B505DCC82F221865AD965"
+      "6AD7CA42224A89D4D3146D63C9DA7B892E7F2D8C538F3742235DFEEB52EE80521148E75E"
+      "B0E8864C3752CEC8970AF07792FF195E3D05024292FB828BA7AE07CCD6FB31C90947B3F7"
+      "4A123C6D6423FE1482807D3388E61AD6CC4A5FA8084E66F18FECF385074780BA0D3370D1"
+      "466195E85F5F09E46411CDB5907384FC891192EB36DB5773F87C052453952EE51BFE7160"
+      "13EB38FE90939077184A97B7AC21E9C69B0EB8E480E1E6979B775CA8BA01E6170D1A270B"
+      "50A2EC59D2585BB5548947FA0A28D3A239D825CD3470A255F710B1EC024BDFA3C043B291"
+      "F927944D616441647E13263556571B4E080925BC08ECFFF49C0DE569BBC7C8D9FB9B98DD"
+      "2A1B5A504794658FCBD377247B43DD8BAA338B054240359D4EF111E941E69BCECB7A892F"
+      "6F9459D7F0B1AD69473E6F809EB24E1A008855BCEEF6DA35A53154C0E9E5C0CC9982E26F"
+      "EFC060417AEE7B09B2D95F3D3E1D12AB9FA16FD44A78B9021F48DA585AB4A449C3349789"
+      "0A1262B6D3E0FD44E021D18AB25F4D4BC9F84F8FA44D6205BB68F56511C831EF0055F0F7"
+      "4ACCA2AFC046F76C7E3F0549D0BF6DCAC71ACCB7D513BF9CEB5E61A641EC3192AE0E3F2C"
+      "89194592057020C5D762B28DA8EED2BD76E06B0E5118629AFBE57A341BBE5FA75D91874F"
+      "07A9862C36541A22EBAB40FCAC5C1ECFD7574DAD0C862BBE99AD7FA894DC429287305255"
+      "73D53A521DF1F9481FC11754E7107C4DCA43B744AA8DEADF28B0CD41456D83BB15887740"
+      "AA6F2D711817F4DF4E7CEC0FC97E66CC58A079AE595A419A62173FEC13EC939968EAAA72"
+      "3081B14035EDF62F69A3FB3699483AE87C3DE63FDE3C8FB60322024C40E0F43A307BC520"
+      "A89027A1A35C490B9F76F078968EEC68"};
+  EXPECT_EQ(vHex, vExpected);
+  // Check that v is in the correct range: 1 < v < N
+  MessageExtractionFacility::UniqueBIGNUM vBn{
+      MessageExtractionFacility::hexToUniqueBIGNUM(vHex)};
+  MessageExtractionFacility::UniqueBIGNUM nBn{
+      MessageExtractionFacility::hexToUniqueBIGNUM(NHex)};
+  EXPECT_GT(BN_cmp(vBn.get(), BN_value_one()), 0);
+  EXPECT_LT(BN_cmp(vBn.get(), nBn.get()), 0);
+}
+
+/**
+ * @test Test that calculateV throws an error for empty input parameters.
+ * @brief Verifies that calculateV throws std::runtime_error when given empty
+ * xHex, NHex, or g.
+ */
+TEST_F(SessionDataTest, CalculateVWithEmptyInput_ShouldThrowRuntimeError) {
+  EXPECT_THROW(MyCryptoLibrary::SecureRemotePassword::calculateV("", "ABCD", 2),
+               std::invalid_argument);
+  EXPECT_THROW(MyCryptoLibrary::SecureRemotePassword::calculateV("1234", "", 2),
+               std::invalid_argument);
+  EXPECT_THROW(
+      MyCryptoLibrary::SecureRemotePassword::calculateV("1234", "ABCD", 0),
+      std::invalid_argument);
+}
+
+/**
+ * @test Test the correctness of the calculation of v for a small group.
+ * @brief Verifies that calculateV works for small values.
+ */
+TEST_F(SessionDataTest, CalculateVWithSmallValues_ShouldMatchReference) {
+  const std::string xHex = "05";
+  const std::string NHex = "17"; // 23 in decimal
+  const unsigned int g = 2;
+  // v = 2^5 mod 23 = 32 mod 23 = 9
+  const std::string expectedVHex = "09";
+  const std::string vHex =
+      MyCryptoLibrary::SecureRemotePassword::calculateV(xHex, NHex, g);
+  EXPECT_EQ(vHex, expectedVHex);
 }

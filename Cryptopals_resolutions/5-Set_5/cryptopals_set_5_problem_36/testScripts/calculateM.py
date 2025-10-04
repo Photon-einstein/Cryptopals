@@ -1,11 +1,15 @@
 import hashlib
 
+
 def hex_to_bytes(hexstr):
     return bytes.fromhex(hexstr)
 
+
 def hash_bytes(hash_name, data):
     hash_name = hash_name.replace("-", "").lower()
-    if hash_name == "sha256":
+    if hash_name == "sha1":
+        h = hashlib.sha1()
+    elif hash_name == "sha256":
         h = hashlib.sha256()
     elif hash_name == "sha384":
         h = hashlib.sha384()
@@ -16,6 +20,7 @@ def hash_bytes(hash_name, data):
     h.update(data)
     return h.digest()
 
+
 def calculateM(hash_name, N_hex, g_hex, username, salt_hex, A_hex, B_hex, K_hex):
     # H(N)
     N_bytes = hex_to_bytes(N_hex)
@@ -24,7 +29,7 @@ def calculateM(hash_name, N_hex, g_hex, username, salt_hex, A_hex, B_hex, K_hex)
     g_bytes = hex_to_bytes(g_hex)
     hg = hash_bytes(hash_name, g_bytes)
     # H(U)
-    hu = hash_bytes(hash_name, username.encode('utf-8'))
+    hu = hash_bytes(hash_name, username.encode("utf-8"))
     # H(N) XOR H(g)
     hn_xor_hg = bytes(a ^ b for a, b in zip(hN, hg))
     # salt, A, B, K as bytes
@@ -37,6 +42,7 @@ def calculateM(hash_name, N_hex, g_hex, username, salt_hex, A_hex, B_hex, K_hex)
     # Hash the concatenated value
     m = hash_bytes(hash_name, m_input)
     return m.hex().upper()
+
 
 if __name__ == "__main__":
     # Test values
@@ -70,13 +76,15 @@ if __name__ == "__main__":
         "6A364597E899A0255DC164F31CC50846851DF9AB48195DED7EA1B1D510BD7EE74D73FA"
         "F36BC31ECFA268359046F4EB879F924009438B481C6CD7889A002ED5EE382BC9190DA6"
         "FC026E479558E4475677E9AA9E3050E2765694DFC81F56E880B96E7160C980DD98EDD3"
-        "DFFFFFFFFFFFFFFFFF")
+        "DFFFFFFFFFFFFFFFFF"
+    )
     g = 19
-    g_hex = format(g, 'X')  # Convert integer g to hex string (uppercase, no '0x')
+    g_hex = format(g, "X")  # Convert integer g to hex string (uppercase, no '0x')
     username = "Bob"
     salt_hex = (
         "4118F5DFB7D944C02FAEDBED7982BF5505BF4B681A14EA54C5D2F2471BC2C793"
-        "CE74D80D8D889A85E34BD536355A3E059AC9C34331D83FC16C757C214D99246A")
+        "CE74D80D8D889A85E34BD536355A3E059AC9C34331D83FC16C757C214D99246A"
+    )
     A_hex = (
         "F6FDBCA9750B211E9A12DE1D60E54C7942C65D1D30826E552824E10A0777FEA1"
         "B38EE8CE5F2AC5D3BE76886D3F630EF44584382E8C303D8249420D08586B52F0"
@@ -89,7 +97,8 @@ if __name__ == "__main__":
         "B815BAD5D14BC94C7A05114540D9F75DCDA5BB468BF2D2FDE33D5D6634BDA360"
         "69A7CA3690BBEF1CC5BF22D41A9A9785EA962BE8C2933E07B53709C1D58D1E48"
         "6B472BEF3F8FA4722AC5B64AB49823A9BD1076C9DC7979E62EA3C230586E2A97"
-        "D163CC2E000C9F54E1F43AAB8DBB1C54768DFA9E3553D94EE76107969E992325")
+        "D163CC2E000C9F54E1F43AAB8DBB1C54768DFA9E3553D94EE76107969E992325"
+    )
     B_hex = (
         "F4D69379248D20EED58A337FB5E470B6C3ED3E3020DC88E51FED0DADA1FBAB41"
         "FD5A2E5502E2EC15373D069C309797747F08F1E7AD6453C42BF4858FFEE011AC"
@@ -102,12 +111,14 @@ if __name__ == "__main__":
         "422FABE39B1928B0B299B35311FDB46EE35C7E9FAC2467469A61705275B06D36"
         "FC588007F077B674126A56228C7B836271531293FBAE7FAA9F08E852F67C65EA"
         "2C598A9D7090BA64FE89A3364F87FE7B27BBED1862A01A42A348CD64AFEE58CC"
-        "CA02B0764B813608C0A98DC9F815294D26746DF7DC28B79C6EABF08017406C06")
+        "CA02B0764B813608C0A98DC9F815294D26746DF7DC28B79C6EABF08017406C06"
+    )
     K_hex = (
         "39FDCEC9D0DC0BD723318C18F55951C3BB9B442FDE6452AA5BAC2B8F6A2B61BF"
-        "406C79A849C324AA0B3DD7854FB5C56763E305889689E04C8E83A95E244410E7")
+        "406C79A849C324AA0B3DD7854FB5C56763E305889689E04C8E83A95E244410E7"
+    )
 
-    hash_algorithms = ["SHA-256", "SHA-384", "SHA-512"]
+    hash_algorithms = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"]
     for hash_name in hash_algorithms:
         M = calculateM(hash_name, N_hex, g_hex, username, salt_hex, A_hex, B_hex, K_hex)
         print(f"{hash_name}: {M}")

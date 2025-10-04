@@ -54,6 +54,17 @@ using OsslStr = std::unique_ptr<char, OpenSSLStringDeleter>;
 const std::string generateCryptographicNonce(const std::size_t length);
 
 /**
+ * @brief This method will perform the SHA1 of a given input for testing
+ * purposes.
+ *
+ * This method will perform the SHA1 of a given input.
+ *
+ * @param input The input as plaintext.
+ * @return The SHA1(input) in hexadecimal format.
+ **/
+std::string sha1(const std::string &input);
+
+/**
  * @brief This method will perform the SHA256 of a given input.
  *
  * This method will perform the SHA256 of a given input.

@@ -90,7 +90,7 @@ TEST(SHA256Test, sha256_WithStringWithNullByte_ShouldMatchReference) {
  */
 TEST(SHA256Test, sha256_WithAllByteValues_ShouldMatchReference) {
   std::string input;
-  for (int i = 0; i < 256; i++) {
+  for (int i = 0; i < 256; ++i) {
     input.push_back(static_cast<char>(i));
   }
   const std::string expectedHashValue(

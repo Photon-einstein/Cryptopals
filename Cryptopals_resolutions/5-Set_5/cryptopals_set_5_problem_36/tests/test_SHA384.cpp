@@ -95,7 +95,7 @@ TEST(SHA384Test, sha384_WithStringWithNullByte_ShouldMatchReference) {
  */
 TEST(SHA384Test, sha384_WithAllByteValues_ShouldMatchReference) {
   std::string input;
-  for (int i = 0; i < 256; i++) { // fixed: only 0x00..0xff, not 384 bytes
+  for (int i = 0; i < 256; ++i) { // fixed: only 0x00..0xff, not 384 bytes
     input.push_back(static_cast<char>(i));
   }
   const std::string expectedHashValue(

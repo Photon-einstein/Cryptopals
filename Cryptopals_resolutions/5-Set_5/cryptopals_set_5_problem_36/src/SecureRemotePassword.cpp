@@ -513,41 +513,53 @@ const std::string MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
 }
 /******************************************************************************/
 /**
- * @brief This method will perform the following calculation:
- * x = H(s | P).
+ * @brief Calculates the SRP private key 'x' according to RFC 5054.
  *
- * This method will perform the following calculation:
- * x = H(s | P).
- * Clarification:
- * - H: hash algorithm;
- * - s: salt;
- * - P: password;
- * - x: output of the hash;
+ * RFC 5054 formula:
+ *   x = H(salt | H(username | ":" | password))
+ * where H is the agreed hash function (e.g., SHA-1, SHA-256, SHA-384,
+ * SHA-512), salt is provided in hexadecimal format, and username and password
+ * are in plaintext.
  *
- * @param hash The hash algorithm used in this calculation.
- * @param password The password used in this calculation, received in
- * plaintext.
- * @param salt The salt used in this calculation, received in hexadecimal
- * format
- *
- * @return The result of H(s | P) in hexadecimal format.
+ * @param hashName The hash algorithm to use (e.g., "SHA-256").
+ * @param username The username in plaintext.
+ * @param password The password in plaintext.
+ * @param saltHex The salt value in hexadecimal format.
+ * @return The computed 'x' value as a hexadecimal string.
+ * @throws std::invalid_argument if any input is empty or unsupported hash is
+ * specified.
  */
-const std::string
-MyCryptoLibrary::SecureRemotePassword::calculateX(const std::string &hash,
-                                                  const std::string &password,
-                                                  const std::string &salt) {
-  if (_hashMap.find(hash) == _hashMap.end()) {
+const std::string MyCryptoLibrary::SecureRemotePassword::calculateX(
+    const std::string &hashName, const std::string &username,
+    const std::string &password, const std::string &saltHex) {
+  // Validate input
+  if (_hashMap.find(hashName) == _hashMap.end()) {
     throw std::invalid_argument("SecureRemotePassword log | calculateX(): "
                                 "hash algorithm not recognized.");
-  } else if (password.empty() || salt.empty()) {
+  }
+  if (username.empty() || password.empty() || saltHex.empty()) {
     throw std::invalid_argument(
         "SecureRemotePassword log | calculateX(): "
         "invalid input parameters received, cannot be empty.");
   }
-  const std::string saltPlaintext{
-      MessageExtractionFacility::hexToPlaintext(salt)};
-  return MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
-      hash, saltPlaintext, password);
+  // Step 1: Inner hash = H(username | ":" | password)
+  const std::string inner{username + ":" + password};
+  const std::string innerHashHex{_hashMap.at(hashName)(inner)};
+  // Step 2: Convert saltHex and innerHashHex to raw bytes
+  std::vector<uint8_t> saltBytes =
+      MessageExtractionFacility::hexToBytes(saltHex);
+  std::vector<uint8_t> innerHashBytes =
+      MessageExtractionFacility::hexToBytes(innerHashHex);
+  // Step 3: Concatenate saltBytes + innerHashBytes
+  std::string concat(reinterpret_cast<const char *>(saltBytes.data()),
+                     saltBytes.size());
+  concat += std::string(reinterpret_cast<const char *>(innerHashBytes.data()),
+                        innerHashBytes.size());
+  // Step 4: Outer hash = H(salt | H(username | ":" | password))
+  std::string xHex{_hashMap.at(hashName)(concat)};
+  // Step 5: Return as uppercase hex
+  std::transform(xHex.begin(), xHex.end(), xHex.begin(), ::toupper);
+  return xHex;
 }
 /******************************************************************************/
 /**
@@ -572,6 +584,16 @@ std::string MyCryptoLibrary::SecureRemotePassword::calculateSClient(
     const std::string &BHex, const std::string &kHex, unsigned int g,
     const std::string &xHex, const std::string &aHex, const std::string &uHex,
     const std::string &NHex) {
+  // Debugging information
+  std::cout << "[DEBUG] calculateSClient input parameters:" << std::endl;
+  std::cout << "  [DEBUG] BHex: " << BHex << std::endl;
+  std::cout << "  [DEBUG] kHex: " << kHex << std::endl;
+  std::cout << "  [DEBUG] g: " << g << std::endl;
+  std::cout << "  [DEBUG] xHex: " << xHex << std::endl;
+  std::cout << "  [DEBUG] aHex: " << aHex << std::endl;
+  std::cout << "  [DEBUG] uHex: " << uHex << std::endl;
+  std::cout << "  [DEBUG] NHex: " << NHex << std::endl;
+
   // Parameter validation
   if (BHex.empty() || kHex.empty() || xHex.empty() || aHex.empty() ||
       uHex.empty() || NHex.empty()) {
@@ -668,6 +690,14 @@ std::string MyCryptoLibrary::SecureRemotePassword::calculateSClient(
 std::string MyCryptoLibrary::SecureRemotePassword::calculateSServer(
     const std::string &AHex, const std::string &vHex, const std::string &uHex,
     const std::string &bHex, const std::string &NHex) {
+  // Debugging information
+  std::cout << "[DEBUG] calculateSServer input parameters:" << std::endl;
+  std::cout << "  [DEBUG] AHex: " << AHex << std::endl;
+  std::cout << "  [DEBUG] vHex: " << vHex << std::endl;
+  std::cout << "  [DEBUG] uHex: " << uHex << std::endl;
+  std::cout << "  [DEBUG] bHex: " << bHex << std::endl;
+  std::cout << "  [DEBUG] NHex: " << NHex << std::endl;
+
   // Parameter validation
   if (AHex.empty() || vHex.empty() || uHex.empty() || bHex.empty() ||
       NHex.empty()) {

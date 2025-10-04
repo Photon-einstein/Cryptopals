@@ -715,17 +715,39 @@ curl -X POST http://localhost:18080/srp/auth/init \
     87.9. Check if the 'v' at the server side match the one sent at the client side (Done)
     87.10. Check if the 'b' is the correct one at the server side (Done)
     87.11. Check if the 'A' is the correct one at the server side (Done)
-
     87.12. Test with Known RFC Vectors (in progress)
 
     - Compare S server with the reference, it is matching the reference (Done)
     - Compare S client with the reference, it is not matching the reference (Done)
 
-88. Server calculation of K = H(S) (TBD)
-89. Server calculation of M' = H(H(N) XOR H(g) | H(U) | s | A | B | K) (TBD)
-90. Add the calculation of the M' at the server side and the compare with the M received (TBD)
-91. Add a method to calculate M2 (TBD)
-92. Add unit tests of the calculation of M2 (TBD)
-93. Add a python script to double-check the method in Cpp (TBD)
-94. Add the calculation of the M2 at the server side (TBD)
-95. Add the sending of the M2 to the client (TBD)
+88. Adapt the python cross-reference script of the calculateX method so that it reflects
+    the requirements of the RFC-5054 (Done)
+89. Adapt the calculateX method at the C++ source code so that it reflects the requirements
+    of the RFC-5054 (Done)
+90. Add SHA-1 method so that it is possible to test the RFC-5054 test vectors (Done)
+91. Adapt the calculateX method at the C++ tests so that the tests pass again (Done)
+92. Adapt the failing tests at the method calculateX with the new values, according
+    to the python script result (in progress)
+93. Add SHA-1 tests as well to validate the implementation (Done)
+94. Add test to validate calculateU with RFC-5054 vector tests (Done)
+95. Go throw the test_SessionData file an add tests against the RFC-5054 vector tests (Done)
+96. Add python script to validate calculateV against the RFC-5054 test vector (Done)
+97. Add tests to validate the method calculateV against the RFC-5054 test vector (Done)
+98. Add python script to validate calculatePublicKey against the RFC-5054 test vector (Done)
+99. Add test to validate calculate k with RFC-5054 vector tests (Done)
+
+100.  Add tests to validate the method calculatePublicKey against the RFC-5054 test vector (Done)
+      99.1. Add tests when the client is making the method call (Done)
+      99.2. Add tests when the server is making the method call (Done)
+
+101.  When there is some non-deterministic value, place the RFC-5054 test vectors to get a deterministic
+      final value to the protocol (in progress)
+
+102.  Server calculation of K = H(S) (TBD)
+103.  Server calculation of M' = H(H(N) XOR H(g) | H(U) | s | A | B | K) (TBD)
+104.  Add the calculation of the M' at the server side and the compare with the M received (TBD)
+105.  Add a method to calculate M2 (TBD)
+106.  Add unit tests of the calculation of M2 (TBD)
+107.  Add a python script to double-check the method in Cpp (TBD)
+108.  Add the calculation of the M2 at the server side (TBD)
+109.  Add the sending of the M2 to the client (TBD)

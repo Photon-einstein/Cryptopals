@@ -34,6 +34,41 @@ EncryptionUtility::generateCryptographicNonce(const std::size_t length) {
 }
 /******************************************************************************/
 /**
+ * @brief This method will perform the SHA1 of a given input for testing
+ * purposes.
+ *
+ * This method will perform the SHA1 of a given input.
+ *
+ * @param input The input as plaintext.
+ * @return The SHA1(input) in hexadecimal format.
+ **/
+std::string EncryptionUtility::sha1(const std::string &input) {
+  EVP_MD_CTX *ctx = EVP_MD_CTX_new();
+  if (!ctx)
+    throw std::runtime_error("EncryptionUtility log | sha1(): "
+                             "Failed to create EVP_MD_CTX");
+  unsigned char hash[EVP_MAX_MD_SIZE];
+  unsigned int length = 0;
+  if (EVP_DigestInit_ex(ctx, EVP_sha1(), nullptr) != 1 ||
+      EVP_DigestUpdate(ctx, input.data(), input.size()) != 1 ||
+      EVP_DigestFinal_ex(ctx, hash, &length) != 1) {
+    EVP_MD_CTX_free(ctx);
+    throw std::runtime_error("EncryptionUtility log | sha1(): "
+                             "EVP digest calculation failed");
+  }
+  EVP_MD_CTX_free(ctx);
+  // Convert to hex string
+  std::ostringstream oss;
+  for (unsigned int i = 0; i < length; i++) {
+    oss << std::hex << std::setw(2) << std::setfill('0')
+        << static_cast<int>(hash[i]);
+  }
+  std::string shaHex = oss.str();
+  std::transform(shaHex.begin(), shaHex.end(), shaHex.begin(), ::toupper);
+  return shaHex;
+}
+/******************************************************************************/
+/**
  * @brief This method will perform the SHA256 of a given input.
  *
  * This method will perform the SHA256 of a given input.
@@ -161,6 +196,7 @@ std::string EncryptionUtility::sha512(const std::string &input) {
 const std::unordered_map<std::string, EncryptionUtility::HashFn> &
 EncryptionUtility::getHashMap() {
   static const std::unordered_map<std::string, HashFn> table = {
+      {"SHA-1", EncryptionUtility::sha1},
       {"SHA-256", EncryptionUtility::sha256},
       {"SHA-384", EncryptionUtility::sha384},
       {"SHA-512", EncryptionUtility::sha512}};
@@ -177,19 +213,14 @@ EncryptionUtility::getHashMap() {
 const std::map<std::string, unsigned int> EncryptionUtility::getMinSaltSizes() {
   return {// SHA-1 (160 bits / 8 bits per byte = 20 bytes)
           {"SHA-1", 20},
-
           // SHA-256 (256 bits / 8 bits per byte = 32 bytes)
           {"SHA-256", 32},
-
           // SHA-512 (512 bits / 8 bits per byte = 64 bytes)
           {"SHA-512", 64},
-
           // SHA-224 (224 bits / 8 bits per byte = 28 bytes)
           {"SHA-224", 28},
-
           // SHA-384 (384 bits / 8 bits per byte = 48 bytes)
           {"SHA-384", 48},
-
           // Truncated SHA-512 variants
           {"SHA-512/224", 28},
           {"SHA-512/256", 32}};

@@ -95,7 +95,7 @@ TEST(SHA512Test, sha512_WithStringWithNullByte_ShouldMatchReference) {
  */
 TEST(SHA512Test, sha512_WithAllByteValues_ShouldMatchReference) {
   std::string input;
-  for (int i = 0; i < 256; i++) { // fixed: only 0x00..0xff, not 512 bytes
+  for (int i = 0; i < 256; ++i) { // fixed: only 0x00..0xff, not 512 bytes
     input.push_back(static_cast<char>(i));
   }
   const std::string expectedHashValue(

@@ -204,30 +204,27 @@ public:
   static const std::string calculateHashConcat(const std::string &hashName,
                                                const std::string &left,
                                                const std::string &right);
-
   /**
-   * @brief This method will perform the following calculation:
-   * x = H(s | P).
+   * @brief Calculates the SRP private key 'x' according to RFC 5054.
    *
-   * This method will perform the following calculation:
-   * x = H(s | P).
-   * Clarification:
-   * - H: hash algorithm;
-   * - s: salt;
-   * - P: password;
-   * - x: output of the hash;
+   * RFC 5054 formula:
+   *   x = H(salt | H(username | ":" | password))
+   * where H is the agreed hash function (e.g., SHA-1, SHA-256, SHA-384,
+   * SHA-512), salt is provided in hexadecimal format, and username and password
+   * are in plaintext.
    *
-   * @param hash The hash algorithm used in this calculation.
-   * @param password The password used in this calculation, received in
-   * plaintext.
-   * @param salt The salt used in this calculation, received in hexadecimal
-   * format
-   *
-   * @return The result of H(s | P) in hexadecimal format.
+   * @param hashName The hash algorithm to use (e.g., "SHA-256").
+   * @param username The username in plaintext.
+   * @param password The password in plaintext.
+   * @param saltHex The salt value in hexadecimal format.
+   * @return The computed 'x' value as a hexadecimal string.
+   * @throws std::invalid_argument if any input is empty or unsupported hash is
+   * specified.
    */
-  static const std::string calculateX(const std::string &hash,
+  static const std::string calculateX(const std::string &hashName,
+                                      const std::string &username,
                                       const std::string &password,
-                                      const std::string &salt);
+                                      const std::string &saltHex);
 
   /**
    * @brief This method calculates the session key S for the client in the SRP
