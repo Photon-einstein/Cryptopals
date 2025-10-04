@@ -5,17 +5,18 @@ def hex_to_int(h):
     return int(h, 16)
 
 
-def calculateSClient(B_hex, k, g, x_hex, a_hex, u_hex, N_hex, hash_name):
+def calculateSClient(B_hex, k, g, x_hex, a_hex, u_hex, N_hex, hash_name, debug=False):
     # Debug: print input parameters
-    print("[DEBUG] calculate_S_Client input parameters:")
-    print("  B_hex:", B_hex)
-    print("  k:", k)
-    print("  g:", g)
-    print("  x_hex:", x_hex)
-    print("  a_hex:", a_hex)
-    print("  u_hex:", u_hex)
-    print("  N_hex:", N_hex)
-    print("  hash_name:", hash_name)
+    if debug:
+        print("[DEBUG] calculate_S_Client input parameters:")
+        print("  B_hex:", B_hex)
+        print("  k:", k)
+        print("  g:", g)
+        print("  x_hex:", x_hex)
+        print("  a_hex:", a_hex)
+        print("  u_hex:", u_hex)
+        print("  N_hex:", N_hex)
+        print("  hash_name:", hash_name)
     # Calculate k using the imported function if needed
     if k is None or not isinstance(k, int):
         k_hex = calculate_k(N_hex, g, hash_name)
