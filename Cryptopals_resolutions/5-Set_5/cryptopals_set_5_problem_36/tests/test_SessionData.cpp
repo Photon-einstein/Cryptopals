@@ -237,6 +237,7 @@ protected:
       "B2D4F3F7DFA46C34BF6F5FE04BB842965A75B4714003F5C20D8279E2183D6D54"
       "CCEE840C9A76BCB83F633B98E4E141BFF5EE1D8DCCC4F2932C693A1A5ED474DE"};
   // RFC-5054 Test vector reference values for test purposes
+  const unsigned int _groupIdRFC5054TestVector{1};
   const std::string _usernameRFC5054TestVectorValue{"alice"};
   const std::string _passwordRFC5054TestVectorValue{"password123"};
   const std::string _saltRFC5054TestVectorValue{
@@ -408,7 +409,7 @@ TEST_F(SessionDataTest, SessionData_GetKMultiplierMap_ShouldMatchReference) {
  * values, matches the expected reference value from RFC-5054.
  */
 TEST_F(SessionDataTest,
-       CalculatePublicKeyClientWithRFC5054TestVector_ShouldMatchReference) {
+       CalculatePublicKey_ClientWithRFC5054TestVector_ShouldMatchReference) {
   const unsigned int groupId{1};
   const std::string privateKeyHex{_aRFC5054TestVectorValue};
   const std::string NHex{_srpParametersMap.at(groupId)._nHex};
@@ -435,7 +436,7 @@ TEST_F(SessionDataTest,
  * values, matches the expected reference value from RFC-5054.
  */
 TEST_F(SessionDataTest,
-       CalculatePublicKeyServerWithRFC5054TestVector_ShouldMatchReference) {
+       CalculatePublicKey_ServerWithRFC5054TestVector_ShouldMatchReference) {
   const unsigned int groupId{1};
   const std::string privateKeyHex{_bRFC5054TestVectorValue};
   const std::string NHex{_srpParametersMap.at(groupId)._nHex};
@@ -461,92 +462,90 @@ TEST_F(SessionDataTest,
 }
 
 /**
- * @test Test the correctness of the calculation of the u = H(A | B)
+ * @test Test the correctness of the calculation of the u = H(PAD(A) | PAD(B))
  * parameter with SHA-1.
  * @brief Verifies that the scrambling parameter u, computed from known A and
  * B values using SHA-1, matches the expected reference value and has the
  * correct length, using as inputs the RFC-5054 test vector.
  */
 TEST_F(SessionDataTest,
-       calculateHashConcatWithSHA1RFC5054TestVector_ShouldMatchReference) {
+       calculateU_WithSHA1RFC5054TestVector_ShouldMatchReference) {
   std::string hashName{"SHA-1"};
-  std::string uHex{MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
-      hashName,
-      MessageExtractionFacility::hexToPlaintext(_A_RFC5054TestVectorValue),
-      MessageExtractionFacility::hexToPlaintext(_B_RFC5054TestVectorValue))};
+  std::string uHex{MyCryptoLibrary::SecureRemotePassword::calculateU(
+      hashName, _A_RFC5054TestVectorValue, _B_RFC5054TestVectorValue,
+      _srpParametersMap.at(_groupIdRFC5054TestVector)._nHex)};
   EXPECT_EQ(uHex.length(), SHA_DIGEST_LENGTH * 2);
   EXPECT_EQ(uHex, _uRFC5054TestVectorValue);
 }
 
 /**
- * @test Test the correctness of the calculation of the u = H(A | B)
- * parameter with SHA-256.
+ * @test Test the correctness of the calculation of the u = H(PAD(A) | PAD(B))
+ * parameter with SHA-256, group 4.
  * @brief Verifies that the scrambling parameter u, computed from known A and
  * B values using SHA-256, matches the expected reference value and has the
  * correct length.
  */
-TEST_F(SessionDataTest, calculateHashConcatWithSHA256_ShouldMatchReference) {
-  std::string hashName{"SHA-256"};
-  std::string uHex{MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
-      hashName, MessageExtractionFacility::hexToPlaintext(_A_Hex),
-      MessageExtractionFacility::hexToPlaintext(_B_Hex))};
-  std::string expectedUHex{
+TEST_F(SessionDataTest, calculateU_WithSHA256Group4_ShouldMatchReference) {
+  const unsigned int groupId{4};
+  const std::string uHex{MyCryptoLibrary::SecureRemotePassword::calculateU(
+      _srpParametersMap.at(groupId)._hashName, _A_Hex, _B_Hex,
+      _srpParametersMap.at(groupId)._nHex)};
+  const std::string uExpected{
       "49510A0BB9F42F1068F4446E620A4DF30453369329F2A001EF33A72510AA1810"};
   EXPECT_EQ(uHex.length(), SHA256_DIGEST_LENGTH * 2);
-  EXPECT_EQ(uHex, expectedUHex);
+  EXPECT_EQ(uHex, uExpected);
 }
 
 /**
- * @test Test the correctness of the calculation of the u = H(A | B)
- * parameter with SHA-384.
+ * @test Test the correctness of the calculation of the u = H(PAD(A) | PAD(B))
+ * parameter with SHA-384, group 5.
  * @brief Verifies that the scrambling parameter u, computed from known A and
  * B values using SHA-384, matches the expected reference value and has the
  * correct length.
  */
-TEST_F(SessionDataTest, calculateHashConcatWithSHA384_ShouldMatchReference) {
-  std::string hashName{"SHA-384"};
-  std::string uHex{MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
-      hashName, MessageExtractionFacility::hexToPlaintext(_A_Hex),
-      MessageExtractionFacility::hexToPlaintext(_B_Hex))};
-  std::string expectedUHex{
-      "0314B21EC992117D9C5F683036DD2F475EC67FE8E645534598B728CB32B4CB5A"
-      "0140F855718AFE6C1D03A44E2B5639EC"};
+TEST_F(SessionDataTest, calculateU_WithSHA384Group5_ShouldMatchReference) {
+  const unsigned int groupId{5};
+  const std::string uHex{MyCryptoLibrary::SecureRemotePassword::calculateU(
+      _srpParametersMap.at(groupId)._hashName, _A_Hex, _B_Hex,
+      _srpParametersMap.at(groupId)._nHex)};
+  const std::string uExpected{
+      "B745B6C458C39420EF4544CBD57E5FDB0536E954AC9485D30139B0E5C4EF07E496801EB6"
+      "AF1E15B167A1E5A7F0ED9759"};
   EXPECT_EQ(uHex.length(), SHA384_DIGEST_LENGTH * 2);
-  EXPECT_EQ(uHex, expectedUHex);
+  EXPECT_EQ(uHex, uExpected);
 }
 
 /**
- * @test Test the correctness of the calculation of the u = H(A | B)
- * parameter with SHA-512.
+ * @test Test the correctness of the calculation of the u = H(PAD(A) | PAD(B))
+ * parameter with SHA-512, group 7.
  * @brief Verifies that the scrambling parameter u, computed from known A and
  * B values using SHA-512, matches the expected reference value and has the
  * correct length.
  */
-TEST_F(SessionDataTest, calculateHashConcatWithSHA512_ShouldMatchReference) {
-  std::string hashName{"SHA-512"};
-  std::string uHex{MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
-      hashName, MessageExtractionFacility::hexToPlaintext(_A_Hex),
-      MessageExtractionFacility::hexToPlaintext(_B_Hex))};
-  std::string expectedUHex{
-      "AB6BDCAAC999E71946DA5047698DD4EAA2146D8097D03628E394880D6D21672D"
-      "C12EEEC2BD18C4050E6D725C3FAC7D86CA10A79F3A08E277A872B521C4742CDF"};
+TEST_F(SessionDataTest, calculateU_WithSHA512Group7_ShouldMatchReference) {
+  const unsigned int groupId{7};
+  const std::string uHex{MyCryptoLibrary::SecureRemotePassword::calculateU(
+      _srpParametersMap.at(groupId)._hashName, _A_Hex, _B_Hex,
+      _srpParametersMap.at(groupId)._nHex)};
+  const std::string uExpected{
+      "5E5B4A7F0DF5B66664D943CFA951872B81B4497B51744E5F413D5906FF37B980F937AE3A"
+      "109A13A1EAC7B65A02C8AA8C6AAFC5B3242AE63165A1841E17D06DE7"};
   EXPECT_EQ(uHex.length(), SHA512_DIGEST_LENGTH * 2);
-  EXPECT_EQ(uHex, expectedUHex);
+  EXPECT_EQ(uHex, uExpected);
 }
 
 /**
  * @test Test that during the u calculation, it throws an exception for
  * an unknown hash name.
- * @brief Verifies that the calculateHashConcat method throws
+ * @brief Verifies that the calculateU method throws
  * std::invalid_argument when an unsupported hash algorithm is provided.
  */
-TEST_F(SessionDataTest,
-       calculateHashConcat_WithUnknownHash_ShouldThrowRuntimeError) {
+TEST_F(SessionDataTest, calculateU_WithUnknownHash_ShouldThrowRuntimeError) {
   const std::string unknownHash{"unknownHash"};
   try {
-    MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
-        unknownHash, MessageExtractionFacility::hexToPlaintext(_A_Hex),
-        MessageExtractionFacility::hexToPlaintext(_B_Hex));
+    const unsigned int groupId{7};
+    const std::string uHex{MyCryptoLibrary::SecureRemotePassword::calculateU(
+        unknownHash, _A_Hex, _B_Hex, _srpParametersMap.at(groupId)._nHex)};
   } catch (const std::invalid_argument &e) {
     EXPECT_THAT(std::string(e.what()),
                 ::testing::EndsWith("hash algorithm not recognized."));
@@ -556,16 +555,17 @@ TEST_F(SessionDataTest,
 /**
  * @test Test that during the u calculation, it throws an exception with
  * empty input parameters.
- * @brief Verifies that the calculateHashConcat method throws
+ * @brief Verifies that the calculateU method throws
  * std::invalid_argument when empty input parameters are provided.
  */
 TEST_F(SessionDataTest,
-       calculateHashConcat_WithEmptyInputParameters_ShouldThrowRuntimeError) {
-  const std::string hash{"SHA-256"};
+       calculateU_WithEmptyInputParameters_ShouldThrowRuntimeError) {
+  const unsigned int groupId{7};
   const std::string leftEmpty{}, rightEmpty{};
   try {
-    MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(hash, leftEmpty,
-                                                               rightEmpty);
+    const std::string uHex{MyCryptoLibrary::SecureRemotePassword::calculateU(
+        _srpParametersMap.at(groupId)._hashName, leftEmpty, rightEmpty,
+        _srpParametersMap.at(groupId)._nHex)};
   } catch (const std::invalid_argument &e) {
     EXPECT_THAT(std::string(e.what()),
                 ::testing::EndsWith(
@@ -583,7 +583,7 @@ TEST_F(SessionDataTest,
  * and compatible with other SRP implementations.
  */
 TEST_F(SessionDataTest,
-       CalculateXWithSHA1RFC5054TestVector_ShouldMatchReference) {
+       CalculateX_WithSHA1RFC5054TestVector_ShouldMatchReference) {
   const std::string x{MyCryptoLibrary::SecureRemotePassword::calculateX(
       _hashNameRFC5054TestVectorValue, _usernameRFC5054TestVectorValue,
       _passwordRFC5054TestVectorValue, _saltRFC5054TestVectorValue)};
@@ -598,7 +598,7 @@ TEST_F(SessionDataTest,
  * input values. This ensures the implementation of x generation is correct
  * and compatible with other SRP implementations.
  */
-TEST_F(SessionDataTest, CalculateXWithSHA256_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateX_WithSHA256_ShouldMatchReference) {
   const std::string hash{"SHA-256"};
   const std::string salt{
       "3F455AE2504D25D0E5A24E363358CD58A3E41EB18AD066FEB81A7A1E82369DED"};
@@ -618,7 +618,7 @@ TEST_F(SessionDataTest, CalculateXWithSHA256_ShouldMatchReference) {
  * input values. This ensures the implementation of x generation is correct
  * and compatible with other SRP implementations.
  */
-TEST_F(SessionDataTest, CalculateXWithSHA384_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateX_WithSHA384_ShouldMatchReference) {
   const std::string hash{"SHA-384"};
   const std::string salt{"BFB160DEA15A3E9C974E1797AA02F8B1F0FBE6D97AA18E40577"
                          "C07A9E2F40BB02C8F612B42BADBCBE37691B9A2382B30"};
@@ -639,7 +639,7 @@ TEST_F(SessionDataTest, CalculateXWithSHA384_ShouldMatchReference) {
  * input values. This ensures the implementation of x generation is correct
  * and compatible with other SRP implementations.
  */
-TEST_F(SessionDataTest, CalculateXWithSHA512_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateX_WithSHA512_ShouldMatchReference) {
   const std::string hash{"SHA-512"};
   const std::string salt{
       "6B479DEBFE96BB93AC51E60F534536E4E493549EE1DA41A145E415612FFBA766A2CEAF"
@@ -659,7 +659,7 @@ TEST_F(SessionDataTest, CalculateXWithSHA512_ShouldMatchReference) {
  * @brief Verifies that the calculateX method throws
  * std::invalid_argument when an unsupported hash algorithm is provided.
  */
-TEST_F(SessionDataTest, CalculateXUnknownHash_ShouldThrowAnError) {
+TEST_F(SessionDataTest, CalculateX_UnknownHash_ShouldThrowAnError) {
   try {
     const std::string unknownHash{"unknownHash"};
     const std::string salt{
@@ -681,7 +681,7 @@ TEST_F(SessionDataTest, CalculateXUnknownHash_ShouldThrowAnError) {
  * reference value.
  */
 TEST_F(SessionDataTest,
-       CalculateSClientGroup1RFC5054TestVector_ShouldMatchReference) {
+       CalculateSClient_Group1RFC5054TestVector_ShouldMatchReference) {
   const unsigned int groupId{1};
   const unsigned int g{_srpParametersMap.at(groupId)._g};
   const std::string NHex{_srpParametersMap.at(groupId)._nHex};
@@ -698,7 +698,7 @@ TEST_F(SessionDataTest,
  * @brief Verifies that the client side S calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateSClientGroup1_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateSClient_Group1_ShouldMatchReference) {
   const unsigned int groupId{1};
   const std::string kHex{
       MessageExtractionFacility::BIGNUMToHex(_kMap.at(groupId).get())};
@@ -720,7 +720,7 @@ TEST_F(SessionDataTest, CalculateSClientGroup1_ShouldMatchReference) {
  * @brief Verifies that the client side S calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateSClientGroup2_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateSClient_Group2_ShouldMatchReference) {
   const unsigned int groupId{2};
   const std::string kHex{
       MessageExtractionFacility::BIGNUMToHex(_kMap.at(groupId).get())};
@@ -744,7 +744,7 @@ TEST_F(SessionDataTest, CalculateSClientGroup2_ShouldMatchReference) {
  * @brief Verifies that the client side S calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateSClientGroup3_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateSClient_Group3_ShouldMatchReference) {
   const unsigned int groupId{3};
   const std::string kHex{
       MessageExtractionFacility::BIGNUMToHex(_kMap.at(groupId).get())};
@@ -770,7 +770,7 @@ TEST_F(SessionDataTest, CalculateSClientGroup3_ShouldMatchReference) {
  * @brief Verifies that the client side S calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateSClientGroup4_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateSClient_Group4_ShouldMatchReference) {
   const unsigned int groupId{4};
   const std::string kHex{
       MessageExtractionFacility::BIGNUMToHex(_kMap.at(groupId).get())};
@@ -800,7 +800,7 @@ TEST_F(SessionDataTest, CalculateSClientGroup4_ShouldMatchReference) {
  * @brief Verifies that the client side S calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateSClientGroup5_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateSClient_Group5_ShouldMatchReference) {
   const unsigned int groupId{5};
   const std::string kHex{
       MessageExtractionFacility::BIGNUMToHex(_kMap.at(groupId).get())};
@@ -834,7 +834,7 @@ TEST_F(SessionDataTest, CalculateSClientGroup5_ShouldMatchReference) {
  * @brief Verifies that the client side S calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateSClientGroup6_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateSClient_Group6_ShouldMatchReference) {
   const unsigned int groupId{6};
   const std::string kHex{
       MessageExtractionFacility::BIGNUMToHex(_kMap.at(groupId).get())};
@@ -875,7 +875,7 @@ TEST_F(SessionDataTest, CalculateSClientGroup6_ShouldMatchReference) {
  * @brief Verifies that the client side S calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateSClientGroup7_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateSClient_Group7_ShouldMatchReference) {
   const unsigned int groupId{7};
   const std::string kHex{
       MessageExtractionFacility::BIGNUMToHex(_kMap.at(groupId).get())};
@@ -924,7 +924,7 @@ TEST_F(SessionDataTest, CalculateSClientGroup7_ShouldMatchReference) {
  * @brief Verifies that K calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateKHash1_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateK_HashSHA1_ShouldMatchReference) {
   const std::string hash{"SHA-1"};
   const std::string K{
       MyCryptoLibrary::SecureRemotePassword::calculateK(hash, _SHex)};
@@ -938,7 +938,7 @@ TEST_F(SessionDataTest, CalculateKHash1_ShouldMatchReference) {
  * @brief Verifies that K calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateKHash256_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateK_HashSHA256_ShouldMatchReference) {
   const std::string hash{"SHA-256"};
   const std::string K{
       MyCryptoLibrary::SecureRemotePassword::calculateK(hash, _SHex)};
@@ -953,7 +953,7 @@ TEST_F(SessionDataTest, CalculateKHash256_ShouldMatchReference) {
  * @brief Verifies that K calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateKHash384_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateK_HashSHA384_ShouldMatchReference) {
   const std::string hash{"SHA-384"};
   const std::string K{
       MyCryptoLibrary::SecureRemotePassword::calculateK(hash, _SHex)};
@@ -969,7 +969,7 @@ TEST_F(SessionDataTest, CalculateKHash384_ShouldMatchReference) {
  * @brief Verifies that K calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateKHash512_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateK_HashSHA512_ShouldMatchReference) {
   const std::string hash{"SHA-512"};
   const std::string K{
       MyCryptoLibrary::SecureRemotePassword::calculateK(hash, _SHex)};
@@ -985,7 +985,7 @@ TEST_F(SessionDataTest, CalculateKHash512_ShouldMatchReference) {
  * @brief Verifies that the calculateK method throws
  * std::invalid_argument when an unsupported hash algorithm is provided.
  */
-TEST_F(SessionDataTest, CalculateKUnknownHash_ShouldThrowAnError) {
+TEST_F(SessionDataTest, CalculateK_UnknownHash_ShouldThrowAnError) {
   try {
     const std::string unknownHash{"unknownHash"};
     const std::string K{
@@ -1002,7 +1002,7 @@ TEST_F(SessionDataTest, CalculateKUnknownHash_ShouldThrowAnError) {
  * @brief Verifies that the calculateK method throws
  * std::invalid_argument when an empty input parameter is provided.
  */
-TEST_F(SessionDataTest, CalculateKWithEmptyInputParameter_ShouldThrowAnError) {
+TEST_F(SessionDataTest, CalculateK_WithEmptyInputParameter_ShouldThrowAnError) {
   try {
     const std::string hash{"SHA-256"};
     const std::string emptyS{};
@@ -1019,7 +1019,7 @@ TEST_F(SessionDataTest, CalculateKWithEmptyInputParameter_ShouldThrowAnError) {
  * @brief Verifies that M calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateMHashSHA1_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateM_HashSHA1_ShouldMatchReference) {
   const std::string hash{"SHA-1"};
   const unsigned int groupId{7};
   const std::string NHex{_srpParametersMap.at(groupId)._nHex};
@@ -1037,7 +1037,7 @@ TEST_F(SessionDataTest, CalculateMHashSHA1_ShouldMatchReference) {
  * @brief Verifies that M calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateMHashSHA256_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateM_HashSHA256_ShouldMatchReference) {
   const std::string hash{"SHA-256"};
   const unsigned int groupId{7};
   const std::string NHex{_srpParametersMap.at(groupId)._nHex};
@@ -1056,7 +1056,7 @@ TEST_F(SessionDataTest, CalculateMHashSHA256_ShouldMatchReference) {
  * @brief Verifies that M calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateMHashSHA384_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateM_HashSHA384_ShouldMatchReference) {
   const std::string hash{"SHA-384"};
   const unsigned int groupId{7};
   const std::string NHex{_srpParametersMap.at(groupId)._nHex};
@@ -1076,7 +1076,7 @@ TEST_F(SessionDataTest, CalculateMHashSHA384_ShouldMatchReference) {
  * @brief Verifies that M calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateMHashSHA512_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateM_HashSHA512_ShouldMatchReference) {
   const std::string hash{"SHA-512"};
   const unsigned int groupId{7};
   const std::string NHex{_srpParametersMap.at(groupId)._nHex};
@@ -1096,7 +1096,7 @@ TEST_F(SessionDataTest, CalculateMHashSHA512_ShouldMatchReference) {
  * @brief Verifies that the calculateM method throws
  * std::invalid_argument when an unsupported hash algorithm is provided.
  */
-TEST_F(SessionDataTest, CalculateMUnknownHash_ShouldThrowAnError) {
+TEST_F(SessionDataTest, CalculateM_UnknownHash_ShouldThrowAnError) {
   try {
     const std::string hash{"UNKNOWN-HASH"};
     const unsigned int groupId{7};
@@ -1117,7 +1117,7 @@ TEST_F(SessionDataTest, CalculateMUnknownHash_ShouldThrowAnError) {
  * @brief Verifies that the calculateM method throws
  * std::invalid_argument when an empty input parameter is provided.
  */
-TEST_F(SessionDataTest, CalculateMWithEmptyInputParameter_ShouldThrowAnError) {
+TEST_F(SessionDataTest, CalculateM_WithEmptyInputParameter_ShouldThrowAnError) {
   try {
     const std::string hash{"SHA-256"};
     const unsigned int groupId{7};
@@ -1139,7 +1139,7 @@ TEST_F(SessionDataTest, CalculateMWithEmptyInputParameter_ShouldThrowAnError) {
  * reference value.
  */
 TEST_F(SessionDataTest,
-       CalculateSServerGroup1RFC5054TestVector_ShouldMatchReference) {
+       CalculateSServer_Group1RFC5054TestVector_ShouldMatchReference) {
   const unsigned int groupId{1};
   const std::string NHex{_srpParametersMap.at(groupId)._nHex};
   const std::string S{MyCryptoLibrary::SecureRemotePassword::calculateSServer(
@@ -1154,7 +1154,7 @@ TEST_F(SessionDataTest,
  * @brief Verifies that the server side S calculation matches the expected
  * reference value.
  */
-TEST_F(SessionDataTest, CalculateSServerGroup7_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateSServer_Group7_ShouldMatchReference) {
   const unsigned int groupId{7};
   const std::string NHex{_srpParametersMap.at(groupId)._nHex};
   const std::string S{MyCryptoLibrary::SecureRemotePassword::calculateSServer(
@@ -1199,7 +1199,7 @@ TEST_F(SessionDataTest, CalculateSServerGroup7_ShouldMatchReference) {
  * std::invalid_argument when invalid input parameters are provided.
  */
 TEST_F(SessionDataTest,
-       CalculateSServerInvalidInputParameters_ShouldThrowAnError) {
+       CalculateSServer_InvalidInputParameters_ShouldThrowAnError) {
   try {
     const unsigned int groupId{7};
     const std::string NHexInvalid{""};
@@ -1217,10 +1217,11 @@ TEST_F(SessionDataTest,
  * @brief Verifies that the verifier v, computed from known x, N, and g values,
  * matches the expected reference value from RFC-5054.
  */
-TEST_F(SessionDataTest, CalculateVWithRFC5054TestVector_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateV_WithRFC5054TestVector_ShouldMatchReference) {
+  const unsigned int groupId{_groupIdRFC5054TestVector};
   const std::string xHex{_xRFC5054TestVectorValue};
-  const std::string NHex{_srpParametersMap.at(1)._nHex};
-  const unsigned int g{_srpParametersMap.at(1)._g};
+  const std::string NHex{_srpParametersMap.at(groupId)._nHex};
+  const unsigned int g{_srpParametersMap.at(groupId)._g};
   const std::string vHex{
       MyCryptoLibrary::SecureRemotePassword::calculateV(xHex, NHex, g)};
   EXPECT_EQ(vHex, _vRFC5054TestVectorValue);
@@ -1240,7 +1241,7 @@ TEST_F(SessionDataTest, CalculateVWithRFC5054TestVector_ShouldMatchReference) {
  * matches the expected reference value from RFC-5054.
  */
 TEST_F(SessionDataTest,
-       CalculateVWithRFC5054TestVectorGroup2_ShouldMatchReference) {
+       CalculateV_WithRFC5054TestVectorGroup2_ShouldMatchReference) {
   const unsigned int groupId{2};
   const std::string xHex{_xRFC5054TestVectorValue};
   const std::string NHex{_srpParametersMap.at(groupId)._nHex};
@@ -1271,7 +1272,7 @@ TEST_F(SessionDataTest,
  * matches the expected reference value from RFC-5054.
  */
 TEST_F(SessionDataTest,
-       CalculateVWithRFC5054TestVectorGroup3_ShouldMatchReference) {
+       CalculateV_WithRFC5054TestVectorGroup3_ShouldMatchReference) {
   const unsigned int groupId{3};
   const std::string xHex{_xRFC5054TestVectorValue};
   const std::string NHex{_srpParametersMap.at(groupId)._nHex};
@@ -1304,7 +1305,7 @@ TEST_F(SessionDataTest,
  * matches the expected reference value from RFC-5054.
  */
 TEST_F(SessionDataTest,
-       CalculateVWithRFC5054TestVectorGroup4_ShouldMatchReference) {
+       CalculateV_WithRFC5054TestVectorGroup4_ShouldMatchReference) {
   const unsigned int groupId{4};
   const std::string xHex{_xRFC5054TestVectorValue};
   const std::string NHex{_srpParametersMap.at(groupId)._nHex};
@@ -1340,7 +1341,7 @@ TEST_F(SessionDataTest,
  * matches the expected reference value from RFC-5054.
  */
 TEST_F(SessionDataTest,
-       CalculateVWithRFC5054TestVectorGroup5_ShouldMatchReference) {
+       CalculateV_WithRFC5054TestVectorGroup5_ShouldMatchReference) {
   const unsigned int groupId{5};
   const std::string xHex{_xRFC5054TestVectorValue};
   const std::string NHex{_srpParametersMap.at(groupId)._nHex};
@@ -1380,7 +1381,7 @@ TEST_F(SessionDataTest,
  * matches the expected reference value from RFC-5054.
  */
 TEST_F(SessionDataTest,
-       CalculateVWithRFC5054TestVectorGroup6_ShouldMatchReference) {
+       CalculateV_WithRFC5054TestVectorGroup6_ShouldMatchReference) {
   const unsigned int groupId{6};
   const std::string xHex{_xRFC5054TestVectorValue};
   const std::string NHex{_srpParametersMap.at(groupId)._nHex};
@@ -1427,7 +1428,7 @@ TEST_F(SessionDataTest,
  * matches the expected reference value from RFC-5054.
  */
 TEST_F(SessionDataTest,
-       CalculateVWithRFC5054TestVectorGroup7_ShouldMatchReference) {
+       CalculateV_WithRFC5054TestVectorGroup7_ShouldMatchReference) {
   const unsigned int groupId{7};
   const std::string xHex{_xRFC5054TestVectorValue};
   const std::string NHex{_srpParametersMap.at(groupId)._nHex};
@@ -1479,7 +1480,7 @@ TEST_F(SessionDataTest,
  * @brief Verifies that calculateV throws std::runtime_error when given empty
  * xHex, NHex, or g.
  */
-TEST_F(SessionDataTest, CalculateVWithEmptyInput_ShouldThrowRuntimeError) {
+TEST_F(SessionDataTest, CalculateV_WithEmptyInput_ShouldThrowRuntimeError) {
   EXPECT_THROW(MyCryptoLibrary::SecureRemotePassword::calculateV("", "ABCD", 2),
                std::invalid_argument);
   EXPECT_THROW(MyCryptoLibrary::SecureRemotePassword::calculateV("1234", "", 2),
@@ -1493,7 +1494,7 @@ TEST_F(SessionDataTest, CalculateVWithEmptyInput_ShouldThrowRuntimeError) {
  * @test Test the correctness of the calculation of v for a small group.
  * @brief Verifies that calculateV works for small values.
  */
-TEST_F(SessionDataTest, CalculateVWithSmallValues_ShouldMatchReference) {
+TEST_F(SessionDataTest, CalculateV_WithSmallValues_ShouldMatchReference) {
   const std::string xHex = "05";
   const std::string NHex = "17"; // 23 in decimal
   const unsigned int g = 2;

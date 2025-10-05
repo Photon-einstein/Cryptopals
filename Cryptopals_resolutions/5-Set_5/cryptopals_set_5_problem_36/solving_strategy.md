@@ -163,7 +163,7 @@ Client                        Server
   |<-----------------------------|
   |                              |
   | Compute:                     |
-  | x = H(s | P)                 |
+  | x = H(s | H(U|":"| P))       |
   | v = g^x mod N                |
   |                              |
   | Send U, v                    |
@@ -378,7 +378,7 @@ Client                        Server
 TBD bellow:
   |                              |
   | Compute:                     |
-  | x = H(s | P)                 |
+  | x = H(s | H(U|":"| P))       |
   | v = g^x mod N                |
   |                              |
   | Send U, v                    |
@@ -391,7 +391,7 @@ TBD end:
 
 Specifications more information:
 
-- x = H(s | P) computed as raw bytes;
+- x = H(s | H(U|":"| P)) computed as raw bytes;
 - Password using system-generated (recommended for cryptography testing)
   Generate a random string with high entropy.
   Use a secure PRNG (e.g., OpenSSL RAND_bytes, C++ std::random_device + std::uniform_int_distribution).
@@ -399,7 +399,7 @@ Specifications more information:
 
 30. Add an auxiliary method to generate a password, minimum size should be 16 bytes (Done)
 31. Generate a password at the client side (Done)
-32. Generate x = H(s | P) (Done)
+32. Generate x = H(s | H(U|":"| P)) (Done)
 33. Generate v = g^x mod N (Done)
 34. Add the following leg at the client: (Done)
 
@@ -486,7 +486,7 @@ Proposed communication flow present at RFC 2945 pg.5:
 
   # Client generates a, computes:
   # A = g^a mod N
-  # u = H(A | B)
+  # u = H(PAD(A) | PAD(B))
   # x = H(s | P)
   # S = (B - k * g^x) ^ (a + u * x) mod N
   # K = H(S)
@@ -494,7 +494,7 @@ Proposed communication flow present at RFC 2945 pg.5:
   U, A, M                     -->
                               <--   # U serves to keep track of the state
                                     # Server computes:
-                                    # u = H(A | B)
+                                    # u = H(PAD(A) | PAD(B))
                                     # S = (A * v^u) ^ b mod N
                                     # K = H(S)
                                     # M' = H(H(N) XOR H(g) | H(U) | s | A | B | K)
@@ -528,7 +528,7 @@ Glossary:
 
 - A: A = g^a mod N (already sent to server)
 - a in [1, N-1]
-- u is the scrambling parameter: u = H(A | B)
+- u is the scrambling parameter: u = H(PAD(A) | PAD(B))
 - S is the shared secret, at the client it is calculated as:
   S = (B - k \* g^x) ^ (a + u \* x) mod N
 - K = H(S), S should be converted to byte array before hashing
@@ -546,7 +546,7 @@ Glossary:
 
 **Server side**
 
-- u is the scrambling parameter: u = H(A | B)
+- u is the scrambling parameter: u = H(PAD(A) | PAD(B))
 - S = (A \* v^u) ^ b mod N
 
 41. Add the first leg on server side of the Secure Remote Password protocol, Authentication phase. Study phase (in progress)
@@ -571,8 +571,8 @@ Glossary:
 
   # Client generates a, computes:
   # A = g^a mod N
-  # u = H(A | B)
-  # x = H(s | P)
+  # u = H(PAD(A) | PAD(B))
+  # x = H(s | H(U|":"| P))
   # S = (B - k * g^x) ^ (a + u * x) mod N
   # K = H(S)
 ```
@@ -604,8 +604,8 @@ Glossary:
     **should be at least 256 bits long**, at the client side (Done)
 60. Add the calculation of the parameter A (public key), should be abstracted to a utility,
     **constrains: 1 < A < N**, at the client side (Done)
-61. Add the calculation of the parameter u = H(A | B), at the client side (Done)
-62. Add tests to the parameter u = H(A | B) using the method calculateHashConcat (Done)
+61. Add the calculation of the parameter u = H(PAD(A) | PAD(B)), at the client side (Done)
+62. Add tests to the parameter u = H(PAD(A) | PAD(B)) using the method calculateU (Done)
 63. Add the calculation of the parameter x = H(s | P), use method already implemented at the
     registration step, at the client side (Done)
 64. Add tests at the client side to ensure that x is well performed, as the output
@@ -653,8 +653,8 @@ curl -X POST http://localhost:18080/srp/auth/init \
 
   # Client generates a, computes:
   # A = g^a mod N
-  # u = H(A | B)
-  # x = H(s | P)
+  # u = H(PAD(A) | PAD(B))
+  # x = H(s | H(U|":"| P))
   # S = (B - k * g^x) ^ (a + u * x) mod N
   # K = H(S)
 ```
@@ -668,7 +668,7 @@ curl -X POST http://localhost:18080/srp/auth/init \
   U, A, M                     -->
                               <--   # U serves to keep track of the state
                                     # Server computes:
-                                    # u = H(A | B)
+                                    # u = H(PAD(A) | PAD(B))
                                     # S = (A * v^u) ^ b mod N
                                     # K = H(S)
                                     # M' = H(H(N) XOR H(g) | H(U) | s | A | B | K)
@@ -689,7 +689,7 @@ curl -X POST http://localhost:18080/srp/auth/init \
 80. Finish the sending of the data at the client side with the parameters U, A, M, during
     the srp/auth/complete (Done)
 81. Add the reception and verification of the data in the server at the srp/auth/complete endpoint (Done)
-82. Server calculation of u = H(A | B) (Done)
+82. Server calculation of u = H(PAD(A) | PAD(B)) (Done)
 83. Implement method of Server calculation of S = (A \* v^u) ^ b mod N (Done)
 84. Add a script to validate S = (A \* v^u) ^ b mod N at the server side (Done)
 85. Add unit tests to test S against the results obtained at the script (Done)
@@ -779,7 +779,7 @@ Client                        Server
 
   # Client generates a, computes:
   # A = g^a mod N
-  # u = H(A | B)
+  # u = H(PAD(A) | PAD(B))
   # x = H(s | H(U|":"| P))
   # S = (B - k * g^x) ^ (a + u * x) mod N
   # K = H(S)
@@ -801,13 +801,8 @@ Client                        Server
   # If valid, authentication is complete
 ```
 
-102.  Compare the implementation against the RFC-5054 to see if there is some mismatch (in progress)
+104.  Server calculation of K = H(S) (in progress)
 
-103.  When there is some non-deterministic value, place the RFC-5054 test vectors to get a deterministic
-      final value to the protocol, both S client and S server should match.
-      Then start replacing those values for the actual results of the intermediate methods, the results
-      should still match until a predefined point, the problem should appear during this process (TBD)
-104.  Server calculation of K = H(S) (TBD)
 105.  Server calculation of M' = H(H(N) XOR H(g) | H(U) | s | A | B | K) (TBD)
 106.  Add the calculation of the M' at the server side and the compare with the M received (TBD)
 107.  Add a method to calculate M2 (TBD)

@@ -523,25 +523,23 @@ void Server::handleAuthenticationComplete() {
           _secureRemotePasswordMap.at(extractedClientId)->_peerPublicKeyHex =
               extractedAHex;
           // u calculation
-          _secureRemotePasswordMap.at(extractedClientId)->_uHex =
-              MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
-                  _srpParametersMap
-                      .at(_secureRemotePasswordMap.at(extractedClientId)
-                              ->_groupId)
-                      ._hashName,
-                  MessageExtractionFacility::hexToPlaintext(
-                      _secureRemotePasswordMap.at(extractedClientId)
-                          ->_peerPublicKeyHex),
-                  MessageExtractionFacility::hexToPlaintext(
-                      _secureRemotePasswordMap.at(extractedClientId)
-                          ->_publicKeyHex));
+          _secureRemotePasswordMap.at(extractedClientId)
+              ->_uHex = MyCryptoLibrary::SecureRemotePassword::calculateU(
+              _srpParametersMap
+                  .at(_secureRemotePasswordMap.at(extractedClientId)->_groupId)
+                  ._hashName,
+              _secureRemotePasswordMap.at(extractedClientId)->_peerPublicKeyHex,
+              _secureRemotePasswordMap.at(extractedClientId)->_publicKeyHex,
+              _srpParametersMap
+                  .at(_secureRemotePasswordMap.at(extractedClientId)->_groupId)
+                  ._nHex);
           if (_debugFlag) {
             std::cout
                 << "\n--- Server log | Scrambling parameter u generated at the "
                    "authentication phase---"
                 << std::endl;
             std::cout << "\tClient ID: " << extractedClientId << std::endl;
-            std::cout << "\tu = H(A | B): "
+            std::cout << "\tu = H(PAD(A) | PAD(B)): "
                       << _secureRemotePasswordMap.at(extractedClientId)->_uHex
                       << std::endl;
             std::cout << "----------------------" << std::endl;
