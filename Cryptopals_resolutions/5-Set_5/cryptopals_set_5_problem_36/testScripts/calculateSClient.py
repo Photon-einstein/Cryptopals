@@ -1,4 +1,4 @@
-from calculateKMultiplierParameter import calculate_k
+from calculate_k_MultiplierParameter import calculate_k
 
 
 def hex_to_int(h):
