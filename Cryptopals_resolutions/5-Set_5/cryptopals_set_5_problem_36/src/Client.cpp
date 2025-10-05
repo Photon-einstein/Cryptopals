@@ -359,7 +359,7 @@ const bool Client::registrationComplete(const int portServerNumber,
     if (_debugFlag) {
       std::cout
           << "\n--- Client log | Password derived secret x generated at the "
-             "authentication phase---"
+             "registration phase---"
           << std::endl;
       std::cout << "\tClient ID: " << _clientId << std::endl;
       std::cout << "\tx(hex) = H(salt | H(username |:| password)) '" << xHex

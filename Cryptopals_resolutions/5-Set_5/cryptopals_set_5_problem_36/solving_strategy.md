@@ -787,7 +787,7 @@ Client                        Server
   U, A, M                     -->
                               <--   # U serves to keep track of the state
                                     # Server computes:
-                                    # u = H(A | B)
+                                    # u = H(PAD(A) | PAD(B))
                                     # S = (A * v^u) ^ b mod N
                                     # K = H(S)
                                     # M' = H(H(N) XOR H(g) | H(U) | s | A | B | K)
@@ -801,12 +801,30 @@ Client                        Server
   # If valid, authentication is complete
 ```
 
-104.  Server calculation of K = H(S) (in progress)
+104. Validate the entire protocol until now with the RFC-5054 test vector with the input parameters: (Done)
+     I = "alice" (done)
+     P = "password123" (done)
+     s = "BEB25379D1A8581EB5A727673A2441EE" (done)
+     group 1, SHA-1 (done)
+     a = "60975527035CF2AD1989806F0407210BC81EDC04E2762A56AFD529DDDA2D4393" (done)
+     b = "E487CB59D31AC550471E81F00F6928E01DDA08E974A004F49E61F5D105284D20" (done)
 
-105.  Server calculation of M' = H(H(N) XOR H(g) | H(U) | s | A | B | K) (TBD)
-106.  Add the calculation of the M' at the server side and the compare with the M received (TBD)
-107.  Add a method to calculate M2 (TBD)
-108.  Add unit tests of the calculation of M2 (TBD)
-109.  Add a python script to double-check the method in Cpp (TBD)
-110.  Add the calculation of the M2 at the server side (TBD)
-111.  Add the sending of the M2 to the client (TBD)
+     Values comparison between values obtained and RFC-5054 test vector:
+     N: match
+     g: match
+     A: match
+     x: match
+     v: match
+     B: match
+     u: match
+     S: match
+
+105. Server calculation of K = H(S) (in progress)
+
+106. Server calculation of M' = H(H(N) XOR H(g) | H(U) | s | A | B | K) (TBD)
+107. Add the calculation of the M' at the server side and the compare with the M received (TBD)
+108. Add a method to calculate M2 (TBD)
+109. Add unit tests of the calculation of M2 (TBD)
+110. Add a python script to double-check the method in Cpp (TBD)
+111. Add the calculation of the M2 at the server side (TBD)
+112. Add the sending of the M2 to the client (TBD)

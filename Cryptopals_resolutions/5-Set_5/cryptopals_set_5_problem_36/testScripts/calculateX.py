@@ -59,5 +59,9 @@ if __name__ == "__main__":
     hash_name = "SHA-1"
     x = calculate_x(hash_name, salt_hex, username, password)
     x_expected = "94B7555AABE9127CC58CCF4993DB6CF84D16C124"
-    print(f"x = {x}")
-    print(f"x_expected = {x_expected}")
+    print(f"x          = {x}\n")
+    print(f"x_expected = {x_expected}\n")
+    if x == x_expected:
+        print("x value matches RFC-5054 test vector")
+    else:
+        print("x value does not match RFC-5054 test vector")
