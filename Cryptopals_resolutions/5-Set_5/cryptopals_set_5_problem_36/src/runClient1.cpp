@@ -15,7 +15,7 @@ int main(void) {
   /* work to verify */
   const bool debugFlag{true};
   const std::string clientId{"Bob"};
-  const unsigned int requestedGroup{7};
+  const unsigned int requestedGroup{5};
   std::shared_ptr<Client> client =
       std::make_shared<Client>(clientId, debugFlag);
   const bool registrationResult =

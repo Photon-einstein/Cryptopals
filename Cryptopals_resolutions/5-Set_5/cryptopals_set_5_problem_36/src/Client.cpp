@@ -352,15 +352,21 @@ const bool Client::registrationComplete(const int portServerNumber,
       std::cout << "Password generated: '" << _sessionData->_password << "'."
                 << std::endl;
     }
-    // x calc
-    const std::string xHex =
-        MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
-            _sessionData->_hash, _sessionData->_password,
-            MessageExtractionFacility::hexToPlaintext(_sessionData->_salt));
+    // x calculation
+    const std::string xHex{MyCryptoLibrary::SecureRemotePassword::calculateX(
+        _sessionData->_hash, _clientId, _sessionData->_password,
+        _sessionData->_salt)};
     if (_debugFlag) {
-      std::cout << "x(hex) = H(s | P): '" << xHex << "'." << std::endl;
+      std::cout
+          << "\n--- Client log | Password derived secret x generated at the "
+             "authentication phase---"
+          << std::endl;
+      std::cout << "\tClient ID: " << _clientId << std::endl;
+      std::cout << "\tx(hex) = H(salt | H(username |:| password)) '" << xHex
+                << "'." << std::endl;
+      std::cout << "----------------------" << std::endl;
     }
-    // v calc
+    // v calculation
     std::string vHex = MyCryptoLibrary::SecureRemotePassword::calculateV(
         xHex, _srpParametersMap.at(groupId)._nHex,
         _srpParametersMap.at(groupId)._g);
@@ -512,19 +518,17 @@ const bool Client::authenticationInit(const int portServerNumber) {
       std::cout << "----------------------" << std::endl;
     }
     // u calculation
-    _sessionData->_uHex =
-        MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
-            _srpParametersMap.at(extractedGroupId)._hashName,
-            MessageExtractionFacility::hexToPlaintext(
-                _sessionData->_publicKeyHex),
-            MessageExtractionFacility::hexToPlaintext(
-                _sessionData->_peerPublicKeyHex));
+    _sessionData->_uHex = MyCryptoLibrary::SecureRemotePassword::calculateU(
+        _srpParametersMap.at(extractedGroupId)._hashName,
+        _sessionData->_publicKeyHex, _sessionData->_peerPublicKeyHex,
+        _srpParametersMap.at(extractedGroupId)._nHex);
     if (_debugFlag) {
       std::cout << "\n--- Client log | Scrambling parameter u generated at the "
                    "authentication phase---"
                 << std::endl;
       std::cout << "\tClient ID: " << extractedClientId << std::endl;
-      std::cout << "\tu = H(A | B): " << _sessionData->_uHex << std::endl;
+      std::cout << "\tu = H(PAD(A) | PAD(B)): " << _sessionData->_uHex
+                << std::endl;
       std::cout << "----------------------" << std::endl;
     }
     // x calculation

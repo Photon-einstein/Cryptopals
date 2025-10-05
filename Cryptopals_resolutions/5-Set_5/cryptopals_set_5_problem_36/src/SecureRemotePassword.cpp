@@ -489,27 +489,53 @@ const std::string MyCryptoLibrary::SecureRemotePassword::calculateV(
 }
 /******************************************************************************/
 /**
- * @brief Calculates a hash digest of the concatenation of two values.
+ * @brief Calculates the SRP scrambling parameter u = H(PAD(A) | PAD(B))
+ * according to RFC 5054.
+ *
+ * PAD(X): left-pad X with zeros to the byte length of N.
+ * H: hash function (e.g., SHA-1, SHA-256, etc.)
  *
  * @param hashName The hash algorithm to use (e.g., "SHA-256").
- * @param left The left value in plaintext
- * @param right The right value in plaintext
- * @return The hash digest in hexadecimal format.
+ * @param AHex The client's public key A in hexadecimal format.
+ * @param BHex The server's public key B in hexadecimal format.
+ * @param NHex The group prime N in hexadecimal format.
+ * @return The computed u value as an uppercase hexadecimal string.
+ * @throws std::invalid_argument if any input is empty or hash is unsupported.
  */
-const std::string MyCryptoLibrary::SecureRemotePassword::calculateHashConcat(
-    const std::string &hashName, const std::string &left,
-    const std::string &right) {
+const std::string MyCryptoLibrary::SecureRemotePassword::calculateU(
+    const std::string &hashName, const std::string &AHex,
+    const std::string &BHex, const std::string &NHex) {
+  // Validate input
   if (_hashMap.find(hashName) == _hashMap.end()) {
+    throw std::invalid_argument("SecureRemotePassword log | calculateU(): "
+                                "hash algorithm not recognized.");
+  }
+  if (AHex.empty() || BHex.empty() || NHex.empty()) {
     throw std::invalid_argument(
-        "SecureRemotePassword log | calculateHashConcat(): "
-        "hash algorithm not recognized.");
-  } else if (left.empty() || right.empty()) {
-    throw std::invalid_argument(
-        "SecureRemotePassword log | calculateHashConcat(): "
+        "SecureRemotePassword log | calculateU(): "
         "invalid input parameters received, cannot be empty.");
   }
-  const std::string digestX{_hashMap.at(hashName)(left + right)};
-  return digestX;
+  // Get byte length of N
+  const std::vector<uint8_t> NBytes{
+      MessageExtractionFacility::hexToBytes(NHex)};
+  const size_t padLen{NBytes.size()};
+  // Convert A and B to bytes and pad left
+  const std::vector<uint8_t> ABytes{
+      MessageExtractionFacility::hexToBytes(AHex)};
+  const std::vector<uint8_t> BBytes{
+      MessageExtractionFacility::hexToBytes(BHex)};
+  const std::vector<uint8_t> APadded{
+      EncryptionUtility::padLeft(ABytes, padLen)};
+  const std::vector<uint8_t> BPadded{
+      EncryptionUtility::padLeft(BBytes, padLen)};
+  // Concatenate PAD(A) || PAD(B)
+  std::vector<uint8_t> input(APadded);
+  input.insert(input.end(), BPadded.begin(), BPadded.end());
+  // Hash
+  const std::string inputStr(input.begin(), input.end());
+  std::string uHex{_hashMap.at(hashName)(inputStr)};
+  std::transform(uHex.begin(), uHex.end(), uHex.begin(), ::toupper);
+  return uHex;
 }
 /******************************************************************************/
 /**
@@ -551,10 +577,12 @@ const std::string MyCryptoLibrary::SecureRemotePassword::calculateX(
   std::vector<uint8_t> innerHashBytes =
       MessageExtractionFacility::hexToBytes(innerHashHex);
   // Step 3: Concatenate saltBytes + innerHashBytes
-  std::string concat(reinterpret_cast<const char *>(saltBytes.data()),
-                     saltBytes.size());
-  concat += std::string(reinterpret_cast<const char *>(innerHashBytes.data()),
-                        innerHashBytes.size());
+  std::vector<uint8_t> concatBytes;
+  concatBytes.reserve(saltBytes.size() + innerHashBytes.size());
+  concatBytes.insert(concatBytes.end(), saltBytes.begin(), saltBytes.end());
+  concatBytes.insert(concatBytes.end(), innerHashBytes.begin(),
+                     innerHashBytes.end());
+  std::string concat(concatBytes.begin(), concatBytes.end());
   // Step 4: Outer hash = H(salt | H(username | ":" | password))
   std::string xHex{_hashMap.at(hashName)(concat)};
   // Step 5: Return as uppercase hex
@@ -584,16 +612,6 @@ std::string MyCryptoLibrary::SecureRemotePassword::calculateSClient(
     const std::string &BHex, const std::string &kHex, unsigned int g,
     const std::string &xHex, const std::string &aHex, const std::string &uHex,
     const std::string &NHex) {
-  // Debugging information
-  std::cout << "[DEBUG] calculateSClient input parameters:" << std::endl;
-  std::cout << "  [DEBUG] BHex: " << BHex << std::endl;
-  std::cout << "  [DEBUG] kHex: " << kHex << std::endl;
-  std::cout << "  [DEBUG] g: " << g << std::endl;
-  std::cout << "  [DEBUG] xHex: " << xHex << std::endl;
-  std::cout << "  [DEBUG] aHex: " << aHex << std::endl;
-  std::cout << "  [DEBUG] uHex: " << uHex << std::endl;
-  std::cout << "  [DEBUG] NHex: " << NHex << std::endl;
-
   // Parameter validation
   if (BHex.empty() || kHex.empty() || xHex.empty() || aHex.empty() ||
       uHex.empty() || NHex.empty()) {
@@ -690,14 +708,6 @@ std::string MyCryptoLibrary::SecureRemotePassword::calculateSClient(
 std::string MyCryptoLibrary::SecureRemotePassword::calculateSServer(
     const std::string &AHex, const std::string &vHex, const std::string &uHex,
     const std::string &bHex, const std::string &NHex) {
-  // Debugging information
-  std::cout << "[DEBUG] calculateSServer input parameters:" << std::endl;
-  std::cout << "  [DEBUG] AHex: " << AHex << std::endl;
-  std::cout << "  [DEBUG] vHex: " << vHex << std::endl;
-  std::cout << "  [DEBUG] uHex: " << uHex << std::endl;
-  std::cout << "  [DEBUG] bHex: " << bHex << std::endl;
-  std::cout << "  [DEBUG] NHex: " << NHex << std::endl;
-
   // Parameter validation
   if (AHex.empty() || vHex.empty() || uHex.empty() || bHex.empty() ||
       NHex.empty()) {
@@ -815,10 +825,10 @@ MyCryptoLibrary::SecureRemotePassword::calculateK(const std::string &hash,
                                 "SHex in empty.");
   }
   // Convert S from hex string to bytes
-  std::vector<uint8_t> SBytes{MessageExtractionFacility::hexToBytes(SHex)};
+  const std::vector<uint8_t> SBytes{
+      MessageExtractionFacility::hexToBytes(SHex)};
   // Convert bytes to string for hashing
-  std::string SPlaintext(reinterpret_cast<const char *>(SBytes.data()),
-                         SBytes.size());
+  const std::string SPlaintext(SBytes.begin(), SBytes.end());
   // Hash the byte string
   std::string KHex{_hashMap.at(hash)(SPlaintext)};
   // Return as uppercase hex
@@ -870,19 +880,16 @@ std::string MyCryptoLibrary::SecureRemotePassword::calculateM(
   EncryptionUtility::HashFn hashFn{_hashMap.at(hashName)};
   // H(N)
   std::vector<uint8_t> NBytes{MessageExtractionFacility::hexToBytes(NHex)};
-  const std::string NPlain(reinterpret_cast<const char *>(NBytes.data()),
-                           NBytes.size());
+  const std::string NPlain(NBytes.begin(), NBytes.end());
   const std::string hashN{hashFn(NPlain)};
   // H(g)
   std::vector<uint8_t> gBytes{MessageExtractionFacility::hexToBytes(gHex)};
-  const std::string gPlain(reinterpret_cast<const char *>(gBytes.data()),
-                           gBytes.size());
+  const std::string gPlain(gBytes.begin(), gBytes.end());
   const std::string hashG{hashFn(gPlain)};
   // H(U)
   std::string hashU{hashFn(username)};
   std::vector<uint8_t> hashUBytes{MessageExtractionFacility::hexToBytes(hashU)};
-  const std::string hashUPlain(
-      reinterpret_cast<const char *>(hashUBytes.data()), hashUBytes.size());
+  const std::string hashUPlain(hashUBytes.begin(), hashUBytes.end());
   // H(N) XOR H(g)
   if (hashN.size() != hashG.size()) {
     throw std::runtime_error("SecureRemotePassword log | calculateM(): "
@@ -897,17 +904,13 @@ std::string MyCryptoLibrary::SecureRemotePassword::calculateM(
   // Prepare salt, A, B, K as bytes
   std::vector<uint8_t> saltBytes{
       MessageExtractionFacility::hexToBytes(saltHex)};
-  const std::string saltPlain(reinterpret_cast<const char *>(saltBytes.data()),
-                              saltBytes.size());
+  const std::string saltPlain(saltBytes.begin(), saltBytes.end());
   std::vector<uint8_t> ABytes{MessageExtractionFacility::hexToBytes(AHex)};
-  const std::string APlain(reinterpret_cast<const char *>(ABytes.data()),
-                           ABytes.size());
+  const std::string APlain(ABytes.begin(), ABytes.end());
   std::vector<uint8_t> BBytes{MessageExtractionFacility::hexToBytes(BHex)};
-  const std::string BPlain(reinterpret_cast<const char *>(BBytes.data()),
-                           BBytes.size());
+  const std::string BPlain(BBytes.begin(), BBytes.end());
   std::vector<uint8_t> KBytes{MessageExtractionFacility::hexToBytes(KHex)};
-  const std::string KPlain(reinterpret_cast<const char *>(KBytes.data()),
-                           KBytes.size());
+  const std::string KPlain(KBytes.begin(), KBytes.end());
   // Concatenate all parts
   const std::string MInput{hashN_xor_hashG + hashUPlain + saltPlain + APlain +
                            BPlain + KPlain};

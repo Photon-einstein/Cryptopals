@@ -36,7 +36,7 @@ struct SessionData {
   std::unique_ptr<MyCryptoLibrary::SecureRemotePassword> _secureRemotePassword;
   unsigned int _groupId;
   std::string _salt; // hexadecimal format
-  std::string _hash; // (e.g., "SHA-256", "SHA-384", "SHA-512").
+  std::string _hash; // (e.g., "SHA-1", "SHA-256", "SHA-384", "SHA-512").
   std::string _password;
   std::string _vHex;                // Store the verifier v in hex format
   bool registrationComplete{false}; // Indicates if registration is finished

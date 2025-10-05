@@ -194,16 +194,19 @@ public:
                                       const std::string &NHex, unsigned int g);
 
   /**
-   * @brief Calculates a hash digest of the concatenation of two values.
+   * @brief Calculates the SRP scrambling parameter u = H(PAD(A) | PAD(B))
+   * according to RFC 5054.
    *
    * @param hashName The hash algorithm to use (e.g., "SHA-256").
-   * @param left The left value in plaintext
-   * @param right The right value in plaintext
-   * @return The hash digest in hexadecimal format.
+   * @param AHex The client's public key A in hexadecimal format.
+   * @param BHex The server's public key B in hexadecimal format.
+   * @param NHex The group prime N in hexadecimal format.
+   * @return The computed u value as an uppercase hexadecimal string.
    */
-  static const std::string calculateHashConcat(const std::string &hashName,
-                                               const std::string &left,
-                                               const std::string &right);
+  static const std::string calculateU(const std::string &hashName,
+                                      const std::string &AHex,
+                                      const std::string &BHex,
+                                      const std::string &NHex);
   /**
    * @brief Calculates the SRP private key 'x' according to RFC 5054.
    *
