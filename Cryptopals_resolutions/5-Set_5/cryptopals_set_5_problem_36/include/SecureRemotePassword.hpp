@@ -323,6 +323,21 @@ public:
              const std::string &saltHex, const std::string &AHex,
              const std::string &BHex, const std::string &KHex);
 
+  /**
+   * @brief Calculates the SRP server proof M2 = H(A | M | K) according to RFC
+   * 5054.
+   *
+   * @param hashName The hash algorithm to use (e.g., "SHA-256").
+   * @param AHex The client's public key A in hexadecimal format.
+   * @param MHex The client proof M in hexadecimal format.
+   * @param KHex The session key K in hexadecimal format.
+   * @return The computed M2 value as an uppercase hexadecimal string.
+   */
+  static const std::string calculateM2(const std::string &hashName,
+                                       const std::string &AHex,
+                                       const std::string &MHex,
+                                       const std::string &KHex);
+
 private:
   /* private methods */
 

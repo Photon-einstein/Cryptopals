@@ -802,12 +802,12 @@ Client                        Server
 ```
 
 104. Validate the entire protocol until now with the RFC-5054 test vector with the input parameters: (Done)
-     I = "alice" (done)
-     P = "password123" (done)
-     s = "BEB25379D1A8581EB5A727673A2441EE" (done)
-     group 1, SHA-1 (done)
-     a = "60975527035CF2AD1989806F0407210BC81EDC04E2762A56AFD529DDDA2D4393" (done)
-     b = "E487CB59D31AC550471E81F00F6928E01DDA08E974A004F49E61F5D105284D20" (done)
+     I = "alice" (Done)
+     P = "password123" (Done)
+     s = "BEB25379D1A8581EB5A727673A2441EE" (Done)
+     group 1, SHA-1 (Done)
+     a = "60975527035CF2AD1989806F0407210BC81EDC04E2762A56AFD529DDDA2D4393" (Done)
+     b = "E487CB59D31AC550471E81F00F6928E01DDA08E974A004F49E61F5D105284D20" (Done)
 
      Values comparison between values obtained and RFC-5054 test vector:
      N: match
@@ -819,12 +819,12 @@ Client                        Server
      u: match
      S: match
 
-105. Server calculation of K = H(S) (in progress)
+105. Server calculation of K = H(S), session key (Done)
+106. Server calculation of M' = H(H(N) XOR H(g) | H(U) | s | A | B | K) (Done)
+107. Add mismatch M == M' from the server at the authentication complete method (Done)
+108. Add calculation of M2 = H(A | M | K) at the SecureRemotePassword class (Done)
+109. Add calculation of M2 = H(A | M | K) at the Server side (Done)
+110. Add the sending of the M2 to the client (Done)
 
-106. Server calculation of M' = H(H(N) XOR H(g) | H(U) | s | A | B | K) (TBD)
-107. Add the calculation of the M' at the server side and the compare with the M received (TBD)
-108. Add a method to calculate M2 (TBD)
-109. Add unit tests of the calculation of M2 (TBD)
-110. Add a python script to double-check the method in Cpp (TBD)
-111. Add the calculation of the M2 at the server side (TBD)
-112. Add the sending of the M2 to the client (TBD)
+111. Add unit tests of the calculation of M2 (TBD)
+112. Add a python script to double-check the method in Cpp (TBD)

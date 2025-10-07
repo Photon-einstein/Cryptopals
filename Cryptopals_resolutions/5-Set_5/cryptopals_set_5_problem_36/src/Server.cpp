@@ -564,6 +564,77 @@ void Server::handleAuthenticationComplete() {
                       << std::endl;
             std::cout << "----------------------" << std::endl;
           }
+          // K calculation
+          _secureRemotePasswordMap.at(extractedClientId)->_KHex =
+              MyCryptoLibrary::SecureRemotePassword::calculateK(
+                  _secureRemotePasswordMap.at(extractedClientId)->_hash,
+                  _secureRemotePasswordMap.at(extractedClientId)->_SHex);
+          if (_debugFlag) {
+            std::cout << "\n--- Server log | Session key K generated at the "
+                         "authentication phase---"
+                      << std::endl;
+            std::cout << "\tClient ID: " << extractedClientId << std::endl;
+            std::cout << "\tK(hex) = H(S): '"
+                      << _secureRemotePasswordMap.at(extractedClientId)->_KHex
+                      << "'." << std::endl;
+            std::cout << "----------------------" << std::endl;
+          }
+          // M calculation
+          _secureRemotePasswordMap.at(extractedClientId)
+              ->_MHex = MyCryptoLibrary::SecureRemotePassword::calculateM(
+              _secureRemotePasswordMap.at(extractedClientId)->_hash,
+              _srpParametersMap
+                  .at(_secureRemotePasswordMap.at(extractedClientId)->_groupId)
+                  ._nHex,
+              MessageExtractionFacility::uintToHex(
+                  _srpParametersMap
+                      .at(_secureRemotePasswordMap.at(extractedClientId)
+                              ->_groupId)
+                      ._g),
+              extractedClientId,
+              _secureRemotePasswordMap.at(extractedClientId)->_salt,
+              _secureRemotePasswordMap.at(extractedClientId)
+                  ->_peerPublicKeyHex, // A
+              _secureRemotePasswordMap.at(extractedClientId)
+                  ->_publicKeyHex, // B
+              _secureRemotePasswordMap.at(extractedClientId)->_KHex);
+          if (_debugFlag) {
+            std::cout
+                << "\n--- Server log | Verification value M generated at the "
+                   "authentication phase---"
+                << std::endl;
+            std::cout << "\tClient ID: " << extractedClientId << std::endl;
+            std::cout << "\tM(hex): '"
+                      << _secureRemotePasswordMap.at(extractedClientId)->_MHex
+                      << "'." << std::endl;
+            std::cout << "----------------------" << std::endl;
+          }
+          if (_secureRemotePasswordMap.at(extractedClientId)->_MHex !=
+              extractedMHex) {
+            crow::json::wvalue err;
+            err["message"] = "SRP authentication failed";
+            return crow::response(403, err);
+          }
+          // M2 calculation
+          _secureRemotePasswordMap.at(extractedClientId)
+              ->_M2Hex = MyCryptoLibrary::SecureRemotePassword::calculateM2(
+              _secureRemotePasswordMap.at(extractedClientId)->_hash,
+              _secureRemotePasswordMap.at(extractedClientId)->_peerPublicKeyHex,
+              _secureRemotePasswordMap.at(extractedClientId)->_MHex,
+              _secureRemotePasswordMap.at(extractedClientId)->_KHex);
+          if (_debugFlag) {
+            std::cout
+                << "\n--- Server log | Verification value M2 generated at the "
+                   "authentication phase---"
+                << std::endl;
+            std::cout << "\tClient ID: " << extractedClientId << std::endl;
+            std::cout << "\tM2(hex): '"
+                      << _secureRemotePasswordMap.at(extractedClientId)->_M2Hex
+                      << "'." << std::endl;
+            std::cout << "----------------------" << std::endl;
+          }
+          res["message"] = "SRP authentication successful";
+          res["M2"] = _secureRemotePasswordMap.at(extractedClientId)->_M2Hex;
           return crow::response(201, res);
         } catch (const nlohmann::json::exception &e) {
           crow::json::wvalue err;
