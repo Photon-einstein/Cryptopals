@@ -921,3 +921,48 @@ std::string MyCryptoLibrary::SecureRemotePassword::calculateM(
   return MHex;
 }
 /******************************************************************************/
+/**
+ * @brief Calculates the SRP server proof M2 = H(A | M | K) according to RFC
+ * 5054.
+ *
+ * All inputs must be hexadecimal strings representing big-endian values.
+ * The hash is computed over the concatenation of the raw bytes of A, M, and K.
+ *
+ * @param hashName The hash algorithm to use (e.g., "SHA-256").
+ * @param AHex The client's public key A in hexadecimal format.
+ * @param MHex The client proof M in hexadecimal format.
+ * @param KHex The session key K in hexadecimal format.
+ * @return The computed M2 value as an uppercase hexadecimal string.
+ * @throws std::invalid_argument if any input is empty or hash is unsupported.
+ */
+const std::string MyCryptoLibrary::SecureRemotePassword::calculateM2(
+    const std::string &hashName, const std::string &AHex,
+    const std::string &MHex, const std::string &KHex) {
+  // input parameter's validation
+  if (_hashMap.find(hashName) == _hashMap.end()) {
+    throw std::invalid_argument("SecureRemotePassword log | calculateM2(): "
+                                "hash algorithm not recognized.");
+  } else if (AHex.empty() || MHex.empty() || KHex.empty()) {
+    throw std::invalid_argument(
+        "SecureRemotePassword log | calculateM2(): "
+        "invalid input parameters received, cannot be empty.");
+  }
+  // Convert hex inputs to raw bytes
+  const std::vector<uint8_t> ABytes{
+      MessageExtractionFacility::hexToBytes(AHex)};
+  const std::vector<uint8_t> MBytes{
+      MessageExtractionFacility::hexToBytes(MHex)};
+  const std::vector<uint8_t> KBytes{
+      MessageExtractionFacility::hexToBytes(KHex)};
+  // Concatenate A | M | K
+  std::vector<uint8_t> input;
+  input.reserve(ABytes.size() + MBytes.size() + KBytes.size());
+  input.insert(input.end(), ABytes.begin(), ABytes.end());
+  input.insert(input.end(), MBytes.begin(), MBytes.end());
+  input.insert(input.end(), KBytes.begin(), KBytes.end());
+  const std::string inputStr(input.begin(), input.end());
+  std::string M2Hex = _hashMap.at(hashName)(inputStr);
+  std::transform(M2Hex.begin(), M2Hex.end(), M2Hex.begin(), ::toupper);
+  return M2Hex;
+}
+/******************************************************************************/

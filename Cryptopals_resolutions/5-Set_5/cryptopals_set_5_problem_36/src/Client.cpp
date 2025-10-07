@@ -546,9 +546,6 @@ const bool Client::authenticationInit(const int portServerNumber) {
       std::cout << "----------------------" << std::endl;
     }
     // S calculation
-    if (_debugFlag) {
-      std::cout << "[DEBUG] Group ID: " << _sessionData->_groupId << std::endl;
-    }
     const std::string BHex{_sessionData->_peerPublicKeyHex};
     const std::string kHex{MessageExtractionFacility::BIGNUMToHex(
         MyCryptoLibrary::SecureRemotePassword::getKMap()
@@ -581,6 +578,15 @@ const bool Client::authenticationInit(const int portServerNumber) {
     // K calculation
     _sessionData->_KHex = MyCryptoLibrary::SecureRemotePassword::calculateK(
         _sessionData->_hash, _sessionData->_SHex);
+    if (_debugFlag) {
+      std::cout << "\n--- Client log | Session key K generated at the "
+                   "authentication phase---"
+                << std::endl;
+      std::cout << "\tClient ID: " << extractedClientId << std::endl;
+      std::cout << "\tK(hex) = H(S): '" << _sessionData->_KHex << "'."
+                << std::endl;
+      std::cout << "----------------------" << std::endl;
+    }
     return authenticationInitResult;
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
@@ -609,6 +615,7 @@ const bool Client::authenticationInit(const int portServerNumber) {
 const bool Client::authenticationComplete(const int portServerNumber) {
   bool authenticationCompleteResult{true};
   try {
+    // M calculation
     const std::string MHex{MyCryptoLibrary::SecureRemotePassword::calculateM(
         _sessionData->_hash, _srpParametersMap.at(_sessionData->_groupId)._nHex,
         MessageExtractionFacility::uintToHex(
