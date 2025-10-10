@@ -825,6 +825,6 @@ Client                        Server
 108. Add calculation of M2 = H(A | M | K) at the SecureRemotePassword class (Done)
 109. Add calculation of M2 = H(A | M | K) at the Server side (Done)
 110. Add the sending of the M2 to the client (Done)
-
-111. Add unit tests of the calculation of M2 (TBD)
-112. Add a python script to double-check the method in Cpp (TBD)
+111. Add a python script to double-check the method in Cpp (Done)
+112. Add unit tests of the calculation of M2 = H(A | M | K) (Done)
+113. Add unit tests of authentication part of the protocol (Done)

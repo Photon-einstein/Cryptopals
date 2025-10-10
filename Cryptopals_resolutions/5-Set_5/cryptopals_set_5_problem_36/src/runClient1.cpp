@@ -13,7 +13,7 @@ int main(void) {
   double time;
   start = clock();
   /* work to verify */
-  const bool debugFlag{true};
+  const bool debugFlag{false};
   const std::string clientId{"Bob"};
   const unsigned int requestedGroup{5};
   std::shared_ptr<Client> client =
