@@ -1504,3 +1504,109 @@ TEST_F(SessionDataTest, CalculateV_WithSmallValues_ShouldMatchReference) {
       MyCryptoLibrary::SecureRemotePassword::calculateV(xHex, NHex, g);
   EXPECT_EQ(vHex, expectedVHex);
 }
+
+/**
+ * @test Test the correctness of the calculation of the SRP client verifier
+ * M2 = H(A | M | K) using the RFC-5054 test vector with SHA-1 as hash
+ * algorithm.
+ * @brief Verifies that the verifier M2, computed from known A, M, K matches the
+ * expected value.
+ */
+TEST_F(SessionDataTest,
+       CalculateM2_WithRFC5054TestVectorSHA1_ShouldMatchReference) {
+  const std::string hash{"SHA-1"};
+  const std::string MHex{"3F3BC67169EA71302599CF1B0F5D408B7B65D347"};
+  const std::string KHex{"017EEFA1CEFC5C2E626E21598987F31E0F1B11BB"};
+  const std::string M2Hex{MyCryptoLibrary::SecureRemotePassword::calculateM2(
+      hash, _A_RFC5054TestVectorValue, MHex, KHex)};
+  const std::string M2HexExpected{"9CAB3C575A11DE37D3AC1421A9F009236A48EB55"};
+  EXPECT_EQ(M2Hex, M2HexExpected);
+}
+
+/**
+ * @test Test the correctness of the calculation of the SRP client verifier
+ * M2 = H(A | M | K) using the RFC-5054 test vector with SHA-256 as hash
+ * algorithm.
+ * @brief Verifies that the verifier M2, computed from known A, M, K matches the
+ * expected value.
+ */
+TEST_F(SessionDataTest,
+       CalculateM2_WithRFC5054TestVectorSHA256_ShouldMatchReference) {
+  const std::string hash{"SHA-256"};
+  const std::string MHex{
+      "79BD06B66CE6C85E02A85BBD80D5CE6CA4A0A86939B7D0F913012C6101A77546"};
+  const std::string KHex{
+      "C370461D9D28F31C1D20F988907C3FB8EDA57B7AA2EC149ECB2260D8E91A9931"};
+  const std::string M2Hex{MyCryptoLibrary::SecureRemotePassword::calculateM2(
+      hash, _A_RFC5054TestVectorValue, MHex, KHex)};
+  const std::string M2HexExpected{
+      "491F3622627F1E942E64D9D61BD64BCB3796B697805EF7E279A57C01C7B63222"};
+  EXPECT_EQ(M2Hex, M2HexExpected);
+}
+
+/**
+ * @test Test the correctness of the calculation of the SRP client verifier
+ * M2 = H(A | M | K) using the RFC-5054 test vector with SHA-384 as hash
+ * algorithm.
+ * @brief Verifies that the verifier M2, computed from known A, M, K matches the
+ * expected value.
+ */
+TEST_F(SessionDataTest,
+       CalculateM2_WithRFC5054TestVectorSHA384_ShouldMatchReference) {
+  const std::string hash{"SHA-384"};
+  const std::string MHex{"C0318E36BC854EFAE4D8ECD18A4CA1EC95A67A672A4EC2BCF170B"
+                         "577D312DA80AB26BEED788AB9713326AEDB3E9A0297"};
+  const std::string KHex{"D4E3B2E5ABCCF9F54EB12F55D4B26A23BAA11541414F4CAB7CDC1"
+                         "85C5C28C69D0BD0B66F353EABCD63B748CEAB45D8FC"};
+  const std::string M2Hex{MyCryptoLibrary::SecureRemotePassword::calculateM2(
+      hash, _A_RFC5054TestVectorValue, MHex, KHex)};
+  const std::string M2HexExpected{
+      "6D4F1C4FFE20286D0263F10BB4917ECC5C77B70DC453158CC43F0ED1DB2C430E0A14A68B"
+      "9420C8E956A41DC5D2E3218F"};
+  EXPECT_EQ(M2Hex, M2HexExpected);
+}
+
+/**
+ * @test Test the correctness of the calculation of the SRP client verifier
+ * M2 = H(A | M | K) using the RFC-5054 test vector with SHA-512 as hash
+ * algorithm.
+ * @brief Verifies that the verifier M2, computed from known A, M, K matches the
+ * expected value.
+ */
+TEST_F(SessionDataTest,
+       CalculateM2_WithRFC5054TestVectorSHA512_ShouldMatchReference) {
+  const std::string hash{"SHA-512"};
+  const std::string MHex{
+      "8AE46F403CAEA982FCF3E34A3DDFDC9265059DBEA08F0C45A4E0B9672904C343C8FD087B"
+      "0C23F8E0261D0E1FEDD730CD6DDC74EC53EA09D5CD920DB5EE2F8E27"};
+  const std::string KHex{
+      "EB86BD35F055213D911E74BA485D516D2C7D648ECA4FD7C4FD474CF9FFF1D3A8B0EFCB6B"
+      "C0F2B07530BD02D6EA12F85F550B136958F783E4B84D47F727AE4B23"};
+  const std::string M2Hex{MyCryptoLibrary::SecureRemotePassword::calculateM2(
+      hash, _A_RFC5054TestVectorValue, MHex, KHex)};
+  const std::string M2HexExpected{
+      "5C0EFFC6FB406E41E908D0B985F037128C88AC74A235EABB82FBAEBD8B3B7E8A7238EAA1"
+      "A1541ABAC609C2DBAD15C7A30E79CCAB0C65AC4AA5226E78E2596BC4"};
+  EXPECT_EQ(M2Hex, M2HexExpected);
+}
+
+/**
+ * @test Test that during the M2 calculation, it throws an exception when
+ * an unknown hash name is provided.
+ * @brief Verifies that the calculateM method throws
+ * std::invalid_argument when an unsupported hash algorithm is provided.
+ */
+TEST_F(SessionDataTest, CalculateM2_UnknownHash_ShouldThrowAnError) {
+  try {
+    const std::string hash{"UNKNOWN-HASH"};
+    const std::string MHex{
+        "79BD06B66CE6C85E02A85BBD80D5CE6CA4A0A86939B7D0F913012C6101A77546"};
+    const std::string KHex{
+        "C370461D9D28F31C1D20F988907C3FB8EDA57B7AA2EC149ECB2260D8E91A9931"};
+    const std::string M2Hex{MyCryptoLibrary::SecureRemotePassword::calculateM2(
+        hash, _A_RFC5054TestVectorValue, MHex, KHex)};
+  } catch (const std::invalid_argument &e) {
+    EXPECT_THAT(std::string(e.what()),
+                ::testing::EndsWith("hash algorithm not recognized."));
+  }
+}
