@@ -186,7 +186,7 @@ const bool Client::authentication(const int portServerNumber) {
                                "Invalid port server number used.");
     }
     // check if the registration was already done
-    if (!_sessionData->registrationComplete) {
+    if (!_sessionData || !_sessionData->registrationComplete) {
       throw std::runtime_error("Client log | authentication(): "
                                "Registration is not completed.");
     }
