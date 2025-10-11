@@ -91,7 +91,7 @@ public:
    * @return Filename where the public configurations of the Secure Remote
    * Password protocol are available.
    */
-  const std::string &getSrpParametersFilenameLocation();
+  const std::string &getSrpParametersFilenameLocation() const;
 
   /**
    * @brief This method returns the default group ID of SRP public parameters.
@@ -100,7 +100,7 @@ public:
    *
    * @return The default group ID of SRP public parameters.
    */
-  const unsigned int getDefaultGroupId();
+  const unsigned int getDefaultGroupId() const;
 
   /**
    * @brief Returns whether this class is acting as a server.
@@ -203,7 +203,7 @@ private:
   std::thread _serverThread;
   const bool _debugFlag;
 
-  const std::string _srpParametersFilename{"../input/SrpParameters.json"};
+  const std::string _srpParametersFilename;
   std::map<unsigned int, SrpParametersLoader::SrpParameters> _srpParametersMap;
   unsigned int _defaultGroupId;
   unsigned int _minGroupId, _maxGroupId;

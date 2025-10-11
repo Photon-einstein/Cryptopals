@@ -40,11 +40,11 @@ public:
    *
    * This method sets the server's production port to a new one.
    *
-   * @param portServerTest The port number to be used in production.
+   * @param portServerProduction The port number to be used in production.
    *
-   * @throw runtime_error if the portProduction is not a valid one.
+   * @throw runtime_error if the portServerProduction is not a valid one.
    */
-  void setProductionPort(const int portProduction);
+  void setProductionPort(const int portServerProduction);
 
   /**
    * @brief This method sets the server's test port to a new one.
@@ -89,7 +89,7 @@ public:
    * @return Filename where the public configurations of the Secure Remote
    * Password protocol are available.
    */
-  const std::string &getSrpParametersFilenameLocation();
+  const std::string &getSrpParametersFilenameLocation() const;
 
   /**
    * @brief This method will perform the registration step with a given
@@ -217,10 +217,10 @@ private:
   const std::string _clientId{};
   const bool _debugFlag;
 
-  const std::string _srpParametersFilename{"../input/SrpParameters.json"};
+  const std::map<std::string, unsigned int> _minSaltSizesMap;
+  const std::string _srpParametersFilename;
   std::map<unsigned int, SrpParametersLoader::SrpParameters> _srpParametersMap;
 
-  const std::map<std::string, unsigned int> _minSaltSizesMap;
   std::unique_ptr<SessionData> _sessionData;
   const unsigned int _passwordSize{20}; // bytes
   const std::string _serverConfirmationMessage{"Ack"};

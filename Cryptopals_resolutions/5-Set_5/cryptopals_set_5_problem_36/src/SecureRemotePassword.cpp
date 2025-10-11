@@ -118,7 +118,7 @@ MyCryptoLibrary::SecureRemotePassword::getSrpParametersFilenameLocation() {
  */
 const unsigned int &
 MyCryptoLibrary::SecureRemotePassword::getMinSizePrivateKey() {
-  if (_minSizePrivateKey <= 0) {
+  if (_minSizePrivateKey == 0) {
     throw std::runtime_error("Secure Remote Password log | "
                              "getMinSizePrivateKey(): stored minSizePrivateKey "
                              "is invalid");
@@ -184,7 +184,7 @@ MyCryptoLibrary::SecureRemotePassword::getSrpParametersMap() const {
  */
 std::string MyCryptoLibrary::SecureRemotePassword::generatePrivateKey(
     const std::string &NHex, const unsigned int minSizeBits) {
-  if (NHex.empty() || minSizeBits <= 0) {
+  if (NHex.empty() || minSizeBits == 0) {
     throw std::invalid_argument(
         "SecureRemotePassword log | generatePrivateKey(): "
         "Invalid input parameters received.");

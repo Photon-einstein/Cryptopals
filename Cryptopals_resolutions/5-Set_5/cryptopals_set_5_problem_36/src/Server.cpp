@@ -25,6 +25,8 @@ bool Server::_isServerFlag = true;
  */
 Server::Server(const bool debugFlag, const unsigned int defaultGroupId)
     : _debugFlag{debugFlag},
+      _srpParametersFilename{MyCryptoLibrary::SecureRemotePassword::
+                                 getSrpParametersFilenameLocation()},
       _minSaltSizesMap{EncryptionUtility::getMinSaltSizes()},
       _hashMap{EncryptionUtility::getHashMap()} {
   _srpParametersMap = SrpParametersLoader::loadSrpParameters(
@@ -116,7 +118,7 @@ const int Server::getTestPort() const { return _portTest; }
  * @return Filename where the public configurations of the Secure Remote
  * Password protocol are available.
  */
-const std::string &Server::getSrpParametersFilenameLocation() {
+const std::string &Server::getSrpParametersFilenameLocation() const {
   if (_srpParametersFilename.size() == 0) {
     throw std::runtime_error("Secure Remote Password log | "
                              "getSrpParametersFilenameLocation(): public SRP "
@@ -132,7 +134,7 @@ const std::string &Server::getSrpParametersFilenameLocation() {
  *
  * @return The default group ID of SRP public parameters.
  */
-const unsigned int Server::getDefaultGroupId() { return _defaultGroupId; }
+const unsigned int Server::getDefaultGroupId() const { return _defaultGroupId; }
 /******************************************************************************/
 /**
  * @brief Returns whether this class is acting as a server.

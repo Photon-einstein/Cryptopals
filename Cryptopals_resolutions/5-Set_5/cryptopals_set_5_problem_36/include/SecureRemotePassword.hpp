@@ -77,7 +77,7 @@ public:
    *
    * @return The minimum size of a private key at the SPP protocol, in bits.
    */
-  const unsigned int &getMinSizePrivateKey();
+  static const unsigned int &getMinSizePrivateKey();
 
   /**
    * @brief Returns a constant reference to the map of SRP multiplier parameters
@@ -345,7 +345,7 @@ private:
   bool _debugFlag;
   static const std::string _srpParametersFilename;
   std::map<unsigned int, SrpParametersLoader::SrpParameters> _srpParametersMap;
-  unsigned int _groupId;
+  unsigned int _groupId{0};
   static unsigned int _minSizePrivateKey;
   static std::unordered_map<std::string, EncryptionUtility::HashFn> _hashMap;
   static const std::map<unsigned int, MessageExtractionFacility::UniqueBIGNUM>
