@@ -703,7 +703,7 @@ TEST_F(
   for (const auto &user : jsonResponseBefore["users"]) {
     if (mapTrackClientRegistrationsBefore.find(user.s()) !=
         mapTrackClientRegistrationsBefore.end()) {
-      mapTrackClientRegistrationsBefore.try_emplace(user.s(), true);
+      mapTrackClientRegistrationsBefore[user.s()] = true;
     }
   }
   EXPECT_FALSE(mapTrackClientRegistrationsBefore[_clientId1])
