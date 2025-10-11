@@ -1,128 +1,79 @@
-"@startuml Diffie_Hellman_implementation_class_diagram"
-
-class Server {
-    - _diffieHellmanMapMutex : std::mutex
-    - _diffieHellmanMap : std::map<boost::uuids::uuid, std::unique_ptr<SessionData>>
-    - _nonceSize : std::size_t
-    - _app : crow::SimpleApp
-    - _portProduction : int
-    - _portTest : int
-    - _serverThread : std::thread
-    - _debugFlag : bool
-    - _ivLength : std::size_t
-    
-    + Server(debugFlag : bool) {explicit}
-    + ~Server()
-    + runServer() : void
-    + runServerTest() : void
-    + clearDiffieHellmanSessionData() : void
-    + getProductionPort() : int
-    + getTestPort() : int
-    - setupRoutes() : void
-    - rootEndpoint() : void
-    - keyExchangeRoute() : void
-    - getSessionsDataEndpoint() : void
-    - generateUniqueSessionId() : boost::uuids::uuid
-}
-
-note "Exposes API Endpoints:\n- **POST /keyExchange** (Diffie-Hellman Key Exchange)\n- **GET /sessionsData** (Retrieve Session Data)" as ServerEndpointsNote
-Server .. ServerEndpointsNote
+"@startuml Secure_Remote_Password_class_diagram"
 
 class Client {
-    - _diffieHellmanMap : std::map<std::string, std::unique_ptr<SessionData>>
     - _portServerProduction : int
-    - _portServerTest : int 
-    - _clientId : std::string
-    - _nonceSize : std::size_t
-    - _debugFlag : bool
+    - _portServerTest : int
+    - _clientId : const std::string
+    - _debugFlag : const bool
+    - _minSaltSizesMap : const std::map<std::string, unsigned int>
+    - _srpParametersFilename : const std::string
+    - _srpParametersMap : std::map<unsigned int, SrpParametersLoader::SrpParameters>
+    - _sessionData : std::unique_ptr<SessionData>
+    - _passwordSize : const unsigned int = 20
+    - _serverConfirmationMessage : const std::string = "Ack"
+    - _isServerFlag : bool {static}
 
-    + Client(clientId : std::string, debugFlag : bool) {explicit}
+    + Client(clientId : const std::string&, debugFlag : const bool) {explicit}
     + ~Client()
-    + diffieHellmanKeyExchange(portServerNumber : int) : void
-    + confirmSessionId(sessionId : std::string) : bool
-    + getClientId() : std::string {const}
-    + getProductionPort() : int {const}
-    + getTestPort() : int {const}
-    + verifyServerSessionDataEntryEndpoint(sessionId : std::string, clientId : std::string, clientNonce : std::string, serverNonce : std::string, derivedKey : std::string, iv : std::string) : bool {const}
-    - printServerResponse(response : cpr::Response) : void {static}
-    - confirmationServerResponse(ciphertext : std::string, key : std::vector<uint8_t>, iv : std::vector<uint8_t>, sessionId : std::string, clientId : std::string, clientNonce : std::string, serverNonce : std::string, message : std::string) :  std::tuple<bool, std::string>
+    + setProductionPort(portServerProduction : const int) : void
+    + setTestPort(portServerTest : const int) : void
+    + getClientId() : const std::string& {const}
+    + getProductionPort() : const int {const}
+    + getTestPort() : const int {const}
+    + getSrpParametersFilenameLocation() : const std::string& {const}
+    + registration(portServerNumber : const int, groupId : const int = 1) : const bool
+    + authentication(portServerNumber : const int) : const bool
+    + getIsServerFlag() : bool {static}
+    + calculateX(hash : const std::string&, salt : const std::string&, password : const std::string&) : std::string {static}
+    - registrationInit(portServerNumber : const int, groupId : const unsigned int) : const bool
+    - registrationComplete(portServerNumber : const int, groupId : const unsigned int) : const bool
+    - authenticationInit(portServerNumber : const int) : const bool
+    - authenticationComplete(portServerNumber : const int) : const bool
+    - printServerResponse(response : const cpr::Response&) : void {static}
 }
 
-class SessionData <<struct>> {
-    - _diffieHellman : std::unique_ptr<MyCryptoLibrary::DiffieHellman>
-    - _serverNonceHex : std::string
-    - _clientNonceHex : std::string
-    - _derivedKeyHex : std::string
-    - _clientId : std::string
-    - _iv : std::vector<uint8_t>
+namespace EncryptionUtility {
 
-    + SessionData(nonceSize : std::size_t, clientNonceHex : std::string, clientId : std::string, debugFlag : bool, ivLength : std::size_t)
-    + SessionData(diffieHellman : std::unique_ptr<MyCryptoLibrary::DiffieHellman>, serverNonceHex : std::string, clientNonceHex : std::string, iv : std::vector<uint8_t>)
-}
-
-namespace MyCryptoLibrary {
-    class DiffieHellman {
-        - _dhParametersFilename : std::string
-        - _dhParameter : DhParametersLoader::DhParameters
-        - _p : MessageExtractionFacility::UniqueBIGNUM
-        - _g : MessageExtractionFacility::UniqueBIGNUM
-        - _privateKey : MessageExtractionFacility::UniqueBIGNUM
-        - _publicKey : MessageExtractionFacility::UniqueBIGNUM
-        - _sharedSecret : MessageExtractionFacility::UniqueBIGNUM
-        - _debugFlag : bool
-        - _derivedSymmetricKey : std::vector<uint8_t>
-        - _derivedSymmetricKeyHex : std::string
-        - _confirmationMessage : std::string
-
-        + DiffieHellman(debugFlag : bool) {explicit}
-        + ~DiffieHellman() 
-        + getPublicKey() : std::string {const}
-        + getGroupName() : std::string {const}
-        + deriveSharedSecret(peerPublicKeyHex : std::string, serverNonceHex : std::string, clientNonceHex : std::string) : std::string
-        + getSymmetricKey() : std::vector<uint8_t> {const}
-        + getConfirmationMessage() : std::string {const}
-        + getDhParametersFilenameLocation() : std::string {const}
-        - generatePrivateKey() : void
-        - generatePublicKey() : void
+    class HashFn <<typedef>> {
+        std::function<std::string(const std::string &)>
     }
+
+    class EncryptionUtility {
+        + generateCryptographicNonce(length : const std::size_t) : const std::string
+        + sha1(input : const std::string&) : std::string
+        + sha256(input : const std::string&) : std::string
+        + sha384(input : const std::string&) : std::string
+        + sha512(input : const std::string&) : std::string
+        + getHashMap() : const std::unordered_map<std::string, HashFn>
+        + getMinSaltSizes() : const std::map<std::string, unsigned int>
+        + generatePassword(passwordLength : std::size_t = 16) : const std::string
+        + padLeft(input : const std::vector<uint8_t>&, size : size_t) : std::vector<uint8_t>
+    }
+
+    EncryptionUtility ..> HashFn : uses
+
 }
 
 namespace MessageExtractionFacility {
-  class UniqueBIGNUM <<typedef>> {
-    - BIGNUM* (with custom deleter)
-  }
 
-  class ConversionUtility {
-    + hexToBytes(hexStr: std::string) : std::vector<unsigned char> {const}
-    + toHexString(data: std::vector<unsigned char>) : std::string {const}
-    + hexToUniqueBIGNUM(hexNumber: std::string) : UniqueBIGNUM {const}
-    + BIGNUMToHex(bn: BIGNUM*) : std::string {const}
-    + BIGNUMToDec(bn: BIGNUM*) : std::string {const}
-  }
-}
+    class UniqueBIGNUM <<typedef>> {
+        std::unique_ptr<BIGNUM, BIGNUM_deleter>
+    }
 
-namespace DhParametersLoader {
-    class DhParameters <<struct>> {
-        + _groupName : std::string
-        + _pHex : std::string
-        + _gHex : std::string
-        + _description : std::string
-        + _notes : std::string
+    class MessageExtractionFacility {
+        + hexToBytes(hexStr : const std::string&) : std::vector<unsigned char>
+        + toHexString(data : const std::vector<unsigned char>&) : std::string
+        + hexToPlaintext(hexString : const std::string&) : std::string
+        + hexToUniqueBIGNUM(hexNumber : const std::string&) : UniqueBIGNUM
+        + BIGNUMToHex(bn : BIGNUM*) : std::string
+        + BIGNUMToDec(bn : BIGNUM*) : std::string
+        + uintToHex(value : unsigned int, width : size_t = 2) : std::string
     }
-    class Loader {
-        {static} + loadDhParameters(filename : std::string) : std::map<std::string, DhParameters>
-    }
+
+    MessageExtractionFacility ..> UniqueBIGNUM : uses
+
 }
 
 
-MyCryptoLibrary.DiffieHellman --> DhParametersLoader : uses
-MyCryptoLibrary.DiffieHellman --> MessageExtractionFacility : uses
-
-Server --> SessionData : uses
-Client --> SessionData : uses
-
-Client --> Server : "<<uses HTTP requests>>"
-
-SessionData --> MyCryptoLibrary.DiffieHellman : "has a"
 
 @enduml

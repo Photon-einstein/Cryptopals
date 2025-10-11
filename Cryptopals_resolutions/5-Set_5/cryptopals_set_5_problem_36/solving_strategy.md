@@ -831,3 +831,27 @@ Client                        Server
 114. Add unit tests of authentication of a user that has not performed a previous registration,
      it should return an error (Done)
 115. Fix static code analysis problems (Done)
+
+116. Creation of uml class diagram for this source code (in progress)
+
+- Command to generate the document:
+
+```bash
+java -jar /home/tiago-sousa/.vscode/extensions/jebbs.plantuml-2.18.1/plantuml.jar -tsvg class_diagram.puml
+```
+
+Subtasks:
+
+- Client.hpp (Done)
+- EncryptionUtility.hpp (Done)
+- MessageExtractionFacility.hpp (Done)
+- SecureRemotePassword.hpp (in progress)
+- Server.hpp (TBD)
+- SessionData.hpp (TBD)
+- SrpParametersLoader (TBD)
+
+117. Creation of the uml sequence diagram for this source code (TBD)
+
+```bash
+java -jar /home/tiago-sousa/.vscode/extensions/jebbs.plantuml-2.18.1/plantuml.jar -tsvg sequence_diagram.puml
+```
