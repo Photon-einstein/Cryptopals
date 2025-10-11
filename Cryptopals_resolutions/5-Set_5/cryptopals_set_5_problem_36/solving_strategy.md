@@ -828,3 +828,8 @@ Client                        Server
 111. Add a python script to double-check the method in Cpp (Done)
 112. Add unit tests of the calculation of M2 = H(A | M | K) (Done)
 113. Add unit tests of authentication part of the protocol (Done)
+114. Add unit tests of authentication of a user that has not performed a previous registration,
+     it should return an error (Done)
+
+115. Access the possibilities of a front end to the client to make the registration and authentication
+     via the SRP protocol (in progress)

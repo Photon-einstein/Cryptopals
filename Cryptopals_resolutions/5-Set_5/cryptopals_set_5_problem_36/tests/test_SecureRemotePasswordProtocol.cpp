@@ -795,7 +795,7 @@ TEST_F(
  * - Client 1 completes the registration process with the server;
  * - Client 1 attempts the authentication with the server.
  *
- * The scenario is expected to be successful without any error.
+ * This scenario is expected to be successful without any error.
  */
 TEST_F(
     SecureRemotePasswordProtocolTest,
@@ -808,18 +808,14 @@ TEST_F(
   ASSERT_TRUE(jsonResponseBefore);
   // Check that the users array contains the expected username
   bool found = false;
-  std::map<std::string, bool> mapTrackClientRegistrationsBefore;
-  mapTrackClientRegistrationsBefore[_clientId1] = false;
   for (const auto &user : jsonResponseBefore["users"]) {
-    if (mapTrackClientRegistrationsBefore.find(user.s()) !=
-        mapTrackClientRegistrationsBefore.end()) {
-      mapTrackClientRegistrationsBefore[user.s()] = true;
+    if (user.s() == _clientId1) {
+      found = true;
     }
   }
-  EXPECT_FALSE(mapTrackClientRegistrationsBefore[_clientId1])
-      << "Expected username '" << _clientId1
-      << "' to not be found in registered users list in the "
-         "beginning of the test.";
+  EXPECT_FALSE(found) << "Expected username '" << _clientId1
+                      << "' to not be found in registered users list in the "
+                         "beginning of the test.";
   // registration client 1
   const bool registrationReturnValue1{_mapUsers[_clientId1]->registration(
       _mapUsers[_clientId1]->getTestPort())};
@@ -853,7 +849,7 @@ TEST_F(
  * - Client 1, 2 and 3 complete the registration process with the server;
  * - Client 1, 2 and 3 attempts the authentication with the server.
  *
- * The scenario is expected to be successful without any error.
+ * This scenario is expected to be successful without any error.
  */
 TEST_F(
     SecureRemotePasswordProtocolTest,
@@ -864,7 +860,8 @@ TEST_F(
   EXPECT_EQ(response.status_code, 200);
   crow::json::rvalue jsonResponseBefore = crow::json::load(response.text);
   ASSERT_TRUE(jsonResponseBefore);
-  // Check that the users array contains the expected username
+  // Check that the users array does not contain the expected username
+  // before registration
   bool found = false;
   std::map<std::string, bool> mapTrackClientRegistrationsBefore;
   mapTrackClientRegistrationsBefore[_clientId1] = false;
@@ -942,4 +939,102 @@ TEST_F(
   const bool authenticationReturnValue3{_mapUsers[_clientId3]->authentication(
       _mapUsers[_clientId3]->getTestPort())};
   EXPECT_TRUE(authenticationReturnValue3);
+}
+
+/**
+ * @test Test the correctness of the entire SRP protocol, on a bad flow
+ * scenario.
+ * @brief Test the correctness of the entire SRP protocol, namely,
+ * the client attempts to authenticate without having performed previous
+ * registration. Scenario:
+ * - Client 1 does not complete a registration.
+ * - Client 1 attempts the authentication with the server.
+ *
+ * The scenario is expected to not have a successful authentication.
+ */
+TEST_F(
+    SecureRemotePasswordProtocolTest,
+    Authentication_OneClientsAttemptsToAuthenticateWithoutRegistration_ShouldReturnError) {
+  auto response = cpr::Get(
+      cpr::Url{"http://localhost:" + std::to_string(_server->getTestPort()) +
+               std::string("/srp/registered/users")});
+  EXPECT_EQ(response.status_code, 200);
+  crow::json::rvalue jsonResponseBefore = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponseBefore);
+  // Check that the users array does not contain the expected username
+  // before registration
+  bool found = false;
+  for (const auto &user : jsonResponseBefore["users"]) {
+    if (user.s() == _clientId1) {
+      found = true;
+    }
+  }
+  EXPECT_FALSE(found) << "Expected username '" << _clientId1
+                      << "' to not be found in registered users list in the "
+                         "beginning of the test.";
+  // no registration client 1
+  // authentication client 1
+  const bool authenticationReturnValue1{_mapUsers[_clientId1]->authentication(
+      _mapUsers[_clientId1]->getTestPort())};
+  EXPECT_FALSE(authenticationReturnValue1);
+}
+
+/**
+ * @test Test the correctness of the entire SRP protocol, on a bad flow
+ * scenario.
+ * @brief Test the correctness of the entire SRP protocol, namely,
+ * the client attempts to authenticate without having performed previous
+ * registration. Scenario:
+ * - Client 1, 2 and 3 don't complete a registration.
+ * - Client 1, 2 and 3 attempts the authentication with the server.
+ *
+ * The scenario is expected to not have a successful authentication at all
+ * clients.
+ */
+TEST_F(
+    SecureRemotePasswordProtocolTest,
+    Authentication_ThreeClientsAttemptsToAuthenticateWithoutRegistration_ShouldReturnError) {
+  auto response = cpr::Get(
+      cpr::Url{"http://localhost:" + std::to_string(_server->getTestPort()) +
+               std::string("/srp/registered/users")});
+  EXPECT_EQ(response.status_code, 200);
+  crow::json::rvalue jsonResponseBefore = crow::json::load(response.text);
+  ASSERT_TRUE(jsonResponseBefore);
+  // Check that the users array does not contain the expected username
+  // before registration
+  std::map<std::string, bool> mapTrackClientRegistrationsBefore;
+  mapTrackClientRegistrationsBefore[_clientId1] = false;
+  mapTrackClientRegistrationsBefore[_clientId2] = false;
+  mapTrackClientRegistrationsBefore[_clientId3] = false;
+  for (const auto &user : jsonResponseBefore["users"]) {
+    if (mapTrackClientRegistrationsBefore.find(user.s()) !=
+        mapTrackClientRegistrationsBefore.end()) {
+      mapTrackClientRegistrationsBefore[user.s()] = true;
+    }
+  }
+  EXPECT_FALSE(mapTrackClientRegistrationsBefore[_clientId1])
+      << "Expected username '" << _clientId1
+      << "' to not be found in registered users list in the "
+         "beginning of the test.";
+  EXPECT_FALSE(mapTrackClientRegistrationsBefore[_clientId2])
+      << "Expected username '" << _clientId2
+      << "' to not be found in registered users list in the "
+         "beginning of the test.";
+  EXPECT_FALSE(mapTrackClientRegistrationsBefore[_clientId3])
+      << "Expected username '" << _clientId3
+      << "' to not be found in registered users list in the "
+         "beginning of the test.";
+  // no registration client 1, 2 and 3
+  // authentication client 1
+  const bool authenticationReturnValue1{_mapUsers[_clientId1]->authentication(
+      _mapUsers[_clientId1]->getTestPort())};
+  EXPECT_FALSE(authenticationReturnValue1);
+  // authentication client 2
+  const bool authenticationReturnValue2{_mapUsers[_clientId2]->authentication(
+      _mapUsers[_clientId2]->getTestPort())};
+  EXPECT_FALSE(authenticationReturnValue2);
+  // authentication client 3
+  const bool authenticationReturnValue3{_mapUsers[_clientId3]->authentication(
+      _mapUsers[_clientId3]->getTestPort())};
+  EXPECT_FALSE(authenticationReturnValue3);
 }
