@@ -397,13 +397,9 @@ TEST_F(SecureRemotePasswordProtocolTest,
   crow::json::rvalue jsonResponseBefore = crow::json::load(response.text);
   ASSERT_TRUE(jsonResponseBefore);
   // Check that the users array contains the expected username
-  bool found = false;
-  for (const auto &user : jsonResponseBefore["users"]) {
-    if (user.s() == _clientId1) {
-      found = true;
-      break;
-    }
-  }
+  bool found = std::any_of(
+      jsonResponseBefore["users"].begin(), jsonResponseBefore["users"].end(),
+      [&](const auto &user) { return user.s() == _clientId1; });
   EXPECT_FALSE(found) << "Expected username '" << _clientId1
                       << "' to not be found in registered users list in the "
                          "beginning of the test.";
@@ -449,13 +445,9 @@ TEST_F(
   crow::json::rvalue jsonResponseBefore = crow::json::load(response.text);
   ASSERT_TRUE(jsonResponseBefore);
   // Check that the users array contains the expected username
-  bool found = false;
-  for (const auto &user : jsonResponseBefore["users"]) {
-    if (user.s() == _clientId1) {
-      found = true;
-      break;
-    }
-  }
+  bool found = std::any_of(
+      jsonResponseBefore["users"].begin(), jsonResponseBefore["users"].end(),
+      [&](const auto &user) { return user.s() == _clientId1; });
   EXPECT_FALSE(found) << "Expected username '" << _clientId1
                       << "' to not be found in registered users list in the "
                          "beginning of the test.";
@@ -501,13 +493,9 @@ TEST_F(SecureRemotePasswordProtocolTest,
   crow::json::rvalue jsonResponseBefore = crow::json::load(response.text);
   ASSERT_TRUE(jsonResponseBefore);
   // Check that the users array contains the expected username
-  bool found = false;
-  for (const auto &user : jsonResponseBefore["users"]) {
-    if (user.s() == _clientId1) {
-      found = true;
-      break;
-    }
-  }
+  bool found = std::any_of(
+      jsonResponseBefore["users"].begin(), jsonResponseBefore["users"].end(),
+      [&](const auto &user) { return user.s() == _clientId1; });
   EXPECT_FALSE(found) << "Expected username '" << _clientId1
                       << "' to not be found in registered users list in the "
                          "beginning of the test.";
@@ -554,13 +542,9 @@ TEST_F(
   crow::json::rvalue jsonResponseBefore = crow::json::load(response.text);
   ASSERT_TRUE(jsonResponseBefore);
   // Check that the users array contains the expected username
-  bool found = false;
-  for (const auto &user : jsonResponseBefore["users"]) {
-    if (user.s() == _clientId1) {
-      found = true;
-      break;
-    }
-  }
+  bool found = std::any_of(
+      jsonResponseBefore["users"].begin(), jsonResponseBefore["users"].end(),
+      [&](const auto &user) { return user.s() == _clientId1; });
   EXPECT_FALSE(found) << "Expected username '" << _clientId1
                       << "' to not be found in registered users list in the "
                          "beginning of the test.";
@@ -625,13 +609,9 @@ TEST_F(
   crow::json::rvalue jsonResponseBefore = crow::json::load(response.text);
   ASSERT_TRUE(jsonResponseBefore);
   // Check that the users array contains the expected username
-  bool found = false;
-  for (const auto &user : jsonResponseBefore["users"]) {
-    if (user.s() == _clientId1) {
-      found = true;
-      break;
-    }
-  }
+  bool found = std::any_of(
+      jsonResponseBefore["users"].begin(), jsonResponseBefore["users"].end(),
+      [&](const auto &user) { return user.s() == _clientId1; });
   EXPECT_FALSE(found) << "Expected username '" << _clientId1
                       << "' to not be found in registered users list in the "
                          "beginning of the test.";
@@ -646,13 +626,9 @@ TEST_F(
   crow::json::rvalue jsonResponseAfter = crow::json::load(response.text);
   ASSERT_TRUE(jsonResponseAfter);
   // Check that the users array contains the expected username
-  found = false;
-  for (const auto &user : jsonResponseAfter["users"]) {
-    if (user.s() == _clientId1) {
-      found = true;
-      break;
-    }
-  }
+  found = std::any_of(jsonResponseAfter["users"].begin(),
+                      jsonResponseAfter["users"].end(),
+                      [&](const auto &user) { return user.s() == _clientId1; });
   EXPECT_TRUE(found) << "Expected username '" << _clientId1
                      << "' to be found in registered users list in the "
                         "beginning of the test.";
@@ -720,7 +696,6 @@ TEST_F(
   crow::json::rvalue jsonResponseBefore = crow::json::load(response.text);
   ASSERT_TRUE(jsonResponseBefore);
   // Check that the users array contains the expected username
-  bool found = false;
   std::map<std::string, bool> mapTrackClientRegistrationsBefore;
   mapTrackClientRegistrationsBefore[_clientId1] = false;
   mapTrackClientRegistrationsBefore[_clientId2] = false;
@@ -728,7 +703,7 @@ TEST_F(
   for (const auto &user : jsonResponseBefore["users"]) {
     if (mapTrackClientRegistrationsBefore.find(user.s()) !=
         mapTrackClientRegistrationsBefore.end()) {
-      mapTrackClientRegistrationsBefore[user.s()] = true;
+      mapTrackClientRegistrationsBefore.try_emplace(user.s(), true);
     }
   }
   EXPECT_FALSE(mapTrackClientRegistrationsBefore[_clientId1])
@@ -807,12 +782,9 @@ TEST_F(
   crow::json::rvalue jsonResponseBefore = crow::json::load(response.text);
   ASSERT_TRUE(jsonResponseBefore);
   // Check that the users array contains the expected username
-  bool found = false;
-  for (const auto &user : jsonResponseBefore["users"]) {
-    if (user.s() == _clientId1) {
-      found = true;
-    }
-  }
+  bool found = std::any_of(
+      jsonResponseBefore["users"].begin(), jsonResponseBefore["users"].end(),
+      [&](const auto &user) { return user.s() == _clientId1; });
   EXPECT_FALSE(found) << "Expected username '" << _clientId1
                       << "' to not be found in registered users list in the "
                          "beginning of the test.";
@@ -828,12 +800,9 @@ TEST_F(
   crow::json::rvalue jsonResponseAfter = crow::json::load(response.text);
   ASSERT_TRUE(jsonResponseAfter);
   // Check that the users array contains the expected username
-  unsigned int registrationClientCounter{0};
-  for (const auto &user : jsonResponseAfter["users"]) {
-    if (user.s() == _clientId1) {
-      ++registrationClientCounter;
-    }
-  }
+  unsigned int registrationClientCounter = std::count_if(
+      jsonResponseAfter["users"].begin(), jsonResponseAfter["users"].end(),
+      [&](const auto &user) { return user.s() == _clientId1; });
   ASSERT_EQ(registrationClientCounter, 1);
   // authentication client 1
   const bool authenticationReturnValue1{_mapUsers[_clientId1]->authentication(
@@ -862,7 +831,6 @@ TEST_F(
   ASSERT_TRUE(jsonResponseBefore);
   // Check that the users array does not contain the expected username
   // before registration
-  bool found = false;
   std::map<std::string, bool> mapTrackClientRegistrationsBefore;
   mapTrackClientRegistrationsBefore[_clientId1] = false;
   mapTrackClientRegistrationsBefore[_clientId2] = false;
@@ -870,7 +838,7 @@ TEST_F(
   for (const auto &user : jsonResponseBefore["users"]) {
     if (mapTrackClientRegistrationsBefore.find(user.s()) !=
         mapTrackClientRegistrationsBefore.end()) {
-      mapTrackClientRegistrationsBefore[user.s()] = true;
+      mapTrackClientRegistrationsBefore.try_emplace(user.s(), true);
     }
   }
   EXPECT_FALSE(mapTrackClientRegistrationsBefore[_clientId1])
@@ -1009,7 +977,7 @@ TEST_F(
   for (const auto &user : jsonResponseBefore["users"]) {
     if (mapTrackClientRegistrationsBefore.find(user.s()) !=
         mapTrackClientRegistrationsBefore.end()) {
-      mapTrackClientRegistrationsBefore[user.s()] = true;
+      mapTrackClientRegistrationsBefore.try_emplace(user.s(), true);
     }
   }
   EXPECT_FALSE(mapTrackClientRegistrationsBefore[_clientId1])

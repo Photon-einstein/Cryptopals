@@ -48,9 +48,9 @@ Client::~Client() {}
  *
  * This method sets the server's production port to a new one.
  *
- * @param portServerTest The port number to be used in production.
+ * @param portServerProduction The port number to be used in production.
  *
- * @throw runtime_error if the portProduction is not a valid one.
+ * @throw runtime_error if the portServerProduction is not a valid one.
  */
 void Client::setProductionPort(const int portServerProduction) {
   if (portServerProduction < 1024 || portServerProduction > 49151) {
@@ -117,7 +117,7 @@ const int Client::getTestPort() const { return _portServerTest; }
  * @return Filename where the public configurations of the Secure Remote
  * Password protocol are available.
  */
-const std::string &Client::getSrpParametersFilenameLocation() {
+const std::string &Client::getSrpParametersFilenameLocation() const {
   if (_srpParametersFilename.size() == 0) {
     throw std::runtime_error("Secure Remote Password log | "
                              "getSrpParametersFilenameLocation(): public SRP "
@@ -305,10 +305,6 @@ const bool Client::registrationInit(const int portServerNumber,
     // Data storage
     _sessionData = std::make_unique<SessionData>(
         extractedGroupId, extractedSalt, extractedSha, _debugFlag);
-    if (_sessionData.get() == nullptr) {
-      throw std::runtime_error("Client log | registrationInit(): "
-                               "_sessionData value returned is null.");
-    }
     return registrationInitResult;
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;
@@ -403,7 +399,7 @@ const bool Client::registrationComplete(const int portServerNumber,
                 << std::endl;
       std::cout << "----------------------" << std::endl;
     }
-    if (_serverConfirmationMessage != _serverConfirmationMessage) {
+    if (extractedServerConfirmation != _serverConfirmationMessage) {
       throw std::runtime_error(
           "Client log | registrationComplete(): "
           "extracted server confirmation don't match, expected: '" +
