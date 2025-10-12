@@ -2,6 +2,7 @@ import hashlib
 
 from calculateK import calculateK
 
+
 def hex_to_bytes(hexstr):
     return bytes.fromhex(hexstr)
 
@@ -58,5 +59,14 @@ if __name__ == "__main__":
 
     hash_algorithms = ["SHA-1", "SHA-256", "SHA-384", "SHA-512"]
     for hash_name in hash_algorithms:
-        M = calculateM(hash_name, N_hex, g_hex, username, salt_hex, A_hex, B_hex, calculateK(hash_name, S_hex))
+        M = calculateM(
+            hash_name,
+            N_hex,
+            g_hex,
+            username,
+            salt_hex,
+            A_hex,
+            B_hex,
+            calculateK(hash_name, S_hex),
+        )
         print(f"{hash_name}: {M}")

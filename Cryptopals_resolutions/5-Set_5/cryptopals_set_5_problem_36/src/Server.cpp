@@ -210,7 +210,7 @@ void Server::handleRegisterInit() {
           } else if (_secureRemotePasswordMap.find(extractedClientId) !=
                          _secureRemotePasswordMap.end() &&
                      _secureRemotePasswordMap[extractedClientId]
-                         ->registrationComplete) {
+                         ->_registrationComplete) {
             crow::json::wvalue err;
             err["message"] = "Server log | handleRegisterInit(): Conflict, "
                              "client is already registered";
@@ -290,7 +290,7 @@ void Server::handleRegisterComplete() {
           } else if (_secureRemotePasswordMap.find(extractedClientId) !=
                          _secureRemotePasswordMap.end() &&
                      _secureRemotePasswordMap[extractedClientId]
-                         ->registrationComplete) {
+                         ->_registrationComplete) {
             crow::json::wvalue err;
             err["message"] = "Server log | handleRegisterInit(): Conflict, "
                              "client is already registered";
@@ -312,7 +312,7 @@ void Server::handleRegisterComplete() {
           _secureRemotePasswordMap[extractedClientId]->_vHex = extractedVHex;
           // reply to the client with the acknowledgment of successful
           // registration completion
-          _secureRemotePasswordMap[extractedClientId]->registrationComplete =
+          _secureRemotePasswordMap[extractedClientId]->_registrationComplete =
               true;
           res["confirmation"] = "Ack";
           return crow::response(201, res);
@@ -370,7 +370,7 @@ void Server::handleAuthenticationInit() {
                                      extractedClientId +
                                      " has not registered before.");
           } else if (!_secureRemotePasswordMap[extractedClientId]
-                          ->registrationComplete) {
+                          ->_registrationComplete) {
             throw std::runtime_error("Server log | handleAuthenticationInit(): "
                                      "Client " +
                                      extractedClientId +
@@ -509,7 +509,7 @@ void Server::handleAuthenticationComplete() {
                 "Client " +
                 extractedClientId + " has not registered before.");
           } else if (!_secureRemotePasswordMap[extractedClientId]
-                          ->registrationComplete) {
+                          ->_registrationComplete) {
             throw std::runtime_error(
                 "Server log | handleAuthenticationComplete(): "
                 "Client " +
@@ -727,7 +727,7 @@ void Server::registeredUsersEndpoint() {
       {
         std::lock_guard<std::mutex> lock(_secureRemotePasswordMapMutex);
         for (const auto &pair : _secureRemotePasswordMap) {
-          if (pair.second && pair.second->registrationComplete) {
+          if (pair.second && pair.second->_registrationComplete) {
             registeredUsers.push_back(pair.first);
           }
         }

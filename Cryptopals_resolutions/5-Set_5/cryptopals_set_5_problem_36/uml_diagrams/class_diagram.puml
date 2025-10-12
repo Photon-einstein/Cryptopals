@@ -1,4 +1,9 @@
-"@startuml Secure_Remote_Password_class_diagram"
+@startuml Secure_Remote_Password_class_diagram
+
+left to right direction
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
 
 class Client {
     - _portServerProduction : int
@@ -31,6 +36,49 @@ class Client {
     - authenticationComplete(portServerNumber : const int) : const bool
     - printServerResponse(response : const cpr::Response&) : void {static}
 }
+
+Client ..> SessionData : contains
+Client ..> SrpParametersLoader.SrpParameters : contains
+
+Client --> Server : "<<uses HTTP requests>>"
+
+namespace MyCryptoLibrary {
+
+    class SecureRemotePassword {
+        - _debugFlag : bool
+        - _srpParametersFilename : const std::string {static}
+        - _srpParametersMap : std::map<unsigned int, SrpParametersLoader::SrpParameters>
+        - _groupId : unsigned int = 0
+        - _minSizePrivateKey : unsigned int {static}
+        - _hashMap : std::unordered_map<std::string, EncryptionUtility::HashFn> {static}
+        - _kMap : const std::map<unsigned int, MessageExtractionFacility::UniqueBIGNUM> {static}
+
+        + SecureRemotePassword(debugFlag : const bool) {explicit}
+        + ~SecureRemotePassword()
+        + calculateKMultiplierParameters() : std::map<unsigned int, MessageExtractionFacility::UniqueBIGNUM> {static}
+        + getSrpParametersFilenameLocation() : const std::string& {static}
+        + getMinSizePrivateKey() : const unsigned int& {static}
+        + getKMap() : const std::map<unsigned int, MessageExtractionFacility::UniqueBIGNUM>& {static}
+        + getSrpParametersMap() : const std::map<unsigned int, SrpParametersLoader::SrpParameters>& {const}
+        + generatePrivateKey(NHex : const std::string&, minSizeBits : const unsigned int) : std::string {static}
+        + calculatePublicKey(privateKeyHex : const std::string&, NHex : const std::string&, gHex : const std::string&, isServer : bool, k : const BIGNUM* = nullptr, vHex : const std::string = "") : std::string {static}
+        + validatePublicKey(publicKeyHex : const std::string&, NHex : const std::string&) : bool {static}
+        + calculateK(NHex : const std::string&, gHex : const std::string&, hashName : const std::string&) : MessageExtractionFacility::UniqueBIGNUM {static}
+        + calculateV(xHex : const std::string&, NHex : const std::string&, g : unsigned int) : const std::string {static}
+        + calculateU(hashName : const std::string&, AHex : const std::string&, BHex : const std::string&, NHex : const std::string&) : const std::string {static}
+        + calculateX(hashName : const std::string&, username : const std::string&, password : const std::string&, saltHex : const std::string&) : const std::string {static}
+        + calculateSClient(BHex : const std::string&, kHex : const std::string&, g : unsigned int, xHex : const std::string&, aHex : const std::string&, uHex : const std::string&, NHex : const std::string&) : std::string {static}
+        + calculateSServer(AHex : const std::string&, vHex : const std::string&, uHex : const std::string&, bHex : const std::string&, NHex : const std::string&) : std::string {static}
+        + calculateK(hash : const std::string&, SHex : const std::string&) : std::string {static}
+        + calculateM(hashName : const std::string&, NHex : const std::string&, gHex : const std::string&, username : const std::string&, saltHex : const std::string&, AHex : const std::string&, BHex : const std::string&, KHex : const std::string&) : std::string {static}
+        + calculateM2(hashName : const std::string&, AHex : const std::string&, MHex : const std::string&, KHex : const std::string&) : const std::string {static}
+    }
+}
+
+MyCryptoLibrary.SecureRemotePassword ..> SrpParametersLoader.SrpParameters : contains
+MyCryptoLibrary.SecureRemotePassword ..> EncryptionUtility.HashFn : uses
+MyCryptoLibrary.SecureRemotePassword ..> MessageExtractionFacility.UniqueBIGNUM : uses
+
 
 namespace EncryptionUtility {
 
@@ -74,6 +122,91 @@ namespace MessageExtractionFacility {
 
 }
 
+class Server {
+    - _app : crow::SimpleApp
+    - _secureRemotePasswordMapMutex : std::mutex {mutable}
+    - _secureRemotePasswordMap : std::map<std::string, std::unique_ptr<SessionData>>
+    - _portProduction : const int = 18080
+    - _portTest : const int = 18081
+    - _serverThread : std::thread
+    - _debugFlag : const bool
+    - _srpParametersFilename : const std::string
+    - _srpParametersMap : std::map<unsigned int, SrpParametersLoader::SrpParameters>
+    - _defaultGroupId : unsigned int
+    - _minGroupId : unsigned int
+    - _maxGroupId : unsigned int
+    - _minSaltSizesMap : const std::map<std::string, unsigned int>
+    - _hashMap : const std::unordered_map<std::string, EncryptionUtility::HashFn>
+    - _isServerFlag : bool {static}
 
+    + Server(debugFlag : const bool, defaultGroupId : const unsigned int = 3) {explicit}
+    + ~Server()
+    + runServer() : void
+    + runServerTest() : void
+    + clearSecureRemotePasswordMap() : void
+    + getProductionPort() : const int {const}
+    + getTestPort() : const int {const}
+    + getSrpParametersFilenameLocation() : const std::string& {const}
+    + getDefaultGroupId() : const unsigned int {const}
+    + getIsServerFlag() : bool {static}
+    - setupRoutes() : void
+    - rootEndpoint() : void
+    - handleRegisterInit() : void
+    - handleRegisterComplete() : void
+    - handleAuthenticationInit() : void
+    - handleAuthenticationComplete() : void
+    - vValidation(clientId : const std::string&, vHex : const std::string&) : bool
+    - registeredUsersEndpoint() : void
+}
+
+Server ..> SessionData : contains
+Server ..> SrpParametersLoader.SrpParameters : contains
+Server ..> EncryptionUtility.HashFn : uses
+
+note "Exposes API Endpoints:\n- **POST /handleRegisterInit** (First part of the registration process)\n- **POST /handleRegisterComplete** (Last part of the registration process)\n- **POST /handleAuthenticationInit** (First part of the authentication process)\n- **POST /handleAuthenticationComplete** (Last part of the authentication process)\n- **GET /registeredUsersEndpoint** (Returns all the registered users)" as ServerEndpointsNote
+Server .. ServerEndpointsNote
+
+class SessionData {
+    - _secureRemotePassword : std::unique_ptr<MyCryptoLibrary::SecureRemotePassword>
+    - _groupId : unsigned int
+    - _salt : std::string
+    - _hash : std::string
+    - _password : std::string
+    - _vHex : std::string
+    - _registrationComplete : bool = false
+    - _privateKeyHex : std::string
+    - _publicKeyHex : std::string
+    - _peerPublicKeyHex : std::string
+    - _uHex : std::string
+    - _xHex : std::string
+    - _SHex : std::string
+    - _KHex : std::string
+    - _MHex : std::string
+    - _M2Hex : std::string
+
+    + SessionData(groupId : const unsigned int, salt : const std::string&, hash : const std::string&, debugFlag : const bool) {explicit}
+    + ~SessionData()
+}
+
+SessionData ..> MyCryptoLibrary.SecureRemotePassword : contains
+
+namespace SrpParametersLoader {
+
+    class SrpParameters {
+        + _groupId : unsigned int
+        + _sizeBits : unsigned int
+        + _nHex : std::string
+        + _g : unsigned int
+        + _groupName : std::string
+        + _hashName : std::string
+    }
+
+    class SrpParametersLoader {
+        + loadSrpParameters(filename : const std::string&) : std::map<unsigned int, SrpParameters>
+    }
+
+    SrpParametersLoader ..> SrpParameters : uses
+
+}
 
 @enduml

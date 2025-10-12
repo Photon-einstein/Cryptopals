@@ -186,7 +186,7 @@ const bool Client::authentication(const int portServerNumber) {
                                "Invalid port server number used.");
     }
     // check if the registration was already done
-    if (!_sessionData || !_sessionData->registrationComplete) {
+    if (!_sessionData || !_sessionData->_registrationComplete) {
       throw std::runtime_error("Client log | authentication(): "
                                "Registration is not completed.");
     }
@@ -407,7 +407,7 @@ const bool Client::registrationComplete(const int portServerNumber,
           _serverConfirmationMessage + "'.");
     }
     // mark the registration step as complete at this point
-    _sessionData->registrationComplete = true;
+    _sessionData->_registrationComplete = true;
     return registrationCompleteResult;
   } catch (const std::exception &e) {
     std::cerr << e.what() << std::endl;

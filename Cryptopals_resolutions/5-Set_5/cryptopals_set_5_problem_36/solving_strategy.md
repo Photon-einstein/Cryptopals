@@ -832,7 +832,7 @@ Client                        Server
      it should return an error (Done)
 115. Fix static code analysis problems (Done)
 
-116. Creation of uml class diagram for this source code (in progress)
+116. Creation of UML class diagram for this source code (Done)
 
 - Command to generate the document:
 
@@ -845,12 +845,12 @@ Subtasks:
 - Client.hpp (Done)
 - EncryptionUtility.hpp (Done)
 - MessageExtractionFacility.hpp (Done)
-- SecureRemotePassword.hpp (in progress)
-- Server.hpp (TBD)
-- SessionData.hpp (TBD)
-- SrpParametersLoader (TBD)
+- SecureRemotePassword.hpp (Done)
+- Server.hpp (Done)
+- SessionData.hpp (Done)
+- SrpParametersLoader (Done)
 
-117. Creation of the uml sequence diagram for this source code (TBD)
+117. Creation of the UML sequence diagram for this source code (in progress)
 
 ```bash
 java -jar /home/tiago-sousa/.vscode/extensions/jebbs.plantuml-2.18.1/plantuml.jar -tsvg sequence_diagram.puml
