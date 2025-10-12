@@ -36,9 +36,8 @@ Client::Client(const std::string &clientId, const bool debugFlag)
     throw std::runtime_error("Client log | constructor(): "
                              "Client ID is null.");
   }
-  _srpParametersMap = SrpParametersLoader::loadSrpParameters(
-      MyCryptoLibrary::SecureRemotePassword::
-          getSrpParametersFilenameLocation());
+  _srpParametersMap =
+      SrpParametersLoader::loadSrpParameters(_srpParametersFilename);
 }
 /******************************************************************************/
 Client::~Client() {}
