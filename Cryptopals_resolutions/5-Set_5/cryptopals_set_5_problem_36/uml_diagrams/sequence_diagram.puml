@@ -60,18 +60,38 @@ activate Client
             Client constructs JSON registration init
             with clientId and requestedGroup
         end note
-        Client -> ServerAPI : HTTP POST /srp/register/init (1st msg of the registration process)
+        Client -> ServerAPI : HTTP POST /srp/register/init (First message of the registration process)
         activate ServerAPI
+            ServerAPI -> ServerAPI : extract client's id as extractedClientId
+            ServerAPI -> ServerAPI : extract client's requestedGroup as extractedGroupId
+            ServerAPI -> ServerAPI : Validate extractedClientId
+            ServerAPI -> ServerAPI : Validate extractedGroupId
+            ServerAPI -> ServerAPI : Get minSaltSize value
+            
+            ServerAPI -> ServerEU : generateCryptographicNonce(minSaltSize)
+            activate ServerEU
+            note right
+                Loads the result into the salt variable
+            end note
+            ServerEU --> ServerAPI: Returns the new salt variable
+            deactivate ServerEU
 
+            ServerAPI -> ServerSession: Create SessionData(extractedGroupId, salt, hash, _debugFlag)
+            activate ServerSession
+                ServerSession -> ServerSession: Calls SessionData constructor
+                ServerSession -> ServerSRP: Create SecureRemotePassword(debugFlag) 
+                activate ServerSRP
+                    ServerSRP --> ServerSession: Returns the new SecureRemotePassword
+                deactivate ServerSRP
+                ServerSession -> ServerSession: Validate groupId
+                ServerSession -> ServerSession: Validate salt
+                ServerSession -> ServerSession: Validate hash
+                ServerSession -> ServerSession: Store groupId, salt and hash
+                
+                ServerSession --> ServerAPI: Returns the new SessionData
+            deactivate ServerSession
 
-
-
-
-
-
-
-
-
+            ServerAPI -> ServerAPI: Build JSON reply to the client 
             ServerAPI --> Client : HTTP 201 OK 
             note right
                 Server constructs JSON registration init 
@@ -81,6 +101,69 @@ activate Client
         deactivate ServerAPI
         Client --> Client: registrationResult
     deactivate Client
+
+    alt registrationResult == false
+        Client -> Client : Returns false
+    end
+
+    Client -> Client: registrationComplete(portServerNumber, _groupId)
+    activate Client
+        Client -> Client: Validation _sessionData
+        Client -> ClientEU: generatePassword(_passwordSize)
+        activate ClientEU
+            ClientEU --> Client: Return random password
+            note right
+                Loads the result into the
+                _sessionData->_password variable
+            end note
+        deactivate ClientEU
+        Client -> Client: Validate password
+
+        Client -> ClientSRP: calculateX( _hash, _clientId, _password, _salt)
+        activate ClientSRP
+            ClientSRP --> Client: return calculated x
+            note right
+                x = H(salt | H(username | ":" | password))
+            end note
+        deactivate ClientSRP
+        Client -> Client: Stores the result at xHex
+
+        Client -> ClientSRP: calculateV(xHex, _nHex, _g)
+        activate ClientSRP
+            ClientSRP --> Client: return calculated v
+            note right
+                v = g^x mod N
+            end note
+        deactivate ClientSRP
+        Client -> Client: Stores the result at vHex
+
+        Client -> Client : built "srp/register/complete" message
+        note right
+            Client constructs JSON registration complete
+            with clientId and v
+        end note
+        Client -> ServerAPI : HTTP POST /srp/register/complete (Last message of the registration process)
+
+        activate ServerAPI
+            ServerAPI -> ServerAPI : extract client's id as extractedClientId
+            ServerAPI -> ServerAPI : extract client's v parameter as extractedVHex
+            ServerAPI -> ServerAPI : Validate extractedClientId
+            ServerAPI -> ServerAPI : Validate extractedVHex
+            ServerAPI -> ServerAPI : Store extractedVHex
+
+            note right
+                Server constructs JSON registration complete 
+                response with a confirmation message
+            end note
+            ServerAPI --> Client : HTTP 201 OK 
+        deactivate ServerAPI
+        Client --> Client: registrationResult
+    deactivate Client
+    
+    alt registrationResult == true
+        Client -> Client : Set _registrationComplete = true
+    end
+
 
 deactivate Client
 
