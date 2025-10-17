@@ -53,6 +53,7 @@ deactivate Client
 
 Main -> Client : registration(client->getProductionPort(), requestedGroup)
 activate Client
+    Client -> Client: validate portServerNumber
     Client -> Client: registrationInit(portServerNumber, groupId)
     activate Client
         Client -> Client : built "srp/register/init" message
@@ -164,8 +165,92 @@ activate Client
         Client -> Client : Set _registrationComplete = true
     end
 
+    Client --> Main: registrationCompleteResult
+deactivate Client
+
+alt registrationCompleteResult == false:
+    Main -> Main: throw std::runtime_error("Registration() failed.");
+end
+
+Main -> Client : authentication(client->getProductionPort())
+activate Client
+    Client -> Client: validate portServerNumber
+    alt _sessionData == null or _sessionData->registrationComplete == false:
+        Client -> Client: throw std::runtime_error("Registration is not completed.");
+    end
+
+    Client -> Client: authenticationInit(portServerNumber)
+    activate Client
+        Client -> Client : built "srp/authentication/init" message
+        note right
+            Client constructs JSON authentication init
+            with clientId
+        end note
+        Client -> ServerAPI : HTTP POST /srp/auth/init (First message of the authentication process)
+        activate ServerAPI
+            ServerAPI -> ServerAPI : extract client's id as extractedClientId
+            ServerAPI -> ServerAPI : Validate extractedClientId
+            ServerAPI -> ServerAPI : Get groupId
+            ServerAPI -> ServerAPI : Get saltSize
+            ServerAPI -> ServerAPI : Get minSaltSize
+            ServerAPI -> ServerAPI : Get vHex as extractedVHex
+            ServerAPI -> ServerAPI : Validate saltSize
+            ServerAPI -> ServerAPI : Validate extractedVHex
+            ServerAPI -> ServerAPI : Get minPrivateKeyBits
+
+            ServerAPI -> ServerSRP: generatePrivateKey(_nHex, minPrivateKeyBits)
+            activate ServerSRP
+                ServerSRP -> ServerSRP: Validate _nHex
+                ServerSRP -> ServerSRP: Validate minPrivateKeyBits
+
+                loop generate random candidate until n in the range [1, N-1] and at least minPrivateKeyBits
+                    ServerSRP -> ServerSRP: random number generation as n
+                end
+                ServerSRP --> ServerAPI: privateKey
+            deactivate ServerSRP
+            ServerAPI -> ServerAPI: Store privateKey as _privateKeyHex
+
+            ServerAPI -> ServerAPI: getIsServerFlag
+            activate ServerAPI
+                ServerAPI --> ServerAPI: isServer
+            deactivate ServerAPI
+
+            ServerAPI -> ServerSRP: calculatePublicKey(_privateKeyHex, _nHex, gHex, isServer, k, _vHex)
+            activate ServerSRP
+                ServerSRP -> ServerSRP: Validate _privateKeyHex as b
+                ServerSRP -> ServerSRP: Validate _nHex as N
+                ServerSRP -> ServerSRP: Validate gHex as g
+                ServerSRP -> ServerSRP: Validate k
+                ServerSRP -> ServerSRP: Validate vHex as v
+
+                ServerSRP --> ServerAPI: return calculated B
+                note right
+                    B = (k*v + g^b) mod N
+                end note
+            deactivate ServerSRP
+
+            note right
+                Server constructs JSON authentication init 
+                response with a confirmation message with the
+                fields: clientId, salt, B, groupId
+            end note
+            ServerAPI --> Client : HTTP 201 OK 
+        deactivate ServerAPI
+
+    deactivate Client
+
+    alt registrationResult == false
+        Client -> Client : Returns false
+    end
+
+    Client -> Client: authenticationComplete(portServerNumber)
+    activate Client
+
+    deactivate Client
+
 
 deactivate Client
+
 
 Main -> Main : Program ends
 deactivate Main
