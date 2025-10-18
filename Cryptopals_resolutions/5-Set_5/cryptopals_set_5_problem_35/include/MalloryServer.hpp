@@ -186,7 +186,7 @@ private:
    * symmetric encryption after the Diffie Hellman key exchange protocol has
    * been completed. This fake server performs the man in the middle attack.
    * Normal function from a normal server is to receive messages from clients,
-   * checks the validity of the session id and if valid, sends back a
+   * checks the validity of the session ID and if valid, sends back a
    * confirmation response. This fake server decrypt, read and encrypt again
    * with another session to the real server.
    *
@@ -207,9 +207,9 @@ private:
   void getSessionsDataEndpoint();
 
   /**
-   * @brief This method will generate an unique session's id.
+   * @brief This method will generate an unique session's ID.
    *
-   * This method will generate an unique session's id for a given connection
+   * This method will generate an unique session's ID for a given connection
    * request.
    *
    * @return An unique session's ID to be used.

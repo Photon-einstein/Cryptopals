@@ -857,6 +857,57 @@ java -jar /home/tiago-sousa/.vscode/extensions/jebbs.plantuml-2.18.1/plantuml.ja
 ```
 
 118. Review the sequence diagram (Done)
+119. Run the static code analysis again (Done)
 
-119. Run the static code analysis again (in progress)
-120. Review the entire code base one last time (TBD)
+120. Review the entire code base one last time (in progress)
+
+- Include files:
+
+* Client.hpp (TBD)
+* EncryptionUtility.hpp (TBD)
+* MessageExtractionFacility.hpp (TBD)
+* SecureRemotePassword.hpp (TBD)
+* Server.hpp (TBD)
+* SessionData.hpp (TBD)
+* SrpParametersLoader.hpp (TBD)
+
+- Source files:
+
+* Client.cpp (TBD)
+* EncryptionUtility.cpp (TBD)
+* MessageExtractionFacility.cpp (TBD)
+* runClient1.cpp (TBD)
+* runServer.cpp (TBD)
+* SecureRemotePassword.cpp (TBD)
+* Server.cpp (TBD)
+* SessionData.cpp (TBD)
+* SrpParametersLoader.cpp (TBD)
+* cryptopals_set_5_problem_36/CMakeLists.txt (TBD)
+
+- Test files:
+
+* test_Client.cpp (TBD)
+* test_SecureRemotePasswordProtocol.cpp (TBD)
+* test_Server.cpp (TBD)
+* test_SessionData.cpp (TBD)
+* test_SHA1.cpp (TBD)
+* test_SHA256.cpp (TBD)
+* test_SHA384.cpp (TBD)
+* test_SHA512.cpp (TBD)
+* test_srpParametersLoader.cpp (TBD)
+* cryptopals_set_5_problem_36/tests/CMakeLists.txt (TBD)
+
+- testScripts:
+
+* calculate_k_MultiplierParameter.py (TBD)
+* calculateK.py (TBD)
+* calculateM2.py (TBD)
+* calculateM.py (TBD)
+* calculatePublicKey.py (TBD)
+* calculateSClient.py (TBD)
+* calculateSServer.py (TBD)
+* calculateU.py (TBD)
+* calculateV.py (TBD)
+* calculateX.py (TBD)
+* count_avg_loc.sh (TBD)
+* testSRP_withRFC_vector.py (TBD)

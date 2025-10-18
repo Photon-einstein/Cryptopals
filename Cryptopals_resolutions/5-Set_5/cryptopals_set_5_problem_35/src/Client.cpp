@@ -20,7 +20,7 @@
  * This method will perform the constructor of the Client object when a group
  * name is used in its constructor.
  *
- * @param clientId The client id to be used by this client.
+ * @param clientId The client ID to be used by this client.
  * @param debugFlag The boolean flag to decide if aggressive prints should be
  * displayed into the standard output, created for troubleshooting purposes.
  * @param groupNameDH The group name to be used in the DH key exchange protocol,
@@ -46,7 +46,7 @@ Client::Client(const std::string &clientId, const bool debugFlag,
  * This method will perform the constructor of the Client object when the DH
  * parameters 'p' and 'g' are used.
  *
- * @param clientId The client id to be used by this client.
+ * @param clientId The client ID to be used by this client.
  * @param debugFlag The boolean flag to decide if aggressive prints should be
  * displayed into the standard output, created for troubleshooting purposes.
  * @param p The prime number p to be used in the DH key exchange protocol.
@@ -155,7 +155,7 @@ Client::diffieHellmanKeyExchange(const int portServerNumber) {
     std::vector<uint8_t> iv = MessageExtractionFacility::hexToBytes(ivHex);
     if (_debugFlag) {
       std::cout << "\n--- Client log | Extracted Data ---" << std::endl;
-      std::cout << "\tSession id: " << sessionId << std::endl;
+      std::cout << "\tSession ID: " << sessionId << std::endl;
       std::cout << "\tNonce: " << extractedNonceServer << std::endl;
       std::cout << "\tPrime p: " << extractedPrimeP << std::endl;
       std::cout << "\tGenerator g: " << extractedGeneratorG << std::endl;
@@ -220,7 +220,7 @@ Client::diffieHellmanKeyExchange(const int portServerNumber) {
  *
  * @param portServerNumber The number of the server to use in this message
  * exchange.
- * @param sessionId The session id to be used in this connection with the
+ * @param sessionId The session ID to be used in this connection with the
  * server.
  *
  * @return A bool, true if the exchange and validation was successful, failure
@@ -245,7 +245,7 @@ const bool Client::messageExchange(const int portServerNumber,
     if (_diffieHellmanMap.find(sessionId) == _diffieHellmanMap.end()) {
       throw std::runtime_error(
           "Client log | messageExchange(): "
-          "The session id received as an argument is not setup.");
+          "The session ID received as an argument is not setup.");
     }
     // rotate iv
     _diffieHellmanMap[sessionId]->_iv =
@@ -336,12 +336,12 @@ const bool Client::messageExchange(const int portServerNumber,
 }
 /******************************************************************************/
 /**
- * @brief This method will confirm if a given session id is correctly setup.
+ * @brief This method will confirm if a given session ID is correctly setup.
  *
- * This method will confirm if a given session id is correctly setup on the
+ * This method will confirm if a given session ID is correctly setup on the
  * client side.
  *
- * @param sessionId The session id to be confirmed.
+ * @param sessionId The session ID to be confirmed.
  *
  * @return A bool value, true if the sessionId exists, false otherwise.
  */
@@ -425,12 +425,12 @@ Client::getDiffieHellmanMap() {
  * These method's arguments are one entry from the endpoint of the server
  * named GET '/sessionsData'.
  *
- * @param sessionId The session id to be verified.
- * @param clientId The client id to be verified for a given session id.
- * @param clientNonce The client nonce to be verified for a given session id.
- * @param serverNonce The server nonce to be verified for a given session id.
- * @param derivedKey The derived key to be verified for a given session id.
- * @param iv The initialization vector to be verified for a given session id.
+ * @param sessionId The session ID to be verified.
+ * @param clientId The client ID to be verified for a given session ID.
+ * @param clientNonce The client nonce to be verified for a given session ID.
+ * @param serverNonce The server nonce to be verified for a given session ID.
+ * @param derivedKey The derived key to be verified for a given session ID.
+ * @param iv The initialization vector to be verified for a given session ID.
  *
  * @return Bool value, true if there is a match, false otherwise.
  */
