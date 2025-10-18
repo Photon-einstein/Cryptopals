@@ -29,7 +29,6 @@ class Client {
     + registration(portServerNumber : const int, groupId : const int = 1) : const bool
     + authentication(portServerNumber : const int) : const bool
     + getIsServerFlag() : bool {static}
-    + calculateX(hash : const std::string&, salt : const std::string&, password : const std::string&) : std::string {static}
     - registrationInit(portServerNumber : const int, groupId : const unsigned int) : const bool
     - registrationComplete(portServerNumber : const int, groupId : const unsigned int) : const bool
     - authenticationInit(portServerNumber : const int) : const bool

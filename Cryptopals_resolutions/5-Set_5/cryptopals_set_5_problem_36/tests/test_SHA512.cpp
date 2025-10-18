@@ -77,7 +77,7 @@ TEST(SHA512Test, sha512_WithVeryLongString_ShouldMatchReference) {
  */
 TEST(SHA512Test, sha512_WithStringWithNullByte_ShouldMatchReference) {
   const std::string input =
-      std::string("abc\0def", 7); // includes '\0' in middle
+      std::string("abc\0def", 7); // includes '\0' in the middle
   const std::string expectedHashValue(
       "1F3108537CA81C8E53E1DFFF2166866FC30B81869DE3F9D2BD3A585A95794A29DAB168CF"
       "B8464119620A991D9AC800F73C0BA0F32342E50EC2DB63C28A7CA809");
@@ -95,7 +95,7 @@ TEST(SHA512Test, sha512_WithStringWithNullByte_ShouldMatchReference) {
  */
 TEST(SHA512Test, sha512_WithAllByteValues_ShouldMatchReference) {
   std::string input;
-  for (int i = 0; i < 256; ++i) { // fixed: only 0x00..0xff, not 512 bytes
+  for (int i = 0; i < 256; ++i) {
     input.push_back(static_cast<char>(i));
   }
   const std::string expectedHashValue(

@@ -1,10 +1,35 @@
-import json
+"""
+calculateV.py
 
-# SRP v parameter calculation: v = g^x mod N
+Compute the SRP verifier v = g^x mod N for SRP groups defined in
+../input/SrpParameters.json.
+
+Module provides:
+- concat_hex_lines(hex_lines): join multi-line hex representations into a single hex string.
+- calculate_v(x_hex, N_hex, g): compute verifier v as uppercase hex, padded to the byte-length of N.
+- main(): example/demo that computes v for configured SRP groups and prints RFC-5054 expected value for group 1.
+
+Notes:
+- All hex inputs/outputs are uppercase and do not include the "0x" prefix.
+- Output is padded to the byte-length of N to ensure consistent formatting across implementations.
+"""
+
+import json
 
 
 def concat_hex_lines(hex_lines):
-    """Concatenate a list of hex string lines into a single hex string."""
+    """Concatenate a list of hex string lines into a single normalized hex string.
+
+    Parameters:
+    - hex_lines (Iterable[str]): lines that together represent a hex number,
+      possibly containing spaces or newlines.
+
+    Returns:
+    - str: a single hex string with whitespace removed.
+
+    Example:
+        concat_hex_lines(["AA BB", "CC"]) -> "AABBCC"
+    """
     return "".join(hex_lines).replace("\n", "").replace(" ", "")
 
 
@@ -13,13 +38,17 @@ def calculate_v(x_hex, N_hex, g):
     Calculates the SRP verifier v according to RFC 5054:
     v = g^x mod N
 
-    Args:
-        x_hex (str): The private key x as a hexadecimal string.
-        N_hex (str): The group prime N as a hexadecimal string.
-        g (int): The generator g as an integer.
+    Parameters:
+    - x_hex (str): The private key x as a hexadecimal string.
+    - N_hex (str): The group prime N as a hexadecimal string.
+    - g (int): The generator g as an integer.
 
     Returns:
-        str: The verifier v as an uppercase hexadecimal string.
+    - str: The verifier v as an uppercase hexadecimal string, zero-padded
+      to the byte-length of N for consistent output.
+
+    Example:
+        calculate_v("94B7...", N_hex, 2) -> "7E27..."
     """
     x = int(x_hex, 16)
     N = int(N_hex, 16)
@@ -31,6 +60,11 @@ def calculate_v(x_hex, N_hex, g):
 
 
 def main():
+    """Load SRP group parameters and print verifier v for each group.
+
+    Uses the x value from the RFC 5054 test vector and prints the expected
+    verifier for group 1 for verification purposes.
+    """
     with open("../input/SrpParameters.json", "r") as f:
         params = json.load(f)
 

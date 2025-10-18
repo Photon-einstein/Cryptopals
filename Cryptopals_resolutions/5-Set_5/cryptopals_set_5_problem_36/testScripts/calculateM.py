@@ -1,13 +1,58 @@
+"""
+calculateM.py
+
+Utilities to compute the SRP proof value M as defined in RFC 5054:
+
+    M = H( H(N) XOR H(g) | H(U) | s | A | B | K )
+
+Where:
+- H is the chosen hash (SHA-1, SHA-256, SHA-384, SHA-512).
+- N, g, s, A, B, K are provided as hexadecimal strings (no "0x" prefix).
+- U (username) is a UTF-8 string.
+
+This module provides:
+- hex_to_bytes(hexstr) -> bytes
+- hash_bytes(hash_name, data) -> bytes
+- calculateM(hash_name, N_hex, g_hex, username, salt_hex, A_hex, B_hex, K_hex) -> str
+
+All returned hex digests are uppercase to match project conventions.
+"""
+
 import hashlib
 
 from calculateK import calculateK
 
 
 def hex_to_bytes(hexstr):
+    """
+    Convert a hexadecimal string to bytes.
+
+    Parameters:
+    - hexstr (str): Hexadecimal string (upper/lower case allowed, no "0x" prefix).
+
+    Returns:
+    - bytes: The decoded byte sequence.
+
+    Raises:
+    - ValueError: if hexstr length is odd or contains non-hex characters.
+    """
     return bytes.fromhex(hexstr)
 
 
 def hash_bytes(hash_name, data):
+    """
+    Compute the raw hash digest bytes for the given data using the requested algorithm.
+
+    Parameters:
+    - hash_name (str): Name of the hash algorithm (e.g. "SHA-1", "SHA-256", "SHA-384", "SHA-512").
+    - data (bytes): Bytes to hash.
+
+    Returns:
+    - bytes: Raw hash digest bytes.
+
+    Raises:
+    - ValueError: if an unsupported hash_name is provided.
+    """
     hash_name = hash_name.replace("-", "").lower()
     if hash_name == "sha1":
         h = hashlib.sha1()
@@ -24,6 +69,22 @@ def hash_bytes(hash_name, data):
 
 
 def calculateM(hash_name, N_hex, g_hex, username, salt_hex, A_hex, B_hex, K_hex):
+    """
+    Calculate the SRP proof value M.
+
+    Parameters:
+    - hash_name (str): Hash algorithm name.
+    - N_hex (str): Modulus N as hex string.
+    - g_hex (str): Generator g as hex string.
+    - username (str): Username (UTF-8).
+    - salt_hex (str): Salt s as hex string.
+    - A_hex (str): Client public value A as hex string.
+    - B_hex (str): Server public value B as hex string.
+    - K_hex (str): Session key K as hex string.
+
+    Returns:
+    - str: Uppercase hex string of M.
+    """
     # H(N)
     N_bytes = hex_to_bytes(N_hex)
     hN = hash_bytes(hash_name, N_bytes)

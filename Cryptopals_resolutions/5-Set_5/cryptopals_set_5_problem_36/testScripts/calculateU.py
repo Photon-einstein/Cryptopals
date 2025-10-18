@@ -1,7 +1,43 @@
+"""
+calculateU.py
+
+Utilities to compute the SRP scrambling parameter u as defined in RFC 5054.
+
+This module provides:
+- hex_to_bytes(hexstr, pad_bytes=None) -> bytes
+    Convert a hexadecimal string to raw bytes and optionally left-pad the result
+    with zero bytes to reach a specified byte length.
+
+- calculate_u(hash_name, A_hex, B_hex, N_hex) -> str
+    Compute u = H(PAD(A) || PAD(B)) where PAD(x) denotes left-padding x to the
+    byte-length of N. The function selects the requested hash algorithm
+    (SHA-1, SHA-256, SHA-384, SHA-512) and returns the digest as an uppercase
+    hexadecimal string.
+
+Notes:
+- All hex inputs are expected without a "0x" prefix.
+- The returned hex string is uppercase for consistency with other tools.
+"""
+
 import hashlib
 
 
 def hex_to_bytes(hexstr, pad_bytes=None):
+    """
+    Convert a hexadecimal string to bytes and optionally left-pad to pad_bytes.
+
+    Parameters:
+    - hexstr (str): Hexadecimal string (upper/lower case allowed, no "0x" prefix).
+    - pad_bytes (int | None): If provided and the resulting bytes length is less
+      than pad_bytes, the result is left-padded with zero bytes to exactly
+      pad_bytes length.
+
+    Returns:
+    - bytes: Raw bytes represented by the hex string, possibly left-padded.
+
+    Example:
+        hex_to_bytes("01", pad_bytes=2) -> b'\x00\x01'
+    """
     b = bytes.fromhex(hexstr)
     if pad_bytes is not None and len(b) < pad_bytes:
         b = b.rjust(pad_bytes, b"\x00")
@@ -9,6 +45,26 @@ def hex_to_bytes(hexstr, pad_bytes=None):
 
 
 def calculate_u(hash_name, A_hex, B_hex, N_hex):
+    """
+    Calculate the scrambling parameter u = H(PAD(A) || PAD(B)).
+
+    Parameters:
+    - hash_name (str): Name of the hash algorithm to use (e.g. "SHA-1", "SHA-256", "SHA-384", "SHA-512").
+    - A_hex (str): Client public value A as a hex string.
+    - B_hex (str): Server public value B as a hex string.
+    - N_hex (str): Group prime N as a hex string; used to determine padding length.
+
+    Returns:
+    - str: Uppercase hexadecimal digest of H(PAD(A) || PAD(B)).
+
+    Raises:
+    - ValueError: if an unsupported hash_name is provided.
+
+    Behavior:
+    - Pads A and B to the byte-length of N, concatenates PAD(A)||PAD(B), hashes the
+      concatenation with the selected hash algorithm, and returns the hex digest
+      in uppercase.
+    """
     # Pad A and B to the byte length of N
     N = int(N_hex, 16)
     pad_bytes = (N.bit_length() + 7) // 8

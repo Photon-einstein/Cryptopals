@@ -1,28 +1,50 @@
+"""
+calculateX.py
+
+Compute the SRP private key x as defined in RFC 5054:
+
+    x = H( salt || H( username || ":" || password ) )
+
+This module provides:
+- calculate_x(hash_name, salt_hex, username, password) -> str
+    Computes the 'x' value using the requested hash algorithm and returns it
+    as an uppercase hexadecimal string (no "0x" prefix).
+
+Notes:
+- salt_hex must be a hex string (uppercase or lowercase) representing the salt.
+- hash_name supports: "SHA-1", "SHA-256", "SHA-384", "SHA-512" (case-insensitive).
+- The returned hex string matches RFC 5054 test vectors when using the
+  corresponding inputs.
+"""
+
 import hashlib
 
 
 def calculate_x(hash_name, salt_hex, username, password):
     """
-    /**
-     * @brief Calculates the SRP private key 'x' according to RFC 5054.
-     *
-     * Formula: x = SHA-<alg>(salt | SHA-<alg>(username | ":" | password))
-     *
-     * @param hash_name The hash algorithm to use ("SHA-1", "SHA-256", "SHA-384", "SHA-512").
-     * @param salt_hex The salt value as a hexadecimal string.
-     * @param username The username as a string.
-     * @param password The password as a string.
-     * @return The computed 'x' value as an uppercase hexadecimal string.
-     * @throws ValueError if the hash_name is not supported.
-     *
-     * Example (RFC 5054 test vector):
-     *   salt_hex = "BEB25379D1A8581EB5A727673A2441EE"
-     *   username = "alice"
-     *   password = "password123"
-     *   hash_name = "SHA-1"
-     *   x = calculate_x(hash_name, salt_hex, username, password)
-     *   # x == "94B7555AABE9127CC58CCF4993DB6CF84D16C124"
-     */
+    Calculate the SRP private key 'x' according to RFC 5054.
+
+    Formula:
+        x = H( salt || H( username || ":" || password ) )
+
+    Parameters:
+    - hash_name (str): Hash algorithm name (e.g. "SHA-1", "SHA-256", "SHA-384", "SHA-512").
+    - salt_hex (str): Salt as a hexadecimal string (no "0x" prefix).
+    - username (str): Username string.
+    - password (str): Password string.
+
+    Returns:
+    - str: Computed 'x' value as an uppercase hexadecimal string.
+
+    Raises:
+    - ValueError: if an unsupported hash_name is provided.
+
+    Example:
+        salt_hex = "BEB25379D1A8581EB5A727673A2441EE"
+        username = "alice"
+        password = "password123"
+        x = calculate_x("SHA-1", salt_hex, username, password)
+        # x == "94B7555AABE9127CC58CCF4993DB6CF84D16C124"
     """
     # Convert salt from hex to bytes
     salt_bytes = bytes.fromhex(salt_hex)

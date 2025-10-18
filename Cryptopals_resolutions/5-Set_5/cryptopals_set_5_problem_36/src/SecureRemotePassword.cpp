@@ -9,18 +9,19 @@
 #include "./../include/SecureRemotePassword.hpp"
 
 /* static fields initialization */
-unsigned int MyCryptoLibrary::SecureRemotePassword::_minSizePrivateKey = 256;
+const unsigned int MyCryptoLibrary::SecureRemotePassword::_minSizePrivateKey{
+    256}; // bits
 std::unordered_map<std::string, EncryptionUtility::HashFn>
     MyCryptoLibrary::SecureRemotePassword::_hashMap =
         EncryptionUtility::getHashMap();
 
-const std::string
-    MyCryptoLibrary::SecureRemotePassword::_srpParametersFilename =
-        "../input/SrpParameters.json";
+const std::string MyCryptoLibrary::SecureRemotePassword::_srpParametersFilename{
+    "../input/SrpParameters.json"};
 
 const std::map<unsigned int, MessageExtractionFacility::UniqueBIGNUM>
-    MyCryptoLibrary::SecureRemotePassword::_kMap =
-        MyCryptoLibrary::SecureRemotePassword::calculateKMultiplierParameters();
+    MyCryptoLibrary::SecureRemotePassword::_kMap{
+        MyCryptoLibrary::SecureRemotePassword::
+            calculateKMultiplierParameters()};
 
 /* constructor / destructor */
 
@@ -114,7 +115,7 @@ MyCryptoLibrary::SecureRemotePassword::getSrpParametersFilenameLocation() {
  * @brief This method returns the minimum size of a private key in bits,
  * according to the SRP protocol.
  *
- * @return The minimum size of a private key at the SPP protocol, in bits.
+ * @return The minimum size of a private key at the SRP protocol, in bits.
  */
 const unsigned int &
 MyCryptoLibrary::SecureRemotePassword::getMinSizePrivateKey() {
@@ -173,7 +174,7 @@ MyCryptoLibrary::SecureRemotePassword::getSrpParametersMap() const {
  *
  * This method will generate a private key to be used at a SRP protocol.
  * Requirements of the private key:
- * - should be at in the range [1, N-1];
+ * - should be in the range [1, N-1];
  * - should be at least minSizeBits;
  *
  * @param NHex N in hexadecimal format.
@@ -383,7 +384,7 @@ MessageExtractionFacility::UniqueBIGNUM
 MyCryptoLibrary::SecureRemotePassword::calculateK(const std::string &NHex,
                                                   const std::string &gHex,
                                                   const std::string &hashName) {
-  // input parameters validation
+  // Input parameters validation
   if (NHex.empty() || gHex.empty()) {
     throw std::invalid_argument(
         "SecureRemotePassword::calculateK(): N or g is empty.");
@@ -441,11 +442,11 @@ MyCryptoLibrary::SecureRemotePassword::calculateK(const std::string &NHex,
  * @param g The value of the generator g.
  *
  * @return The result of v = g^x mod N, in hexadecimal format.
- * @throw std::runtime_error If the calculation fails.
+ * @throw std::runtime_error if the calculation fails.
  */
 const std::string MyCryptoLibrary::SecureRemotePassword::calculateV(
     const std::string &xHex, const std::string &NHex, unsigned int g) {
-  // input parameters validation
+  // Input parameters validation
   if (xHex.empty() || NHex.empty() || g <= 1) {
     throw std::invalid_argument("SecureRemotePassword::calculateV(): invalid "
                                 "input parameters received.");
@@ -687,7 +688,7 @@ std::string MyCryptoLibrary::SecureRemotePassword::calculateSClient(
   BN_free(tmp2);
   BN_free(S);
   BN_CTX_free(ctx);
-  // to upper case conversion
+  // To upper case conversion
   std::transform(SStr.begin(), SStr.end(), SStr.begin(), ::toupper);
   return SStr;
 }

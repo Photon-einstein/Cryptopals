@@ -1,4 +1,3 @@
-#include "../include/SecureRemotePassword.hpp"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -8,6 +7,7 @@
 
 #include "../include/Client.hpp"
 #include "../include/EncryptionUtility.hpp"
+#include "../include/SecureRemotePassword.hpp"
 #include "../include/Server.hpp"
 #include "../include/SrpParametersLoader.hpp"
 
@@ -57,7 +57,7 @@ protected:
  */
 TEST_F(SecureRemotePasswordProtocolTest,
        GetRootEndpoint_WithServerRunning_ShouldReturnSuccessStatus) {
-  auto response = cpr::Get(cpr::Url{
+  cpr::Response response = cpr::Get(cpr::Url{
       "http://localhost:" + std::to_string(_server->getTestPort()) + "/"});
   EXPECT_EQ(response.status_code, 200);
   crow::json::rvalue jsonResponse = crow::json::load(response.text);
@@ -275,7 +275,7 @@ TEST_F(
  * @brief Ensures that the /srp/register/init endpoint is working as expected.
  * The scenario tested is the following one:
  * - a valid user ID is provided by a given client;
- * - the request group ID provided is less than the minimum group id that
+ * - the request group ID provided is less than the minimum group ID that
  * exists;
  * - the expected result should be a group ID equals to the minimum required
  * value defined at the server level.
@@ -356,7 +356,7 @@ TEST_F(SecureRemotePasswordProtocolTest,
  * @test Test the correctness of the /srp/register/init endpoint of the server.
  * @brief Ensures that the /srp/register/init endpoint is working as expected.
  * The scenario tested is the following one:
- * - a bad request, without any client id provided;
+ * - a bad request, without any client ID provided;
  * - the expected result should be a 404 error code with error message ending in
  * "ClientId not found"
  */
@@ -386,7 +386,8 @@ TEST_F(SecureRemotePasswordProtocolTest,
  * Scenario:
  * - valid portServerNumber provided;
  * - no groupId provided, should use the default one.
- * Should succeed in the registration step.
+ *
+ * The scenario should succeed in the registration step.
  */
 TEST_F(SecureRemotePasswordProtocolTest,
        Registration_WithValidPortNumberAndDefaultGroupId_ShouldReturnSuccess) {
@@ -432,8 +433,9 @@ TEST_F(SecureRemotePasswordProtocolTest,
  * @brief Test the correctness of the registration method at the client side.
  * Scenario:
  * - valid portServerNumber provided;
- * - groupId provided, invalid one, bellow minimum bound.
- * Should succeed in the registration step.
+ * - groupId provided, invalid one, below minimum bound.
+ *
+ * The scenario should succeed in the registration step.
  */
 TEST_F(
     SecureRemotePasswordProtocolTest,
@@ -481,8 +483,9 @@ TEST_F(
  * @brief Test the correctness of the registration method at the client side.
  * Scenario:
  * - valid portServerNumber provided;
- * - groupId provided, valid one.
- * Should succeed in the registration step.
+ * - groupId provided is a valid one.
+ *
+ * The scenario should succeed in the registration step.
  */
 TEST_F(SecureRemotePasswordProtocolTest,
        Registration_WithValidPortNumberAndValidGroupId_ShouldReturnSuccess) {
@@ -530,7 +533,8 @@ TEST_F(SecureRemotePasswordProtocolTest,
  * Scenario:
  * - valid portServerNumber provided;
  * - groupId provided, invalid one, above maximum bound.
- * Should succeed in the registration step.
+ *
+ * The scenario should succeed in the registration step.
  */
 TEST_F(
     SecureRemotePasswordProtocolTest,
@@ -578,7 +582,8 @@ TEST_F(
  * @brief Test the correctness of the registration method at the client side.
  * Scenario:
  * - invalid portServerNumber provided;
- * Should fail in the registration step.
+ *
+ * The scenario should fail in the registration step.
  */
 TEST_F(SecureRemotePasswordProtocolTest,
        Registration_WithInvalidPortNumber_ShouldReturnAnError) {
@@ -591,13 +596,16 @@ TEST_F(SecureRemotePasswordProtocolTest,
 /**
  * @test Test the correctness of the registration method at the client and
  * server side.
- * @brief Test the correctness of the registration method at the client  and
- * server side. Scenario:
+ * @brief Test the correctness of the registration method at the client and
+ * server side.
+ * Scenario:
  * - Client 1 completes the registration process with the server;
  * - Client 1 attempts the registration process with the server a second time,
- * it should return an error message, as it has already registered once.
+ * it should return an error message, as it has already registered once;
  * - A post request with a registration/init is attempted for the same client
- * ID, it is expected that the server will return an error;
+ * ID.
+ *
+ * The server is expected to return an error;
  */
 TEST_F(
     SecureRemotePasswordProtocolTest,
@@ -684,7 +692,9 @@ TEST_F(
  * - Client 1 attempts the registration process with the server a second time,
  * it should return an error message, as it has already registered once.
  * - A post request with a registration/init is attempted for the same client
- * ID, it is expected that the server will return an error;
+ * ID.
+ *
+ * The server is expected to return an error;
  */
 TEST_F(
     SecureRemotePasswordProtocolTest,

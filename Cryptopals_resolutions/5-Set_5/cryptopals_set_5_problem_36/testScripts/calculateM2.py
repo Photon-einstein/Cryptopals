@@ -1,40 +1,95 @@
+"""
+calculateM2.py
+
+Utilities to compute the SRP server proof M2 = H(A | M | K).
+
+This module provides:
+- hex_to_bytes(hexstr) -> bytes
+    Convert a hex string to raw bytes.
+
+- calculateM2(hash_name, A_hex, M_hex, K_hex) -> str
+    Compute M2 = H(A || M || K) where A, M, K are provided as hex strings
+    and H is the selected hash function (SHA-1, SHA-256, SHA-384, SHA-512).
+
+Behavior and notes:
+- All inputs are expected to be hex strings without "0x" prefix.
+- The returned digest is an uppercase hex string to match project conventions.
+- This is a small test/tool script intended for verification using known
+  RFC 5054 vectors.
+"""
+
 import hashlib
 
 
-def hex_to_bytes(hexstr):
+def hex_to_bytes(hexstr: str) -> bytes:
+    """
+    Convert a hexadecimal string to bytes.
+
+    Parameters:
+    - hexstr: Hexadecimal string (may be upper/lower case, no "0x" prefix).
+
+    Returns:
+    - bytes: Raw bytes represented by the hex string.
+
+    Raises:
+    - ValueError if the input contains non-hex characters or has odd length.
+    """
     return bytes.fromhex(hexstr)
 
 
-def calculateM2(hash_name, A_hex, M_hex, K_hex):
+def calculateM2(hash_name: str, A_hex: str, M_hex: str, K_hex: str) -> str:
     """
-    Calculates M2 = H(A | M | K) for SRP.
-    All inputs are hex strings.
-    Returns uppercase hex digest.
+    Calculate M2 = H(A | M | K) for SRP.
+
+    Parameters:
+    - hash_name: Name of the hash algorithm (e.g. "SHA-1", "SHA-256", "SHA-384", "SHA-512").
+    - A_hex: Client public value A as a hex string.
+    - M_hex: Client proof M as a hex string.
+    - K_hex: Session key K as a hex string.
+
+    Returns:
+    - Uppercase hex digest string of H(A || M || K).
+
+    Raises:
+    - ValueError if an unsupported hash_name is provided.
     """
     A_bytes = hex_to_bytes(A_hex)
     M_bytes = hex_to_bytes(M_hex)
     K_bytes = hex_to_bytes(K_hex)
     input_bytes = A_bytes + M_bytes + K_bytes
 
-    hash_name = hash_name.lower().replace("-", "")
-    if hash_name == "sha1":
+    hn = hash_name.lower().replace("-", "")
+    if hn == "sha1":
         h = hashlib.sha1()
-    elif hash_name == "sha256":
+    elif hn == "sha256":
         h = hashlib.sha256()
-    elif hash_name == "sha384":
+    elif hn == "sha384":
         h = hashlib.sha384()
-    elif hash_name == "sha512":
+    elif hn == "sha512":
         h = hashlib.sha512()
     else:
-        raise ValueError("Unsupported hash: " + hash_name)
+        raise ValueError(f"Unsupported hash: {hash_name}")
+
     h.update(input_bytes)
     return h.hexdigest().upper()
 
 
 if __name__ == "__main__":
+    """
+    Example usage with RFC 5054 test vectors.
+
+    Running this script will print M2 values for a set of precomputed M and K
+    values for several hash algorithms. Use this to verify implementations.
+    """
     # Example RFC 5054 test vector values
-    A_hex = "61D5E490F6F1B79547B0704C436F523DD0E560F0C64115BB72557EC44352E8903211C04692272D8B2D1A5358A2CF1B6E0BFCF99F921530EC8E39356179EAE45E42BA92AEACED825171E1E8B9AF6D9C03E1327F44BE087EF06530E69F66615261EEF54073CA11CF5858F0EDFDFE15EFEAB349EF5D76988A3672FAC47B0769447B"
-    # Precalculated M and K values for each hash
+    A_hex = (
+        "61D5E490F6F1B79547B0704C436F523DD0E560F0C64115BB72557EC44352E890"
+        "3211C04692272D8B2D1A5358A2CF1B6E0BFCF99F921530EC8E39356179EAE45E"
+        "42BA92AEACED825171E1E8B9AF6D9C03E1327F44BE087EF06530E69F66615261"
+        "EEF54073CA11CF5858F0EDFDFE15EFEAB349EF5D76988A3672FAC47B0769447B"
+    )
+
+    # Precalculated M and K values for each hash (from RFC / project test vectors)
     values = {
         "SHA-1": {
             "M_hex": "3F3BC67169EA71302599CF1B0F5D408B7B65D347",
@@ -54,9 +109,9 @@ if __name__ == "__main__":
         },
     }
 
-    for hash_name in values:
-        M_hex = values[hash_name]["M_hex"]
-        K_hex = values[hash_name]["K_hex"]
+    for hash_name, pair in values.items():
+        M_hex = pair["M_hex"]
+        K_hex = pair["K_hex"]
         M2 = calculateM2(hash_name, A_hex, M_hex, K_hex)
         print(f"{hash_name} M2: {M2}")
 

@@ -49,7 +49,7 @@ std::string toHexString(const std::vector<unsigned char> &data);
  *
  * @param hexString The input string in hexadecimal format (e.g., "48656C6C6F").
  * @return The resulting plaintext string (e.g., "Hello").
- * @throw std::invalid_argument If the input string has an odd length or
+ * @throw std::invalid_argument if the input string has an odd length or
  * contains non-hexadecimal characters.
  */
 std::string hexToPlaintext(const std::string &hexString);

@@ -73,7 +73,7 @@ TEST(SHA1Test, sha1_WithVeryLongString_ShouldMatchReference) {
  */
 TEST(SHA1Test, sha1_WithStringWithNullByte_ShouldMatchReference) {
   const std::string input =
-      std::string("abc\0def", 7); // includes '\0' in middle
+      std::string("abc\0def", 7); // includes '\0' in the middle
   const std::string expectedHashValue(
       "487B1975D97215516D7267DFF3557C0676956056");
   const std::string hash{EncryptionUtility::sha1(input)};

@@ -17,7 +17,7 @@ public:
    * This method will perform the constructor of the Client object when a group
    * name is used in its constructor.
    *
-   * @param clientId The client id to be used by this client.
+   * @param clientId The client ID to be used by this client.
    * @param debugFlag The boolean flag to decide if aggressive prints should be
    * displayed into the standard output, created for troubleshooting purposes.
    *
@@ -59,9 +59,9 @@ public:
   void setTestPort(const int portServerTest);
 
   /**
-   * @brief This method return the client ID.
+   * @brief This method returns the client ID.
    *
-   * This method return the client ID of a given client.
+   * This method returns the client ID of a given client.
    *
    * @return A string, the client ID.
    * @throw runtime_error if the client ID is null.
@@ -95,13 +95,14 @@ public:
    * @brief This method will perform the registration step with a given
    * server.
    *
-   * This method perform the registration step with a given server.
+   * This method performs the registration step with a given server.
    * It will propose a certain group ID that can be accepted or rejected
    * by the server, in the latter case it would be overwritten during this
    * step.
    *
-   * @param portServerNumber The number of the server to use in this exchange.
-   * @param groupId The group ID that the client is proposing to the client.
+   * @param portServerNumber The server's port number to be used in this
+   * exchange.
+   * @param groupId The group ID that the client is proposing to the server.
    *
    * @return True if the registration succeed, false otherwise.
    */
@@ -116,7 +117,8 @@ public:
    * It is assumed that the registration was already completed at a previous
    * time.
    *
-   * @param portServerNumber The number of the server to use in this exchange.
+   * @param portServerNumber The server's port number to be used in this
+   * exchange.
    *
    * @return True if the authentication succeed, false otherwise.
    */
@@ -128,23 +130,19 @@ public:
    */
   static bool getIsServerFlag();
 
-  static std::string calculateX(const std::string &hash,
-                                const std::string &salt,
-                                const std::string &password);
-
 private:
   /* private methods */
 
   /**
    * @brief This method will perform the first step of the registration
-   * with a given server.
+   * process with a given server.
    *
    * This method perform the first step of the registration with a given
    * server. It will propose a certain group ID that can be accepted
    * or rejected by the server, in the latter case it would be overwritten
    * during this step.
    *
-   * @param portServerNumber The number of the server to use in this exchange.
+   * @param portServerNumber The server's port number to use in this exchange.
    * @param groupId The group ID of this session.
    *
    * @return True if the registrationInit succeed, false otherwise.
@@ -156,11 +154,11 @@ private:
    * @brief This method will perform the last step of the registration
    * with a given server.
    *
-   * This method perform the last step of the registration step with a
+   * This method performs the last step of the registration step with a
    * given server. It will perform the computation of x and v and then
-   * send to the server U and v.
+   * send to the server the parameters U and v.
    *
-   * @param portServerNumber The number of the server to use in this exchange.
+   * @param portServerNumber The server's port number to use in this exchange.
    * @param groupId The group ID of this session.
    *
    * @return True if the registrationComplete succeed, false otherwise.
@@ -176,7 +174,7 @@ private:
    * server. It will perform the calculations and verifications involved
    * at the first leg of the authentication of SRP protocol.
    *
-   * @param portServerNumber The number of the server to use in this exchange.
+   * @param portServerNumber The server's port number to use in this exchange.
    *
    * @return True if the authenticationInit succeed, false otherwise.
    */
@@ -186,11 +184,11 @@ private:
    * @brief This method will perform the final step of the authentication
    * with a given server.
    *
-   * This method perform the final step of the authentication with a given
+   * This method performs the final step of the authentication with a given
    * server. It will perform the calculations and verifications involved
    * at the second leg of the authentication of SRP protocol.
    *
-   * @param portServerNumber The number of the server to use in this exchange.
+   * @param portServerNumber The server's port number to use in this exchange.
    *
    * @return True if the authenticationComplete succeed, false otherwise.
    */
@@ -201,7 +199,7 @@ private:
    * Remote Password protocol.
    *
    * This method will print the server response to the Secure Remote
-   * Password protocol. The response is a json text, and it will be printed
+   * Password protocol. The response is a JSON text, and it will be printed
    * in a structured way.
    *
    * @param response The response sent by the server during the execution
