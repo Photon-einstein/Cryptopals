@@ -18,7 +18,7 @@ struct SessionData {
    * @param nonceSize The nonce size used in the Diffie Hellman key exchange
    * protocol.
    * @param clientNonceHex The client nonce received in hexadecimal format.
-   * @param clientId The client id that is using this session.
+   * @param clientId The client ID that is using this session.
    * @param debugFlag The boolean flag to decide if aggressive prints should be
    * displayed into the standard output, created for troubleshooting purposes.
    * @param ivLength The length of the initialization vector (IV) used in the

@@ -19,7 +19,7 @@ public:
    * This method will perform the constructor of the Client object when a group
    * name is used in its constructor.
    *
-   * @param clientId The client id to be used by this client.
+   * @param clientId The client ID to be used by this client.
    * @param debugFlag The boolean flag to decide if aggressive prints should be
    * displayed into the standard output, created for troubleshooting purposes.
    * @param groupNameDH The group name to be used in the DH key exchange
@@ -36,7 +36,7 @@ public:
    * This method will perform the constructor of the Client object when the DH
    * parameters 'p' and 'g' are used.
    *
-   * @param clientId The client id to be used by this client.
+   * @param clientId The client ID to be used by this client.
    * @param debugFlag The boolean flag to decide if aggressive prints should be
    * displayed into the standard output, created for troubleshooting purposes.
    * @param p The prime number p to be used in the DH key exchange protocol.
@@ -64,12 +64,13 @@ public:
    * This method will perform the Diffie Hellman key exchange protocol with
    * a given server, in order to agree on a given symmetric encryption key.
    *
-   * @param portServerNumber The number of the server to use in this exchange.
+   * @param portServerNumber The port server's number to use in this exchange.
    *
    * @return A tuple containing:
    *         - bool: indicating success or failure of validation.
-   *         - std::string: the decrypted plaintext message. If decryption
-   * fails, this may contain garbage or incomplete data.
+   *         - std::string: the decrypted plaintext message.
+   *                        If decryption fails, this may contain garbage
+   *                        or incomplete data.
    *         - std::string: the created session ID
    * @throw runtime_error if portServerNumber < 1024
    */
@@ -79,13 +80,13 @@ public:
   /**
    * @brief This method will perform the message exchange route.
    *
-   * This method will perform a secure message exchange a with a given server
+   * This method will perform a secure message exchange with a given server
    * after the Diffie Hellman key exchange protocol has been successfully
    * executed and a valid session created.
    *
    * @param portServerNumber The number of the server to use in this message
    * exchange.
-   * @param sessionId The session id to be used in this connection with the
+   * @param sessionId The session ID to be used in this connection with the
    * server.
    *
    * @return A bool, true if the exchange and validation was successful, failure
@@ -97,12 +98,12 @@ public:
                              const std::string &sessionId);
 
   /**
-   * @brief This method will confirm if a given session id is correctly setup.
+   * @brief This method will confirm if a given session ID is correctly setup.
    *
-   * This method will confirm if a given session id is correctly setup on the
+   * This method will confirm if a given session ID is correctly setup on the
    * client side.
    *
-   * @param sessionId The session id to be confirmed.
+   * @param sessionId The session ID to be confirmed.
    *
    * @return A bool value, true if the sessionId exists, false otherwise.
    */
@@ -164,15 +165,15 @@ public:
    * side.
    *
    * This method verify if this entry exists on the client side.
-   * These method's arguments are one entry from the endpoint of the server
-   * named GET '/sessionsData'.
+   * These method's arguments are one entry obtained from the endpoint of the
+   * server named GET '/sessionsData'.
    *
-   * @param sessionId The session id to be verified.
-   * @param clientId The client id to be verified for a given session id.
-   * @param clientNonce The client nonce to be verified for a given session id.
-   * @param serverNonce The server nonce to be verified for a given session id.
-   * @param derivedKey The derived key to be verified for a given session id.
-   * @param iv The initialization vector to be verified for a given session id.
+   * @param sessionId The session ID to be verified.
+   * @param clientId The client ID to be verified for a given session ID.
+   * @param clientNonce The client nonce to be verified for a given session ID.
+   * @param serverNonce The server nonce to be verified for a given session ID.
+   * @param derivedKey The derived key to be verified for a given session ID.
+   * @param iv The initialization vector to be verified for a given session ID.
    *
    * @return Bool value, true if there is a match, false otherwise.
    */

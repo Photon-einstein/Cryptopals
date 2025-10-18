@@ -130,7 +130,7 @@ private:
    * This method runs the route that performs the message exchange using
    * symmetric encryption after the Diffie Hellman's key exchange protocol has
    * been completed. It receives messages from clients, checks the validity of
-   * the session id and if valid, sends back a confirmation response.
+   * the session ID and if valid, sends back a confirmation response.
    *
    * @throws std::runtime_error if there is an error in MessageExchangeRoute.
    */
@@ -147,9 +147,9 @@ private:
   void getSessionsDataEndpoint();
 
   /**
-   * @brief This method will generate an unique session's id.
+   * @brief This method will generate an unique session's ID.
    *
-   * This method will generate an unique session's id for a given connection
+   * This method will generate an unique session's ID for a given connection
    * request.
    *
    * @return An unique session's ID to be used.

@@ -241,7 +241,7 @@ void Server::keyExchangeRoute() {
  * This method runs the route that performs the message exchange using
  * symmetric encryption after the Diffie Hellman's key exchange protocol has
  * been completed. It receives messages from clients, checks the validity of
- * the session id and if valid, sends back a confirmation response.
+ * the session ID and if valid, sends back a confirmation response.
  *
  * @throws std::runtime_error if there is an error in MessageExchangeRoute.
  */
@@ -259,12 +259,12 @@ void Server::messageExchangeRoute() {
           boost::uuids::string_generator gen;
           boost::uuids::uuid extractedSessionIdUuidFormat =
               gen(extractedSessionId);
-          // check if session id already exists
+          // check if session ID already exists
           std::lock_guard<std::mutex> lock(_diffieHellmanMapMutex);
           if (_diffieHellmanMap.find(extractedSessionIdUuidFormat) ==
               _diffieHellmanMap.end()) {
             throw std::runtime_error("Server log | MessageExchangeRoute(): "
-                                     "Session id: " +
+                                     "Session ID: " +
                                      extractedSessionId + " not valid");
           }
           // convert iv to bytes and store it
@@ -283,8 +283,8 @@ void Server::messageExchangeRoute() {
           }
           // build server's confirmation
           std::string serverConfirmationMessage =
-              std::string("Hello from server id: ") + _serverId +
-              " at session id: " + extractedSessionId +
+              std::string("Hello from server ID: ") + _serverId +
+              " at session ID: " + extractedSessionId +
               +" message received from client: '" + plaintext + "'";
           _diffieHellmanMap[extractedSessionIdUuidFormat]->_iv =
               EncryptionUtility::generateRandomIV(_nonceSize);
@@ -353,9 +353,9 @@ void Server::getSessionsDataEndpoint() {
 }
 /******************************************************************************/
 /**
- * @brief This method will generate an unique session's id.
+ * @brief This method will generate an unique session's ID.
  *
- * This method will generate an unique session's id for a given connection
+ * This method will generate an unique session's ID for a given connection
  * request.
  *
  * @return An unique session's ID to be used.
