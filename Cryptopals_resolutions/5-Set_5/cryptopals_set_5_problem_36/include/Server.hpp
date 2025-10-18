@@ -22,9 +22,9 @@ public:
    * This method will execute the constructor of the Server object. It
    * needs to have as input the debugFlag.
    *
-   * @param debugFlag The boolean flag to decide if aggressive prints should be
+   * @param debugFlag The boolean flag decides if aggressive prints should be
    * displayed into the standard output, created for troubleshooting purposes.
-   * @param defaultGroupId The default group id is the minimum pre-requisite
+   * @param defaultGroupId The default group ID is the minimum pre-requisite
    * regarding the security definitions of the Secure Remote Password protocol.
    *
    */
@@ -114,17 +114,13 @@ private:
   /**
    * @brief This method will start the endpoints that the server
    * provides to his clients
-   *
-   * This method will start the endpoints that the server
-   * provides to his clients, namely the root endpoint and the signature
-   * verification endpoint
    */
   void setupRoutes();
 
   /**
    * @brief This method is the entry point for the server URL address
    *
-   * This method will serve as a confirmation that the server URL is up
+   * This method will serve as a confirmation that the server is up
    * and running at the root path
    */
   void rootEndpoint();
@@ -134,7 +130,7 @@ private:
    * registration step initialization.
    *
    * This method runs the route that performs group search inside the
-   * registration step, returning the agreed group id and the salt.
+   * registration step, returning the agreed group ID and salt.
    */
   void handleRegisterInit();
 
@@ -172,8 +168,8 @@ private:
    * @brief This method perform the validation of the extracted v parameter
    * at the registration step.
    *
-   * This method perform the validation of the extracted v parameter
-   * at the registration step, it will test if v ∈ ]0, N[.
+   * This method performs the validation of the extracted v parameter
+   * at the registration step, it will test if v ∈ [1, N-1].
    *
    * @param clientId The clientId involved in this registration step.
    * @param vHex The v parameter in hexadecimal format.

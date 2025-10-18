@@ -236,7 +236,7 @@ protected:
       "6104C5EAA0BCCE3A0EBEB3675BB1394D7844D6EA7C9BB70626EBC8459F584925"
       "B2D4F3F7DFA46C34BF6F5FE04BB842965A75B4714003F5C20D8279E2183D6D54"
       "CCEE840C9A76BCB83F633B98E4E141BFF5EE1D8DCCC4F2932C693A1A5ED474DE"};
-  // RFC-5054 Test vector reference values for test purposes
+  // RFC 5054 Test vector reference values for test purposes
   const unsigned int _groupIdRFC5054TestVector{1};
   const std::string _usernameRFC5054TestVectorValue{"alice"};
   const std::string _passwordRFC5054TestVectorValue{"password123"};
@@ -298,8 +298,8 @@ TEST_F(SessionDataTest,
  * @test Test that the constructor of SessionData throws an error when
  * an invalid group ID is given as input parameter.
  * @brief Test that the constructor of SessionData throws an error when
- * an invalid group ID is given as input parameter. The error message
- * should match the expected value.
+ * an invalid group ID is given as input parameter.
+ * The error message should match the expected value.
  */
 TEST_F(SessionDataTest, SessionData_WithInvalidGroupId_ShouldThrowAnError) {
   const unsigned int groupId{0};
@@ -319,8 +319,8 @@ TEST_F(SessionDataTest, SessionData_WithInvalidGroupId_ShouldThrowAnError) {
  * @test Test that the constructor of SessionData throws an error when
  * an invalid salt is given as input parameter.
  * @brief Test that the constructor of SessionData throws an error when
- * an invalid salt is given as input parameter. The error message
- * should match the expected value.
+ * an invalid salt is given as input parameter.
+ * The error message should match the expected value.
  */
 TEST_F(SessionDataTest, SessionData_WithInvalidSalt_ShouldThrowAnError) {
   const unsigned int groupId{5};
@@ -339,8 +339,8 @@ TEST_F(SessionDataTest, SessionData_WithInvalidSalt_ShouldThrowAnError) {
  * @test Test that the constructor of SessionData throws an error when
  * an invalid hash is given as input parameter.
  * @brief Test that the constructor of SessionData throws an error when
- * an invalid hash is given as input parameter. The error message
- * should match the expected value.
+ * an invalid hash is given as input parameter.
+ * The error message should match the expected value.
  */
 TEST_F(SessionDataTest, SessionData_WithInvalidHash_ShouldThrowAnError) {
   const unsigned int groupId{5};
@@ -372,7 +372,7 @@ TEST_F(SessionDataTest, SessionData_GetKMultiplierMap_ShouldMatchReference) {
   const std::map<unsigned int, MessageExtractionFacility::UniqueBIGNUM> &kMap{
       session._secureRemotePassword->getKMap()};
   const unsigned int groupsSize{7};
-  // Test to RFC-5054 test vector
+  // Test to RFC 5054 test vector
   EXPECT_EQ(
       MessageExtractionFacility::BIGNUMToHex(
           MyCryptoLibrary::SecureRemotePassword::calculateK(
@@ -404,9 +404,9 @@ TEST_F(SessionDataTest, SessionData_GetKMultiplierMap_ShouldMatchReference) {
 
 /**
  * @test Test the correctness of the calculation of the SRP public key A
- * (client) using the RFC-5054 test vector for group 1.
+ * (client) using the RFC 5054 test vector for group 1.
  * @brief Verifies that the public key A, computed from known a, N, and g
- * values, matches the expected reference value from RFC-5054.
+ * values, matches the expected reference value from RFC 5054.
  */
 TEST_F(SessionDataTest,
        CalculatePublicKey_ClientWithRFC5054TestVector_ShouldMatchReference) {
@@ -431,9 +431,9 @@ TEST_F(SessionDataTest,
 
 /**
  * @test Test the correctness of the calculation of the SRP public key B
- * (server) using the RFC-5054 test vector for group 1.
+ * (server) using the RFC 5054 test vector for group 1.
  * @brief Verifies that the public key B, computed from known b, N, g, k, and v
- * values, matches the expected reference value from RFC-5054.
+ * values, matches the expected reference value from RFC 5054.
  */
 TEST_F(SessionDataTest,
        CalculatePublicKey_ServerWithRFC5054TestVector_ShouldMatchReference) {
@@ -466,7 +466,7 @@ TEST_F(SessionDataTest,
  * parameter with SHA-1.
  * @brief Verifies that the scrambling parameter u, computed from known A and
  * B values using SHA-1, matches the expected reference value and has the
- * correct length, using as inputs the RFC-5054 test vector.
+ * correct length, using as inputs the RFC 5054 test vector.
  */
 TEST_F(SessionDataTest,
        calculateU_WithSHA1RFC5054TestVector_ShouldMatchReference) {
@@ -575,7 +575,7 @@ TEST_F(SessionDataTest,
 
 /**
  * @test Test the correctness of the calculation of the x parameter with
- * SHA-1 according to the RFC-5054 test vector.
+ * SHA-1 according to the RFC 5054 test vector.
  * @brief Verifies that the private key parameter x, computed as
  * x = H(salt | H(username | ":" | password))
  * using SHA-1, matches the expected reference value for known
@@ -676,7 +676,7 @@ TEST_F(SessionDataTest, CalculateX_UnknownHash_ShouldThrowAnError) {
 
 /**
  * @test Test the correctness of the SRP S parameter calculation for group
- * ID 1 with the input values of the test vector of the RFC-5054.
+ * ID 1 with the input values of the test vector of the RFC 5054.
  * @brief Verifies that the client side S calculation matches the expected
  * reference value.
  */
@@ -1134,7 +1134,7 @@ TEST_F(SessionDataTest, CalculateM_WithEmptyInputParameter_ShouldThrowAnError) {
 
 /**
  * @test Test the correctness of the SRP S parameter calculation for group
- * ID 1 at the server side, using the RFC-5054 test vectors.
+ * ID 1 at the server side, using the RFC 5054 test vectors.
  * @brief Verifies that the server side S calculation matches the expected
  * reference value.
  */
@@ -1213,9 +1213,9 @@ TEST_F(SessionDataTest,
 
 /**
  * @test Test the correctness of the calculation of the SRP verifier v = g^x mod
- * N using the RFC-5054 test vector for group 1.
+ * N using the RFC 5054 test vector for group 1.
  * @brief Verifies that the verifier v, computed from known x, N, and g values,
- * matches the expected reference value from RFC-5054.
+ * matches the expected reference value from RFC 5054.
  */
 TEST_F(SessionDataTest, CalculateV_WithRFC5054TestVector_ShouldMatchReference) {
   const unsigned int groupId{_groupIdRFC5054TestVector};
@@ -1236,9 +1236,9 @@ TEST_F(SessionDataTest, CalculateV_WithRFC5054TestVector_ShouldMatchReference) {
 
 /**
  * @test Test the correctness of the calculation of the SRP verifier v = g^x mod
- * N using the RFC-5054 test vector for group 2.
+ * N using the RFC 5054 test vector for group 2.
  * @brief Verifies that the verifier v, computed from known x, N, and g values,
- * matches the expected reference value from RFC-5054.
+ * matches the expected reference value from RFC 5054.
  */
 TEST_F(SessionDataTest,
        CalculateV_WithRFC5054TestVectorGroup2_ShouldMatchReference) {
@@ -1267,9 +1267,9 @@ TEST_F(SessionDataTest,
 
 /**
  * @test Test the correctness of the calculation of the SRP verifier v = g^x mod
- * N using the RFC-5054 test vector for group 3.
+ * N using the RFC 5054 test vector for group 3.
  * @brief Verifies that the verifier v, computed from known x, N, and g values,
- * matches the expected reference value from RFC-5054.
+ * matches the expected reference value from RFC 5054.
  */
 TEST_F(SessionDataTest,
        CalculateV_WithRFC5054TestVectorGroup3_ShouldMatchReference) {
@@ -1300,9 +1300,9 @@ TEST_F(SessionDataTest,
 
 /**
  * @test Test the correctness of the calculation of the SRP verifier v = g^x mod
- * N using the RFC-5054 test vector for group 4.
+ * N using the RFC 5054 test vector for group 4.
  * @brief Verifies that the verifier v, computed from known x, N, and g values,
- * matches the expected reference value from RFC-5054.
+ * matches the expected reference value from RFC 5054.
  */
 TEST_F(SessionDataTest,
        CalculateV_WithRFC5054TestVectorGroup4_ShouldMatchReference) {
@@ -1336,9 +1336,9 @@ TEST_F(SessionDataTest,
 
 /**
  * @test Test the correctness of the calculation of the SRP verifier v = g^x mod
- * N using the RFC-5054 test vector for group 5.
+ * N using the RFC 5054 test vector for group 5.
  * @brief Verifies that the verifier v, computed from known x, N, and g values,
- * matches the expected reference value from RFC-5054.
+ * matches the expected reference value from RFC 5054.
  */
 TEST_F(SessionDataTest,
        CalculateV_WithRFC5054TestVectorGroup5_ShouldMatchReference) {
@@ -1376,9 +1376,9 @@ TEST_F(SessionDataTest,
 
 /**
  * @test Test the correctness of the calculation of the SRP verifier v = g^x mod
- * N using the RFC-5054 test vector for group 6.
+ * N using the RFC 5054 test vector for group 6.
  * @brief Verifies that the verifier v, computed from known x, N, and g values,
- * matches the expected reference value from RFC-5054.
+ * matches the expected reference value from RFC 5054.
  */
 TEST_F(SessionDataTest,
        CalculateV_WithRFC5054TestVectorGroup6_ShouldMatchReference) {
@@ -1423,9 +1423,9 @@ TEST_F(SessionDataTest,
 
 /**
  * @test Test the correctness of the calculation of the SRP verifier v = g^x mod
- * N using the RFC-5054 test vector for group 7.
+ * N using the RFC 5054 test vector for group 7.
  * @brief Verifies that the verifier v, computed from known x, N, and g values,
- * matches the expected reference value from RFC-5054.
+ * matches the expected reference value from RFC 5054.
  */
 TEST_F(SessionDataTest,
        CalculateV_WithRFC5054TestVectorGroup7_ShouldMatchReference) {
@@ -1507,7 +1507,7 @@ TEST_F(SessionDataTest, CalculateV_WithSmallValues_ShouldMatchReference) {
 
 /**
  * @test Test the correctness of the calculation of the SRP client verifier
- * M2 = H(A | M | K) using the RFC-5054 test vector with SHA-1 as hash
+ * M2 = H(A | M | K) using the RFC 5054 test vector with SHA-1 as hash
  * algorithm.
  * @brief Verifies that the verifier M2, computed from known A, M, K matches the
  * expected value.
@@ -1525,7 +1525,7 @@ TEST_F(SessionDataTest,
 
 /**
  * @test Test the correctness of the calculation of the SRP client verifier
- * M2 = H(A | M | K) using the RFC-5054 test vector with SHA-256 as hash
+ * M2 = H(A | M | K) using the RFC 5054 test vector with SHA-256 as hash
  * algorithm.
  * @brief Verifies that the verifier M2, computed from known A, M, K matches the
  * expected value.
@@ -1546,7 +1546,7 @@ TEST_F(SessionDataTest,
 
 /**
  * @test Test the correctness of the calculation of the SRP client verifier
- * M2 = H(A | M | K) using the RFC-5054 test vector with SHA-384 as hash
+ * M2 = H(A | M | K) using the RFC 5054 test vector with SHA-384 as hash
  * algorithm.
  * @brief Verifies that the verifier M2, computed from known A, M, K matches the
  * expected value.
@@ -1568,7 +1568,7 @@ TEST_F(SessionDataTest,
 
 /**
  * @test Test the correctness of the calculation of the SRP client verifier
- * M2 = H(A | M | K) using the RFC-5054 test vector with SHA-512 as hash
+ * M2 = H(A | M | K) using the RFC 5054 test vector with SHA-512 as hash
  * algorithm.
  * @brief Verifies that the verifier M2, computed from known A, M, K matches the
  * expected value.

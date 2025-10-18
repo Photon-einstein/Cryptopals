@@ -50,12 +50,12 @@ include_directories(
 # Add source files
 set(SOURCE_FILES
   ../src/Client.cpp
-  ../src/SrpParametersLoader.cpp
   ../src/EncryptionUtility.cpp 
   ../src/MessageExtractionFacility.cpp
   ../src/SecureRemotePassword.cpp
   ../src/Server.cpp
   ../src/SessionData.cpp
+  ../src/SrpParametersLoader.cpp
 )
 
 # Add test source files
@@ -94,9 +94,9 @@ target_link_libraries(runTests
     GTest::gtest_main
     GTest::gmock
     GTest::gmock_main
-    fmt::fmt
-    cpr::cpr 
     OpenSSL::Crypto 
+    cpr::cpr 
+    fmt::fmt
     pthread
 )
 

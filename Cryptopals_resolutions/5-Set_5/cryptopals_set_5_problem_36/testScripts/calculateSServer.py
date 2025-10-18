@@ -1,8 +1,69 @@
+"""
+calculateSServer.py
+
+Utilities to compute the SRP shared secret S on the server side.
+
+This module provides:
+- hex_to_bytes(hexstr) -> bytes
+    Convert a hexadecimal string to raw bytes.
+
+- calculateSServer(A_hex, v_hex, u_hex, b_hex, N_hex) -> str
+    Compute the SRP server shared secret S using the formula:
+
+        S = (A * v^u) ^ b mod N
+
+  Parameters:
+  - A_hex (str): Client public value A as a hex string.
+  - v_hex (str): Verifier v as a hex string.
+  - u_hex (str): Scrambling parameter u as a hex string.
+  - b_hex (str): Server private exponent b as a hex string.
+  - N_hex (str): Prime modulus N as a hex string.
+
+  Returns:
+  - str: Shared secret S encoded as an uppercase hex string. The result is
+    zero-padded to an even length (full bytes) if necessary.
+
+Notes:
+- All hex string inputs should not include a "0x" prefix.
+- This is a small helper script intended for testing and verification with
+  RFC 5054 vectors; it performs integer modular arithmetic using Python's pow().
+"""
+
+
 def hex_to_bytes(hexstr):
+    """
+    Convert a hexadecimal string to bytes.
+
+    Parameters:
+    - hexstr (str): Hexadecimal string (upper/lower case allowed, no "0x" prefix).
+
+    Returns:
+    - bytes: Raw bytes represented by the hex string.
+
+    Raises:
+    - ValueError: if the input contains non-hex characters or has odd length.
+    """
     return bytes.fromhex(hexstr)
 
 
 def calculateSServer(A_hex, v_hex, u_hex, b_hex, N_hex):
+    """
+    Calculate the SRP server shared secret S.
+
+    Formula (server side):
+        S = (A * v^u) ^ b mod N
+
+    Parameters:
+    - A_hex (str): Client public value A as a hex string.
+    - v_hex (str): Verifier v as a hex string.
+    - u_hex (str): Scrambling parameter u as a hex string.
+    - b_hex (str): Server private key 'b' as a hex string.
+    - N_hex (str): Prime modulus N as a hex string.
+
+    Returns:
+    - str: Uppercase hex string of the computed shared secret S. The hex string
+      is padded to an even length so it represents a whole number of bytes.
+    """
     # Debug: print input parameters
     # print("[DEBUG] calculateSServer input parameters:")
     # print("  A_hex:", A_hex)

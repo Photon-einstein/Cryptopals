@@ -1,11 +1,83 @@
+"""
+calculateSClient.py
+
+Utilities to compute the SRP shared secret S on the client side.
+
+This module provides:
+- hex_to_int(h) -> int
+    Convert a hex string to an integer.
+
+- calculateSClient(B_hex, k, g, x_hex, a_hex, u_hex, N_hex, hash_name, debug=False) -> str
+    Compute the SRP client shared secret S using the formula:
+
+        S = (B - k * g^x)^(a + u * x) mod N
+
+  Parameters:
+  - B_hex: server public value B as a hex string.
+  - k: multiplier parameter k as int (if None or not int, calculated via calculate_k).
+  - g: generator as integer.
+  - x_hex: private exponent x as hex string (derived from username/salt/password).
+  - a_hex: client private exponent a as hex string.
+  - u_hex: scrambling parameter u as hex string.
+  - N_hex: modulus N as a hex string.
+  - hash_name: name of the hash algorithm (passed to calculate_k when needed).
+  - debug: optional bool, when True prints debug info.
+
+  Returns:
+  - S_hex: shared secret S encoded as an uppercase hex string padded to the byte-length of N.
+
+Notes:
+- Inputs are expected to be hex strings without "0x" prefix.
+- The function will compute k via calculate_k(N_hex, g, hash_name) if k is None or not an int.
+- The returned hex string is zero-padded to the byte-length of N for interoperability.
+"""
+
 from calculate_k_MultiplierParameter import calculate_k
 
 
 def hex_to_int(h):
+    """
+    Convert a hexadecimal string to an integer.
+
+    Parameters:
+    - h (str): Hexadecimal string (no "0x" prefix).
+
+    Returns:
+    - int: Integer value represented by the hex string.
+
+    Example:
+        hex_to_int("FF") -> 255
+    """
     return int(h, 16)
 
 
 def calculateSClient(B_hex, k, g, x_hex, a_hex, u_hex, N_hex, hash_name, debug=False):
+    """
+    Calculate the SRP client shared secret S.
+
+    Formula (client side):
+        S = (B - k * g^x)^(a + u * x) mod N
+
+    Parameters:
+    - B_hex (str): Server public value B in hex.
+    - k (int or None): Multiplier parameter k as integer. If None or not int,
+      it will be computed using calculate_k(N_hex, g, hash_name).
+    - g (int): Generator integer.
+    - x_hex (str): x value (derived from salt/username/password) in hex.
+    - a_hex (str): Client private key 'a' in hex.
+    - u_hex (str): Scrambling parameter u in hex.
+    - N_hex (str): Prime modulus N in hex.
+    - hash_name (str): Hash algorithm name used for calculating k if needed.
+    - debug (bool): If True, prints debug information.
+
+    Returns:
+    - str: Uppercase hex string of the computed shared secret S, zero-padded to the byte-length of N.
+
+    Behavior:
+    - Converts hex inputs to integers, computes intermediate values, and performs
+      modular exponentiation using Python's pow with modulus.
+    - Ensures the output hex string length corresponds to the byte-length of N.
+    """
     # Debug: print input parameters
     if debug:
         print("[DEBUG] calculate_S_Client input parameters:")

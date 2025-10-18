@@ -16,18 +16,17 @@ int main(void) {
   const bool debugFlag{false};
   const std::string clientId{"Bob"};
   const unsigned int requestedGroup{5};
-  std::shared_ptr<Client> client =
-      std::make_shared<Client>(clientId, debugFlag);
-  const bool registrationResult =
-      client->registration(client->getProductionPort(), requestedGroup);
+  std::shared_ptr<Client> client{std::make_shared<Client>(clientId, debugFlag)};
+  const bool registrationResult{
+      client->registration(client->getProductionPort(), requestedGroup)};
   if (registrationResult == false) {
     throw std::runtime_error("runClient1 log | registration() failed.");
   }
   std::cout << "\nClient " << clientId
             << "'s registration was completed with success.\n"
             << std::endl;
-  const bool authenticationResult =
-      client->authentication(client->getProductionPort());
+  const bool authenticationResult{
+      client->authentication(client->getProductionPort())};
   if (authenticationResult == false) {
     throw std::runtime_error("runClient1 log | authentication() failed.");
   }

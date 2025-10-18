@@ -19,7 +19,7 @@
 std::vector<unsigned char>
 MessageExtractionFacility::hexToBytes(const std::string &hexStr) {
   bool flagOdd{false};
-  int step = 2;
+  int step{2};
   if (hexStr.length() % 2 != 0) {
     flagOdd = true;
     step = 1;
@@ -58,7 +58,7 @@ MessageExtractionFacility::toHexString(const std::vector<unsigned char> &data) {
     ss << std::setw(2)
        << static_cast<int>(byte); // Convert to int to print properly
   }
-  std::string hexStr = ss.str();
+  std::string hexStr{ss.str()};
   std::transform(hexStr.begin(), hexStr.end(), hexStr.begin(), ::toupper);
   return hexStr;
 }
@@ -69,7 +69,7 @@ MessageExtractionFacility::toHexString(const std::vector<unsigned char> &data) {
  *
  * @param hexString The input string in hexadecimal format (e.g., "48656C6C6F").
  * @return The resulting plaintext string (e.g., "Hello").
- * @throw std::invalid_argument If the input string has an odd length or
+ * @throw std::invalid_argument if the input string has an odd length or
  * contains non-hexadecimal characters.
  */
 std::string
@@ -112,8 +112,8 @@ MessageExtractionFacility::hexToPlaintext(const std::string &hexString) {
  */
 MessageExtractionFacility::UniqueBIGNUM
 MessageExtractionFacility::hexToUniqueBIGNUM(const std::string &hexNumber) {
-  BIGNUM *bnPtr = nullptr; // BN_hex2bn needs a pointer to a BIGNUM*
-                           // It will allocate the BIGNUM itself.
+  BIGNUM *bnPtr{nullptr}; // BN_hex2bn needs a pointer to a BIGNUM*
+                          // It will allocate the BIGNUM itself.
   if (!BN_hex2bn(&bnPtr, hexNumber.c_str())) {
     // OpenSSL functions return 0 on error, non-zero on success.
     // Get OpenSSL error string for more details.
@@ -140,7 +140,7 @@ MessageExtractionFacility::hexToUniqueBIGNUM(const std::string &hexNumber) {
  * @throws std::runtime_error if conversion fails.
  */
 std::string MessageExtractionFacility::BIGNUMToHex(BIGNUM *bn) {
-  char *hexChars = BN_bn2hex(bn); // Allocates memory
+  char *hexChars{BN_bn2hex(bn)}; // Allocates memory
   if (!hexChars) {
     throw std::runtime_error("MessageExtractionFacility log | BIGNUMToHex(): "
                              "Failed to convert BIGNUM to hex string.");

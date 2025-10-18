@@ -1,3 +1,21 @@
+"""
+testSRP_withRFC_vector.py
+
+Verify SRP shared secret S computation against RFC 5054 test vectors.
+
+This script:
+- Imports calculateSServer and calculateSClient helpers (must be in the same directory
+  or PYTHONPATH).
+- Defines the RFC 5054 test vector values (N, g, k, x, v, a, b, A, B, u, expected S).
+- Computes S using the client-side and server-side helper functions and prints the results.
+- Compares the produced values and prints whether they match.
+
+Notes:
+- The script runs top-level (no functions defined) and exits with an error if the helper
+  modules are not importable.
+- All hex strings are expected to be uppercase and without a "0x" prefix.
+"""
+
 try:
     from calculateSServer import calculateSServer
     from calculateSClient import calculateSClient

@@ -32,7 +32,7 @@ protected:
 /**
  * @test Test the correctness of the method loadSrpParameters
  * @brief Ensures that the parameters retrieved, using the correct input
- * filename retrieve the correct data.
+ * filename, retrieve the correct data.
  */
 TEST_F(SrpParametersLoaderTest,
        loadSrpParameters_WithCorrectFilename_ShouldMatchReference) {
@@ -198,7 +198,8 @@ TEST_F(SrpParametersLoaderTest,
 /**
  * @test Test the correctness of the method loadSrpParameters
  * @brief Ensures that if a faulty input filename is provided,
- * the loadSrpParameters() will throw a runtime exception error.
+ * the loadSrpParameters() will throw a runtime exception error
+ * with the expected error message.
  */
 TEST_F(SrpParametersLoaderTest,
        loadSrpParameters_WithIncorrectFilename_ShouldMatchThrowAnException) {

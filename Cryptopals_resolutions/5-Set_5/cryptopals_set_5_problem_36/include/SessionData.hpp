@@ -15,9 +15,10 @@ struct SessionData {
    * will perform all the necessary data initializations.
    *
    * @param groupId The group ID that is going to be used with this client ID
-   * session
+   * session.
    * @param salt The salt that is going to be used with this client ID session.
-   * @param hash The hash algorithm that is to be used with client ID session.
+   * @param hash The hash algorithm that is to be used with this client ID
+   * session.
    * @param debugFlag If true there is be more information in the logs, false
    * otherwise.
    */

@@ -73,7 +73,7 @@ TEST(SHA256Test, sha256_WithVeryLongString_ShouldMatchReference) {
  */
 TEST(SHA256Test, sha256_WithStringWithNullByte_ShouldMatchReference) {
   const std::string input =
-      std::string("abc\0def", 7); // includes '\0' in middle
+      std::string("abc\0def", 7); // includes '\0' in the middle
   const std::string expectedHashValue(
       "516A5E926CE20C5F4D80F00E1A01ABDF14986DEF6588D6ABEED9FCE090BC660C");
   const std::string hash{EncryptionUtility::sha256(input)};

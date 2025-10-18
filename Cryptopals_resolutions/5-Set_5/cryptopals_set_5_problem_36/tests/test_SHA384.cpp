@@ -77,7 +77,7 @@ TEST(SHA384Test, sha384_WithVeryLongString_ShouldMatchReference) {
  */
 TEST(SHA384Test, sha384_WithStringWithNullByte_ShouldMatchReference) {
   const std::string input =
-      std::string("abc\0def", 7); // includes '\0' in middle
+      std::string("abc\0def", 7); // includes '\0' in the middle
   const std::string expectedHashValue(
       "BC3837E347023944602DB615E0E2043D13B85E76BD2B4CAAECFF8BAF20796767"
       "353DA289710CE9A68AE124D139318F7A");
@@ -95,7 +95,7 @@ TEST(SHA384Test, sha384_WithStringWithNullByte_ShouldMatchReference) {
  */
 TEST(SHA384Test, sha384_WithAllByteValues_ShouldMatchReference) {
   std::string input;
-  for (int i = 0; i < 256; ++i) { // fixed: only 0x00..0xff, not 384 bytes
+  for (int i = 0; i < 256; ++i) {
     input.push_back(static_cast<char>(i));
   }
   const std::string expectedHashValue(

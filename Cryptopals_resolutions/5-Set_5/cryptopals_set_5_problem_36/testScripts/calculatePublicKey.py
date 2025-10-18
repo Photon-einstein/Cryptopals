@@ -1,11 +1,55 @@
+"""
+calculatePublicKey.py
+
+Helpers to compute SRP public keys A and B.
+
+This module provides:
+- hex_to_int(h): convert a hex string to an integer.
+- int_to_hex(i, pad_bytes=None): convert an integer to an uppercase hex string,
+  optionally zero-padded to a given byte width.
+- calculate_public_key(private_key_hex, N_hex, g_hex, is_server, k_hex=None, v_hex=None):
+  compute the SRP public value:
+    - Client: A = g^a mod N
+    - Server: B = (k*v + g^b) mod N
+
+All functions expect hex strings without "0x" prefix. Returned hex strings are
+uppercase and padded to the byte-length of N when appropriate.
+"""
+
 import json
 
 
 def hex_to_int(h):
+    """
+    Convert a hexadecimal string to an integer.
+
+    Parameters:
+    - h (str): Hexadecimal string (no "0x" prefix).
+
+    Returns:
+    - int: Integer value represented by the hex string.
+
+    Example:
+        hex_to_int("FF") -> 255
+    """
     return int(h, 16)
 
 
 def int_to_hex(i, pad_bytes=None):
+    """
+    Convert an integer to an uppercase hexadecimal string.
+
+    Parameters:
+    - i (int): Integer to convert.
+    - pad_bytes (int | None): If provided, zero-pad the hex string to this many bytes.
+
+    Returns:
+    - str: Uppercase hex representation, optionally zero-padded to pad_bytes*2 characters.
+
+    Example:
+        int_to_hex(255) -> "FF"
+        int_to_hex(255, pad_bytes=2) -> "00FF"
+    """
     h = format(i, "X")
     if pad_bytes:
         h = h.zfill(pad_bytes * 2)
@@ -16,20 +60,31 @@ def calculate_public_key(
     private_key_hex, N_hex, g_hex, is_server, k_hex=None, v_hex=None
 ):
     """
-    Calculates the SRP public key (A or B).
-    For the client: A = g^a mod N
-    For the server: B = (k*v + g^b) mod N
+    Calculate the SRP public key (A or B).
 
-    Args:
-        private_key_hex (str): The private key (a or b) in hex.
-        N_hex (str): The group prime N in hex.
-        g_hex (str): The generator g in hex.
-        is_server (bool): If True, computes B (server); if False, computes A (client).
-        k_hex (str): Optional, k in hex (required for server).
-        v_hex (str): Optional, v in hex (required for server).
+    For the client (is_server == False):
+        A = g^a mod N
+
+    For the server (is_server == True):
+        B = (k*v + g^b) mod N
+
+    Parameters:
+    - private_key_hex (str): Private key in hex (a or b).
+    - N_hex (str): Group prime N in hex.
+    - g_hex (str): Generator g in hex.
+    - is_server (bool): If True compute B, otherwise compute A.
+    - k_hex (str | None): Multiplier k in hex (required for server B).
+    - v_hex (str | None): Verifier v in hex (required for server B).
 
     Returns:
-        str: The public key (A or B) as an uppercase hex string.
+    - str: Public key (A or B) as an uppercase hex string, padded to the byte-length of N.
+
+    Raises:
+    - ValueError: if server computation is requested but k_hex or v_hex is missing.
+
+    Notes:
+    - The function uses the minimal byte length of N to determine padding so that
+      A and B have consistent hex width across implementations.
     """
     N = hex_to_int(N_hex)
     g = hex_to_int(g_hex)

@@ -75,7 +75,7 @@ public:
    * @brief This method returns the minimum size of a private key in bits,
    * according to the SRP protocol.
    *
-   * @return The minimum size of a private key at the SPP protocol, in bits.
+   * @return The minimum size of a private key at the SRP protocol, in bits.
    */
   static const unsigned int &getMinSizePrivateKey();
 
@@ -113,7 +113,7 @@ public:
    *
    * This method will generate a private key to be used at a SRP protocol.
    * Requirements of the private key:
-   * - should be at in the range [1, N-1];
+   * - should be in the range [1, N-1];
    * - should be at least minSizeBits;
    *
    * @param NHex N in hexadecimal format.
@@ -188,7 +188,7 @@ public:
    * @param g The value of the generator g.
    *
    * @return The result of v = g^x mod N, in hexadecimal format.
-   * @throw std::runtime_error If the calculation fails.
+   * @throw std::runtime_error if the calculation fails.
    */
   static const std::string calculateV(const std::string &xHex,
                                       const std::string &NHex, unsigned int g);
@@ -339,14 +339,11 @@ public:
                                        const std::string &KHex);
 
 private:
-  /* private methods */
-
-  /* private members */
   bool _debugFlag;
   static const std::string _srpParametersFilename;
   std::map<unsigned int, SrpParametersLoader::SrpParameters> _srpParametersMap;
   unsigned int _groupId{0};
-  static unsigned int _minSizePrivateKey;
+  static const unsigned int _minSizePrivateKey;
   static std::unordered_map<std::string, EncryptionUtility::HashFn> _hashMap;
   static const std::map<unsigned int, MessageExtractionFacility::UniqueBIGNUM>
       _kMap;
