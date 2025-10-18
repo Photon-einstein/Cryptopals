@@ -4,9 +4,7 @@ box "Client Environment" #LightYellow
     participant "main (runClient1)" as Main
     participant "Client (Bob)" as Client
     participant "Client:SecureRemotePassword" as ClientSRP
-    participant "Client:SessionData" as ClientSession
     participant "Client:SrpParametersLoader" as ClientSrpLoader
-    participant "Client:MessageExtractionFacility" as ClientMEF
     participant "Client:EncryptionUtility" as ClientEU
 end box
 
@@ -14,245 +12,381 @@ box "Server Environment" #LightBlue
     participant "Server (API)" as ServerAPI
     participant "Server:SecureRemotePassword" as ServerSRP
     participant "Server:SessionData" as ServerSession
-    participant "Server:SrpParametersLoader" as ServerSrpLoader
-    participant "Server:MessageExtractionFacility" as ServerMEF
     participant "Server:EncryptionUtility" as ServerEU
 end box
 
 activate Main
-
-Main -> Client : Create Client("Bob", debugFlag)
-activate Client
-
-    Client -> ClientEU: getMinSaltSizes()
-    activate ClientEU
-        note right
-            Loads the result into the _minSaltSizesMap variable
-        end note
-    ClientEU --> Client: A map of hash names with the minimum salt sizes, in bytes.
-    deactivate ClientEU
-
-    Client -> ClientSRP: getSrpParametersFilenameLocation()
-    activate ClientSRP
-        note right
-            Loads the result into the _srpParametersFilename variable
-        end note
-    ClientSRP --> Client: Returns the SRP parameters file name location
-    deactivate ClientSRP
-
-    Client -> ClientSrpLoader : loadSrpParameters(_srpParametersFilename)
-    activate ClientSrpLoader
-        note right
-            Loads SRP group parameters (N, g, hashName) from JSON file
-        end note
-    ClientSrpLoader --> Client : SRP parameters map
-    deactivate ClientSrpLoader
-
-    Client --> Main : returns Client
-deactivate Client
-
-Main -> Client : registration(client->getProductionPort(), requestedGroup)
-activate Client
-    Client -> Client: validate portServerNumber
-    Client -> Client: registrationInit(portServerNumber, groupId)
+    Main -> Client : Create Client("Bob", debugFlag)
     activate Client
-        Client -> Client : built "srp/register/init" message
-        note right
-            Client constructs JSON registration init
-            with clientId and requestedGroup
-        end note
-        Client -> ServerAPI : HTTP POST /srp/register/init (First message of the registration process)
-        activate ServerAPI
-            ServerAPI -> ServerAPI : extract client's id as extractedClientId
-            ServerAPI -> ServerAPI : extract client's requestedGroup as extractedGroupId
-            ServerAPI -> ServerAPI : Validate extractedClientId
-            ServerAPI -> ServerAPI : Validate extractedGroupId
-            ServerAPI -> ServerAPI : Get minSaltSize value
-            
-            ServerAPI -> ServerEU : generateCryptographicNonce(minSaltSize)
-            activate ServerEU
-            note right
-                Loads the result into the salt variable
-            end note
-            ServerEU --> ServerAPI: Returns the new salt variable
-            deactivate ServerEU
 
-            ServerAPI -> ServerSession: Create SessionData(extractedGroupId, salt, hash, _debugFlag)
-            activate ServerSession
-                ServerSession -> ServerSession: Calls SessionData constructor
-                ServerSession -> ServerSRP: Create SecureRemotePassword(debugFlag) 
-                activate ServerSRP
-                    ServerSRP --> ServerSession: Returns the new SecureRemotePassword
-                deactivate ServerSRP
-                ServerSession -> ServerSession: Validate groupId
-                ServerSession -> ServerSession: Validate salt
-                ServerSession -> ServerSession: Validate hash
-                ServerSession -> ServerSession: Store groupId, salt and hash
-                
-                ServerSession --> ServerAPI: Returns the new SessionData
-            deactivate ServerSession
-
-            ServerAPI -> ServerAPI: Build JSON reply to the client 
-            ServerAPI --> Client : HTTP 201 OK 
-            note right
-                Server constructs JSON registration init 
-                response with the fields: clientId, groupId,
-                groupName, primeN, generatorG, sha and salt
-            end note
-        deactivate ServerAPI
-        Client --> Client: registrationResult
-    deactivate Client
-
-    alt registrationResult == false
-        Client -> Client : Returns false
-    end
-
-    Client -> Client: registrationComplete(portServerNumber, _groupId)
-    activate Client
-        Client -> Client: Validation _sessionData
-        Client -> ClientEU: generatePassword(_passwordSize)
+        Client -> ClientEU: getMinSaltSizes()
         activate ClientEU
-            ClientEU --> Client: Return random password
             note right
-                Loads the result into the
-                _sessionData->_password variable
+                Loads the result into the _minSaltSizesMap variable
             end note
+        ClientEU --> Client: A map of hash names with the minimum salt sizes, in bytes.
         deactivate ClientEU
-        Client -> Client: Validate password
 
-        Client -> ClientSRP: calculateX( _hash, _clientId, _password, _salt)
+        Client -> ClientSRP: getSrpParametersFilenameLocation()
         activate ClientSRP
-            ClientSRP --> Client: return calculated x
             note right
-                x = H(salt | H(username | ":" | password))
+                Loads the result into the _srpParametersFilename variable
             end note
+        ClientSRP --> Client:SRP parameters file name location
         deactivate ClientSRP
-        Client -> Client: Stores the result at xHex
 
-        Client -> ClientSRP: calculateV(xHex, _nHex, _g)
-        activate ClientSRP
-            ClientSRP --> Client: return calculated v
+        Client -> ClientSrpLoader : loadSrpParameters(_srpParametersFilename)
+        activate ClientSrpLoader
             note right
-                v = g^x mod N
+                Loads SRP group parameters (N, g, hashName) from the JSON file
             end note
-        deactivate ClientSRP
-        Client -> Client: Stores the result at vHex
+        ClientSrpLoader --> Client : SRP parameters map
+        deactivate ClientSrpLoader
 
-        Client -> Client : built "srp/register/complete" message
-        note right
-            Client constructs JSON registration complete
-            with clientId and v
-        end note
-        Client -> ServerAPI : HTTP POST /srp/register/complete (Last message of the registration process)
-
-        activate ServerAPI
-            ServerAPI -> ServerAPI : extract client's id as extractedClientId
-            ServerAPI -> ServerAPI : extract client's v parameter as extractedVHex
-            ServerAPI -> ServerAPI : Validate extractedClientId
-            ServerAPI -> ServerAPI : Validate extractedVHex
-            ServerAPI -> ServerAPI : Store extractedVHex
-
-            note right
-                Server constructs JSON registration complete 
-                response with a confirmation message
-            end note
-            ServerAPI --> Client : HTTP 201 OK 
-        deactivate ServerAPI
-        Client --> Client: registrationResult
+        Client --> Main : new Client
     deactivate Client
-    
-    alt registrationResult == true
-        Client -> Client : Set _registrationComplete = true
-    end
 
-    Client --> Main: registrationCompleteResult
-deactivate Client
-
-alt registrationCompleteResult == false:
-    Main -> Main: throw std::runtime_error("Registration() failed.");
-end
-
-Main -> Client : authentication(client->getProductionPort())
-activate Client
-    Client -> Client: validate portServerNumber
-    alt _sessionData == null or _sessionData->registrationComplete == false:
-        Client -> Client: throw std::runtime_error("Registration is not completed.");
-    end
-
-    Client -> Client: authenticationInit(portServerNumber)
+    Main -> Client : registration(client->getProductionPort(), requestedGroup)
     activate Client
-        Client -> Client : built "srp/authentication/init" message
-        note right
-            Client constructs JSON authentication init
-            with clientId
-        end note
-        Client -> ServerAPI : HTTP POST /srp/auth/init (First message of the authentication process)
-        activate ServerAPI
-            ServerAPI -> ServerAPI : extract client's id as extractedClientId
-            ServerAPI -> ServerAPI : Validate extractedClientId
-            ServerAPI -> ServerAPI : Get groupId
-            ServerAPI -> ServerAPI : Get saltSize
-            ServerAPI -> ServerAPI : Get minSaltSize
-            ServerAPI -> ServerAPI : Get vHex as extractedVHex
-            ServerAPI -> ServerAPI : Validate saltSize
-            ServerAPI -> ServerAPI : Validate extractedVHex
-            ServerAPI -> ServerAPI : Get minPrivateKeyBits
-
-            ServerAPI -> ServerSRP: generatePrivateKey(_nHex, minPrivateKeyBits)
-            activate ServerSRP
-                ServerSRP -> ServerSRP: Validate _nHex
-                ServerSRP -> ServerSRP: Validate minPrivateKeyBits
-
-                loop generate random candidate until n in the range [1, N-1] and at least minPrivateKeyBits
-                    ServerSRP -> ServerSRP: random number generation as n
-                end
-                ServerSRP --> ServerAPI: privateKey
-            deactivate ServerSRP
-            ServerAPI -> ServerAPI: Store privateKey as _privateKeyHex
-
-            ServerAPI -> ServerAPI: getIsServerFlag
+        Client -> Client: validate portServerNumber
+        Client -> Client: registrationInit(portServerNumber, groupId)
+        activate Client
+            Client -> Client : built "srp/register/init" message
+            note right
+                Client constructs JSON registration init
+                with clientId and requestedGroup
+            end note
+            Client -> ServerAPI : HTTP POST /srp/register/init (First message of the registration process)
             activate ServerAPI
-                ServerAPI --> ServerAPI: isServer
+                ServerAPI -> ServerAPI : extract client's id as extractedClientId
+                ServerAPI -> ServerAPI : extract client's requestedGroup as extractedGroupId
+                ServerAPI -> ServerAPI : Validate extractedClientId
+                ServerAPI -> ServerAPI : Validate extractedGroupId
+                ServerAPI -> ServerAPI : Get minSaltSize value
+                
+                ServerAPI -> ServerEU : generateCryptographicNonce(minSaltSize)
+                activate ServerEU
+                    note right
+                        Loads the result into the salt variable
+                    end note
+                    ServerEU --> ServerAPI: salt
+                deactivate ServerEU
+
+                ServerAPI -> ServerSession: Create SessionData(extractedGroupId, salt, hash, _debugFlag)
+                activate ServerSession
+                    ServerSession -> ServerSession: Calls SessionData constructor
+                    ServerSession -> ServerSRP: Create SecureRemotePassword(debugFlag) 
+                    activate ServerSRP
+                        ServerSRP --> ServerSession: new SecureRemotePassword
+                    deactivate ServerSRP
+                    ServerSession -> ServerSession: Validate groupId
+                    ServerSession -> ServerSession: Validate salt
+                    ServerSession -> ServerSession: Validate hash
+                    ServerSession -> ServerSession: Store groupId, salt and hash
+                    
+                    ServerSession --> ServerAPI: new SessionData
+                deactivate ServerSession
+
+                ServerAPI -> ServerAPI: Build JSON reply to the client 
+                ServerAPI --> Client : HTTP 201 OK 
+                note right
+                    Server constructs JSON registration init 
+                    response with the fields: clientId, groupId,
+                    groupName, primeN, generatorG, sha and salt
+                end note
+            deactivate ServerAPI
+            Client --> Client: registrationInitResult
+        deactivate Client
+
+        alt registrationInitResult == false
+            Client -> Main : false
+        end
+
+        Client -> Client: registrationComplete(portServerNumber, _groupId)
+        activate Client
+            Client -> Client: Validation _sessionData
+            Client -> ClientEU: generatePassword(_passwordSize)
+            activate ClientEU
+                ClientEU --> Client: password
+                note right
+                    Loads the result into the
+                    _sessionData->_password variable
+                end note
+            deactivate ClientEU
+            Client -> Client: Validate password
+
+            Client -> ClientSRP: calculateX( _hash, _clientId, _password, _salt)
+            activate ClientSRP
+                ClientSRP --> Client: x
+                note right
+                    x = H(salt | H(username | ":" | password))
+                end note
+            deactivate ClientSRP
+            Client -> Client: Stores the result at xHex
+
+            Client -> ClientSRP: calculateV(xHex, _nHex, _g)
+            activate ClientSRP
+                ClientSRP --> Client: v
+                note right
+                    v = g^x mod N
+                end note
+            deactivate ClientSRP
+            Client -> Client: Stores the result at vHex
+
+            Client -> Client : built "srp/register/complete" message
+            note right
+                Client constructs JSON registration complete
+                with clientId and v
+            end note
+            Client -> ServerAPI : HTTP POST /srp/register/complete (Last message of the registration process)
+
+            activate ServerAPI
+                ServerAPI -> ServerAPI : extract client's id as extractedClientId
+                ServerAPI -> ServerAPI : extract client's v parameter as extractedVHex
+                ServerAPI -> ServerAPI : Validate extractedClientId
+                ServerAPI -> ServerAPI : Validate extractedVHex
+                ServerAPI -> ServerAPI : Stores extractedVHex
+
+                note right
+                    Server constructs JSON registration complete 
+                    response with a confirmation message
+                end note
+                ServerAPI --> Client : HTTP 201 OK 
+            deactivate ServerAPI
+            Client --> Client: registrationResult
+        deactivate Client
+        
+        alt registrationResult == true
+            Client -> Client : Set _registrationComplete = true
+        end
+
+        Client --> Main: registrationCompleteResult
+    deactivate Client
+
+    alt registrationCompleteResult == false:
+        Main -> Main: throw std::runtime_error("Registration() failed.");
+    end
+
+    Main -> Client : authentication(client->getProductionPort())
+    activate Client
+        Client -> Client: validate portServerNumber
+        alt _sessionData == null or _sessionData->registrationComplete == false:
+            Client -> Client: throw std::runtime_error("Registration is not completed.");
+        end
+
+        Client -> Client: authenticationInit(portServerNumber)
+        activate Client
+            Client -> Client : Build "srp/auth/init" message
+            note right
+                Client constructs JSON authentication init
+                with clientId
+            end note
+            Client -> ServerAPI : HTTP POST /srp/auth/init (First message of the authentication process)
+            activate ServerAPI
+                ServerAPI -> ServerAPI : extract client's id as extractedClientId
+                ServerAPI -> ServerAPI : Validate extractedClientId
+                ServerAPI -> ServerAPI : Get groupId
+                ServerAPI -> ServerAPI : Get saltSize
+                ServerAPI -> ServerAPI : Get minSaltSize
+                ServerAPI -> ServerAPI : Get vHex as extractedVHex
+                ServerAPI -> ServerAPI : Validate saltSize
+                ServerAPI -> ServerAPI : Validate extractedVHex
+                ServerAPI -> ServerAPI : Get minPrivateKeyBits
+
+                ServerAPI -> ServerSRP: generatePrivateKey(_nHex, minPrivateKeyBits)
+                activate ServerSRP
+                    ServerSRP -> ServerSRP: Validate _nHex
+                    ServerSRP -> ServerSRP: Validate minPrivateKeyBits
+
+                    loop generate random candidate until n in the range [1, N-1] and at least minPrivateKeyBits bit size
+                        ServerSRP -> ServerSRP: Generate random number as n
+                    end
+                    ServerSRP --> ServerAPI: privateKey
+                deactivate ServerSRP
+                ServerAPI -> ServerAPI: Store privateKey as _privateKeyHex
+
+                ServerAPI -> ServerAPI: getIsServerFlag()
+                activate ServerAPI
+                    ServerAPI --> ServerAPI: isServer
+                deactivate ServerAPI
+
+                ServerAPI -> ServerSRP: calculatePublicKey(_privateKeyHex, _nHex, gHex, isServer, k, _vHex)
+                activate ServerSRP
+                    ServerSRP -> ServerSRP: Validate _privateKeyHex as b
+                    ServerSRP -> ServerSRP: Validate _nHex as N
+                    ServerSRP -> ServerSRP: Validate gHex as g
+                    ServerSRP -> ServerSRP: Validate k
+                    ServerSRP -> ServerSRP: Validate vHex as v
+
+                    ServerSRP --> ServerAPI: B
+                    note right
+                        B = (k*v + g^b) mod N
+                    end note
+                deactivate ServerSRP
+
+                note right
+                    Server constructs JSON authentication init 
+                    response with a confirmation message with the
+                    fields: clientId, salt, B, groupId
+                end note
+                ServerAPI --> Client : HTTP 201 OK 
+            deactivate ServerAPI
+            Client --> Client: authenticationInitResult
+        deactivate Client
+
+        alt authenticationInitResult == false
+            Client --> Main : false
+        end
+
+        Client -> Client: authenticationComplete(portServerNumber)
+        activate Client
+            Client -> ClientSRP: calculateM(_hash, _nHex, gHex, _clientId, _salt, _publicKeyHex, _peerPublicKeyHex, _KHex)
+            activate ClientSRP
+                ClientSRP -> ClientSRP: Validate _hash as H
+                ClientSRP -> ClientSRP: Validate _nHex as N
+                ClientSRP -> ClientSRP: Validate gHex as g
+                ClientSRP -> ClientSRP: Validate _clientId as U
+                ClientSRP -> ClientSRP: Validate _salt as s
+                ClientSRP -> ClientSRP: Validate _publicKeyHex as A
+                ClientSRP -> ClientSRP: Validate _peerPublicKeyHex as B
+                ClientSRP -> ClientSRP: Validate _KHex as K
+
+                ClientSRP --> Client: M
+                note right
+                    M = H(H(N) XOR H(g) | H(U) | s | A | B | K)
+                end note
+            deactivate ClientSRP
+            
+            Client -> Client : Build "srp/auth/complete" message
+            note right
+                Client constructs JSON authentication complete
+                with clientId, M, A
+            end note
+
+            Client -> ServerAPI : HTTP POST /srp/auth/complete (Last message of the authentication process)
+            activate ServerAPI
+                ServerAPI -> ServerAPI : extract client's id as extractedClientId
+                ServerAPI -> ServerAPI : extract M as extractedMHex
+                ServerAPI -> ServerAPI : extract A as extractedAHex
+                ServerAPI -> ServerAPI : Validate extractedClientId
+                ServerAPI -> ServerAPI : Validate extractedMHex
+                ServerAPI -> ServerAPI : Validate extractedAHex
+                ServerAPI -> ServerAPI : Update peer's public key from the extractedAHex field
+
+                ServerAPI -> ServerSRP: calculateU(_hashName, _peerPublicKeyHex, _publicKeyHex, _nHex)
+                activate ServerSRP
+                    ServerSRP -> ServerSRP: Validate _hashName as H
+                    ServerSRP -> ServerSRP: Validate _peerPublicKeyHex as A
+                    ServerSRP -> ServerSRP: Validate _publicKeyHex as B
+                    ServerSRP -> ServerSRP: Validate _nHex as N
+                    ServerSRP -> ServerSRP: Left pad A with the length of N
+                    ServerSRP -> ServerSRP: Left pad B with the length of N
+
+                    ServerSRP --> ServerAPI: U
+                    note right
+                        u = H(PAD(A) | PAD(B))
+                    end note
+                deactivate ServerSRP
+                ServerAPI -> ServerAPI: Storage of calculated U as _uHex
+
+                ServerAPI -> ServerSRP: calculateSServer(_peerPublicKeyHex, _vHex, _uHex, _privateKeyHex, _nHex)
+                activate ServerSRP
+                    ServerSRP -> ServerSRP: Validate _peerPublicKeyHex as A
+                    ServerSRP -> ServerSRP: Validate _vHex as v
+                    ServerSRP -> ServerSRP: Validate _uHex as u
+                    ServerSRP -> ServerSRP: Validate _privateKeyHex as b
+                    ServerSRP -> ServerSRP: Validate _nHex as N
+
+                    ServerSRP --> ServerAPI: S
+                    note right
+                        S = (A * v^u) ^ b mod N
+                    end note
+                deactivate ServerSRP
+                ServerAPI -> ServerAPI: Storage of calculated S as _SHex
+
+                ServerAPI -> ServerSRP: calculateK(_hash, _SHex)
+                activate ServerSRP
+                    ServerSRP -> ServerSRP: Validate _hash as H
+                    ServerSRP -> ServerSRP: Validate _SHex as S
+
+                    ServerSRP --> ServerAPI: K
+                    note right
+                        K = H(S)
+                    end note
+                deactivate ServerSRP
+                ServerAPI -> ServerAPI: Storage of calculated K as _KHex
+
+                ServerAPI -> ServerSRP: calculateM(_hash, _nHex, gHex, extractedClientId, _salt, _peerPublicKeyHex, _publicKeyHex, _KHex)
+                activate ServerSRP
+                    ServerSRP -> ServerSRP: Validate _hash as H
+                    ServerSRP -> ServerSRP: Validate _nHex as N
+                    ServerSRP -> ServerSRP: Validate gHex as g
+                    ServerSRP -> ServerSRP: Validate _clientId as U
+                    ServerSRP -> ServerSRP: Validate _salt as s
+                    ServerSRP -> ServerSRP: Validate _publicKeyHex as B
+                    ServerSRP -> ServerSRP: Validate _peerPublicKeyHex as A
+                    ServerSRP -> ServerSRP: Validate _KHex as K
+
+                    ServerSRP --> ServerAPI: M
+                    note right
+                        M = H(H(N) XOR H(g) | H(U) | s | A | B | K)
+                    end note
+                deactivate ServerSRP
+                ServerAPI -> ServerAPI: Storage of calculated M as _MHex
+
+                alt _MHex != extractedMHex:
+                    ServerAPI -> Client: HTTP 403 "SRP authentication failed"
+                end
+
+                ServerAPI -> ServerSRP: calculateM2(_hash, _peerPublicKeyHex, _MHex, _KHex)
+                activate ServerSRP
+                    ServerSRP -> ServerSRP: Validate _hash as H
+                    ServerSRP -> ServerSRP: Validate _peerPublicKeyHex as A
+                    ServerSRP -> ServerSRP: Validate _MHex as M
+                    ServerSRP -> ServerSRP: Validate _KHex as K
+
+                    ServerSRP --> ServerAPI: M2
+                    note right
+                        M2 = H(A | M | K)
+                    end note
+                deactivate ServerSRP
+                ServerAPI -> ServerAPI: Storage of calculated M2 as _M2Hex
+
+                ServerAPI -> ServerAPI : Build "srp/auth/complete" message
+                note right
+                    Server constructs JSON authentication complete response
+                    with M2 and message "SRP authentication successful"
+                end note
+
+                ServerAPI -> Client: HTTP 201 OK
             deactivate ServerAPI
 
-            ServerAPI -> ServerSRP: calculatePublicKey(_privateKeyHex, _nHex, gHex, isServer, k, _vHex)
-            activate ServerSRP
-                ServerSRP -> ServerSRP: Validate _privateKeyHex as b
-                ServerSRP -> ServerSRP: Validate _nHex as N
-                ServerSRP -> ServerSRP: Validate gHex as g
-                ServerSRP -> ServerSRP: Validate k
-                ServerSRP -> ServerSRP: Validate vHex as v
+            Client -> Client : extract M2 as extractedM2Hex
+            Client -> ClientSRP: calculateM2(_hash, _publicKeyHex, _MHex, _KHex)
+            activate ClientSRP
+                ClientSRP -> ClientSRP: Validate _hash as H
+                ClientSRP -> ClientSRP: Validate _publicKeyHex as A
+                ClientSRP -> ClientSRP: Validate _MHex as M
+                ClientSRP -> ClientSRP: Validate _KHex as K
 
-                ServerSRP --> ServerAPI: return calculated B
+                ClientSRP --> Client: M2
                 note right
-                    B = (k*v + g^b) mod N
+                    M2 = H(A | M | K)
                 end note
-            deactivate ServerSRP
+            deactivate ClientSRP
+            Client -> Client: Storage of calculated M2 as _M2Hex
 
-            note right
-                Server constructs JSON authentication init 
-                response with a confirmation message with the
-                fields: clientId, salt, B, groupId
-            end note
-            ServerAPI --> Client : HTTP 201 OK 
-        deactivate ServerAPI
+            Client -> Client: Validate M2
+            alt _M2Hex != extractedM2Hex:
+                Client -> Client: throw std::runtime_error("M2 from the client and server don't match");
+            end
 
+            Client -> Client: Set authenticationCompleteResult = true
+            Client --> Client: authenticationCompleteResult
+        deactivate Client
+        Client --> Main: authenticationCompleteResult
     deactivate Client
-
-    alt registrationResult == false
-        Client -> Client : Returns false
-    end
-
-    Client -> Client: authenticationComplete(portServerNumber)
-    activate Client
-
-    deactivate Client
-
-
-deactivate Client
-
-
-Main -> Main : Program ends
+    Main -> Main : Program ends
 deactivate Main
 
 @enduml
