@@ -850,8 +850,13 @@ Subtasks:
 - SessionData.hpp (Done)
 - SrpParametersLoader (Done)
 
-117. Creation of the UML sequence diagram for this source code (in progress)
+117. Creation of the UML sequence diagram for this source code (Done)
 
 ```bash
 java -jar /home/tiago-sousa/.vscode/extensions/jebbs.plantuml-2.18.1/plantuml.jar -tsvg sequence_diagram.puml
 ```
+
+118. Review the sequence diagram (Done)
+
+119. Run the static code analysis again (in progress)
+120. Review the entire code base one last time (TBD)

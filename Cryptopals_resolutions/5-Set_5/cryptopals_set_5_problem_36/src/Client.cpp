@@ -625,6 +625,7 @@ const bool Client::authenticationComplete(const int portServerNumber) {
       std::cout << "\tM(hex): '" << MHex << "'." << std::endl;
       std::cout << "----------------------" << std::endl;
     }
+    _sessionData->_MHex = MHex;
     std::string requestBody = fmt::format(
         R"({{
         "clientId": "{}",
@@ -644,6 +645,25 @@ const bool Client::authenticationComplete(const int portServerNumber) {
     if (response.status_code != 201) {
       throw std::runtime_error("Client log | authenticationComplete(): "
                                "authentication failed");
+    }
+    nlohmann::json parsedJson = nlohmann::json::parse(response.text);
+    const std::string extractedM2Hex{parsedJson.at("M2").get<std::string>()};
+    // M2 confirmation on the client side
+    _sessionData->_M2Hex = MyCryptoLibrary::SecureRemotePassword::calculateM2(
+        _sessionData->_hash,
+        _sessionData->_publicKeyHex, // A
+        _sessionData->_MHex, _sessionData->_KHex);
+    if (_debugFlag) {
+      std::cout << "\n--- Client log | Verification value M2 generated at the "
+                   "authentication phase---"
+                << std::endl;
+      std::cout << "\tClient ID: " << _clientId << std::endl;
+      std::cout << "\tM2(hex): '" << _sessionData->_M2Hex << "'." << std::endl;
+      std::cout << "----------------------" << std::endl;
+    }
+    if (_sessionData->_M2Hex != extractedM2Hex) {
+      throw std::runtime_error("Client log | authenticationComplete(): "
+                               "M2 from the client and server don't match");
     }
     return authenticationCompleteResult;
   } catch (const std::exception &e) {
