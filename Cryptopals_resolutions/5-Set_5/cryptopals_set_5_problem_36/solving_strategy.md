@@ -745,29 +745,43 @@ curl -X POST http://localhost:18080/srp/auth/init \
 **Registration Flow**
 
 ```text
-Client                        Server
-  |                              |
-  |    Request SRP params (U)    |
-  |----------------------------->|
-  |                              |
-  |   Receive groupId (N, g)     |
-  |   and salt (s)               |
-  |<-----------------------------|
-  |                              |
-  | Compute:                     |
-  | x = H(s | H(U|":"| P))       |
-  | v = g^x mod N                |
-  |                              |
-  | Send U, v                    |
-  |----------------------------->|
-  |                              |
-  |        OK / Ack              |
-  |<-----------------------------|
+
+
+
+
+
+
+                    Client                        Server
+                      |                              |
+                      |    Request SRP params (U)    |
+                      |----------------------------->|
+                      |                              |
+                      |   Receive groupId (N, g)     |
+                      |   and salt (s)               |
+                      |<-----------------------------|
+                      |                              |
+                      | Compute:                     |
+                      | x = H(s | H(U|":"| P))       |
+                      | v = g^x mod N                |
+                      |                              |
+                      | Send U, v                    |
+                      |----------------------------->|
+                      |                              |
+                      |        OK / Ack              |
+                      |<-----------------------------|
+
+
+
+
+
+
 ```
 
 **Authentication Flow**
 
 ```text
+
+
   Client                             Server
 ---------                           ---------
   U                           -->   # Client sends username (U)
@@ -794,11 +808,11 @@ Client                        Server
                                     # If M == M', server sends:
                                     # M2 = H(A | M | K)   <-- FULL RFC 2945/5054 SERVER PROOF
                                     # Else, authentication fails
-                                    H(A | M | K)
 
   # Client verifies M2:
   # M2 = H(A | M | K)
   # If valid, authentication is complete
+
 ```
 
 104. Validate the entire protocol until now with the RFC-5054 test vector with the input parameters: (Done)
@@ -861,53 +875,148 @@ java -jar /home/tiago-sousa/.vscode/extensions/jebbs.plantuml-2.18.1/plantuml.ja
 
 120. Review the entire code base one last time (Done)
 
-- Include files:
 
-* Client.hpp (Done)
-* EncryptionUtility.hpp (Done)
-* MessageExtractionFacility.hpp (Done)
-* SecureRemotePassword.hpp (Done)
-* Server.hpp (Done)
-* SessionData.hpp (Done)
-* SrpParametersLoader.hpp (Done)
+    - Include files:
 
-- Source files:
+    * Client.hpp (Done)
+    * EncryptionUtility.hpp (Done)
+    * MessageExtractionFacility.hpp (Done)
+    * SecureRemotePassword.hpp (Done)
+    * Server.hpp (Done)
+    * SessionData.hpp (Done)
+    * SrpParametersLoader.hpp (Done)
 
-* Client.cpp (Done)
-* EncryptionUtility.cpp (Done)
-* MessageExtractionFacility.cpp (Done)
-* runClient1.cpp (Done)
-* runServer.cpp (Done)
-* SecureRemotePassword.cpp (Done)
-* Server.cpp (Done)
-* SessionData.cpp (Done)
-* SrpParametersLoader.cpp (Done)
-* cryptopals_set_5_problem_36/CMakeLists.txt (Done)
+    - Source files:
 
-- Test files:
+    * Client.cpp (Done)
+    * EncryptionUtility.cpp (Done)
+    * MessageExtractionFacility.cpp (Done)
+    * runClient1.cpp (Done)
+    * runServer.cpp (Done)
+    * SecureRemotePassword.cpp (Done)
+    * Server.cpp (Done)
+    * SessionData.cpp (Done)
+    * SrpParametersLoader.cpp (Done)
+    * cryptopals_set_5_problem_36/CMakeLists.txt (Done)
 
-* test_Client.cpp (Done)
-* test_SecureRemotePasswordProtocol.cpp (Done)
-* test_Server.cpp (Done)
-* test_SessionData.cpp (Done)
-* test_SHA1.cpp (Done)
-* test_SHA256.cpp (Done)
-* test_SHA384.cpp (Done)
-* test_SHA512.cpp (Done)
-* test_srpParametersLoader.cpp (Done)
-* cryptopals_set_5_problem_36/tests/CMakeLists.txt (Done)
+    - Test files:
 
-- testScripts:
+    * test_Client.cpp (Done)
+    * test_SecureRemotePasswordProtocol.cpp (Done)
+    * test_Server.cpp (Done)
+    * test_SessionData.cpp (Done)
+    * test_SHA1.cpp (Done)
+    * test_SHA256.cpp (Done)
+    * test_SHA384.cpp (Done)
+    * test_SHA512.cpp (Done)
+    * test_srpParametersLoader.cpp (Done)
+    * cryptopals_set_5_problem_36/tests/CMakeLists.txt (Done)
 
-* calculate_k_MultiplierParameter.py (Done)
-* calculateK.py (Done)
-* calculateM2.py (Done)
-* calculateM.py (Done)
-* calculatePublicKey.py (Done)
-* calculateSClient.py (Done)
-* calculateSServer.py (Done)
-* calculateU.py (Done)
-* calculateV.py (Done)
-* calculateX.py (Done)
-* testSRP_withRFC_vector.py (in progress)
-* count_avg_loc.sh (Done)
+    - testScripts:
+
+    * calculate_k_MultiplierParameter.py (Done)
+    * calculateK.py (Done)
+    * calculateM2.py (Done)
+    * calculateM.py (Done)
+    * calculatePublicKey.py (Done)
+    * calculateSClient.py (Done)
+    * calculateSServer.py (Done)
+    * calculateU.py (Done)
+    * calculateV.py (Done)
+    * calculateX.py (Done)
+    * testSRP_withRFC_vector.py (Done)
+    * count_avg_loc.sh (Done)
+
+121. Create the draft document inside LinkedIn (Done)
+122. Find or create a front image to this article (Done)
+123. Record a demo of this protocol running (Done)
+
+- Convert the demo to mp4 format (Done)
+
+124. Define the main topics that the article should address (in progress)
+
+- 1. Hook & Problem Statement (150-200 words) (Done)
+     - Start with a compelling scenario: "What if I told you there's a way to authenticate users without ever transmitting or storing their passwords?"
+     - Brief mention of common password vulnerabilities (breaches, rainbow tables, etc.)
+     - Introduce SRP as the solution
+
+- 2. What is SRP? The Theory Made Simple (300-400 words) (in progress)
+     - Zero-knowledge proof concept in layman's terms
+     - Key advantages over traditional password authentication:
+       - No password transmission
+       - Server stores verifiers, not passwords
+       - Resistant to offline dictionary attacks
+       - Mutual authentication
+     - High-level protocol flow diagram (use sequence diagram)
+
+- 3. Challenge: Implementing Cryptopals Set 5, Challenge 36 (TBD)
+     - Tech Stack: C++, OpenSSL, HTTP server, Python validation scripts
+     - Architecture decisions:
+       - Modular design (Client, Server, SecureRemotePassword classes)
+       - Multi-group support (1024-8192 bit primes from RFC 5054)
+       - Multiple hash algorithms (SHA-1, SHA-256, SHA-384, SHA-512)
+
+- 4.  Key Implementation Challenges & Solutions (500-600 words) (TBD)
+
+      Challenge 1: Cryptographic Precision
+
+      - Big integer arithmetic with OpenSSL's BIGNUM
+      - Proper padding for hash inputs
+      - Cross-validation with Python scripts
+
+      Challenge 2: Protocol State Management
+
+      - Session management across multiple HTTP endpoints
+      - Registration vs Authentication flows
+      - Error handling and validation
+
+      Challenge 3: RFC Compliance
+
+      - Testing against RFC 5054 test vectors
+      - Ensuring mathematical correctness of:
+
+      ```text
+      Client: S = (B - k * g^x)^(a + u * x) mod N
+      Server: S = (A * v^u)^b mod N
+      ```
+
+  - 5.  Architecture Highlights (300-400 words) (TBD)
+
+    Registration Flow: /srp/register/init → /srp/register/complete
+    Authentication Flow: /srp/auth/init → /srp/auth/complete
+
+    - Key Components:
+      - SrpParametersLoader (RFC 5054 groups)
+      - EncryptionUtility (hash functions, big integer ops)
+      - SessionData (state management)
+      - Include UML class diagram
+
+  - 6. Testing & Validation Strategy (300-400 words) (TBD)
+
+    - Unit Tests: 124+ test cases across all components
+    - RFC Vector Testing: Validation against official test vectors
+    - Cross-Language Validation: Python scripts for mathematical verification
+    - Integration Testing: Full protocol flows
+    - Manual Testing: cURL commands for endpoint validation
+
+  - 7. Performance & Security Considerations (250-300 words) (TBD)
+       Security:
+
+  - Proper random number generation for ephemeral keys
+  - Constant-time operations where possible
+  - Input validation and bounds checking
+    Performance:
+  - Group size trade-offs (1024-bit vs 8192-bit)
+  - Hash algorithm selection
+  - Memory management with BIGNUM
+
+  - 8. Lessons Learned & Best Practices (300-400 words) (TBD)
+
+  - Mathematical precision is crucial in cryptographic implementations
+  - Cross-validation saves time - Python scripts caught C++ bugs early
+  - Comprehensive testing against standard test vectors is essential
+  - Modular design makes complex protocols manageable
+  - Documentation and UML diagrams help maintain complex state flows
+
+  - 9. What's next: So why is the SRP not used more nowadays and where is it already
+       used ? (TBD)
