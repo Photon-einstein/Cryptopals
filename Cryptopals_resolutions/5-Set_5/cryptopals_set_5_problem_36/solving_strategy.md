@@ -549,7 +549,7 @@ Glossary:
 - u is the scrambling parameter: u = H(PAD(A) | PAD(B))
 - S = (A \* v^u) ^ b mod N
 
-41. Add the first leg on server side of the Secure Remote Password protocol, Authentication phase. Study phase (in progress)
+41. Add the first leg on server side of the Secure Remote Password protocol, Authentication phase. Study phase (Done)
 
 - Endpoint name: /srp/auth/init
 - Endpoint goal: to allow the setting of the first exchange of information between the client and the server.
@@ -697,7 +697,7 @@ curl -X POST http://localhost:18080/srp/auth/init \
     85.2 Add tests with invalid parameters, empty string (Done)
 86. Server calculation of S = (A \* v^u) ^ b mod N (Done)
 
-87. Find the reason to the mismatch between the S at the client side and at the Server side (in progress).
+87. Find the reason to the mismatch between the S at the client side and at the Server side (Done).
 
     ```text
     S client = (B - k * g^x) ^ (a + u * x) mod N
@@ -715,7 +715,7 @@ curl -X POST http://localhost:18080/srp/auth/init \
     87.9. Check if the 'v' at the server side match the one sent at the client side (Done)
     87.10. Check if the 'b' is the correct one at the server side (Done)
     87.11. Check if the 'A' is the correct one at the server side (Done)
-    87.12. Test with Known RFC Vectors (in progress)
+    87.12. Test with Known RFC Vectors (Done)
 
     - Compare S server with the reference, it is matching the reference (Done)
     - Compare S client with the reference, it is not matching the reference (Done)
@@ -727,7 +727,7 @@ curl -X POST http://localhost:18080/srp/auth/init \
 90. Add SHA-1 method so that it is possible to test the RFC-5054 test vectors (Done)
 91. Adapt the calculateX method at the C++ tests so that the tests pass again (Done)
 92. Adapt the failing tests at the method calculateX with the new values, according
-    to the python script result (in progress)
+    to the python script result (Done)
 93. Add SHA-1 tests as well to validate the implementation (Done)
 94. Add test to validate calculateU with RFC-5054 vector tests (Done)
 95. Go throw the test_SessionData file an add tests against the RFC-5054 vector tests (Done)
@@ -933,90 +933,65 @@ java -jar /home/tiago-sousa/.vscode/extensions/jebbs.plantuml-2.18.1/plantuml.ja
 
 - Convert the demo to mp4 format (Done)
 
-124. Define the main topics that the article should address (in progress)
+124. Define the main topics that the article should address (Done)
 
-- 1. Hook & Problem Statement (150-200 words) (Done)
-     - Start with a compelling scenario: "What if I told you there's a way to authenticate users without ever transmitting or storing their passwords?"
-     - Brief mention of common password vulnerabilities (breaches, rainbow tables, etc.)
-     - Introduce SRP as the solution
 
-- 2. What is SRP? The Theory Made Simple (300-400 words) (in progress)
-     - Zero-knowledge proof concept in layman's terms
-     - Key advantages over traditional password authentication:
-       - No password transmission
-       - Server stores verifiers, not passwords
-       - Resistant to offline dictionary attacks
-       - Mutual authentication
-     - High-level protocol flow diagram (use sequence diagram)
+    - 1. Hook & Problem Statement (150-200 words) (Done)
+        - Start with a compelling scenario: "What if I told you there's a way to authenticate users without ever transmitting or storing their passwords?"
+        - Brief mention of common password vulnerabilities (breaches, rainbow tables, etc.)
+        - Introduce SRP as the solution
 
-- 3. Challenge: Implementing Cryptopals Set 5, Challenge 36 (TBD)
-     - Tech Stack: C++, OpenSSL, HTTP server, Python validation scripts
-     - Architecture decisions:
-       - Modular design (Client, Server, SecureRemotePassword classes)
-       - Multi-group support (1024-8192 bit primes from RFC 5054)
-       - Multiple hash algorithms (SHA-1, SHA-256, SHA-384, SHA-512)
+    - 2. What is SRP? The Theory Made Simple (300-400 words) (Done)
+        - Zero-knowledge proof concept in layman's terms
+        - Key advantages over traditional password authentication:
+          - No password transmission
+          - Server stores verifiers, not passwords
+          - Resistant to offline dictionary attacks
+          - Mutual authentication
+        - High-level protocol flow diagram (use sequence diagram)
 
-- 4.  Key Implementation Challenges & Solutions (500-600 words) (TBD)
+    - 3. Challenge: Implementing Cryptopals Set 5, Challenge 36 (Done)
+        - Tech Stack: C++, OpenSSL, HTTP server, Python validation scripts
+        - Architecture decisions:
+          - Modular design (Client, Server, SecureRemotePassword classes)
+          - Multi-group support (1024-8192 bit primes from RFC 5054)
+          - Multiple hash algorithms (SHA-1, SHA-256, SHA-384, SHA-512)
 
-      Challenge 1: Cryptographic Precision
+    - 4.  Architecture Highlights (300-400 words) (Done)
 
-      - Big integer arithmetic with OpenSSL's BIGNUM
-      - Proper padding for hash inputs
-      - Cross-validation with Python scripts
+      Registration Flow: /srp/register/init → /srp/register/complete
+      Authentication Flow: /srp/auth/init → /srp/auth/complete
 
-      Challenge 2: Protocol State Management
+      - Key Components:
+        - SrpParametersLoader (RFC 5054 groups)
+        - EncryptionUtility (hash functions, big integer ops)
+        - SessionData (state management)
+        - Include UML class diagram
 
-      - Session management across multiple HTTP endpoints
-      - Registration vs Authentication flows
-      - Error handling and validation
+    - 5. Testing & Validation Strategy (300-400 words) (Done)
 
-      Challenge 3: RFC Compliance
+      - Unit Tests: 124+ test cases across all components
+      - RFC Vector Testing: Validation against official test vectors
+      - Cross-Language Validation: Python scripts for mathematical verification
+      - Integration Testing: Full protocol flows
+      - Manual Testing: cURL commands for endpoint validation
 
-      - Testing against RFC 5054 test vectors
-      - Ensuring mathematical correctness of:
+    - 6. Performance & Security Considerations (250-300 words) (Done)
+        Security:
 
-      ```text
-      Client: S = (B - k * g^x)^(a + u * x) mod N
-      Server: S = (A * v^u)^b mod N
-      ```
+    - Proper random number generation for ephemeral keys
+    - Input validation and bounds checking
 
-  - 5.  Architecture Highlights (300-400 words) (TBD)
+      Performance:
 
-    Registration Flow: /srp/register/init → /srp/register/complete
-    Authentication Flow: /srp/auth/init → /srp/auth/complete
+    - Group size trade-offs (1024-bit vs 8192-bit)
+    - Hash algorithm selection
+    - Memory management with BIGNUM
 
-    - Key Components:
-      - SrpParametersLoader (RFC 5054 groups)
-      - EncryptionUtility (hash functions, big integer ops)
-      - SessionData (state management)
-      - Include UML class diagram
+    - 7. Lessons Learned & Best Practices (300-400 words) (Done)
 
-  - 6. Testing & Validation Strategy (300-400 words) (TBD)
-
-    - Unit Tests: 124+ test cases across all components
-    - RFC Vector Testing: Validation against official test vectors
-    - Cross-Language Validation: Python scripts for mathematical verification
-    - Integration Testing: Full protocol flows
-    - Manual Testing: cURL commands for endpoint validation
-
-  - 7. Performance & Security Considerations (250-300 words) (TBD)
-       Security:
-
-  - Proper random number generation for ephemeral keys
-  - Constant-time operations where possible
-  - Input validation and bounds checking
-    Performance:
-  - Group size trade-offs (1024-bit vs 8192-bit)
-  - Hash algorithm selection
-  - Memory management with BIGNUM
-
-  - 8. Lessons Learned & Best Practices (300-400 words) (TBD)
-
-  - Mathematical precision is crucial in cryptographic implementations
-  - Cross-validation saves time - Python scripts caught C++ bugs early
-  - Comprehensive testing against standard test vectors is essential
-  - Modular design makes complex protocols manageable
-  - Documentation and UML diagrams help maintain complex state flows
-
-  - 9. What's next: So why is the SRP not used more nowadays and where is it already
-       used ? (TBD)
+    - Mathematical precision is crucial in cryptographic implementations
+    - Cross-validation saves time - Python scripts caught C++ bugs early
+    - Comprehensive testing against standard test vectors is essential
+    - Modular design makes complex protocols manageable
+    - Documentation and UML diagrams help maintain complex state flows
